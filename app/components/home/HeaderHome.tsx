@@ -20,18 +20,29 @@ export default function HomeHeader() {
   if (!user) return null;
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Typography variant="h6" fontWeight={700}>
-        {user.name}
-      </Typography>
+    <Box
+      sx={{
+        padding: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      {/* ESQUERDA: NOME + DATA */}
+      <Box>
+        <Typography variant="h6" fontWeight={700}>
+          {user.name}
+        </Typography>
 
-      <Typography variant="body2" color="text.secondary">
-        {today}
-      </Typography>
+        <Typography variant="body2" color="text.secondary"  sx={{ color: "white" }}>
+          {today}
+        </Typography>
+      </Box>
 
+      {/* DIREITA: FOTO */}
       <Avatar
         src={user.photo_url}
-        sx={{ width: 48, height: 48, marginTop: 1 }}
+        sx={{ width: 48, height: 48 }}
       />
     </Box>
   );

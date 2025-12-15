@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import { LoginResponse } from '@/app/types/types';
+import api from './axiosConfig';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -92,7 +93,9 @@ export const registerUser = async (data: RegisterData) => {
   }
 };
 
+
+
 export const getMe = async (): Promise<MeResponse> => {
-  const response = await axios.get("/auth/me");
-  return response.data as MeResponse;
+  const response = await api.get<MeResponse>("/auth/me");
+  return response.data;
 };
