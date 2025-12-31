@@ -38,13 +38,20 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   return (
-    <ToastContext.Provider value={{ open, message, severity, showToast, closeToast }}>
-      {children}
-      <Snackbar open={open} autoHideDuration={3000} onClose={closeToast}>
-        <Alert onClose={closeToast} severity={severity}>
-          {message}
-        </Alert>
-      </Snackbar>
-    </ToastContext.Provider>
+   <ToastContext.Provider value={{ open, message, severity, showToast, closeToast }}>
+  {children}
+
+  <Snackbar
+    open={open}
+    autoHideDuration={3000}
+    onClose={closeToast}
+    anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+  >
+    <Alert onClose={closeToast} severity={severity} variant="filled">
+      {message}
+    </Alert>
+  </Snackbar>
+</ToastContext.Provider>
+
   );
 };

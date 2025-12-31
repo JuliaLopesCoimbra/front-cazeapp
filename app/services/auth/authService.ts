@@ -11,12 +11,17 @@ interface LoginData {
   email: string;
   password: string;
 }
-
+interface RefreshResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
 interface RegisterData {
   name: string;
   email: string;
   password: string;
 }
+
 
 export interface MeResponse {
   id: number;
@@ -35,10 +40,37 @@ export const loginUser = async (data: LoginData): Promise<LoginResponse> => {
     const response = await axios.post(`${API_URL}/auth/login`, data);
     return response.data as LoginResponse;
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(error.message || 'Erro inesperado');
-    }
-    throw new Error('Erro inesperado');
+    const err = error as {
+      response?: {
+        data?: {
+          detail?: string;
+          message?: string;
+        };
+      };
+      message?: string;
+    };
+
+    const message =
+      err.response?.data?.detail ||
+      err.response?.data?.message ||
+      err.message ||
+      "Erro ao fazer login";
+
+    throw new Error(message);
+  }
+};
+
+export const refreshAuthToken = async (
+  refreshToken: string
+): Promise<RefreshResponse> => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/refresh`, {
+      refresh_token: refreshToken,
+    });
+
+    return response.data as RefreshResponse;
+  } catch {
+    throw new Error("Sessão expirada");
   }
 };
 

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function AuthCallbackPage() {
@@ -20,9 +21,22 @@ export default function AuthCallbackPage() {
 
     login(access, refresh);
 
- 
     router.push('/pages/user/home');
   }, [params, login, router]);
 
-  return <p>Finalizando login...</p>;
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      height="100vh"
+      gap={2}
+    >
+      <CircularProgress size={48} />
+      <Typography variant="body1" color="text.secondary">
+        Finalizando autenticação...
+      </Typography>
+    </Box>
+  );
 }

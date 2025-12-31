@@ -9,17 +9,16 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { Google, Facebook, Instagram } from "@mui/icons-material";
+import { Google, Facebook } from "@mui/icons-material";
 import { loginUser } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 import {
   initGoogleLogin,
   initFacebookLogin,
-  initInstagramLogin,
 } from "@/app/services/auth/authService";
 
-// Definindo os tipos para os dados de login
 interface LoginData {
   email: string;
   password: string;
@@ -30,46 +29,42 @@ const LoginForm: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [keepMeLoggedIn, setKeepMeLoggedIn] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const { login } = useAuth();
+
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
   const { showToast } = useToast();
   const router = useRouter();
 
   const handleLogin = async () => {
     setLoading(true);
+
     try {
       const loginData: LoginData = { email, password };
       const response = await loginUser(loginData);
 
-      // Sucesso no login
+      // sucesso → reseta tentativas
+      setShowForgotPassword(false);
+
       showToast("Login realizado com sucesso!", "success");
-      console.log(response);
 
-      // Agora, sabemos que 'response' é do tipo LoginResponse
       const { access_token, refresh_token } = response;
+      login(access_token, refresh_token);
 
-      // Armazenando access_token no localStorage
+
       localStorage.setItem("access_token", access_token);
 
-      // Armazenando refresh_token no cookie HttpOnly
-      document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly`;
+      // HttpOnly não funciona via JS, mas mantendo seu padrão atual
+      document.cookie = `refresh_token=${refresh_token}; path=/; secure`;
 
-      // Redirecionando para a home
-      router.push("/pages/user/home"); // Ou o caminho desejado para a home
+      router.push("/pages/user/home");
     } catch (err: unknown) {
+      setShowForgotPassword(true);
+
       if (err instanceof Error) {
-        // Verificando se o erro contém o código 401 e a mensagem "Credenciais inválidas"
-        if (err.message.includes("401")) {
-          showToast(
-            "Credenciais inválidas. Verifique e tente novamente.",
-            "error"
-          );
-        } else {
-          showToast(`Erro ao fazer login: ${err.message}`, "error");
-        }
+        showToast(err.message, "error");
       } else {
-        showToast(
-          "Erro desconhecido ao fazer login. Tente novamente!",
-          "error"
-        );
+        showToast("Erro ao fazer login. Tente novamente.", "error");
       }
     } finally {
       setLoading(false);
@@ -77,7 +72,6 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-   
     <Box
       sx={{
         display: "flex",
@@ -95,7 +89,7 @@ const LoginForm: React.FC = () => {
           borderRadius: "10px",
           boxShadow: 3,
           width: "100%",
-          maxWidth: "400px", // Ajusta a largura do formulário para telas pequenas
+          maxWidth: "400px",
           textAlign: "center",
         }}
       >
@@ -139,6 +133,7 @@ const LoginForm: React.FC = () => {
             />
           }
           label="Mantenha-me conectado"
+          sx={{ color: "black" }}
         />
 
         <Button
@@ -151,6 +146,15 @@ const LoginForm: React.FC = () => {
         >
           {loading ? "Carregando..." : "Continuar"}
         </Button>
+        {showForgotPassword && (
+          <Typography
+            variant="body2"
+            sx={{ mt: 2, color: "#1976d2", cursor: "pointer" }}
+            onClick={() => router.push("/pages/auth/forgot-password")}
+          >
+            Esqueceu a senha?
+          </Typography>
+        )}
 
         {/* Exibição de erro */}
         <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
@@ -162,7 +166,7 @@ const LoginForm: React.FC = () => {
               try {
                 const url = await initGoogleLogin();
                 window.location.href = url; // redireciona
-              } catch (error) {
+              } catch {
                 showToast("Erro ao iniciar login com Google", "error");
               }
             }}
@@ -178,28 +182,13 @@ const LoginForm: React.FC = () => {
               try {
                 const url = await initFacebookLogin();
                 window.location.href = url;
-              } catch (error) {
+              } catch {
                 showToast("Erro ao iniciar login com Facebook", "error");
               }
             }}
+            sx={{ ml: 2 }}
           >
             Facebook
-          </Button>
-
-          <Button
-            variant="outlined"
-            color="secondary"
-            startIcon={<Instagram />}
-            onClick={async () => {
-              try {
-                const url = await initInstagramLogin();
-                window.location.href = url;
-              } catch (error) {
-                showToast("Erro ao iniciar login com Instagram", "error");
-              }
-            }}
-          >
-            Instagram
           </Button>
         </Box>
 
@@ -210,9 +199,7 @@ const LoginForm: React.FC = () => {
           </a>
         </Typography>
       </Box>
-      
     </Box>
-    
   );
 };
 

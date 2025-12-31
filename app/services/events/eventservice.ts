@@ -1,8 +1,5 @@
 import api from "../auth/axiosConfig";
 
-/* =====================
-   TIPOS
-===================== */
 
 export interface EventResponse {
   id: number;
@@ -17,5 +14,9 @@ export interface EventResponse {
 
 export const getEvents = async (): Promise<EventResponse[]> => {
   const response = await api.get<EventResponse[]>("/admin/events");
+  return response.data;
+};
+export const getEventById = async (eventId: number): Promise<EventResponse> => {
+  const response = await api.get<EventResponse>(`/admin/events/${eventId}`);
   return response.data;
 };

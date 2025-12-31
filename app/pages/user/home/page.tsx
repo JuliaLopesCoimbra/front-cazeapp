@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import { Box } from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
 import HomeTabs from "@/app/components/home/HomeTabs";
-import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
+import BottomNav from "@/app/components/layout/BottomNav";
 import { EventResponse, getEvents } from "@/app/services/events/eventservice";
+import { CircularProgress, Typography } from "@mui/material";
 import NewsFeed from "@/app/components/home/NewsFeed";
+import CTVAd from "@/app/components/ads/CTVAd";
+import EventDetails from "@/app/components/home/EventDetails";
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
@@ -15,7 +18,6 @@ const Home: React.FC = () => {
   >("home");
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
-
   const router = useRouter();
 
   useEffect(() => {
@@ -29,38 +31,86 @@ const Home: React.FC = () => {
       .catch(() => {
         router.push("/");
       });
-  }, []);
+  }, [router]);
 
   if (!currentEvent) {
-    return <div>Carregando evento...</div>;
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        height="100vh"
+        gap={2}
+      >
+        <CircularProgress size={48} />
+        <Typography variant="body1" color="text.secondary">
+          Carregando evento...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!currentEvent) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        height="100vh"
+        gap={2}
+      >
+        <CircularProgress size={48} />
+        <Typography variant="body1" color="text.secondary">
+          Carregando evento...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <Box>
-      {/* Menu Hamburguer */}
-      <HamburgerMenu
-        events={events}
-        currentEvent={currentEvent}
-        onSelectEvent={setCurrentEvent}
-      />
+    <>
+    <Box  style={{
+        minHeight: "100vh",
+        paddingBottom: "72px", // espaço pro rodapé
+        backgroundColor: "#f4f7fc",
+        backgroundImage: "url(/background/dashboard.png)",
+      }}>
+    
       {/* Header com nome, foto e data */}
-      <HomeHeader />
+     <HomeHeader
+  event={currentEvent}
+  events={events}
+  currentEvent={currentEvent}
+  onSelectEvent={setCurrentEvent}
+/>
+
+
       {/* Tabs */}
       <HomeTabs active={activeTab} onChange={setActiveTab} />
 
       {/* Conteúdo baseado na aba selecionada */}
       {activeTab === "home" && currentEvent && (
-        <NewsFeed eventId={currentEvent.id} />
+        <>
+          <CTVAd />
+          <NewsFeed eventId={currentEvent.id} />
+        </>
       )}
       {activeTab === "eventos" && (
-        <div>Detalhes do evento: {currentEvent?.description}</div>
+        <EventDetails event={currentEvent} />
       )}
 
       {activeTab === "foto" && <div>Foto IA — {currentEvent?.title}</div>}
 
       {activeTab === "enredo" && <div>Enredo — {currentEvent?.title}</div>}
     </Box>
+    <BottomNav  />
+    </>
   );
+  
+
 };
+
 
 export default Home;
