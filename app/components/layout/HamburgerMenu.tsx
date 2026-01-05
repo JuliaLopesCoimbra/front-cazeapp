@@ -1,5 +1,5 @@
 "use client";
-
+import { useState } from "react";
 import {
   Drawer,
   List,
@@ -12,9 +12,11 @@ import {
   Box,
   Typography,
   Collapse,
+  Menu,
+  MenuItem,
+  ListItemIcon,
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useRouter } from "next/navigation";
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -24,9 +26,15 @@ import PersonIcon from "@mui/icons-material/Person";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import BlockIcon from "@mui/icons-material/Block";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
-import { EventResponse } from "@/app/services/events/eventservice";
-import { useState } from "react";
+import { EventResponse } from "@/app/services/events/eventService";
+import { activateEvent } from "@/app/services/events/eventService";
+import { deactivateEvent } from "@/app/services/events/eventService";
 
 interface Props {
   events: EventResponse[];
@@ -42,14 +50,50 @@ export default function HamburgerMenu({
   const { isAdmin, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [openEvents, setOpenEvents] = useState(false);
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<EventResponse | null>(
+    null
+  );
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuEvent, setMenuEvent] = useState<EventResponse | null>(null);
+  const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
+
+  const openMenu = Boolean(menuAnchorEl);
+
   const router = useRouter();
+
+  const handleEventClick = (event: EventResponse) => {
+    if (event.is_active) {
+      onSelectEvent(event);
+      setOpen(false);
+      return;
+    }
+
+    // Evento inativo
+    if (isAdmin) {
+      setSelectedEvent(event);
+      setActivateModalOpen(true);
+    }
+  };
+  const handleOpenMenu = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    event: EventResponse
+  ) => {
+    e.stopPropagation();
+    setMenuAnchorEl(e.currentTarget);
+    setMenuEvent(event);
+  };
+
+  const handleCloseMenu = () => {
+    setMenuAnchorEl(null);
+    setMenuEvent(null);
+  };
 
   return (
     <>
       <IconButton onClick={() => setOpen(true)}>
         <MenuIcon sx={{ color: "white" }} />
       </IconButton>
-
       <Drawer
         open={open}
         onClose={() => setOpen(false)}
@@ -200,18 +244,17 @@ export default function HamburgerMenu({
               }}
             >
               {events.map((event) => {
-                const isActive = currentEvent?.id === event.id;
+                const isInactive = !event.is_active;
 
                 return (
                   <Box
                     key={event.id}
-                    onClick={() => {
-                      onSelectEvent(event);
-                      setOpen(false);
-                    }}
+                    onClick={() => handleEventClick(event)}
                     sx={{
                       position: "relative",
-                      cursor: "pointer",
+                      cursor:
+                        isInactive && !isAdmin ? "not-allowed" : "pointer",
+                      pointerEvents: isInactive && !isAdmin ? "none" : "auto",
                     }}
                   >
                     {/* IMAGEM */}
@@ -223,10 +266,30 @@ export default function HamburgerMenu({
                         height: 110,
                         borderRadius: 2,
                         backgroundColor: "#222",
+                        opacity: isInactive ? 0.4 : 1,
+                        transition: "opacity 0.3s",
                       }}
                     />
+                    {/* MENU ADMIN (3 PONTINHOS) */}
+                    {isAdmin && (
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleOpenMenu(e, event)}
+                        sx={{
+                          position: "absolute",
+                          top: 6,
+                          right: 6,
+                          backgroundColor: "rgba(0,0,0,0.45)",
+                          "&:hover": {
+                            backgroundColor: "rgba(0,0,0,0.65)",
+                          },
+                        }}
+                      >
+                        <MoreVertIcon fontSize="small" sx={{ color: "#fff" }} />
+                      </IconButton>
+                    )}
 
-                    {/* STATUS (BOLINHA) */}
+                    {/* STATUS BOLINHA */}
                     <Box
                       sx={{
                         position: "absolute",
@@ -235,10 +298,33 @@ export default function HamburgerMenu({
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: isActive ? "#2ecc71" : "#9e9e9e",
+                        backgroundColor: event.is_active
+                          ? "#2ecc71"
+                          : "#e74c3c",
                         border: "2px solid rgba(0,0,0,0.6)",
                       }}
                     />
+
+                    {/* OVERLAY ADMIN */}
+                    {isInactive && isAdmin && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          inset: 0,
+                          borderRadius: 2,
+                          backgroundColor: "rgba(0,0,0,0.45)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#fff",
+                          fontWeight: 600,
+                          fontSize: 13,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Ativar evento
+                      </Box>
+                    )}
                   </Box>
                 );
               })}
@@ -349,6 +435,150 @@ export default function HamburgerMenu({
           </Box>
         </List>
       </Drawer>
+      <Dialog
+        open={activateModalOpen}
+        onClose={() => setActivateModalOpen(false)}
+        slotProps={{
+          backdrop: {},
+          root: {
+            sx: {
+              zIndex: 1501,
+            },
+          },
+        }}
+      >
+        <DialogTitle>Ativar evento `{selectedEvent?.title}`?</DialogTitle>
+
+        <DialogActions>
+          <Button onClick={() => setActivateModalOpen(false)}>Cancelar</Button>
+
+          <Button
+            variant="contained"
+            color="success"
+            onClick={async () => {
+              if (!selectedEvent) return;
+
+              await activateEvent(selectedEvent.id);
+
+              setActivateModalOpen(false);
+              setSelectedEvent(null);
+
+              // Recarregar lista ou atualizar estado global
+              window.location.reload();
+            }}
+          >
+            Ativar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={deactivateModalOpen}
+        onClose={() => setDeactivateModalOpen(false)}
+        slotProps={{
+          backdrop: {},
+          root: {
+            sx: {
+              zIndex: 1501,
+            },
+          },
+        }}
+      >
+        <DialogTitle>Desativar evento `{selectedEvent?.title}`?</DialogTitle>
+
+        <DialogActions>
+          <Button onClick={() => setDeactivateModalOpen(false)}>
+            Cancelar
+          </Button>
+
+          <Button
+            variant="contained"
+            color="error"
+            onClick={async () => {
+              if (!selectedEvent) return;
+
+              await deactivateEvent(selectedEvent.id);
+
+              setDeactivateModalOpen(false);
+              setSelectedEvent(null);
+
+              window.location.reload();
+            }}
+          >
+            Desativar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={openMenu}
+        onClose={handleCloseMenu}
+        slotProps={{
+          root: {
+            sx: {
+              zIndex: 1501,
+            },
+          },
+          paper: {
+            sx: {
+              zIndex: 1501,
+              minWidth: 10,
+              borderRadius: 3,
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
+            },
+          },
+        }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MenuItem
+          sx={{ zIndex: 1500 }}
+          onClick={() => {
+            if (!menuEvent) return;
+            handleCloseMenu();
+
+            // exemplo de navegação
+            router.push(`/pages/admin/events/${menuEvent.id}`);
+          }}
+        >
+          <ListItemIcon>
+            <VisibilityIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Detalhes</ListItemText>
+        </MenuItem>
+        <Divider
+          sx={{
+            my: 0.3, // espaçamento vertical mínimo
+            mx: 1.5, // afasta das laterais
+            borderBottomWidth: "0.5px", // linha mais fina
+            borderColor: "rgba(0,0,0,0.35)", // preto suave
+          }}
+        />
+
+        {menuEvent?.is_active && (
+          <MenuItem
+            onClick={() => {
+              if (!menuEvent) return;
+
+              setSelectedEvent(menuEvent);
+              setDeactivateModalOpen(true);
+              handleCloseMenu();
+            }}
+          >
+            <ListItemIcon>
+              <BlockIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Desativar evento</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
     </>
   );
 }

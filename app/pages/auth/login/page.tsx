@@ -8,8 +8,15 @@ import {
   Box,
   FormControlLabel,
   Checkbox,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
-import { Google, Facebook } from "@mui/icons-material";
+import {
+  Google,
+  Facebook,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 import { loginUser } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
@@ -29,6 +36,8 @@ const LoginForm: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [keepMeLoggedIn, setKeepMeLoggedIn] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const { login } = useAuth();
 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -50,7 +59,6 @@ const LoginForm: React.FC = () => {
 
       const { access_token, refresh_token } = response;
       login(access_token, refresh_token);
-
 
       localStorage.setItem("access_token", access_token);
 
@@ -76,7 +84,7 @@ const LoginForm: React.FC = () => {
       sx={{
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
+
         height: "100vh",
         backgroundImage: "url(/background/dashboard.png)",
         padding: "20px",
@@ -84,22 +92,17 @@ const LoginForm: React.FC = () => {
     >
       <Box
         sx={{
-          backgroundColor: "white",
           padding: "30px",
-          borderRadius: "10px",
-          boxShadow: 3,
+          color: "white",
           width: "100%",
           maxWidth: "400px",
-          textAlign: "center",
+          textAlign: "left",
         }}
       >
-        <Typography variant="h5" sx={{ marginBottom: "20px", color: "black" }}>
+        <Typography variant="h5" sx={{ marginBottom: "20px" }}>
           Login
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{ marginBottom: "20px", color: "black" }}
-        >
+        <Typography variant="body2" sx={{ marginBottom: "20px" }}>
           Bem-vindo de volta. Entre com suas credenciais para acessar sua conta.
         </Typography>
 
@@ -111,17 +114,113 @@ const LoginForm: React.FC = () => {
           margin="normal"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          InputLabelProps={{
+            shrink: true, // ✅ fixa o label em cima
+            sx: {
+              color: "#fff",
+              fontSize: 13,
+              transform: "translate(14px, -9px) scale(1)", // canto superior esquerdo
+              "&.Mui-focused": {
+                color: "#fff",
+              },
+            },
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "transparent",
+              color: "#fff",
+              borderRadius: "14px",
+              "& fieldset": {
+                borderColor: "#fff",
+              },
+              "&:hover fieldset": {
+                borderColor: "#fff",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#fff",
+              },
+              "& input:-webkit-autofill": {
+                WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                WebkitTextFillColor: "#fff",
+                transition: "background-color 9999s ease-in-out 0s",
+              },
+
+              "& input:-webkit-autofill:focus": {
+                WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                WebkitTextFillColor: "#fff",
+              },
+            },
+          }}
         />
+
         <TextField
           fullWidth
           label="Senha"
           variant="outlined"
-          margin="normal"
-          type="password"
+          type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          helperText="Please enter correct password"
-          error={password && password.length < 6 ? true : false}
+          error={Boolean(password && password.length < 6)}
+          helperText={
+            password && password.length < 6
+              ? "A senha deve ter no mínimo 6 caracteres"
+              : ""
+          }
+          InputLabelProps={{
+            shrink: true,
+            sx: {
+              color: "#fff",
+              fontSize: 13,
+              transform: "translate(14px, -9px) scale(1)",
+              "&.Mui-focused": { color: "#fff" },
+            },
+          }}
+          FormHelperTextProps={{
+            sx: { color: "#ff6b6b", fontSize: 12 },
+          }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  edge="end"
+                  sx={{ color: "#fff" }}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            mt: 2,
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "transparent",
+              color: "#fff",
+              borderRadius: "14px",
+              "& fieldset": {
+                borderColor: "#fff",
+              },
+              "&:hover fieldset": {
+                borderColor: "#fff",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#fff",
+              },
+              "&.Mui-error fieldset": {
+                borderColor: "#ff6b6b",
+              },
+              "& input:-webkit-autofill": {
+                WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                WebkitTextFillColor: "#fff",
+                transition: "background-color 9999s ease-in-out 0s",
+              },
+
+              "& input:-webkit-autofill:focus": {
+                WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                WebkitTextFillColor: "#fff",
+              },
+            },
+          }}
         />
 
         {/* Checkbox para manter-me conectado */}
@@ -130,22 +229,50 @@ const LoginForm: React.FC = () => {
             <Checkbox
               checked={keepMeLoggedIn}
               onChange={(e) => setKeepMeLoggedIn(e.target.checked)}
+              sx={{
+                color: "#ffcc01", // cor quando desmarcado
+                "&.Mui-checked": {
+                  color: "#ffcc01", // cor quando marcado
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(255, 204, 1, 0.08)", // hover suave
+                },
+              }}
             />
           }
           label="Mantenha-me conectado"
-          sx={{ color: "black" }}
+          sx={{
+            color: "#fff", // texto branco
+            "& .MuiFormControlLabel-label": {
+              fontSize: 14, // opcional
+            },
+          }}
         />
 
         <Button
           fullWidth
           variant="contained"
-          color="primary"
-          sx={{ marginTop: "20px" }}
+          sx={{
+            mt: 2,
+            backgroundColor: "#ffcc01",
+            color: "#000", // texto preto para contraste
+            fontWeight: 600,
+            borderRadius: "14px",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "#e6b800", // hover mais escuro
+            },
+            "&.Mui-disabled": {
+              backgroundColor: "rgba(255, 204, 1, 0.4)",
+              color: "rgba(0,0,0,0.6)",
+            },
+          }}
           onClick={handleLogin}
           disabled={loading}
         >
           {loading ? "Carregando..." : "Continuar"}
         </Button>
+
         {showForgotPassword && (
           <Typography
             variant="body2"
@@ -155,20 +282,45 @@ const LoginForm: React.FC = () => {
             Esqueceu a senha?
           </Typography>
         )}
-
+        <Typography
+          sx={{
+            mt: 3,
+            mb: 1.5,
+            textAlign: "center",
+            color: "rgba(255,255,255,0.7)",
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+        >
+          ou logue com
+        </Typography>
         {/* Exibição de erro */}
         <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
           <Button
             variant="outlined"
-            color="error"
             startIcon={<Google />}
             onClick={async () => {
               try {
                 const url = await initGoogleLogin();
-                window.location.href = url; // redireciona
+                window.location.href = url;
               } catch {
                 showToast("Erro ao iniciar login com Google", "error");
               }
+            }}
+            sx={{
+              flex: 1,
+              color: "#fff",
+              borderColor: "#fff",
+              backgroundColor: "transparent",
+              borderRadius: "14px",
+              textTransform: "none",
+              "& .MuiSvgIcon-root": {
+                color: "#fff",
+              },
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.08)",
+                borderColor: "#fff",
+              },
             }}
           >
             Google
@@ -176,7 +328,6 @@ const LoginForm: React.FC = () => {
 
           <Button
             variant="outlined"
-            color="primary"
             startIcon={<Facebook />}
             onClick={async () => {
               try {
@@ -186,7 +337,21 @@ const LoginForm: React.FC = () => {
                 showToast("Erro ao iniciar login com Facebook", "error");
               }
             }}
-            sx={{ ml: 2 }}
+            sx={{
+              flex: 1,
+              color: "#fff",
+              borderColor: "#fff",
+              backgroundColor: "transparent",
+              borderRadius: "14px",
+              textTransform: "none",
+              "& .MuiSvgIcon-root": {
+                color: "#fff",
+              },
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.08)",
+                borderColor: "#fff",
+              },
+            }}
           >
             Facebook
           </Button>
@@ -194,7 +359,7 @@ const LoginForm: React.FC = () => {
 
         <Typography variant="body2" sx={{ marginTop: "20px" }}>
           Não tem uma conta?{" "}
-          <a href="#" style={{ textDecoration: "none", color: "#1976d2" }}>
+          <a href="#" style={{ textDecoration: "none", color: "#ffcc01" }}>
             Cadastre-se aqui
           </a>
         </Typography>
