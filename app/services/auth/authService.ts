@@ -21,8 +21,6 @@ interface RegisterData {
   email: string;
   password: string;
 }
-
-
 export interface MeResponse {
   id: number;
   name: string;
@@ -73,7 +71,6 @@ export const refreshAuthToken = async (
     throw new Error("Sessão expirada");
   }
 };
-
 // ---------------------------
 // LOGIN VIA GOOGLE
 // ---------------------------
@@ -85,7 +82,6 @@ export const initGoogleLogin = async (): Promise<string> => {
     throw new Error('Erro ao iniciar login com Google');
   }
 };
-
 // ---------------------------
 // LOGIN VIA FACEBOOK
 // ---------------------------
@@ -99,34 +95,38 @@ export const initFacebookLogin = async (): Promise<string> => {
 };
 
 // ---------------------------
-// LOGIN VIA INSTAGRAM
-// ---------------------------
-export const initInstagramLogin = async (): Promise<string> => {
-  try {
-    const response = await axios.get(`${API_URL}/auth/instagram/init`);
-    return (response.data as { auth_url: string }).auth_url;
-  } catch {
-    throw new Error('Erro ao iniciar login com Instagram');
-  }
-};
-
-// ---------------------------
 // REGISTER
 // ---------------------------
-export const registerUser = async (data: RegisterData) => {
+export const registerUser = async (
+  data: RegisterData
+): Promise<void> => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, data);
-    return response.data;
+    await axios.post(`${API_URL}/auth/register`, data);
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(error.message || 'Erro inesperado');
-    }
-    throw new Error('Erro inesperado');
+    const err = error as {
+      response?: {
+        data?: {
+          detail?: string;
+          message?: string;
+        };
+      };
+      message?: string;
+    };
+
+    const message =
+      err.response?.data?.detail ||
+      err.response?.data?.message ||
+      err.message ||
+      "Erro ao realizar cadastro";
+
+    throw new Error(message);
   }
 };
 
-
-
+export const verifyEmail = async (token: string) => {
+  const response = await api.post("/auth/verify-email", { token });
+  return response.data;
+};
 export const getMe = async (): Promise<MeResponse> => {
   const response = await api.get<MeResponse>("/auth/me");
   return response.data;

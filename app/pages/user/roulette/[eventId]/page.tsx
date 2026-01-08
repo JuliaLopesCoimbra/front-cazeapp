@@ -1,7 +1,7 @@
 "use client";
 
-import { Box, Typography, Button, Modal } from "@mui/material";
-import { useParams } from "next/navigation";
+import { Box, Typography, Button } from "@mui/material";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   getRouletteByEvent,
@@ -17,11 +17,10 @@ export default function Roulette() {
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const params = useParams();
+  const router = useRouter();
   const eventId = Number(params.eventId);
-  const [prize, setPrize] = useState<{
-    name: string;
-    image?: string;
-  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const spinToPosition = (position: number | string) => {
     const pos = Number(position);
@@ -51,12 +50,19 @@ export default function Roulette() {
 
       spinToPosition(result.prize.position);
 
+      // Após a animação (4 segundos), navegar para a página de prêmio
       setTimeout(() => {
-        setPrize({
-          name: result.prize.name,
-          image: result.prize.image_url,
+        const params = new URLSearchParams({
+          prize_id: result.prize.id.toString(),
+          prize_name: result.prize.name,
+          prize_position: result.prize.position.toString(),
         });
-        setSpinning(false);
+
+        if (result.prize.image_url) {
+          params.append("prize_image", result.prize.image_url);
+        }
+
+        router.push(`/pages/roulette/prize/prize-win?${params.toString()}`);
       }, 4000);
     } catch (err) {
       console.error("Erro ao girar roleta", err);
@@ -67,18 +73,27 @@ export default function Roulette() {
     if (!eventId) return;
 
     const loadRoulette = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const data = await getRouletteByEvent(eventId);
         setRoulette(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Erro ao carregar roleta", err);
+        if (err?.response?.status === 404) {
+          setError("Roleta não encontrada ou inativa para este evento.");
+        } else {
+          setError("Erro ao carregar roleta. Tente novamente mais tarde.");
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
     loadRoulette();
   }, [eventId]);
 
-  if (!roulette) {
+  if (loading) {
     return (
       <Box
         sx={{
@@ -90,6 +105,46 @@ export default function Roulette() {
         }}
       >
         <Typography color="white">Carregando roleta...</Typography>
+      </Box>
+    );
+  }
+
+  if (error || !roulette) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundImage: "url(/background/dashboard.png)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          px: 2,
+        }}
+      >
+        <Typography 
+          variant="h6" 
+          color="white" 
+          sx={{ mb: 2, textAlign: "center" }}
+        >
+          {error || "Roleta não encontrada"}
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => window.history.back()}
+          sx={{
+            backgroundColor: "#ffcc01",
+            color: "#000",
+            fontWeight: 600,
+            borderRadius: "14px",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "#e6b800",
+            },
+          }}
+        >
+          Voltar
+        </Button>
       </Box>
     );
   }
@@ -181,47 +236,21 @@ export default function Roulette() {
         onClick={handleSpin}
         disabled={spinning}
         sx={{
-          borderRadius: "20px",
-          px: 4,
-          py: 1.5,
-          fontWeight: 700,
+          backgroundColor: "#ffcc01",
+          color: "#000",
+          fontWeight: 600,
+          marginTop: "10px",
+          borderRadius: "14px",
           textTransform: "none",
+          px: 4,
+          py: 0.5,
+          "&:hover": {
+            backgroundColor: "#e6b800",
+          },
         }}
       >
         {spinning ? "Girando..." : "Girar roleta"}
       </Button>
-
-      {/* MODAL DO PRÊMIO */}
-      <Modal open={!!prize} onClose={() => setPrize(null)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "#111",
-            color: "#fff",
-            p: 3,
-            borderRadius: 2,
-            textAlign: "center",
-            width: 280,
-          }}
-        >
-          <Typography variant="h6" mb={2}>
-            🎉 Você ganhou!
-          </Typography>
-
-          {prize?.image && (
-            <Box
-              component="img"
-              src={prize.image}
-              sx={{ width: "100%", borderRadius: 2, mb: 2 }}
-            />
-          )}
-
-          <Typography fontWeight={700}>{prize?.name}</Typography>
-        </Box>
-      </Modal>
     </Box>
   );
 }

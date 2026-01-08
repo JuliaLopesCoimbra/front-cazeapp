@@ -10,18 +10,16 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import axios from "axios";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
+import { firstAccess } from "@/app/services/auth/authAdminService";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-export default function ResetPasswordPage() {
+export default function FirstAccessPage() {
   const params = useSearchParams();
   const token = params.get("token");
   const router = useRouter();
 
-  const [new_password, setNewPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -29,17 +27,22 @@ export default function ResetPasswordPage() {
   const { showToast } = useToast();
 
   const passwordsMatch =
-    new_password.length > 0 &&
+    password.length > 0 &&
     confirmPassword.length > 0 &&
-    new_password === confirmPassword;
+    password === confirmPassword;
 
-  const handleReset = async () => {
-    if (new_password.length < 6) {
+  const handleFirstAccess = async () => {
+    if (!token) {
+      showToast("Token inválido.", "error");
+      return;
+    }
+
+    if (password.length < 6) {
       showToast("A senha deve ter no mínimo 6 caracteres.", "error");
       return;
     }
 
-    if (new_password !== confirmPassword) {
+    if (password !== confirmPassword) {
       showToast("As senhas não coincidem.", "error");
       return;
     }
@@ -47,18 +50,18 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      await axios.post(`${API_URL}/auth/reset-password`, {
-        token,
-        new_password,
-      });
-
-      showToast("Senha redefinida com sucesso!", "success");
+      await firstAccess({ token, password });
+      showToast("Senha definida com sucesso! Você já pode acessar o sistema.", "success");
 
       setTimeout(() => {
         router.push("/pages/auth/login");
       }, 1500);
-    } catch {
-      showToast("Token inválido ou expirado.", "error");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        showToast(err.message, "error");
+      } else {
+        showToast("Erro ao definir senha. Tente novamente.", "error");
+      }
     } finally {
       setLoading(false);
     }
@@ -101,23 +104,23 @@ export default function ResetPasswordPage() {
         }}
       >
         <Typography variant="h5" sx={{ marginBottom: "20px" }}>
-          Redefinir senha
+          Primeiro acesso
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: "20px" }}>
-          Digite sua nova senha abaixo.
+          Defina sua senha para acessar o sistema como administrador.
         </Typography>
 
-        {/* Nova senha */}
+        {/* Senha */}
         <TextField
           fullWidth
-          label="Nova senha"
+          label="Senha"
           variant="outlined"
           type={showPassword ? "text" : "password"}
-          value={new_password}
-          onChange={(e) => setNewPassword(e.target.value)}
-          error={Boolean(new_password && new_password.length < 6)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={Boolean(password && password.length < 6)}
           helperText={
-            new_password && new_password.length < 6
+            password && password.length < 6
               ? "A senha deve ter no mínimo 6 caracteres"
               : ""
           }
@@ -152,13 +155,13 @@ export default function ResetPasswordPage() {
               color: "#fff",
               borderRadius: "14px",
               "& fieldset": {
-                borderColor: new_password && new_password.length < 6 ? "#ff6b6b" : "#fff",
+                borderColor: password && password.length < 6 ? "#ff6b6b" : "#fff",
               },
               "&:hover fieldset": {
-                borderColor: new_password && new_password.length < 6 ? "#ff6b6b" : "#fff",
+                borderColor: password && password.length < 6 ? "#ff6b6b" : "#fff",
               },
               "&.Mui-focused fieldset": {
-                borderColor: new_password && new_password.length < 6 ? "#ff6b6b" : "#fff",
+                borderColor: password && password.length < 6 ? "#ff6b6b" : "#fff",
               },
               "&.Mui-error fieldset": {
                 borderColor: "#ff6b6b",
@@ -179,7 +182,7 @@ export default function ResetPasswordPage() {
         {/* Confirmar senha */}
         <TextField
           fullWidth
-          label="Confirmar nova senha"
+          label="Confirmar senha"
           variant="outlined"
           type={showConfirmPassword ? "text" : "password"}
           value={confirmPassword}
@@ -264,22 +267,13 @@ export default function ResetPasswordPage() {
               color: "rgba(0,0,0,0.6)",
             },
           }}
-          onClick={handleReset}
+          onClick={handleFirstAccess}
           disabled={loading}
         >
-          {loading ? "Salvando..." : "Redefinir senha"}
+          {loading ? "Salvando..." : "Definir senha"}
         </Button>
-
-        <Typography variant="body2" sx={{ marginTop: "20px", textAlign: "center" }}>
-          Lembrou sua senha?{" "}
-          <a
-            href="/pages/auth/login"
-            style={{ textDecoration: "none", color: "#ffcc01" }}
-          >
-            Voltar ao login
-          </a>
-        </Typography>
       </Box>
     </Box>
   );
 }
+

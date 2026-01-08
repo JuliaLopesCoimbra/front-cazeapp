@@ -30,6 +30,7 @@ import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import BlockIcon from "@mui/icons-material/Block";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { EventResponse } from "@/app/services/events/eventService";
@@ -193,8 +194,8 @@ export default function HamburgerMenu({
               {isAdmin && (
                 <IconButton
                   onClick={() => {
-                    console.log("Adicionar evento ou post");
-                    // router.push("/admin/events/create") ou news/create
+                    router.push("/pages/admin/events/create");
+                    setOpen(false);
                   }}
                   sx={{
                     mr: 1,
@@ -371,7 +372,33 @@ export default function HamburgerMenu({
               />
             </ListItemButton>
           </ListItem>
-          <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+         
+                {/* ───────── ADICIONAR ADMINISTRADOR (ADMIN ONLY) ───────── */}
+                {isAdmin && (
+             <>
+               <ListItem disablePadding>
+                 <ListItemButton
+                   onClick={() => {
+                     router.push("/pages/admin/invite");
+                     setOpen(false);
+                   }}
+                 >
+                   <AdminPanelSettingsIcon sx={{ mr: 2, color: "white" }} />
+
+                   <ListItemText
+                     primary="Adicionar Administrador"
+                     secondary="Convidar novo admin"
+                     primaryTypographyProps={{ fontWeight: 600 }}
+                     secondaryTypographyProps={{
+                       sx: { color: "rgba(255,255,255,0.6)" },
+                     }}
+                   />
+                 </ListItemButton>
+               </ListItem>
+             
+             </>
+           )}
+         <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => {
@@ -415,6 +442,8 @@ export default function HamburgerMenu({
           </ListItem>
 
           <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
+
+     
 
           {/* ───────── SAIR ───────── */}
           <Box display="flex" justifyContent="center" py={2}>

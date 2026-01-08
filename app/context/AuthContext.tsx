@@ -1,7 +1,5 @@
-// /app/context/AuthContext.tsx
-
 "use client";
-
+import { useCallback } from 'react';
 import React, {
   createContext,
   useContext,
@@ -10,7 +8,6 @@ import React, {
   useEffect,
 } from "react";
 import { jwtDecode } from "jwt-decode";
-// import { refreshAuthToken } from "../services/auth/authService";
 interface TokenPayload {
   sub: string;
   role: "admin" | "user";
@@ -22,20 +19,12 @@ interface AuthContextType {
   role: "admin" | "user" | null;
   isAdmin: boolean;
   authReady: boolean;
-   authVersion: number;
+  authVersion: number;
   login: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-// const getCookie = (name: string): string | null => {
-//   const value = `; ${document.cookie}`;
-//   const parts = value.split(`; ${name}=`);
-//   if (parts.length === 2) {
-//     return parts.pop()!.split(";").shift() || null;
-//   }
-//   return null;
-// };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -76,62 +65,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   );
   const [role, setRole] = useState<"admin" | "user" | null>(initialState.role);
   const [authReady, setAuthReady] = useState(false);
-const [authVersion, setAuthVersion] = useState(0);
+  const [authVersion, setAuthVersion] = useState(0);
 
   /* Marca o contexto como pronto após o boot inicial */
   useEffect(() => {
     setAuthReady(true);
   }, []);
+  
+const login = useCallback(
+  (accessToken: string, refreshToken: string) => {
+    const decoded = jwtDecode<TokenPayload>(accessToken);
 
- const login = (accessToken: string, refreshToken: string) => {
-  localStorage.setItem("access_token", accessToken);
-  document.cookie = `refresh_token=${refreshToken}; path=/; secure`;
+    // Salva tokens no localStorage e cookie
+    localStorage.setItem("access_token", accessToken);
+    document.cookie = `refresh_token=${refreshToken}; path=/; secure`;
 
-  const decoded = jwtDecode<TokenPayload>(accessToken);
+    setRole(decoded.role);
+    setIsAuthenticated(true);
+  },
+  []
+);
 
-  setRole(decoded.role);
-  setIsAuthenticated(true);
+  const logout = () => {
+    localStorage.removeItem("access_token");
+    document.cookie =
+      "refresh_token=; path=/; secure; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
-  // 🔥 ISSO AQUI É A CHAVE
-  setAuthVersion((v) => v + 1);
-};
+    setIsAuthenticated(false);
+    setRole(null);
 
-const logout = () => {
-  localStorage.removeItem("access_token");
-  document.cookie =
-    "refresh_token=; path=/; secure; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-
-  setIsAuthenticated(false);
-  setRole(null);
-
-  // 🔥 ISSO AQUI TAMBÉM
-  setAuthVersion((v) => v + 1);
-};
-
-
-  // const refreshSession = async () => {
-  //   const refreshToken = getCookie("refresh_token");
-
-  //   if (!refreshToken) {
-  //     logout();
-  //     return;
-  //   }
-
-  //   try {
-  //     const data = await refreshAuthToken(refreshToken);
-
-  //     // Atualiza tokens
-  //     localStorage.setItem("access_token", data.access_token);
-  //     document.cookie = `refresh_token=${data.refresh_token}; path=/; secure`;
-
-  //     const decoded = jwtDecode<TokenPayload>(data.access_token);
-
-  //     setRole(decoded.role);
-  //     setIsAuthenticated(true);
-  //   } catch {
-  //     logout();
-  //   }
-  // };
+    setAuthVersion((v) => v + 1);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");

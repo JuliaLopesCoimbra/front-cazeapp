@@ -359,7 +359,7 @@ const LoginForm: React.FC = () => {
 
         <Typography variant="body2" sx={{ marginTop: "20px" }}>
           Não tem uma conta?{" "}
-          <a href="#" style={{ textDecoration: "none", color: "#ffcc01" }}>
+          <a href="/pages/auth/register" style={{ textDecoration: "none", color: "#ffcc01" }}>
             Cadastre-se aqui
           </a>
         </Typography>

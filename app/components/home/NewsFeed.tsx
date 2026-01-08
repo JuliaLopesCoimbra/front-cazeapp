@@ -14,6 +14,8 @@ import {
 import { useAuth } from "@/app/context/AuthContext";
 import { getEventNews, NewsResponse } from "@/app/services/news/newsService";
 import EmptyNews from "./EmptyNews";
+import CreateNewsModal from "@/app/components/news/CreateNewsModal";
+import { useRouter } from "next/navigation";
 
 interface Props {
   eventId: number;
@@ -23,10 +25,12 @@ const LIMIT = 5;
 
 export default function NewsFeed({ eventId }: Props) {
   const { isAdmin, authVersion } = useAuth();
+  const router = useRouter();
   const [news, setNews] = useState<NewsResponse[]>([]);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
@@ -89,12 +93,36 @@ export default function NewsFeed({ eventId }: Props) {
 
   const [featured, ...others] = news;
 
+  const handleNewsClick = (newsId: number) => {
+    router.push(`/pages/news/${newsId}`);
+  };
+
+  const handleUpdate = () => {
+    // Recarrega as news após atualização (curtir/comentar)
+    loadNews(true);
+  };
+
   return (
     <Box padding={2} key={authVersion}>
-      {/* AÇÕES ADMIN — SEMPRE NO TOPO */}
+          {/* AÇÕES ADMIN — SEMPRE NO TOPO */}
       {isAdmin && (
         <Box display="flex" justifyContent="flex-end" marginBottom={2}>
-          <Button variant="contained">+ Adicionar post</Button>
+          <Button
+            variant="contained"
+            onClick={() => setCreateModalOpen(true)}
+            sx={{
+              backgroundColor: "#ffcc01",
+              color: "#000",
+              fontWeight: 600,
+              borderRadius: "14px",
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#e6b800",
+              },
+            }}
+          >
+            + Adicionar post
+          </Button>
         </Box>
       )}
 
@@ -110,10 +138,16 @@ export default function NewsFeed({ eventId }: Props) {
           {/* NOTÍCIA PRINCIPAL */}
           {featured && (
             <Card
+              onClick={() => handleNewsClick(featured.id)}
               sx={{
                 backgroundColor: "transparent",
                 boxShadow: "none",
                 color: "#fff",
+                cursor: "pointer",
+                transition: "opacity 0.2s",
+                "&:hover": {
+                  opacity: 0.8,
+                },
               }}
             >
               {featured.image_url && (
@@ -158,6 +192,7 @@ export default function NewsFeed({ eventId }: Props) {
             {others.map((item, index) => (
               <Box key={item.id}>
                 <Card
+                  onClick={() => handleNewsClick(item.id)}
                   sx={{
                     display: "flex",
                     gap: 2,
@@ -165,6 +200,11 @@ export default function NewsFeed({ eventId }: Props) {
                     boxShadow: "none",
                     color: "#fff",
                     paddingBottom: 1,
+                    cursor: "pointer",
+                    transition: "opacity 0.2s",
+                    "&:hover": {
+                      opacity: 0.8,
+                    },
                   }}
                 >
                   {item.image_url && (
@@ -212,6 +252,16 @@ export default function NewsFeed({ eventId }: Props) {
       )}
 
       {hasMore && <div ref={loaderRef} />}
+
+      {/* Modal de criar news */}
+      {isAdmin && (
+        <CreateNewsModal
+          open={createModalOpen}
+          eventId={eventId}
+          onClose={() => setCreateModalOpen(false)}
+          onSuccess={handleUpdate}
+        />
+      )}
     </Box>
   );
 }
