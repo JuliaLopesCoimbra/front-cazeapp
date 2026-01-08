@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,19 +13,21 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { createNews } from "@/app/services/news/newsService";
+import { updateNews, NewsDetailsResponse } from "@/app/services/news/newsService";
 import { useToast } from "@/app/context/ToastContext";
 
 interface Props {
   open: boolean;
   eventId: number;
+  news: NewsDetailsResponse | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function CreateNewsModal({
+export default function EditNewsModal({
   open,
   eventId,
+  news,
   onClose,
   onSuccess,
 }: Props) {
@@ -35,6 +37,16 @@ export default function CreateNewsModal({
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Preenche os campos quando a news é carregada
+  useEffect(() => {
+    if (news && open) {
+      setTitle(news.title);
+      setContent(news.content);
+      setImagePreview(news.image_url || null);
+      setImage(null); // Reset da nova imagem
+    }
+  }, [news, open]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,6 +63,8 @@ export default function CreateNewsModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!news) return;
+
     if (!title.trim()) {
       showToast("O título é obrigatório", "error");
       return;
@@ -61,34 +75,25 @@ export default function CreateNewsModal({
       return;
     }
 
-    if (!image) {
-      showToast("A imagem é obrigatória", "error");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      await createNews(eventId, {
+      await updateNews(eventId, news.id, {
         title: title.trim(),
         content: content.trim(),
-        image,
-        event_id: eventId,
+        image: image || undefined,
       });
 
-      showToast("Notícia criada com sucesso!", "success");
+      showToast("Notícia atualizada com sucesso!", "success");
       
       // Limpa o formulário
-      setTitle("");
-      setContent("");
       setImage(null);
-      setImagePreview(null);
-
+      
       onSuccess();
       onClose();
     } catch (error: any) {
       const message =
-        error.response?.data?.detail || "Erro ao criar notícia";
+        error.response?.data?.detail || "Erro ao atualizar notícia";
       showToast(message, "error");
     } finally {
       setLoading(false);
@@ -97,13 +102,12 @@ export default function CreateNewsModal({
 
   const handleClose = () => {
     if (!loading) {
-      setTitle("");
-      setContent("");
       setImage(null);
-      setImagePreview(null);
       onClose();
     }
   };
+
+  if (!news) return null;
 
   return (
     <Dialog
@@ -111,6 +115,14 @@ export default function CreateNewsModal({
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
+      slotProps={{
+        backdrop: {},
+        root: {
+          sx: {
+            zIndex: 1600,
+          },
+        },
+      }}
       PaperProps={{
         sx: {
           backgroundColor: "#1a1a1a",
@@ -129,7 +141,7 @@ export default function CreateNewsModal({
           fontWeight: 600,
         }}
       >
-        Criar Nova Notícia
+        Editar Notícia
         <Button
           onClick={handleClose}
           disabled={loading}
@@ -211,12 +223,12 @@ export default function CreateNewsModal({
               <input
                 accept="image/*"
                 style={{ display: "none" }}
-                id="image-upload"
+                id="edit-image-upload"
                 type="file"
                 onChange={handleImageChange}
                 disabled={loading}
               />
-              <label htmlFor="image-upload">
+              <label htmlFor="edit-image-upload">
                 <Button
                   variant="outlined"
                   component="span"
@@ -232,7 +244,7 @@ export default function CreateNewsModal({
                     },
                   }}
                 >
-                  {image ? "Alterar Imagem" : "Selecionar Imagem"}
+                  {image ? "Alterar Imagem" : "Trocar Imagem (Opcional)"}
                 </Button>
               </label>
 
@@ -276,7 +288,7 @@ export default function CreateNewsModal({
           <Button
             type="submit"
             variant="contained"
-            disabled={loading || !title.trim() || !content.trim() || !image}
+            disabled={loading || !title.trim() || !content.trim()}
             sx={{
               backgroundColor: "#ffc91f",
               color: "#000",
@@ -293,7 +305,7 @@ export default function CreateNewsModal({
             {loading ? (
               <CircularProgress size={20} sx={{ color: "#000" }} />
             ) : (
-              "Criar"
+              "Salvar"
             )}
           </Button>
         </DialogActions>

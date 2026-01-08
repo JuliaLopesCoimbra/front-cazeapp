@@ -46,6 +46,14 @@ export default function DeleteNewsModal({
       onClose={loading ? undefined : onClose}
       maxWidth="sm"
       fullWidth
+      slotProps={{
+        backdrop: {},
+        root: {
+          sx: {
+            zIndex: 1600,
+          },
+        },
+      }}
       PaperProps={{
         sx: {
           backgroundColor: "#1a1a1a",

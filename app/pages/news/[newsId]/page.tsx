@@ -29,8 +29,8 @@ import {
 } from "@/app/services/news/newsService";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
-import EditNewsModal from "@/app/components/news/EditNewsModal";
-import DeleteNewsModal from "@/app/components/news/DeleteNewsModal";
+import EditNewsModal from "@/app/components/admin/news/EditNewsModal";
+import DeleteNewsModal from "@/app/components/admin/news/DeleteNewsModal";
 import { getMe } from "@/app/services/auth/authService";
 
 export default function NewsDetailPage() {
@@ -235,25 +235,27 @@ export default function NewsDetailPage() {
     >
       {/* Header com botão de voltar */}
       <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        p={2}
-        borderBottom="1px solid rgba(255,255,255,0.1)"
-        position="sticky"
-        top={0}
-        backgroundColor="#000"
-        zIndex={10}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          p: 2,
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          position: "sticky",
+          top: 0,
+          backgroundColor: "#000",
+          zIndex: 10,
+        }}
       >
-        <Box display="flex" alignItems="center" gap={1.5}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <IconButton
-            onClick={() => router.back()}
+            onClick={() => router.push("/pages/user/home")}
             size="small"
             sx={{ color: "#fff" }}
           >
             <ArrowBackIosIcon />
           </IconButton>
-          <Box display="flex" alignItems="center" gap={1.5}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Avatar
               src={news.author?.profile_photo}
               sx={{ width: 40, height: 40 }}
@@ -272,7 +274,7 @@ export default function NewsDetailPage() {
         </Box>
         {/* Botões de editar/excluir apenas para admin que é autor */}
         {isAuthor && isAdmin && (
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <IconButton
               onClick={() => setEditModalOpen(true)}
               size="small"
@@ -312,7 +314,7 @@ export default function NewsDetailPage() {
         )}
 
         {/* Conteúdo */}
-        <Box p={2}>
+        <Box sx={{ p: 2 }}>
           {/* Título */}
           <Typography
             variant="h5"
@@ -331,7 +333,7 @@ export default function NewsDetailPage() {
           </Typography>
 
           {/* Ações (Curtir, Comentar) */}
-          <Box display="flex" gap={1.5} mb={1.5}>
+          <Box sx={{ display: "flex", gap: 1.5, mb: 1.5 }}>
             <IconButton
               onClick={handleLike}
               disabled={!isAuthenticated || liking}
@@ -395,8 +397,8 @@ export default function NewsDetailPage() {
               }}
             >
               {news.comments.map((comment) => (
-                <Box key={comment.id} mb={2}>
-                  <Box display="flex" gap={1.5}>
+                <Box key={comment.id} sx={{ mb: 2 }}>
+                  <Box sx={{ display: "flex", gap: 1.5 }}>
                     <Avatar
                       src={comment.user.profile_photo}
                       sx={{ width: 32, height: 32 }}
@@ -444,7 +446,7 @@ export default function NewsDetailPage() {
 
             {/* Campo de comentário */}
             {isAuthenticated && (
-              <Box display="flex" gap={1} alignItems="flex-end">
+              <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
                 <Avatar sx={{ width: 36, height: 36 }}>
                   U
                 </Avatar>

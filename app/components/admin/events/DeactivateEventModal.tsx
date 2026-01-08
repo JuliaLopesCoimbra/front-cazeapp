@@ -10,7 +10,7 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import BlockIcon from "@mui/icons-material/Block";
 import { useToast } from "@/app/context/ToastContext";
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
   loading?: boolean;
 }
 
-export default function DeleteEventModal({
+export default function DeactivateEventModal({
   open,
   eventTitle,
   onClose,
@@ -35,7 +35,7 @@ export default function DeleteEventModal({
       await onConfirm();
     } catch (error: any) {
       const message =
-        error.response?.data?.detail || "Erro ao excluir evento";
+        error.response?.data?.detail || "Erro ao desativar evento";
       showToast(message, "error");
     }
   };
@@ -80,12 +80,12 @@ export default function DeleteEventModal({
             width: 48,
             height: 48,
             borderRadius: "50%",
-            backgroundColor: "rgba(255, 48, 64, 0.1)",
+            backgroundColor: "rgba(158, 158, 158, 0.1)",
           }}
         >
-          <WarningAmberIcon sx={{ color: "#ff3040", fontSize: 28 }} />
+          <BlockIcon sx={{ color: "#9e9e9e", fontSize: 28 }} />
         </Box>
-        Excluir Evento
+        Desativar Evento
       </DialogTitle>
 
       <DialogContent sx={{ pt: 3, pb: 2 }}>
@@ -93,14 +93,14 @@ export default function DeleteEventModal({
           variant="body1"
           sx={{ color: "rgba(255,255,255,0.9)", mb: 2 }}
         >
-          Tem certeza que deseja excluir este evento?
+          Tem certeza que deseja desativar este evento?
         </Typography>
         <Box
           sx={{
             backgroundColor: "rgba(255,255,255,0.05)",
             borderRadius: 1,
             p: 2,
-            borderLeft: "3px solid #ff3040",
+            borderLeft: "3px solid #9e9e9e",
           }}
         >
           <Typography
@@ -114,7 +114,7 @@ export default function DeleteEventModal({
             variant="caption"
             sx={{ color: "rgba(255,255,255,0.6)" }}
           >
-            Esta ação não pode ser desfeita. Todas as notícias e dados relacionados serão perdidos.
+            O evento ficará oculto para os usuários e não poderá ser selecionado. Os dados serão preservados.
           </Typography>
         </Box>
       </DialogContent>
@@ -143,14 +143,14 @@ export default function DeleteEventModal({
           disabled={loading}
           variant="contained"
           sx={{
-            backgroundColor: "#ff3040",
+            backgroundColor: "#9e9e9e",
             color: "#fff",
             fontWeight: 600,
             "&:hover": {
-              backgroundColor: "#e02e3a",
+              backgroundColor: "#808080",
             },
             "&:disabled": {
-              backgroundColor: "rgba(255, 48, 64, 0.3)",
+              backgroundColor: "rgba(158, 158, 158, 0.3)",
               color: "rgba(255,255,255,0.3)",
             },
           }}
@@ -158,7 +158,7 @@ export default function DeleteEventModal({
           {loading ? (
             <CircularProgress size={20} sx={{ color: "#fff" }} />
           ) : (
-            "Excluir"
+            "Desativar"
           )}
         </Button>
       </DialogActions>

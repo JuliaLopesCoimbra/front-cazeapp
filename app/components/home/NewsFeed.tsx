@@ -14,7 +14,7 @@ import {
 import { useAuth } from "@/app/context/AuthContext";
 import { getEventNews, NewsResponse } from "@/app/services/news/newsService";
 import EmptyNews from "./EmptyNews";
-import CreateNewsModal from "@/app/components/news/CreateNewsModal";
+import CreateNewsModal from "@/app/components/admin/news/CreateNewsModal";
 import { useRouter } from "next/navigation";
 
 interface Props {

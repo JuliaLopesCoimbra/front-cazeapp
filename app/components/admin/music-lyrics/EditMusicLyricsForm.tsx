@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -10,30 +10,62 @@ import {
   Paper,
 } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { createEvent, CreateEventData } from "@/app/services/events/eventService";
+import {
+  updateMusicLyrics,
+  UpdateMusicLyricsData,
+  MusicLyricsResponse,
+  getMusicLyricsById,
+} from "@/app/services/musicLyrics/musicLyricsService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 
-interface CreateEventFormProps {
+interface EditMusicLyricsFormProps {
+  eventId: number;
+  musicId: number;
   onSuccess?: () => void;
 }
 
-export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  const [endsAt, setEndsAt] = useState("");
-  const [bannerImage, setBannerImage] = useState<File | null>(null);
+export default function EditMusicLyricsForm({
+  eventId,
+  musicId,
+  onSuccess,
+}: EditMusicLyricsFormProps) {
+  const [songName, setSongName] = useState("");
+  const [singer, setSinger] = useState("");
+  const [lyrics, setLyrics] = useState("");
+  const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMusic, setLoadingMusic] = useState(true);
   const { showToast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    const loadMusic = async () => {
+      try {
+        setLoadingMusic(true);
+        const music = await getMusicLyricsById(eventId, musicId);
+        setSongName(music.song_name);
+        setSinger(music.singer || "");
+        setLyrics(music.lyrics);
+        if (music.image_url) {
+          setPreview(music.image_url);
+        }
+      } catch (err) {
+        showToast("Erro ao carregar música/letra", "error");
+        router.push("/pages/user/home");
+      } finally {
+        setLoadingMusic(false);
+      }
+    };
+
+    loadMusic();
+  }, [eventId, musicId, showToast, router]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setBannerImage(file);
+      setImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
@@ -45,41 +77,60 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim()) {
-      showToast("O título é obrigatório", "error");
+    if (!songName.trim()) {
+      showToast("O nome da música é obrigatório", "error");
+      return;
+    }
+
+    if (!lyrics.trim()) {
+      showToast("A letra da música é obrigatória", "error");
       return;
     }
 
     setLoading(true);
 
     try {
-      const data: CreateEventData = {
-        title: title.trim(),
-        description: description.trim() || undefined,
-        location: location.trim() || undefined,
-        starts_at: startsAt || undefined,
-        ends_at: endsAt || undefined,
-        banner_image: bannerImage || undefined,
+      const data: UpdateMusicLyricsData = {
+        song_name: songName.trim(),
+        singer: singer.trim() || undefined,
+        lyrics: lyrics.trim(),
+        image: image || undefined,
       };
 
-      await createEvent(data);
-      showToast("Evento criado com sucesso!", "success");
-      
+      await updateMusicLyrics(eventId, musicId, data);
+      showToast("Música/Letra atualizada com sucesso!", "success");
+
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/pages/user/home");
+        router.push(`/pages/admin/music-lyrics/${eventId}/${musicId}`);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
         showToast(err.message, "error");
       } else {
-        showToast("Erro ao criar evento", "error");
+        showToast("Erro ao atualizar música/letra", "error");
       }
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadingMusic) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundColor: "#000",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress sx={{ color: "#ffc91f" }} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -115,7 +166,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           <ArrowBackIosIcon />
         </IconButton>
         <Typography variant="h5" fontWeight={700} sx={{ color: "#fff" }}>
-          Criar Novo Evento
+          Editar Música/Letra
         </Typography>
       </Box>
 
@@ -147,9 +198,9 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         >
           <TextField
             fullWidth
-            label="Título *"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            label="Nome da Música *"
+            value={songName}
+            onChange={(e) => setSongName(e.target.value)}
             disabled={loading}
             required
             sx={{
@@ -177,107 +228,42 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
 
           <TextField
             fullWidth
-            label="Descrição"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            label="Cantor/Intérprete"
+            value={singer}
+            onChange={(e) => setSinger(e.target.value)}
+            disabled={loading}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: "#fff",
+                "& fieldset": {
+                  borderColor: "rgba(255,255,255,0.1)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255,255,255,0.2)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ffc91f",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255,255,255,0.7)",
+                "&.Mui-focused": {
+                  color: "#ffc91f",
+                },
+              },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Letra da Música *"
+            value={lyrics}
+            onChange={(e) => setLyrics(e.target.value)}
             multiline
-            rows={4}
+            rows={8}
             disabled={loading}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#fff",
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.1)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffc91f",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255,255,255,0.7)",
-                "&.Mui-focused": {
-                  color: "#ffc91f",
-                },
-              },
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Localização"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            disabled={loading}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#fff",
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.1)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffc91f",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255,255,255,0.7)",
-                "&.Mui-focused": {
-                  color: "#ffc91f",
-                },
-              },
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Data de Início"
-            type="datetime-local"
-            value={startsAt}
-            onChange={(e) => setStartsAt(e.target.value)}
-            disabled={loading}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#fff",
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.1)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffc91f",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255,255,255,0.7)",
-                "&.Mui-focused": {
-                  color: "#ffc91f",
-                },
-              },
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Data de Término"
-            type="datetime-local"
-            value={endsAt}
-            onChange={(e) => setEndsAt(e.target.value)}
-            disabled={loading}
-            InputLabelProps={{
-              shrink: true,
-            }}
+            required
             sx={{
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "rgba(255,255,255,0.05)",
@@ -302,18 +288,21 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           />
 
           <Box>
-            <Typography variant="body2" sx={{ mb: 1, color: "rgba(255,255,255,0.7)" }}>
-              Banner do Evento
+            <Typography
+              variant="body2"
+              sx={{ mb: 1, color: "rgba(255,255,255,0.7)" }}
+            >
+              Imagem da Música
             </Typography>
             <input
               accept="image/*"
               style={{ display: "none" }}
-              id="banner-image-upload"
+              id="music-lyrics-image-upload-edit"
               type="file"
               onChange={handleImageChange}
               disabled={loading}
             />
-            <label htmlFor="banner-image-upload">
+            <label htmlFor="music-lyrics-image-upload-edit">
               <Button
                 variant="outlined"
                 component="span"
@@ -329,7 +318,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                   },
                 }}
               >
-                {preview ? "Alterar Imagem" : "Selecionar Imagem"}
+                {preview ? "Alterar Imagem" : "Trocar Imagem (Opcional)"}
               </Button>
             </label>
             {preview && (
@@ -369,7 +358,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           <Button
             type="submit"
             variant="contained"
-            disabled={loading || !title.trim()}
+            disabled={loading || !songName.trim() || !lyrics.trim()}
             sx={{
               flex: 1,
               backgroundColor: "#ffc91f",
@@ -387,7 +376,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             {loading ? (
               <CircularProgress size={24} sx={{ color: "#000" }} />
             ) : (
-              "Criar Evento"
+              "Salvar Alterações"
             )}
           </Button>
         </Box>

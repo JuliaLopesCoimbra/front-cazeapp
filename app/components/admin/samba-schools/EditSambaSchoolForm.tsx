@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -10,30 +10,60 @@ import {
   Paper,
 } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { createEvent, CreateEventData } from "@/app/services/events/eventService";
+import {
+  updateSambaSchool,
+  UpdateSambaSchoolData,
+  SambaSchoolResponse,
+  getSambaSchoolById,
+} from "@/app/services/sambaSchools/sambaSchoolService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 
-interface CreateEventFormProps {
+interface EditSambaSchoolFormProps {
+  eventId: number;
+  schoolId: number;
   onSuccess?: () => void;
 }
 
-export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
-  const [title, setTitle] = useState("");
+export default function EditSambaSchoolForm({
+  eventId,
+  schoolId,
+  onSuccess,
+}: EditSambaSchoolFormProps) {
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  const [endsAt, setEndsAt] = useState("");
-  const [bannerImage, setBannerImage] = useState<File | null>(null);
+  const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingSchool, setLoadingSchool] = useState(true);
   const { showToast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    const loadSchool = async () => {
+      try {
+        setLoadingSchool(true);
+        const school = await getSambaSchoolById(eventId, schoolId);
+        setName(school.name);
+        setDescription(school.description || "");
+        if (school.image_url) {
+          setPreview(school.image_url);
+        }
+      } catch (err) {
+        showToast("Erro ao carregar escola de samba", "error");
+        router.push("/pages/user/home");
+      } finally {
+        setLoadingSchool(false);
+      }
+    };
+
+    loadSchool();
+  }, [eventId, schoolId, showToast, router]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setBannerImage(file);
+      setImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
@@ -45,41 +75,54 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim()) {
-      showToast("O título é obrigatório", "error");
+    if (!name.trim()) {
+      showToast("O nome é obrigatório", "error");
       return;
     }
 
     setLoading(true);
 
     try {
-      const data: CreateEventData = {
-        title: title.trim(),
+      const data: UpdateSambaSchoolData = {
+        name: name.trim(),
         description: description.trim() || undefined,
-        location: location.trim() || undefined,
-        starts_at: startsAt || undefined,
-        ends_at: endsAt || undefined,
-        banner_image: bannerImage || undefined,
+        image: image || undefined,
       };
 
-      await createEvent(data);
-      showToast("Evento criado com sucesso!", "success");
-      
+      await updateSambaSchool(eventId, schoolId, data);
+      showToast("Escola de samba atualizada com sucesso!", "success");
+
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/pages/user/home");
+        router.push(`/pages/admin/samba-schools/${eventId}/${schoolId}`);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
         showToast(err.message, "error");
       } else {
-        showToast("Erro ao criar evento", "error");
+        showToast("Erro ao atualizar escola de samba", "error");
       }
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadingSchool) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundColor: "#000",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress sx={{ color: "#ffc91f" }} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -115,7 +158,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           <ArrowBackIosIcon />
         </IconButton>
         <Typography variant="h5" fontWeight={700} sx={{ color: "#fff" }}>
-          Criar Novo Evento
+          Editar Escola de Samba
         </Typography>
       </Box>
 
@@ -147,9 +190,9 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         >
           <TextField
             fullWidth
-            label="Título *"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            label="Nome *"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             disabled={loading}
             required
             sx={{
@@ -206,114 +249,22 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             }}
           />
 
-          <TextField
-            fullWidth
-            label="Localização"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            disabled={loading}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#fff",
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.1)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffc91f",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255,255,255,0.7)",
-                "&.Mui-focused": {
-                  color: "#ffc91f",
-                },
-              },
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Data de Início"
-            type="datetime-local"
-            value={startsAt}
-            onChange={(e) => setStartsAt(e.target.value)}
-            disabled={loading}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#fff",
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.1)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffc91f",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255,255,255,0.7)",
-                "&.Mui-focused": {
-                  color: "#ffc91f",
-                },
-              },
-            }}
-          />
-
-          <TextField
-            fullWidth
-            label="Data de Término"
-            type="datetime-local"
-            value={endsAt}
-            onChange={(e) => setEndsAt(e.target.value)}
-            disabled={loading}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#fff",
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.1)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffc91f",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255,255,255,0.7)",
-                "&.Mui-focused": {
-                  color: "#ffc91f",
-                },
-              },
-            }}
-          />
-
           <Box>
-            <Typography variant="body2" sx={{ mb: 1, color: "rgba(255,255,255,0.7)" }}>
-              Banner do Evento
+            <Typography
+              variant="body2"
+              sx={{ mb: 1, color: "rgba(255,255,255,0.7)" }}
+            >
+              Imagem da Escola de Samba
             </Typography>
             <input
               accept="image/*"
               style={{ display: "none" }}
-              id="banner-image-upload"
+              id="samba-school-image-upload-edit"
               type="file"
               onChange={handleImageChange}
               disabled={loading}
             />
-            <label htmlFor="banner-image-upload">
+            <label htmlFor="samba-school-image-upload-edit">
               <Button
                 variant="outlined"
                 component="span"
@@ -329,7 +280,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                   },
                 }}
               >
-                {preview ? "Alterar Imagem" : "Selecionar Imagem"}
+                {preview ? "Alterar Imagem" : "Trocar Imagem (Opcional)"}
               </Button>
             </label>
             {preview && (
@@ -369,7 +320,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           <Button
             type="submit"
             variant="contained"
-            disabled={loading || !title.trim()}
+            disabled={loading || !name.trim()}
             sx={{
               flex: 1,
               backgroundColor: "#ffc91f",
@@ -387,7 +338,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             {loading ? (
               <CircularProgress size={24} sx={{ color: "#000" }} />
             ) : (
-              "Criar Evento"
+              "Salvar Alterações"
             )}
           </Button>
         </Box>

@@ -15,15 +15,15 @@ import { useToast } from "@/app/context/ToastContext";
 
 interface Props {
   open: boolean;
-  eventTitle: string;
+  songName: string;
   onClose: () => void;
   onConfirm: () => Promise<void>;
   loading?: boolean;
 }
 
-export default function DeleteEventModal({
+export default function DeleteMusicLyricsModal({
   open,
-  eventTitle,
+  songName,
   onClose,
   onConfirm,
   loading = false,
@@ -35,7 +35,7 @@ export default function DeleteEventModal({
       await onConfirm();
     } catch (error: any) {
       const message =
-        error.response?.data?.detail || "Erro ao excluir evento";
+        error.response?.data?.detail || "Erro ao excluir música/letra";
       showToast(message, "error");
     }
   };
@@ -85,7 +85,7 @@ export default function DeleteEventModal({
         >
           <WarningAmberIcon sx={{ color: "#ff3040", fontSize: 28 }} />
         </Box>
-        Excluir Evento
+        Excluir Música/Letra
       </DialogTitle>
 
       <DialogContent sx={{ pt: 3, pb: 2 }}>
@@ -93,7 +93,7 @@ export default function DeleteEventModal({
           variant="body1"
           sx={{ color: "rgba(255,255,255,0.9)", mb: 2 }}
         >
-          Tem certeza que deseja excluir este evento?
+          Tem certeza que deseja excluir esta música/letra?
         </Typography>
         <Box
           sx={{
@@ -108,13 +108,13 @@ export default function DeleteEventModal({
             fontWeight={600}
             sx={{ color: "#fff", mb: 0.5 }}
           >
-            {eventTitle}
+            {songName}
           </Typography>
           <Typography
             variant="caption"
             sx={{ color: "rgba(255,255,255,0.6)" }}
           >
-            Esta ação não pode ser desfeita. Todas as notícias e dados relacionados serão perdidos.
+            Esta ação não pode ser desfeita. Todos os dados relacionados serão perdidos.
           </Typography>
         </Box>
       </DialogContent>

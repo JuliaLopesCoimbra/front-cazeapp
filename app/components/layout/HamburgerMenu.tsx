@@ -26,7 +26,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import BlockIcon from "@mui/icons-material/Block";
@@ -36,6 +35,8 @@ import { useAuth } from "@/app/context/AuthContext";
 import { EventResponse } from "@/app/services/events/eventService";
 import { activateEvent } from "@/app/services/events/eventService";
 import { deactivateEvent } from "@/app/services/events/eventService";
+import ActivateEventModal from "@/app/components/admin/events/ActivateEventModal";
+import DeactivateEventModal from "@/app/components/admin/events/DeactivateEventModal";
 
 interface Props {
   events: EventResponse[];
@@ -58,6 +59,8 @@ export default function HamburgerMenu({
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuEvent, setMenuEvent] = useState<EventResponse | null>(null);
   const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
+  const [activating, setActivating] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
 
   const openMenu = Boolean(menuAnchorEl);
 
@@ -88,6 +91,36 @@ export default function HamburgerMenu({
   const handleCloseMenu = () => {
     setMenuAnchorEl(null);
     setMenuEvent(null);
+  };
+
+  const handleActivate = async () => {
+    if (!selectedEvent) return;
+    setActivating(true);
+    try {
+      await activateEvent(selectedEvent.id);
+      setActivateModalOpen(false);
+      setSelectedEvent(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao ativar evento:", error);
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  const handleDeactivate = async () => {
+    if (!selectedEvent) return;
+    setDeactivating(true);
+    try {
+      await deactivateEvent(selectedEvent.id);
+      setDeactivateModalOpen(false);
+      setSelectedEvent(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao desativar evento:", error);
+    } finally {
+      setDeactivating(false);
+    }
   };
 
   return (
@@ -372,10 +405,11 @@ export default function HamburgerMenu({
               />
             </ListItemButton>
           </ListItem>
-         
+        
                 {/* ───────── ADICIONAR ADMINISTRADOR (ADMIN ONLY) ───────── */}
                 {isAdmin && (
              <>
+               <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
                <ListItem disablePadding>
                  <ListItemButton
                    onClick={() => {
@@ -464,79 +498,24 @@ export default function HamburgerMenu({
           </Box>
         </List>
       </Drawer>
-      <Dialog
-        open={activateModalOpen}
-        onClose={() => setActivateModalOpen(false)}
-        slotProps={{
-          backdrop: {},
-          root: {
-            sx: {
-              zIndex: 1501,
-            },
-          },
-        }}
-      >
-        <DialogTitle>Ativar evento `{selectedEvent?.title}`?</DialogTitle>
-
-        <DialogActions>
-          <Button onClick={() => setActivateModalOpen(false)}>Cancelar</Button>
-
-          <Button
-            variant="contained"
-            color="success"
-            onClick={async () => {
-              if (!selectedEvent) return;
-
-              await activateEvent(selectedEvent.id);
-
-              setActivateModalOpen(false);
-              setSelectedEvent(null);
-
-              // Recarregar lista ou atualizar estado global
-              window.location.reload();
-            }}
-          >
-            Ativar
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={deactivateModalOpen}
-        onClose={() => setDeactivateModalOpen(false)}
-        slotProps={{
-          backdrop: {},
-          root: {
-            sx: {
-              zIndex: 1501,
-            },
-          },
-        }}
-      >
-        <DialogTitle>Desativar evento `{selectedEvent?.title}`?</DialogTitle>
-
-        <DialogActions>
-          <Button onClick={() => setDeactivateModalOpen(false)}>
-            Cancelar
-          </Button>
-
-          <Button
-            variant="contained"
-            color="error"
-            onClick={async () => {
-              if (!selectedEvent) return;
-
-              await deactivateEvent(selectedEvent.id);
-
-              setDeactivateModalOpen(false);
-              setSelectedEvent(null);
-
-              window.location.reload();
-            }}
-          >
-            Desativar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {selectedEvent && (
+        <>
+          <ActivateEventModal
+            open={activateModalOpen}
+            eventTitle={selectedEvent.title}
+            onClose={() => setActivateModalOpen(false)}
+            onConfirm={handleActivate}
+            loading={activating}
+          />
+          <DeactivateEventModal
+            open={deactivateModalOpen}
+            eventTitle={selectedEvent.title}
+            onClose={() => setDeactivateModalOpen(false)}
+            onConfirm={handleDeactivate}
+            loading={deactivating}
+          />
+        </>
+      )}
 
       <Menu
         anchorEl={menuAnchorEl}
@@ -573,7 +552,7 @@ export default function HamburgerMenu({
             if (!menuEvent) return;
             handleCloseMenu();
 
-            // exemplo de navegação
+            
             router.push(`/pages/admin/events/${menuEvent.id}`);
           }}
         >

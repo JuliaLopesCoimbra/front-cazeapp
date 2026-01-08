@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,21 +13,19 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { updateNews, NewsDetailsResponse } from "@/app/services/news/newsService";
+import { createNews } from "@/app/services/news/newsService";
 import { useToast } from "@/app/context/ToastContext";
 
 interface Props {
   open: boolean;
   eventId: number;
-  news: NewsDetailsResponse | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function EditNewsModal({
+export default function CreateNewsModal({
   open,
   eventId,
-  news,
   onClose,
   onSuccess,
 }: Props) {
@@ -37,16 +35,6 @@ export default function EditNewsModal({
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  // Preenche os campos quando a news é carregada
-  useEffect(() => {
-    if (news && open) {
-      setTitle(news.title);
-      setContent(news.content);
-      setImagePreview(news.image_url || null);
-      setImage(null); // Reset da nova imagem
-    }
-  }, [news, open]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,8 +51,6 @@ export default function EditNewsModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!news) return;
-
     if (!title.trim()) {
       showToast("O título é obrigatório", "error");
       return;
@@ -75,25 +61,34 @@ export default function EditNewsModal({
       return;
     }
 
+    if (!image) {
+      showToast("A imagem é obrigatória", "error");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await updateNews(eventId, news.id, {
+      await createNews(eventId, {
         title: title.trim(),
         content: content.trim(),
-        image: image || undefined,
+        image,
+        event_id: eventId,
       });
 
-      showToast("Notícia atualizada com sucesso!", "success");
+      showToast("Notícia criada com sucesso!", "success");
       
       // Limpa o formulário
+      setTitle("");
+      setContent("");
       setImage(null);
-      
+      setImagePreview(null);
+
       onSuccess();
       onClose();
     } catch (error: any) {
       const message =
-        error.response?.data?.detail || "Erro ao atualizar notícia";
+        error.response?.data?.detail || "Erro ao criar notícia";
       showToast(message, "error");
     } finally {
       setLoading(false);
@@ -102,12 +97,13 @@ export default function EditNewsModal({
 
   const handleClose = () => {
     if (!loading) {
+      setTitle("");
+      setContent("");
       setImage(null);
+      setImagePreview(null);
       onClose();
     }
   };
-
-  if (!news) return null;
 
   return (
     <Dialog
@@ -115,6 +111,14 @@ export default function EditNewsModal({
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
+      slotProps={{
+        backdrop: {},
+        root: {
+          sx: {
+            zIndex: 1600,
+          },
+        },
+      }}
       PaperProps={{
         sx: {
           backgroundColor: "#1a1a1a",
@@ -133,7 +137,7 @@ export default function EditNewsModal({
           fontWeight: 600,
         }}
       >
-        Editar Notícia
+        Criar Nova Notícia
         <Button
           onClick={handleClose}
           disabled={loading}
@@ -145,7 +149,7 @@ export default function EditNewsModal({
 
       <form onSubmit={handleSubmit}>
         <DialogContent sx={{ pt: 3 }}>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {/* Título */}
             <TextField
               label="Título"
@@ -215,12 +219,12 @@ export default function EditNewsModal({
               <input
                 accept="image/*"
                 style={{ display: "none" }}
-                id="edit-image-upload"
+                id="image-upload"
                 type="file"
                 onChange={handleImageChange}
                 disabled={loading}
               />
-              <label htmlFor="edit-image-upload">
+              <label htmlFor="image-upload">
                 <Button
                   variant="outlined"
                   component="span"
@@ -236,7 +240,7 @@ export default function EditNewsModal({
                     },
                   }}
                 >
-                  {image ? "Alterar Imagem" : "Trocar Imagem (Opcional)"}
+                  {image ? "Alterar Imagem" : "Selecionar Imagem"}
                 </Button>
               </label>
 
@@ -280,7 +284,7 @@ export default function EditNewsModal({
           <Button
             type="submit"
             variant="contained"
-            disabled={loading || !title.trim() || !content.trim()}
+            disabled={loading || !title.trim() || !content.trim() || !image}
             sx={{
               backgroundColor: "#ffc91f",
               color: "#000",
@@ -297,7 +301,7 @@ export default function EditNewsModal({
             {loading ? (
               <CircularProgress size={20} sx={{ color: "#000" }} />
             ) : (
-              "Salvar"
+              "Criar"
             )}
           </Button>
         </DialogActions>
