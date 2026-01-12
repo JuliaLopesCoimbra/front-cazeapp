@@ -3,7 +3,7 @@
 import { Box, Typography, Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getMe, MeResponse } from "@/app/services/auth/authService";
-import { EventResponse } from "@/app/services/events/eventService";
+import { EventResponse } from "@/app/services/events/eventservice";
 import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
 
 interface Props {

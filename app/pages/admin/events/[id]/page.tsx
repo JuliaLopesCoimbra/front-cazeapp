@@ -21,7 +21,7 @@ import {
   getEventById, 
   EventResponse, 
   deleteEvent 
-} from "@/app/services/events/eventService";
+} from "@/app/services/events/eventservice";
 import {
   getSambaSchoolsByEvent,
   SambaSchoolResponse,
