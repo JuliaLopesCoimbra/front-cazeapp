@@ -16,6 +16,7 @@ import { getEventNews, NewsResponse } from "@/app/services/news/newsService";
 import EmptyNews from "./EmptyNews";
 import CreateNewsModal from "@/app/components/admin/news/CreateNewsModal";
 import { useRouter } from "next/navigation";
+import CTVAd from "@/app/components/ads/CTVAd";
 
 interface Props {
   eventId: number;
@@ -238,6 +239,19 @@ export default function NewsFeed({ eventId }: Props) {
                       marginY: 1,
                     }}
                   />
+                )}
+
+                {/* CTVAd a cada 3 posts */}
+                {(index + 1) % 3 === 0 && index !== others.length - 1 && (
+                  <>
+                    <CTVAd />
+                    <Divider
+                      sx={{
+                        borderColor: "rgba(255,255,255,0.15)",
+                        marginY: 1,
+                      }}
+                    />
+                  </>
                 )}
               </Box>
             ))}
