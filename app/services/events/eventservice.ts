@@ -1,5 +1,7 @@
 import api from "../auth/axiosConfig";
+import axios from "axios";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export interface EventResponse {
   id: number;
@@ -36,6 +38,12 @@ export interface UpdateEventData {
 
 export const getEvents = async (): Promise<EventResponse[]> => {
   const response = await api.get<EventResponse[]>("/admin/events");
+  return response.data;
+};
+
+// Função pública para buscar eventos sem autenticação
+export const getPublicEvents = async (): Promise<EventResponse[]> => {
+  const response = await axios.get<EventResponse[]>(`${API_URL}/public/events`);
   return response.data;
 };
 

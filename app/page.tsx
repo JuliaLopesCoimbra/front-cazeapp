@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button, Box } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { getEvents, EventResponse } from "./services/events/eventService";
+import { getPublicEvents, EventResponse } from "./services/events/eventService";
 import EventIndisponivel from "./components/event/EventIndisponivel";
 
 export default function HomePage() {
@@ -26,20 +26,12 @@ export default function HomePage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const events = await getEvents(); // Chama o serviço para pegar os eventos
+        const events = await getPublicEvents(); // Chama o endpoint público para pegar os eventos
         const activeEvents = events.filter((event: EventResponse) => event.is_active); // Filtra eventos ativos
         setEvents(activeEvents);
-      } catch (error: any) {
+      } catch (error) {
         console.error("Erro ao buscar eventos:", error);
-        
-        // Se for 401 e não houver token, trata como não autenticado (normal para página pública)
-        // Isso evita que o interceptor cause loop infinito ao tentar redirecionar
-        if (error?.response?.status === 401 && typeof window !== "undefined" && !localStorage.getItem("access_token")) {
-          // Endpoint público retornou 401 - trata como array vazio (sem eventos disponíveis)
-          setEvents([]);
-        } else {
-          setEvents([]); // Em caso de outro erro, define como array vazio
-        }
+        setEvents([]); // Em caso de erro, define como array vazio
       } finally {
         setLoading(false);
       }
