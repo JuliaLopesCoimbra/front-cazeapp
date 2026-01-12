@@ -9,6 +9,8 @@ export interface EventResponse {
   description: string;
   location?: string;
   banner_image?: string;
+  image_map?: string;
+  line_up?: string;
   starts_at: string;
   ends_at: string;
   created_at: string;
@@ -24,6 +26,8 @@ export interface CreateEventData {
   ends_at?: string;
   event_dates?: string; // Formato: "2024-01-09,2024-01-10,2024-01-20,2024-01-21"
   banner_image?: File;
+  image_map?: File;
+  line_up?: string;
 }
 
 export interface UpdateEventData {
@@ -34,6 +38,8 @@ export interface UpdateEventData {
   end_date: string;
   event_dates?: string; // Formato: "2024-01-09,2024-01-10,2024-01-20,2024-01-21"
   banner_image?: File;
+  image_map?: File;
+  line_up?: string;
 }
 
 export const getEvents = async (): Promise<EventResponse[]> => {
@@ -61,6 +67,8 @@ export const createEvent = async (data: CreateEventData): Promise<EventResponse>
   if (data.ends_at) formData.append("ends_at", data.ends_at);
   if (data.event_dates) formData.append("event_dates", data.event_dates);
   if (data.banner_image) formData.append("banner_image", data.banner_image);
+  if (data.image_map) formData.append("image_map", data.image_map);
+  if (data.line_up) formData.append("line_up", data.line_up);
 
   const response = await api.post<EventResponse>("/admin/events", formData, {
     headers: {
@@ -82,6 +90,8 @@ export const updateEvent = async (
   formData.append("end_date", data.end_date);
   if (data.event_dates) formData.append("event_dates", data.event_dates);
   if (data.banner_image) formData.append("banner_image", data.banner_image);
+  if (data.image_map) formData.append("image_map", data.image_map);
+  if (data.line_up) formData.append("line_up", data.line_up);
 
   const response = await api.put<EventResponse>(
     `/admin/events/${eventId}`,

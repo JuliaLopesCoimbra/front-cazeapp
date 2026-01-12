@@ -5,6 +5,8 @@ import { EventResponse } from "@/app/services/events/eventService";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EventIcon from "@mui/icons-material/Event";
+import MapIcon from "@mui/icons-material/Map";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { formatEventDates } from "@/app/utils/eventDateFormatter";
 
 interface Props {
@@ -129,13 +131,82 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
               </Box>
     
               {/* LOCAL */}
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <LocationOnIcon style={{ color: "yellow" }} />
-                <p style={{ margin: 0, fontSize: 15 }}>
-                  Setor 2 - Marquês de Sapucaí
-                </p>
-              </Box>
+              {event.location && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <LocationOnIcon style={{ color: "yellow" }} />
+                  <p style={{ margin: 0, fontSize: 15 }}>{event.location}</p>
+                </Box>
+              )}
             </Box>
+
+            {/* MAPA DO EVENTO */}
+            {event.image_map && (
+              <Box
+                sx={{
+                  maxWidth: 700,
+                  width: "100%",
+                
+                  padding: "20px",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                  <MapIcon style={{ color: "yellow" }} />
+                  <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
+                    Mapa do Evento
+                  </h3>
+                </Box>
+                <Box
+                  component="img"
+                  src={event.image_map}
+                  alt="Mapa do Evento"
+                  sx={{
+                    width: "100%",
+                    maxHeight: 400,
+                    objectFit: "contain",
+                    borderRadius: 2,
+                  }}
+                />
+              </Box>
+            )}
+
+            {/* LINE UP / PROGRAMAÇÃO */}
+            {event.line_up && (
+              <Box
+                sx={{
+                  maxWidth: 700,
+                  width: "100%",
+                
+                  padding: "20px",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                  <MusicNoteIcon style={{ color: "yellow" }} />
+                  <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
+                    Programação (Line Up)
+                  </h3>
+                </Box>
+                <Box
+                  sx={{
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    borderRadius: 2,
+                    padding: 3,
+                    color: "white",
+                  }}
+                >
+                  <pre
+                    style={{
+                      margin: 0,
+                      fontSize: 14,
+                      lineHeight: 1.8,
+                      whiteSpace: "pre-wrap",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    {event.line_up}
+                  </pre>
+                </Box>
+              </Box>
+            )}
           
           </main>
         </div>

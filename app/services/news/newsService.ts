@@ -6,6 +6,7 @@ export interface NewsResponse {
   content: string;
   image_url?: string;
   created_at: string;
+  event_id?: number;
 }
 
 export interface NewsAuthor {
@@ -18,6 +19,13 @@ export interface NewsComment {
   id: number;
   content: string;
   created_at: string;
+  parent_comment_id?: number | null;
+  deleted_at?: string | null;
+  likes: {
+    count: number;
+    user_liked: boolean;
+  };
+  replies_count: number;
   user: {
     id: number;
     name: string;

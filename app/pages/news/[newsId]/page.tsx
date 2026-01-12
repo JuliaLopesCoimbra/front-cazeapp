@@ -19,6 +19,9 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import SendIcon from "@mui/icons-material/Send";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ReplyIcon from "@mui/icons-material/Reply";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import {
   getNewsDetails,
   NewsDetailsResponse,
@@ -33,12 +36,18 @@ import {
 import {
   createComment,
   listComments,
+  createReply,
+  listReplies,
+  likeComment,
+  unlikeComment,
+  deleteComment,
   CommentResponse,
 } from "@/app/services/comments/commentService";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
 import EditNewsModal from "@/app/components/admin/news/EditNewsModal";
 import DeleteNewsModal from "@/app/components/admin/news/DeleteNewsModal";
+import DeleteCommentModal from "@/app/components/comments/DeleteCommentModal";
 import { getMe } from "@/app/services/auth/authService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
 
@@ -58,6 +67,16 @@ export default function NewsDetailPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [currentUser, setCurrentUser] = useState<ProfileResponse | null>(null);
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+  const [replies, setReplies] = useState<Record<number, CommentResponse[]>>({});
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyTexts, setReplyTexts] = useState<Record<number, string>>({});
+  const [submittingReply, setSubmittingReply] = useState<Record<number, boolean>>({});
+  const [likingComment, setLikingComment] = useState<Record<number, boolean>>({});
+  const [loadingReplies, setLoadingReplies] = useState<Record<number, boolean>>({});
+  const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<{ id: number; content: string } | null>(null);
+  const [deletingComment, setDeletingComment] = useState(false);
 
   const loadNewsDetails = async () => {
     if (!newsId) return;
@@ -282,6 +301,206 @@ export default function NewsDetailPage() {
     loadNewsDetails();
   };
 
+  const handleLikeComment = async (commentId: number, parentCommentId?: number | null) => {
+    if (!isAuthenticated || !news || likingComment[commentId]) return;
+
+    setLikingComment((prev) => ({ ...prev, [commentId]: true }));
+    try {
+      let comment: any = null;
+      let wasLiked = false;
+
+      // Verifica se é uma resposta (tem parent_comment_id) ou um comentário principal
+      if (parentCommentId) {
+        // É uma resposta
+        const replyList = replies[parentCommentId] || [];
+        comment = replyList.find((r) => r.id === commentId);
+        wasLiked = comment?.likes.user_liked || false;
+
+        if (wasLiked) {
+          await unlikeComment(commentId);
+          setReplies((prev) => ({
+            ...prev,
+            [parentCommentId]: (prev[parentCommentId] || []).map((r) =>
+              r.id === commentId
+                ? {
+                    ...r,
+                    likes: {
+                      count: r.likes.count - 1,
+                      user_liked: false,
+                    },
+                  }
+                : r
+            ),
+          }));
+        } else {
+          await likeComment(commentId);
+          setReplies((prev) => ({
+            ...prev,
+            [parentCommentId]: (prev[parentCommentId] || []).map((r) =>
+              r.id === commentId
+                ? {
+                    ...r,
+                    likes: {
+                      count: r.likes.count + 1,
+                      user_liked: true,
+                    },
+                  }
+                : r
+            ),
+          }));
+        }
+      } else {
+        // É um comentário principal
+        comment = news.comments.find((c) => c.id === commentId);
+        if (!comment) return;
+        wasLiked = comment.likes.user_liked;
+
+        if (wasLiked) {
+          await unlikeComment(commentId);
+          setNews({
+            ...news,
+            comments: news.comments.map((c) =>
+              c.id === commentId
+                ? {
+                    ...c,
+                    likes: {
+                      count: c.likes.count - 1,
+                      user_liked: false,
+                    },
+                  }
+                : c
+            ),
+          });
+        } else {
+          await likeComment(commentId);
+          setNews({
+            ...news,
+            comments: news.comments.map((c) =>
+              c.id === commentId
+                ? {
+                    ...c,
+                    likes: {
+                      count: c.likes.count + 1,
+                      user_liked: true,
+                    },
+                  }
+                : c
+            ),
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error("Erro ao curtir comentário", error);
+      showToast("Erro ao processar curtida", "error");
+    } finally {
+      setLikingComment((prev) => ({ ...prev, [commentId]: false }));
+    }
+  };
+
+  const toggleReplies = async (commentId: number) => {
+    const isExpanded = expandedComments.has(commentId);
+    
+    if (isExpanded) {
+      // Fechar respostas
+      setExpandedComments((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(commentId);
+        return newSet;
+      });
+    } else {
+      // Abrir e carregar respostas
+      setExpandedComments((prev) => new Set(prev).add(commentId));
+      
+      if (!replies[commentId]) {
+        setLoadingReplies((prev) => ({ ...prev, [commentId]: true }));
+        try {
+          const fetchedReplies = await listReplies(newsId, commentId);
+          setReplies((prev) => ({ ...prev, [commentId]: fetchedReplies }));
+        } catch (error) {
+          console.error("Erro ao carregar respostas", error);
+          showToast("Erro ao carregar respostas", "error");
+        } finally {
+          setLoadingReplies((prev) => ({ ...prev, [commentId]: false }));
+        }
+      }
+    }
+  };
+
+  const handleReply = async (commentId: number) => {
+    if (!isAuthenticated || !replyTexts[commentId]?.trim() || submittingReply[commentId] || !news) return;
+
+    setSubmittingReply((prev) => ({ ...prev, [commentId]: true }));
+    try {
+      const newReply = await createReply(newsId, commentId, replyTexts[commentId].trim());
+      
+      // Atualiza as respostas localmente
+      setReplies((prev) => ({
+        ...prev,
+        [commentId]: [...(prev[commentId] || []), newReply],
+      }));
+
+      // Atualiza o contador de respostas no comentário principal
+      setNews({
+        ...news,
+        comments: news.comments.map((c) =>
+          c.id === commentId
+            ? { ...c, replies_count: c.replies_count + 1 }
+            : c
+        ),
+      });
+
+      setReplyTexts((prev) => {
+        const newTexts = { ...prev };
+        delete newTexts[commentId];
+        return newTexts;
+      });
+      setReplyingTo(null);
+      showToast("Resposta adicionada!", "success");
+      
+      // Recarrega as respostas do servidor
+      try {
+        const fetchedReplies = await listReplies(newsId, commentId);
+        setReplies((prev) => ({ ...prev, [commentId]: fetchedReplies }));
+      } catch (syncError) {
+        console.error("Erro ao sincronizar respostas", syncError);
+      }
+    } catch (error: any) {
+      console.error("Erro ao responder", error);
+      const message =
+        error.response?.data?.detail || "Erro ao adicionar resposta";
+      showToast(message, "error");
+    } finally {
+      setSubmittingReply((prev) => ({ ...prev, [commentId]: false }));
+    }
+  };
+
+  const handleDeleteCommentClick = (commentId: number, commentContent: string) => {
+    setCommentToDelete({ id: commentId, content: commentContent });
+    setDeleteCommentModalOpen(true);
+  };
+
+  const handleDeleteCommentConfirm = async () => {
+    if (!commentToDelete || !news) return;
+
+    setDeletingComment(true);
+    try {
+      await deleteComment(commentToDelete.id);
+      showToast("Comentário excluído com sucesso!", "success");
+      setDeleteCommentModalOpen(false);
+      setCommentToDelete(null);
+      
+      // Recarrega os comentários
+      await loadNewsDetails();
+    } catch (error: any) {
+      console.error("Erro ao excluir comentário", error);
+      const message = error.response?.data?.detail || "Erro ao excluir comentário";
+      showToast(message, "error");
+      throw error; // Re-throw para o modal tratar
+    } finally {
+      setDeletingComment(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -423,8 +642,7 @@ export default function NewsDetailPage() {
             alt={news.title}
             sx={{
               width: "100%",
-              height: "auto",
-              maxHeight: "500px",
+              aspectRatio: "1 / 1",
               objectFit: "cover",
               display: "block",
             }}
@@ -546,16 +764,258 @@ export default function NewsDetailPage() {
                           {comment.content}
                         </Typography>
                       </Paper>
-                      <Typography
-                        fontSize={11}
-                        sx={{
-                          color: "rgba(255,255,255,0.5)",
-                          mt: 0.5,
-                          ml: 1,
-                        }}
-                      >
-                        {formatDate(comment.created_at)}
-                      </Typography>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5, ml: 1 }}>
+                        <Typography
+                          fontSize={11}
+                          sx={{
+                            color: "rgba(255,255,255,0.5)",
+                          }}
+                        >
+                          {formatDate(comment.created_at)}
+                        </Typography>
+                        {/* Botões de ação */}
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 1 }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleLikeComment(comment.id)}
+                            disabled={!isAuthenticated || likingComment[comment.id]}
+                            sx={{
+                              color: comment.likes.user_liked ? "#ff3040" : "rgba(255,255,255,0.5)",
+                              padding: "4px",
+                            }}
+                          >
+                            <FavoriteIcon fontSize="small" />
+                          </IconButton>
+                          {comment.likes.count > 0 && (
+                            <Typography
+                              fontSize={11}
+                              sx={{ color: "rgba(255,255,255,0.5)", mr: 1 }}
+                            >
+                              {comment.likes.count}
+                            </Typography>
+                          )}
+                          <IconButton
+                            size="small"
+                            onClick={() => setReplyingTo(comment.id)}
+                            disabled={!isAuthenticated}
+                            sx={{
+                              color: "rgba(255,255,255,0.5)",
+                              padding: "4px",
+                            }}
+                          >
+                            <ReplyIcon fontSize="small" />
+                          </IconButton>
+                          {comment.replies_count > 0 && (
+                            <>
+                              <IconButton
+                                size="small"
+                                onClick={() => toggleReplies(comment.id)}
+                                sx={{
+                                  color: "rgba(255,255,255,0.5)",
+                                  padding: "4px",
+                                }}
+                              >
+                                {expandedComments.has(comment.id) ? (
+                                  <ExpandLessIcon fontSize="small" />
+                                ) : (
+                                  <ExpandMoreIcon fontSize="small" />
+                                )}
+                              </IconButton>
+                              <Typography
+                                fontSize={11}
+                                sx={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}
+                                onClick={() => toggleReplies(comment.id)}
+                              >
+                                {comment.replies_count} {comment.replies_count === 1 ? "resposta" : "respostas"}
+                              </Typography>
+                            </>
+                          )}
+                          {/* Botão de excluir - apenas para admin ou dono do comentário */}
+                          {isAuthenticated && (isAdmin || comment.user.id === currentUser?.id) && (
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteCommentClick(comment.id, comment.content)}
+                              sx={{
+                                color: "rgba(255,255,255,0.5)",
+                                padding: "4px",
+                                ml: 0.5,
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                        </Box>
+                      </Box>
+                      
+                      {/* Campo de resposta */}
+                      {replyingTo === comment.id && isAuthenticated && (
+                        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end", mt: 1, ml: 4 }}>
+                          <Avatar
+                            src={currentUser?.profile_photo || undefined}
+                            sx={{ width: 28, height: 28 }}
+                          >
+                            {currentUser?.name?.[0]?.toUpperCase() || currentUser?.email?.[0]?.toUpperCase() || "U"}
+                          </Avatar>
+                          <TextField
+                            fullWidth
+                            placeholder="Escreva uma resposta..."
+                            value={replyTexts[comment.id] || ""}
+                            onChange={(e) =>
+                              setReplyTexts((prev) => ({
+                                ...prev,
+                                [comment.id]: e.target.value,
+                              }))
+                            }
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleReply(comment.id);
+                              }
+                            }}
+                            multiline
+                            maxRows={3}
+                            disabled={submittingReply[comment.id]}
+                            size="small"
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                backgroundColor: "rgba(255,255,255,0.05)",
+                                color: "#fff",
+                                borderRadius: 2,
+                                "& fieldset": {
+                                  borderColor: "rgba(255,255,255,0.1)",
+                                },
+                                "&:hover fieldset": {
+                                  borderColor: "rgba(255,255,255,0.2)",
+                                },
+                                "&.Mui-focused fieldset": {
+                                  borderColor: "#ffc91f",
+                                },
+                              },
+                              "& .MuiInputBase-input": {
+                                color: "#fff",
+                                fontSize: "13px",
+                                "&::placeholder": {
+                                  color: "rgba(255,255,255,0.5)",
+                                  opacity: 1,
+                                },
+                              },
+                            }}
+                          />
+                          <IconButton
+                            onClick={() => handleReply(comment.id)}
+                            disabled={!replyTexts[comment.id]?.trim() || submittingReply[comment.id]}
+                            sx={{
+                              color: replyTexts[comment.id]?.trim()
+                                ? "#ffc91f"
+                                : "rgba(255,255,255,0.3)",
+                            }}
+                          >
+                            {submittingReply[comment.id] ? (
+                              <CircularProgress size={16} sx={{ color: "#ffc91f" }} />
+                            ) : (
+                              <SendIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              setReplyingTo(null);
+                              setReplyTexts((prev) => {
+                                const newTexts = { ...prev };
+                                delete newTexts[comment.id];
+                                return newTexts;
+                              });
+                            }}
+                            sx={{ color: "rgba(255,255,255,0.5)" }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      )}
+
+                      {/* Lista de respostas */}
+                      {expandedComments.has(comment.id) && (
+                        <Box sx={{ mt: 1, ml: 4, borderLeft: "2px solid rgba(255,255,255,0.1)", pl: 2 }}>
+                          {loadingReplies[comment.id] ? (
+                            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                              <CircularProgress size={20} sx={{ color: "#ffc91f" }} />
+                            </Box>
+                          ) : (
+                            <>
+                              {(replies[comment.id] || []).map((reply) => (
+                                <Box key={reply.id} sx={{ mb: 1.5 }}>
+                                  <Box sx={{ display: "flex", gap: 1 }}>
+                                    <Avatar
+                                      src={reply.user.profile_photo}
+                                      sx={{ width: 24, height: 24 }}
+                                    >
+                                      {reply.user.name[0]?.toUpperCase()}
+                                    </Avatar>
+                                    <Box flex={1}>
+                                      <Paper
+                                        elevation={0}
+                                        sx={{
+                                          backgroundColor: "rgba(255,255,255,0.03)",
+                                          p: 1,
+                                          borderRadius: 1.5,
+                                        }}
+                                      >
+                                        <Typography
+                                          fontWeight={600}
+                                          fontSize={12}
+                                          sx={{ color: "#fff", mb: 0.3 }}
+                                        >
+                                          {reply.user.name}
+                                        </Typography>
+                                        <Typography
+                                          fontSize={13}
+                                          sx={{ color: "rgba(255,255,255,0.9)" }}
+                                        >
+                                          {reply.content}
+                                        </Typography>
+                                      </Paper>
+                                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.3, ml: 0.5 }}>
+                                        <Typography
+                                          fontSize={10}
+                                          sx={{ color: "rgba(255,255,255,0.4)" }}
+                                        >
+                                          {formatDate(reply.created_at)}
+                                        </Typography>
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleLikeComment(reply.id, comment.id)}
+                                          disabled={!isAuthenticated || likingComment[reply.id]}
+                                          sx={{
+                                            color: reply.likes.user_liked ? "#ff3040" : "rgba(255,255,255,0.4)",
+                                            padding: "2px",
+                                          }}
+                                        >
+                                          <FavoriteIcon fontSize="small" />
+                                        </IconButton>
+                                        {reply.likes.count > 0 && (
+                                          <Typography
+                                            fontSize={10}
+                                            sx={{ color: "rgba(255,255,255,0.4)" }}
+                                          >
+                                            {reply.likes.count}
+                                          </Typography>
+                                        )}
+                                      </Box>
+                                    </Box>
+                                  </Box>
+                                </Box>
+                              ))}
+                              {(!replies[comment.id] || replies[comment.id].length === 0) && (
+                                <Typography
+                                  fontSize={12}
+                                  sx={{ color: "rgba(255,255,255,0.5)", py: 1 }}
+                                >
+                                  Nenhuma resposta ainda
+                                </Typography>
+                              )}
+                            </>
+                          )}
+                        </Box>
+                      )}
                     </Box>
                   </Box>
                 </Box>
@@ -649,6 +1109,20 @@ export default function NewsDetailPage() {
           onClose={() => setDeleteModalOpen(false)}
           onConfirm={handleDelete}
           loading={deleting}
+        />
+      )}
+
+      {/* Modal de Exclusão de Comentário */}
+      {commentToDelete && (
+        <DeleteCommentModal
+          open={deleteCommentModalOpen}
+          commentContent={commentToDelete.content}
+          onClose={() => {
+            setDeleteCommentModalOpen(false);
+            setCommentToDelete(null);
+          }}
+          onConfirm={handleDeleteCommentConfirm}
+          loading={deletingComment}
         />
       )}
     </Box>

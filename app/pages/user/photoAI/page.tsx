@@ -18,6 +18,7 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import { searchFace } from "@/app/services/ai/searchFaceService";
 import { useToast } from "@/app/context/ToastContext";
+import { useRouter } from "next/navigation";
 
 type Stage = "intro" | "camera" | "results";
 
@@ -43,6 +44,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [cart, setCart] = useState<SearchResult[]>([]);
   const { showToast } = useToast();
+  const router = useRouter();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -438,6 +440,12 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
     }
   };
 
+  const handleCartClick = () => {
+    if (cart.length > 0) {
+      router.push(`/pages/user/roulette/${eventId}`);
+    }
+  };
+
   const renderResults = () => (
     <Box px={2} py={3} display="flex" flexDirection="column" gap={2}>
       <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -446,11 +454,15 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
         </Typography>
         <Badge badgeContent={cart.length} color="primary">
           <Box
+            onClick={handleCartClick}
             sx={{
               display: "flex",
               alignItems: "center",
               gap: 1,
               color: "#5a3cf1",
+              cursor: cart.length > 0 ? "pointer" : "default",
+              transition: "opacity 0.2s",
+              "&:hover": cart.length > 0 ? { opacity: 0.8 } : {},
             }}
           >
             <ShoppingCartOutlinedIcon />

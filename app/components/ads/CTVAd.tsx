@@ -11,8 +11,6 @@ export default function CTVAd({
  
 }: CTVAdProps) {
   return (
-   
-
       <Box
         sx={{
           mt: 0.3,
@@ -24,7 +22,7 @@ export default function CTVAd({
           justifyContent: "center",
           fontSize: 14,
           opacity: 0.6,
-          margin: 2,
+          
         }}
       >
         📺 Espaço reservado para CTV Ad (mock)

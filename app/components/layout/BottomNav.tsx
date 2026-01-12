@@ -15,7 +15,7 @@ export default function BottomNav() {
     { path: "/pages/user/home", icon: <HomeIcon /> },
     { path: "/pages/user/liked", icon: <FavoriteIcon /> },
     { path: "/notifications", icon: <NotificationsIcon /> },
-    { path: "/store", icon: <StoreIcon /> },
+    { path: "/pages/user/my-photos", icon: <StoreIcon /> },
   ];
 
   return (

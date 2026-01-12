@@ -154,9 +154,13 @@ export default function NewsFeed({ eventId }: Props) {
               {featured.image_url && (
                 <CardMedia
                   component="img"
-                  height="240"
                   image={featured.image_url}
                   alt={featured.title}
+                  sx={{
+                    width: "100%",
+                    aspectRatio: "1 / 1",
+                    objectFit: "cover",
+                  }}
                 />
               )}
               <CardContent>
@@ -213,7 +217,13 @@ export default function NewsFeed({ eventId }: Props) {
                       component="img"
                       image={item.image_url}
                       alt={item.title}
-                      sx={{ width: 120, borderRadius: 1 }}
+                      sx={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: 1,
+                        objectFit: "cover",
+                        flexShrink: 0,
+                      }}
                     />
                   )}
 
@@ -293,8 +303,11 @@ function FeaturedNewsSkeleton() {
     >
       <Skeleton
         variant="rectangular"
-        height={240}
-        sx={{ bgcolor: "#2a2a2a" }}
+        sx={{
+          width: "100%",
+          aspectRatio: "1 / 1",
+          bgcolor: "#2a2a2a",
+        }}
       />
 
       <CardContent>
@@ -323,8 +336,8 @@ function NewsItemSkeleton() {
     >
       <Skeleton
         variant="rectangular"
-        width={120}
-        height={80}
+        width={100}
+        height={100}
         sx={{ bgcolor: "#2a2a2a", borderRadius: 1 }}
       />
 

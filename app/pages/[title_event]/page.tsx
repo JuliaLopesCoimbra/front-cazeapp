@@ -7,6 +7,8 @@ import { Button, Box } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import MapIcon from "@mui/icons-material/Map";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { getEvents, EventResponse } from "../../services/events/eventService";
 import EventIndisponivel from "../../components/event/EventIndisponivel";
 import { formatEventDates } from "../../utils/eventDateFormatter";
@@ -235,6 +237,76 @@ export default function EventPage() {
           )}
         </Box>
 
+        {/* MAPA DO EVENTO */}
+        {event.image_map && (
+          <Box
+            sx={{
+              maxWidth: 700,
+              width: "100%",
+             
+              padding: "20px",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+              <MapIcon style={{ color: "yellow" }} />
+              <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
+                Mapa do Evento
+              </h3>
+            </Box>
+            <Image
+              src={event.image_map}
+              alt="Mapa do Evento"
+              width={700}
+              height={400}
+              style={{
+                borderRadius: 12,
+                width: "100%",
+                height: "auto",
+                objectFit: "contain",
+              }}
+            />
+          </Box>
+        )}
+
+        {/* LINE UP / PROGRAMAÇÃO */}
+        {event.line_up && (
+          <Box
+            sx={{
+              maxWidth: 700,
+              width: "100%",
+             
+              padding: "20px",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+              <MusicNoteIcon style={{ color: "yellow" }} />
+              <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
+                Programação (Line Up)
+              </h3>
+            </Box>
+            <Box
+              sx={{
+                backgroundColor: "rgba(255,255,255,0.1)",
+                borderRadius: 2,
+                padding: 3,
+                color: "white",
+              }}
+            >
+              <pre
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  lineHeight: 1.8,
+                  whiteSpace: "pre-wrap",
+                  fontFamily: "inherit",
+                }}
+              >
+                {event.line_up}
+              </pre>
+            </Box>
+          </Box>
+        )}
+
         <Button
           onClick={() => router.push("/comprar")}
           sx={{
@@ -246,6 +318,7 @@ export default function EventPage() {
             borderRadius: "30px",
             textTransform: "none",
             fontSize: 16,
+            marginBottom: 3,
             boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
             "&:hover": {
               backgroundColor: "#FFC400",

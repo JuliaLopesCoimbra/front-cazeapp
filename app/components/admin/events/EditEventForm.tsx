@@ -35,6 +35,9 @@ export default function EditEventForm({
   const [endDate, setEndDate] = useState("");
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [imageMap, setImageMap] = useState<File | null>(null);
+  const [previewMap, setPreviewMap] = useState<string | null>(null);
+  const [lineUp, setLineUp] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(true);
   const { showToast } = useToast();
@@ -68,6 +71,14 @@ export default function EditEventForm({
         if (event.banner_image) {
           setPreview(event.banner_image);
         }
+        
+        if (event.image_map) {
+          setPreviewMap(event.image_map);
+        }
+        
+        if (event.line_up) {
+          setLineUp(event.line_up);
+        }
       } catch (err) {
         showToast("Erro ao carregar evento", "error");
         router.back();
@@ -86,6 +97,18 @@ export default function EditEventForm({
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleMapImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageMap(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewMap(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -129,6 +152,8 @@ export default function EditEventForm({
         start_date: startDate,
         end_date: endDate,
         banner_image: bannerImage || undefined,
+        image_map: imageMap || undefined,
+        line_up: lineUp.trim() || undefined,
       };
 
       await updateEvent(eventId, data);
@@ -436,6 +461,85 @@ export default function EditEventForm({
               />
             )}
           </Box>
+
+          <Box>
+            <Typography variant="body2" sx={{ mb: 1, color: "rgba(255,255,255,0.7)" }}>
+              Mapa do Evento
+            </Typography>
+            <input
+              accept="image/*"
+              style={{ display: "none" }}
+              id="map-image-upload-edit"
+              type="file"
+              onChange={handleMapImageChange}
+              disabled={loading}
+            />
+            <label htmlFor="map-image-upload-edit">
+              <Button
+                variant="outlined"
+                component="span"
+                disabled={loading}
+                fullWidth
+                sx={{
+                  borderColor: "rgba(255,255,255,0.2)",
+                  color: "#fff",
+                  py: 1.5,
+                  "&:hover": {
+                    borderColor: "#ffc91f",
+                    backgroundColor: "rgba(255,201,31,0.1)",
+                  },
+                }}
+              >
+                {previewMap ? "Alterar Mapa" : "Trocar Mapa (Opcional)"}
+              </Button>
+            </label>
+            {previewMap && (
+              <Box
+                component="img"
+                src={previewMap}
+                alt="Preview Mapa"
+                sx={{
+                  mt: 2,
+                  maxWidth: "100%",
+                  maxHeight: 200,
+                  objectFit: "contain",
+                  borderRadius: 2,
+                }}
+              />
+            )}
+          </Box>
+
+          <TextField
+            fullWidth
+            label="Line Up (Programação do Show)"
+            value={lineUp}
+            onChange={(e) => setLineUp(e.target.value)}
+            multiline
+            rows={6}
+            disabled={loading}
+            placeholder="Ex: 20:00 - Artista A&#10;21:30 - Artista B&#10;23:00 - Artista C"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: "#fff",
+                "& fieldset": {
+                  borderColor: "rgba(255,255,255,0.1)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255,255,255,0.2)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ffc91f",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255,255,255,0.7)",
+                "&.Mui-focused": {
+                  color: "#ffc91f",
+                },
+              },
+            }}
+          />
         </Paper>
 
         <Box display="flex" gap={2} mt={2}>

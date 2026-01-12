@@ -1,0 +1,128 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Card,
+  CardMedia,
+  Grid,
+  Skeleton,
+} from "@mui/material";
+import {
+  getMyPurchasedPhotos,
+  PurchasedPhoto,
+} from "@/app/services/myPhotos/myPhotosService";
+
+export default function MyPhotos() {
+  const [photos, setPhotos] = useState<PurchasedPhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPhotos = async () => {
+      try {
+        const data = await getMyPurchasedPhotos();
+        setPhotos(data);
+      } catch (err) {
+        console.error("Erro ao carregar fotos compradas", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPhotos();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box padding={2}>
+        <Grid container spacing={2}>
+          {[1, 2, 3].map((item) => (
+            <Grid item xs={6} key={item}>
+              <Skeleton
+                variant="rectangular"
+                width="100%"
+                height={200}
+                sx={{ borderRadius: 2 }}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
+  }
+
+  if (photos.length === 0) {
+    return (
+      <Box padding={2} textAlign="center">
+        <Typography variant="h6" sx={{ color: "#fff", marginBottom: 1 }}>
+          Nenhuma foto comprada
+        </Typography>
+        <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)" }}>
+          Você ainda não comprou nenhuma foto.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box padding={2}>
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ color: "#fff", marginBottom: 2 }}
+      >
+        Minhas Fotos Compradas
+      </Typography>
+
+      <Grid container spacing={2}>
+        {photos.map((photo) => (
+          <Grid item xs={6} key={photo.id}>
+            <Card
+              sx={{
+                backgroundColor: "transparent",
+                boxShadow: "none",
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <CardMedia
+                component="img"
+                image={photo.image_url}
+                alt={`Foto ${photo.id}`}
+                sx={{
+                  width: "100%",
+                  aspectRatio: "1 / 1",
+                  objectFit: "cover",
+                  borderRadius: 2,
+                }}
+              />
+              {photo.event_name && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "rgba(255,255,255,0.7)",
+                    display: "block",
+                    marginTop: 1,
+                  }}
+                >
+                  {photo.event_name}
+                </Typography>
+              )}
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "rgba(255,255,255,0.5)",
+                  display: "block",
+                }}
+              >
+                {new Date(photo.purchased_at).toLocaleDateString("pt-BR")}
+              </Typography>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
+}
+
