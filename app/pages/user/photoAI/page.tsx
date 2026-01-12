@@ -7,11 +7,17 @@ import {
   CircularProgress,
   Typography,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Badge,
 } from "@mui/material";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import { searchFace } from "@/app/services/ai/searchFaceService";
+import { useToast } from "@/app/context/ToastContext";
 
 type Stage = "intro" | "camera" | "results";
 
@@ -32,6 +38,11 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchMessage, setSearchMessage] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<SearchResult | null>(null);
+  const [cartModalOpen, setCartModalOpen] = useState(false);
+  const [cart, setCart] = useState<SearchResult[]>([]);
+  const { showToast } = useToast();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -119,12 +130,33 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   };
 
   const handleSearch = async () => {
+    // Inicia a contagem regressiva
+    setCountdown(3);
+    
+    // Contagem regressiva: 3, 2, 1
+    let currentCount = 3;
+    const countdownInterval = setInterval(() => {
+      currentCount -= 1;
+      if (currentCount > 0) {
+        setCountdown(currentCount);
+      } else {
+        clearInterval(countdownInterval);
+        setCountdown(null);
+        // Inicia a busca após a contagem
+        performSearch();
+      }
+    }, 1000);
+  };
+
+  const performSearch = async () => {
     setIsUploading(true);
     setSearchMessage(null);
+    
     try {
       const file = await capturePhoto();
       if (!file) {
         setSearchMessage("Não foi possível capturar a foto. Tente novamente.");
+        setIsUploading(false);
         return;
       }
 
@@ -165,7 +197,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   };
 
   const renderIntro = () => (
-    <Box px={2} py={3} display="flex" flexDirection="column" gap={3}>
+    <Box px={4} py={3} display="flex" flexDirection="column" gap={3}>
       <Box
         sx={{
           background: "#e9e8ed",
@@ -226,42 +258,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   );
 
   const renderCamera = () => (
-    <Box px={2} py={3} display="flex" flexDirection="column" gap={3}>
-      <Box
-        sx={{
-          background: "#e9e8ed",
-          borderRadius: 2,
-          display: "flex",
-          gap: 2,
-          p: 2,
-          alignItems: "center",
-        }}
-      >
-        <Box
-          sx={{
-            width: 54,
-            height: 54,
-            borderRadius: "50%",
-            border: "2px solid #4c36e0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#4c36e0",
-            background: "#fff",
-          }}
-        >
-          <CameraAltOutlinedIcon fontSize="medium" />
-        </Box>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={600}>
-            Encontre suas fotos por reconhecimento facial.
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Tire uma selfie ou envie sua foto de rosto.
-          </Typography>
-        </Box>
-      </Box>
-
+    <Box px={2} py={2} display="flex" flexDirection="column" gap={2} sx={{ height: "100vh", overflow: "auto" }}>
       <Box
         sx={{
           width: "100%",
@@ -276,6 +273,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
           alignItems: "center",
           justifyContent: "center",
           position: "relative",
+          flexShrink: 0,
         }}
       >
         <video
@@ -295,35 +293,150 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
             objectFit: "cover",
           }}
         />
+        
+        {/* Overlay para contagem regressiva */}
+        {countdown !== null && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10,
+            }}
+          >
+            <Typography
+              variant="h1"
+              sx={{
+                color: "white",
+                fontSize: 120,
+                fontWeight: 700,
+              }}
+            >
+              {countdown}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Overlay para loading */}
+        {isUploading && countdown === null && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10,
+              gap: 2,
+            }}
+          >
+            <CircularProgress size={60} sx={{ color: "#fff" }} />
+            <Typography
+              variant="h6"
+              sx={{
+                color: "white",
+                fontWeight: 600,
+              }}
+            >
+              Buscando fotos...
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       {cameraError && (
-        <Typography color="error" textAlign="center">
+        <Typography color="error" textAlign="center" sx={{ fontSize: 14 }}>
           {cameraError}
         </Typography>
       )}
 
-      <Stack gap={1}>
-        <Typography variant="body1" textAlign="center" fontWeight={600}>
-          Primeiro, posicione seu rosto dentro da marcação.
-        </Typography>
-        <Typography variant="body2" textAlign="center" color="text.secondary">
-          Clique em “Pronto” quando estiver enquadrado.
-        </Typography>
-      </Stack>
+      {countdown === null && !isUploading && (
+        <>
+          <Stack gap={0.5} sx={{ px: 1, py: 1 }}>
+            <Typography 
+              variant="body1" 
+              textAlign="center" 
+              fontWeight={700}
+              sx={{ 
+                color: "white",
+                fontSize: 16,
+                lineHeight: 1.4,
+              }}
+            >
+              Primeiro, posicione seu rosto dentro da marcação.
+            </Typography>
+            <Typography 
+              variant="body2" 
+              textAlign="center" 
+              sx={{ 
+                color: "#666",
+                fontSize: 14,
+                lineHeight: 1.4,
+              }}
+            >
+              Clique em "Pronto" quando estiver enquadrado.
+            </Typography>
+          </Stack>
 
-      <Button
-        variant="contained"
-        size="large"
-        fullWidth
-        sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5 }}
-        onClick={handleSearch}
-        disabled={isUploading}
-      >
-        {isUploading ? <CircularProgress size={22} color="inherit" /> : "Pronto"}
-      </Button>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5 }}
+            onClick={handleSearch}
+            disabled={isUploading || countdown !== null}
+          >
+            Pronto
+          </Button>
+        </>
+      )}
+
+      {countdown !== null && (
+        <Typography
+          variant="body1"
+          textAlign="center"
+          sx={{
+            color: "white",
+            fontSize: 16,
+            fontWeight: 600,
+          }}
+        >
+          Preparando captura...
+        </Typography>
+      )}
     </Box>
   );
+
+  const handlePhotoClick = (photo: SearchResult) => {
+    setSelectedPhoto(photo);
+    setCartModalOpen(true);
+  };
+
+  const handleAddToCart = () => {
+    if (selectedPhoto) {
+      // Verifica se a foto já está no carrinho
+      const isAlreadyInCart = cart.some(item => item.url === selectedPhoto.url);
+      if (!isAlreadyInCart) {
+        setCart([...cart, selectedPhoto]);
+        showToast("Foto adicionada ao carrinho!", "success");
+      } else {
+        showToast("Esta foto já está no carrinho", "info");
+      }
+      setCartModalOpen(false);
+      setSelectedPhoto(null);
+    }
+  };
 
   const renderResults = () => (
     <Box px={2} py={3} display="flex" flexDirection="column" gap={2}>
@@ -331,16 +444,18 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
         <Typography variant="h6" fontWeight={700}>
           Minhas fotos
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            color: "#5a3cf1",
-          }}
-        >
-          <ShoppingCartOutlinedIcon />
-        </Box>
+        <Badge badgeContent={cart.length} color="primary">
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              color: "#5a3cf1",
+            }}
+          >
+            <ShoppingCartOutlinedIcon />
+          </Box>
+        </Badge>
       </Box>
 
       {searchMessage && (
@@ -364,11 +479,18 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
           {results.map((item, idx) => (
             <Box
               key={idx}
+              onClick={() => handlePhotoClick(item)}
               sx={{
                 borderRadius: 2,
                 overflow: "hidden",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 background: "#fff",
+                cursor: "pointer",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "scale(1.02)",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
+                },
               }}
             >
               <img
@@ -402,7 +524,142 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
     </Box>
   );
 
-  if (stage === "camera") return renderCamera();
-  if (stage === "results") return renderResults();
-  return renderIntro();
+  return (
+    <>
+      {stage === "camera" && renderCamera()}
+      {stage === "results" && renderResults()}
+      {stage === "intro" && renderIntro()}
+
+      {/* Modal para adicionar foto ao carrinho */}
+      <Dialog
+        open={cartModalOpen}
+        onClose={() => {
+          setCartModalOpen(false);
+          setSelectedPhoto(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          backdrop: {},
+          root: {
+            sx: {
+              zIndex: 1600,
+            },
+          },
+        }}
+        PaperProps={{
+          sx: {
+            backgroundColor: "#1a1a1a",
+            color: "#fff",
+            borderRadius: 2,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            pb: 2,
+            fontWeight: 600,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              backgroundColor: "rgba(90, 60, 241, 0.1)",
+            }}
+          >
+            <ShoppingCartOutlinedIcon sx={{ color: "#5a3cf1", fontSize: 28 }} />
+          </Box>
+          Adicionar ao Carrinho
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 3, pb: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              alignItems: "center",
+            }}
+          >
+            {selectedPhoto && (
+              <Box
+                sx={{
+                  width: "100%",
+                  maxWidth: 300,
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                }}
+              >
+                <img
+                  src={selectedPhoto.url}
+                  alt={selectedPhoto.label || "Foto selecionada"}
+                  style={{
+                    width: "100%",
+                    display: "block",
+                    aspectRatio: "3 / 4",
+                    objectFit: "cover",
+                  }}
+                />
+              </Box>
+            )}
+            <Typography
+              variant="body1"
+              textAlign="center"
+              sx={{ color: "rgba(255,255,255,0.9)" }}
+            >
+              Adicionar essa foto no carrinho?
+            </Typography>
+          </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+            p: 2,
+            gap: 1,
+          }}
+        >
+          <Button
+            onClick={() => {
+              setCartModalOpen(false);
+              setSelectedPhoto(null);
+            }}
+            sx={{
+              color: "rgba(255,255,255,0.7)",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.05)",
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleAddToCart}
+            variant="contained"
+            startIcon={<ShoppingCartOutlinedIcon />}
+            sx={{
+              backgroundColor: "#5a3cf1",
+              color: "#fff",
+              fontWeight: 600,
+              "&:hover": {
+                backgroundColor: "#4a2cd0",
+              },
+            }}
+          >
+            Adicionar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
 }

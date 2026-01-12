@@ -22,16 +22,25 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {
   getNewsDetails,
   NewsDetailsResponse,
-  likeNews,
-  unlikeNews,
-  createComment,
   deleteNews,
 } from "@/app/services/news/newsService";
+import {
+  likeNews,
+  unlikeNews,
+  getLikesCount,
+  didILike,
+} from "@/app/services/likes/likeService";
+import {
+  createComment,
+  listComments,
+  CommentResponse,
+} from "@/app/services/comments/commentService";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
 import EditNewsModal from "@/app/components/admin/news/EditNewsModal";
 import DeleteNewsModal from "@/app/components/admin/news/DeleteNewsModal";
 import { getMe } from "@/app/services/auth/authService";
+import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
 
 export default function NewsDetailPage() {
   const params = useParams();
@@ -48,20 +57,26 @@ export default function NewsDetailPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [currentUser, setCurrentUser] = useState<ProfileResponse | null>(null);
 
   const loadNewsDetails = async () => {
     if (!newsId) return;
 
     setLoading(true);
     try {
+      // getNewsDetails já retorna as informações de likes do backend
       const data = await getNewsDetails(newsId);
       setNews(data);
 
-      // Verifica se o usuário atual é o autor
-      if (isAuthenticated && isAdmin) {
+      // Busca dados do usuário logado
+      if (isAuthenticated) {
         try {
-          const me = await getMe();
-          setIsAuthor(data.author?.id === me.id);
+          const profile = await getProfile();
+          setCurrentUser(profile);
+          if (isAdmin) {
+            const me = await getMe();
+            setIsAuthor(data.author?.id === me.id);
+          }
         } catch (error) {
           console.error("Erro ao buscar dados do usuário", error);
         }
@@ -89,16 +104,43 @@ export default function NewsDetailPage() {
       const wasLiked = news.likes.user_liked;
 
       if (wasLiked) {
+        // Remove o like usando o endpoint específico
         await unlikeNews(newsId);
+        
+        // Atualiza o estado otimisticamente
         setNews({
           ...news,
           likes: {
-            count: news.likes.count - 1,
+            count: Math.max(0, news.likes.count - 1),
             user_liked: false,
           },
         });
+        
+        // Sincroniza com o servidor usando os endpoints de likes
+        try {
+          const [likeStatus, likesCount] = await Promise.all([
+            didILike(newsId),
+            getLikesCount(newsId),
+          ]);
+          setNews((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  likes: {
+                    count: likesCount.count,
+                    user_liked: likeStatus.liked,
+                  },
+                }
+              : null
+          );
+        } catch (syncError) {
+          console.error("Erro ao sincronizar likes", syncError);
+        }
       } else {
+        // Adiciona o like usando o endpoint específico
         await likeNews(newsId);
+        
+        // Atualiza o estado otimisticamente
         setNews({
           ...news,
           likes: {
@@ -106,10 +148,52 @@ export default function NewsDetailPage() {
             user_liked: true,
           },
         });
+        
+        // Sincroniza com o servidor usando os endpoints de likes
+        try {
+          const [likeStatus, likesCount] = await Promise.all([
+            didILike(newsId),
+            getLikesCount(newsId),
+          ]);
+          setNews((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  likes: {
+                    count: likesCount.count,
+                    user_liked: likeStatus.liked,
+                  },
+                }
+              : null
+          );
+        } catch (syncError) {
+          console.error("Erro ao sincronizar likes", syncError);
+        }
       }
     } catch (error) {
       console.error("Erro ao curtir/descurtir", error);
       showToast("Erro ao processar curtida", "error");
+      
+      // Recarrega os dados em caso de erro usando os endpoints de likes
+      try {
+        const [likeStatus, likesCount] = await Promise.all([
+          didILike(newsId),
+          getLikesCount(newsId),
+        ]);
+        setNews((prev) =>
+          prev
+            ? {
+                ...prev,
+                likes: {
+                  count: likesCount.count,
+                  user_liked: likeStatus.liked,
+                },
+              }
+            : null
+        );
+      } catch (reloadError) {
+        console.error("Erro ao recarregar likes", reloadError);
+      }
     } finally {
       setLiking(false);
     }
@@ -120,9 +204,10 @@ export default function NewsDetailPage() {
 
     setSubmittingComment(true);
     try {
+      // Cria o comentário usando o endpoint específico
       const newComment = await createComment(newsId, commentText.trim());
       
-      // Atualiza os comentários localmente
+      // Atualiza os comentários localmente (otimisticamente)
       setNews({
         ...news,
         comments: [newComment, ...news.comments],
@@ -131,11 +216,44 @@ export default function NewsDetailPage() {
 
       setCommentText("");
       showToast("Comentário adicionado!", "success");
+      
+      // Recarrega os comentários do servidor para garantir sincronização
+      try {
+        const comments = await listComments(newsId);
+        setNews((prev) =>
+          prev
+            ? {
+                ...prev,
+                comments: comments,
+                comments_count: comments.length,
+              }
+            : null
+        );
+      } catch (syncError) {
+        console.error("Erro ao sincronizar comentários", syncError);
+        // Se falhar na sincronização, mantém o comentário adicionado otimisticamente
+      }
     } catch (error: any) {
       console.error("Erro ao comentar", error);
       const message =
         error.response?.data?.detail || "Erro ao adicionar comentário";
       showToast(message, "error");
+      
+      // Em caso de erro, recarrega os comentários do servidor
+      try {
+        const comments = await listComments(newsId);
+        setNews((prev) =>
+          prev
+            ? {
+                ...prev,
+                comments: comments,
+                comments_count: comments.length,
+              }
+            : null
+        );
+      } catch (reloadError) {
+        console.error("Erro ao recarregar comentários", reloadError);
+      }
     } finally {
       setSubmittingComment(false);
     }
@@ -249,7 +367,7 @@ export default function NewsDetailPage() {
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <IconButton
-            onClick={() => router.push("/pages/user/home")}
+            onClick={() => router.back()}
             size="small"
             sx={{ color: "#fff" }}
           >
@@ -447,8 +565,11 @@ export default function NewsDetailPage() {
             {/* Campo de comentário */}
             {isAuthenticated && (
               <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
-                <Avatar sx={{ width: 36, height: 36 }}>
-                  U
+                <Avatar
+                  src={currentUser?.profile_photo || undefined}
+                  sx={{ width: 36, height: 36 }}
+                >
+                  {currentUser?.name?.[0]?.toUpperCase() || currentUser?.email?.[0]?.toUpperCase() || "U"}
                 </Avatar>
                 <TextField
                   fullWidth

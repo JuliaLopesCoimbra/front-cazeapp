@@ -12,8 +12,8 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   const items = [
-    { path: "/home", icon: <HomeIcon /> },
-    { path: "/liked", icon: <FavoriteIcon /> },
+    { path: "/pages/user/home", icon: <HomeIcon /> },
+    { path: "/pages/user/liked", icon: <FavoriteIcon /> },
     { path: "/notifications", icon: <NotificationsIcon /> },
     { path: "/store", icon: <StoreIcon /> },
   ];
