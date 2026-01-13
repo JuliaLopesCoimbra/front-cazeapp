@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Button, Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography, IconButton } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import EmailIcon from "@mui/icons-material/Email";
@@ -124,34 +124,22 @@ export default function ProfilePage() {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          padding: "16px 32px",
+          padding: "16px",
         }}
       >
-        {/* LOGO + TEXTO */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Image
-            src="/logo/logo-n1.png"
-            alt="Camarote N1"
-            width={60}
-            height={60}
-          />
-          <strong style={{ fontSize: 22, color: "white" }}>Camarote N1</strong>
-        </div>
-        <Button
+        {/* SETA DE VOLTAR */}
+        <IconButton
           onClick={() => router.back()}
           sx={{
             color: "white",
-            textTransform: "none",
-            fontWeight: 500,
             "&:hover": {
               backgroundColor: "rgba(255,255,255,0.1)",
             },
           }}
         >
-          Voltar
-        </Button>
+          <ArrowBackIosIcon />
+        </IconButton>
       </div>
 
       <main

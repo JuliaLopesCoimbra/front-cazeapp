@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Skeleton } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 
@@ -38,13 +38,39 @@ function PrizeWinContent() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
+          backgroundImage: "url(/background/prize.png)",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          px: 2,
+          py: 4,
         }}
       >
-        <Typography color="white">Carregando...</Typography>
+        {/* Skeleton da imagem do prêmio */}
+        <Skeleton
+          variant="rectangular"
+          width={80}
+          height={80}
+          sx={{
+            borderRadius: 2,
+            marginTop: "470px",
+            mb: 3,
+            bgcolor: "rgba(255,255,255,0.2)",
+          }}
+        />
+
+        {/* Skeleton do botão */}
+        <Skeleton
+          variant="rectangular"
+          width={180}
+          height={48}
+          sx={{
+            borderRadius: "14px",
+            marginTop: "10px",
+            bgcolor: "rgba(255,204,1,0.4)",
+          }}
+        />
       </Box>
     );
   }

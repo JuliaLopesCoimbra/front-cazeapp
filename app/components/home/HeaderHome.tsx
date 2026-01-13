@@ -2,6 +2,7 @@
 
 import { Box, Typography, Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getMe, MeResponse } from "@/app/services/auth/authService";
 import { EventResponse } from "@/app/services/events/eventService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
@@ -20,6 +21,7 @@ export default function HomeHeader({
   onSelectEvent,
   currentEvent,
 }: Props) {
+  const router = useRouter();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
 
   useEffect(() => {
@@ -30,11 +32,6 @@ export default function HomeHeader({
       });
   }, []);
 
-  // const today = new Date().toLocaleDateString("pt-BR", {
-  //   weekday: "long",
-  //   day: "numeric",
-  //   month: "long",
-  // });
 
   if (!profile) return null;
 
@@ -72,10 +69,16 @@ export default function HomeHeader({
         {/* DIREITA: AVATAR */}
         <Avatar 
           src={profile.profile_photo || undefined} 
+          onClick={() => router.push("/pages/user/profile")}
           sx={{ 
             width: 40, 
             height: 40,
             border: "2px solid #FFD600",
+            cursor: "pointer",
+            transition: "transform 0.2s",
+            "&:hover": {
+              transform: "scale(1.05)",
+            },
           }}
         >
           {!profile.profile_photo && (profile.name?.[0] || profile.email[0]).toUpperCase()}

@@ -279,6 +279,7 @@ export default function HamburgerMenu({
             >
               {events.map((event) => {
                 const isInactive = !event.is_active;
+                const isSelected = currentEvent?.id === event.id;
 
                 return (
                   <Box
@@ -289,6 +290,10 @@ export default function HamburgerMenu({
                       cursor:
                         isInactive && !isAdmin ? "not-allowed" : "pointer",
                       pointerEvents: isInactive && !isAdmin ? "none" : "auto",
+                      border: isSelected ? "3px solid #ffc91f" : "none",
+                      borderRadius: 2,
+                      padding: isSelected ? "3px" : 0,
+                      transition: "all 0.2s",
                     }}
                   >
                     {/* IMAGEM */}
