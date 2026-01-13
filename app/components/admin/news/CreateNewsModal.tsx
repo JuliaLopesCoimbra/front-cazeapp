@@ -72,7 +72,7 @@ export default function CreateNewsModal({
       await createNews(eventId, {
         title: title.trim(),
         content: content.trim(),
-        image,
+        images: [image],
         event_id: eventId,
       });
 

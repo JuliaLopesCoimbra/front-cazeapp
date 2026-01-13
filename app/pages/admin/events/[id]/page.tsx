@@ -260,7 +260,7 @@ export default function EventDetailsPage() {
               gap: 2,
             }}
           >
-            <Typography variant="h4" fontWeight={700} sx={{ color: "#fff" }}>
+            <Typography  fontWeight={700} sx={{ color: "#fff", fontSize: "1.2rem" }}>
               {event.title}
             </Typography>
 

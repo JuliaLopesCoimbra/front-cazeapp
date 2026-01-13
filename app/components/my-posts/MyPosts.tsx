@@ -134,10 +134,10 @@ export default function MyPosts() {
                 },
               }}
             >
-              {post.image_url && (
+              {post.images && post.images.length > 0 && (
                 <CardMedia
                   component="img"
-                  image={post.image_url}
+                  image={post.images[0].image_url}
                   alt={post.title}
                   sx={{
                     width: 100,

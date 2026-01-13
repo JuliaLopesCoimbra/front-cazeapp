@@ -6,7 +6,6 @@ import {
   Typography,
   Card,
   CardMedia,
-  Grid,
   Skeleton,
 } from "@mui/material";
 import {
@@ -36,18 +35,17 @@ export default function MyPhotos() {
   if (loading) {
     return (
       <Box padding={2}>
-        <Grid container spacing={2}>
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
           {[1, 2, 3].map((item) => (
-            <Grid item xs={6} key={item}>
-              <Skeleton
-                variant="rectangular"
-                width="100%"
-                height={200}
-                sx={{ borderRadius: 2 }}
-              />
-            </Grid>
+            <Skeleton
+              key={item}
+              variant="rectangular"
+              width="100%"
+              height={200}
+              sx={{ borderRadius: 2 }}
+            />
           ))}
-        </Grid>
+        </Box>
       </Box>
     );
   }
@@ -75,53 +73,52 @@ export default function MyPhotos() {
         Minhas Fotos Compradas
       </Typography>
 
-      <Grid container spacing={2}>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
         {photos.map((photo) => (
-          <Grid item xs={6} key={photo.id}>
-            <Card
+          <Card
+            key={photo.id}
+            sx={{
+              backgroundColor: "transparent",
+              boxShadow: "none",
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
+            <CardMedia
+              component="img"
+              image={photo.image_url}
+              alt={`Foto ${photo.id}`}
               sx={{
-                backgroundColor: "transparent",
-                boxShadow: "none",
+                width: "100%",
+                aspectRatio: "1 / 1",
+                objectFit: "cover",
                 borderRadius: 2,
-                overflow: "hidden",
               }}
-            >
-              <CardMedia
-                component="img"
-                image={photo.image_url}
-                alt={`Foto ${photo.id}`}
-                sx={{
-                  width: "100%",
-                  aspectRatio: "1 / 1",
-                  objectFit: "cover",
-                  borderRadius: 2,
-                }}
-              />
-              {photo.event_name && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "rgba(255,255,255,0.7)",
-                    display: "block",
-                    marginTop: 1,
-                  }}
-                >
-                  {photo.event_name}
-                </Typography>
-              )}
+            />
+            {photo.event_name && (
               <Typography
                 variant="caption"
                 sx={{
-                  color: "rgba(255,255,255,0.5)",
+                  color: "rgba(255,255,255,0.7)",
                   display: "block",
+                  marginTop: 1,
                 }}
               >
-                {new Date(photo.purchased_at).toLocaleDateString("pt-BR")}
+                {photo.event_name}
               </Typography>
-            </Card>
-          </Grid>
+            )}
+            <Typography
+              variant="caption"
+              sx={{
+                color: "rgba(255,255,255,0.5)",
+                display: "block",
+              }}
+            >
+              {new Date(photo.purchased_at).toLocaleDateString("pt-BR")}
+            </Typography>
+          </Card>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 }

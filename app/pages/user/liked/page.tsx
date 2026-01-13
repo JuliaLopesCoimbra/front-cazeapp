@@ -267,10 +267,10 @@ export default function LikedPostsPage() {
                     }}
                   >
                     {/* Foto pequena */}
-                    {item.image_url ? (
+                    {item.images && item.images.length > 0 ? (
                       <CardMedia
                         component="img"
-                        image={item.image_url}
+                        image={item.images[0].image_url}
                         alt={item.title}
                         sx={{
                           width: 80,

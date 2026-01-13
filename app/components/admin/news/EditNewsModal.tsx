@@ -43,7 +43,7 @@ export default function EditNewsModal({
     if (news && open) {
       setTitle(news.title);
       setContent(news.content);
-      setImagePreview(news.image_url || null);
+      setImagePreview(news.images[0]?.image_url || null);
       setImage(null); // Reset da nova imagem
     }
   }, [news, open]);
@@ -81,7 +81,7 @@ export default function EditNewsModal({
       await updateNews(eventId, news.id, {
         title: title.trim(),
         content: content.trim(),
-        image: image || undefined,
+        images: image ? [image] : undefined,
       });
 
       showToast("Notícia atualizada com sucesso!", "success");

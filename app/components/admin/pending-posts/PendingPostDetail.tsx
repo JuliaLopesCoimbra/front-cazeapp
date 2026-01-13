@@ -162,10 +162,10 @@ export default function PendingPostDetail({
           ) : news ? (
             <Box>
               {/* Imagem */}
-              {news.image_url && (
+              {news.images && news.images.length > 0 && (
                 <Box
                   component="img"
-                  src={news.image_url}
+                  src={news.images[0].image_url}
                   alt={news.title}
                   sx={{
                     width: "100%",

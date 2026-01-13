@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
@@ -17,7 +17,7 @@ import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { getEvents, EventResponse } from "@/app/services/events/eventService";
 
-export default function EditNewsPage() {
+function EditNewsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { canCreatePost } = useAuth();
@@ -612,3 +612,27 @@ export default function EditNewsPage() {
   );
 }
 
+export default function EditNewsPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            minHeight: "100vh",
+            backgroundImage: "url(/background/dashboard.png)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress sx={{ color: "#ffcc01" }} />
+        </Box>
+      }
+    >
+      <EditNewsPageContent />
+    </Suspense>
+  );
+}
