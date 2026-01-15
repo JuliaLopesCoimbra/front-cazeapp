@@ -145,7 +145,7 @@ export const inviteSubadmin = async (data: InviteAdminData): Promise<void> => {
       err.response?.data?.detail ||
       err.response?.data?.message ||
       err.message ||
-      "Erro ao convidar subadmin";
+      "Erro ao convidar admin";
 
     throw new Error(message);
   }

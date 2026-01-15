@@ -58,10 +58,10 @@ export default function InviteModal({
           <PersonAdd sx={{ fontSize: 28, color: "#ffcc01" }} />
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Convidar {inviteType === "subadmin" ? "Subadmin" : "Colunista"}
+              Convidar {inviteType === "subadmin" ? "Administrador" : "Colunista"}
             </Typography>
             <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.6)" }}>
-              Envie um convite por e-mail para adicionar um novo {inviteType === "subadmin" ? "subadmin" : "colunista"}
+              Envie um convite por e-mail para adicionar um novo {inviteType === "subadmin" ? "administrador" : "colunista"}
             </Typography>
           </Box>
         </Box>

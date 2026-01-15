@@ -91,7 +91,7 @@ export default function SubadminsTab({ onAddClick, onRevoke, onReactivate, refre
         >
           {searchTerm
             ? `Nenhum administrador encontrado para "${searchTerm}"`
-            : 'Nenhum subadmin cadastrado. Clique em "Adicionar Subadmin" para começar.'}
+            : 'Nenhum administrador cadastrado. Clique em "Adicionar Administrador para começar.'}
         </Alert>
       ) : (
         <>
