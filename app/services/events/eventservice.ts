@@ -1,7 +1,15 @@
 import api from "../auth/axiosConfig";
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Função helper para obter a URL da API de forma segura
+const getApiUrl = (): string => {
+  if (typeof window !== "undefined") {
+    // Cliente: usa a variável de ambiente
+    return process.env.NEXT_PUBLIC_API_URL || "";
+  }
+  // Servidor: usa a variável de ambiente
+  return process.env.NEXT_PUBLIC_API_URL || "";
+};
 
 export interface EventResponse {
   id: number;
@@ -52,6 +60,8 @@ export const getEvents = async (): Promise<EventResponse[]> => {
 
 // Função pública para buscar eventos sem autenticação
 export const getPublicEvents = async (): Promise<EventResponse[]> => {
+  const API_URL = getApiUrl();
+  
   if (!API_URL) {
     throw new Error("NEXT_PUBLIC_API_URL não está configurada");
   }
