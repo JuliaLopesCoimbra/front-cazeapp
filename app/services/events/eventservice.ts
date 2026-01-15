@@ -172,3 +172,17 @@ export const getPendingPostsCount = async (eventId: number): Promise<{ event_id:
   const response = await api.get<{ event_id: number; pending_count: number }>(`/admin/events/${eventId}/pending-posts-count`);
   return response.data;
 };
+
+// Export default para garantir compatibilidade com diferentes sistemas de módulos
+export default {
+  getEvents,
+  getPublicEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  activateEvent,
+  deactivateEvent,
+  updatePostApprovalRequirement,
+  getPendingPostsCount,
+};

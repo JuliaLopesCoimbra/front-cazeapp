@@ -10,8 +10,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Turbopack usa a configuração do tsconfig.json para aliases
-  // Não é necessário configurar webpack no Next.js 16 com Turbopack
+  // Configuração do Turbopack para resolução de módulos
+  turbopack: {
+    resolveAlias: {
+      "@": "./",
+    },
+    resolveExtensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+  },
 };
 
 export default nextConfig;
