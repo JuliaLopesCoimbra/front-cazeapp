@@ -5,7 +5,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getMe, MeResponse } from "@/app/services/auth/authService";
-import { EventResponse } from "@/app/services/events/eventService";
+import { EventResponse } from "@/app/services/events/eventAppService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
 import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
 

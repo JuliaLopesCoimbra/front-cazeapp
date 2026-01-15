@@ -15,7 +15,7 @@ import {
 import { useRouter } from "next/navigation";
 import { getMyPosts } from "@/app/services/myPosts/myPostsService";
 import { NewsResponse } from "@/app/services/news/newsService";
-import { EventResponse } from "@/app/services/events/eventService";
+import { EventResponse } from "@/app/services/events/eventAppService";
 
 const LIMIT = 10;
 

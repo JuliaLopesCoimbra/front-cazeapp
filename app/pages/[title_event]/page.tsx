@@ -9,7 +9,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapIcon from "@mui/icons-material/Map";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
-import { getEvents, EventResponse } from "../../services/events/eventService";
+import { getEvents, EventResponse } from "../../services/events/eventAppService";
 import EventIndisponivel from "../../components/event/EventIndisponivel";
 import { formatEventDates } from "../../utils/eventDateFormatter";
 

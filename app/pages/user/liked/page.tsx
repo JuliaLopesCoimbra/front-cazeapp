@@ -19,7 +19,7 @@ import { useToast } from "@/app/context/ToastContext";
 import BottomNav from "@/app/components/layout/BottomNav";
 import { CircularProgress } from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
-import { EventResponse, getEvents } from "@/app/services/events/eventService";
+import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 
 const LIMIT = 5;
 

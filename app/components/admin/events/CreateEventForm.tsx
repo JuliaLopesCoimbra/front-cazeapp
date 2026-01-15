@@ -10,7 +10,7 @@ import {
   Paper,
 } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { createEvent, CreateEventData } from "@/app/services/events/eventService";
+import { createEvent, CreateEventData } from "@/app/services/events/eventAppService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 

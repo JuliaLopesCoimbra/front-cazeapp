@@ -1,4 +1,4 @@
-import { EventResponse } from "../services/events/eventService";
+import { EventResponse } from "../services/events/eventAppService";
 
 /**
  * Formata uma data individual

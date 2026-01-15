@@ -7,7 +7,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { useAuth } from "@/app/context/AuthContext";
 import BottomNav from "@/app/components/layout/BottomNav";
 import HomeHeader from "@/app/components/home/HeaderHome";
-import { EventResponse, getEvents } from "@/app/services/events/eventService";
+import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import MyPosts from "@/app/components/my-posts/MyPosts";
 import MyPhotos from "@/app/components/my-photos/MyPhotos";
 import MyPendingPosts from "@/app/components/my-posts/MyPendingPosts";

@@ -30,7 +30,7 @@ import {
   deleteEvent,
   updatePostApprovalRequirement,
   getPendingPostsCount,
-} from "@/app/services/events/eventService";
+} from "@/app/services/events/eventAppService";
 import {
   getSambaSchoolsByEvent,
   SambaSchoolResponse,

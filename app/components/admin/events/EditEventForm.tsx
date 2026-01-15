@@ -15,7 +15,7 @@ import {
   UpdateEventData,
   EventResponse,
   getEventById,
-} from "@/app/services/events/eventService";
+} from "@/app/services/events/eventAppService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button, Box } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { getPublicEvents, EventResponse } from "./services/events/eventService";
+import { getPublicEvents, EventResponse } from "./services/events/eventAppService";
 import EventIndisponivel from "./components/event/EventIndisponivel";
 
 export default function HomePage() {

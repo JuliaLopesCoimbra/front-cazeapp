@@ -15,7 +15,7 @@ import { ArrowBackIos, Close, NavigateBefore, NavigateNext } from "@mui/icons-ma
 import { updateNews, getNewsDetails, NewsDetailsResponse } from "@/app/services/news/newsService";
 import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
-import { getEvents, EventResponse } from "@/app/services/events/eventService";
+import { getEvents, EventResponse } from "@/app/services/events/eventAppService";
 
 function EditNewsPageContent() {
   const router = useRouter();
