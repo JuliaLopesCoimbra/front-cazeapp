@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   images: {
@@ -11,13 +10,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@": path.resolve(__dirname, "./"),
-    };
-    return config;
-  },
+  // Turbopack usa a configuração do tsconfig.json para aliases
+  // Não é necessário configurar webpack no Next.js 16 com Turbopack
 };
 
 export default nextConfig;
