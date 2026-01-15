@@ -52,8 +52,25 @@ export const getEvents = async (): Promise<EventResponse[]> => {
 
 // Função pública para buscar eventos sem autenticação
 export const getPublicEvents = async (): Promise<EventResponse[]> => {
-  const response = await axios.get<EventResponse[]>(`${API_URL}/public/events`);
-  return response.data;
+  if (!API_URL) {
+    throw new Error("NEXT_PUBLIC_API_URL não está configurada");
+  }
+  
+  // Garante que a URL está corretamente formatada (sem barras duplas)
+  const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+  const url = `${baseUrl}/public/events`;
+  
+  try {
+    const response = await axios.get<EventResponse[]>(url);
+    return response.data;
+  } catch (error: any) {
+    console.error("Erro ao buscar eventos públicos:", error);
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("URL tentada:", url);
+    }
+    throw error;
+  }
 };
 
 export const getEventById = async (eventId: number): Promise<EventResponse> => {
