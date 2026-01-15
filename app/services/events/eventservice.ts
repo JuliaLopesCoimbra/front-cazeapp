@@ -56,8 +56,17 @@ export const getPublicEvents = async (): Promise<EventResponse[]> => {
     throw new Error("NEXT_PUBLIC_API_URL não está configurada");
   }
   
-  // Garante que a URL está corretamente formatada (sem barras duplas)
-  const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+  // Garante que a URL tem o protocolo (http:// ou https://)
+  let baseUrl = API_URL.trim();
+  
+  // Se não começar com http:// ou https://, adiciona http://
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = `http://${baseUrl}`;
+  }
+  
+  // Remove barra final se existir
+  baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  
   const url = `${baseUrl}/public/events`;
   
   try {
