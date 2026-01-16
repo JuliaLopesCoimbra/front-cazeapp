@@ -9,7 +9,7 @@ import {
   IconButton,
   InputAdornment,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, CheckCircle } from "@mui/icons-material";
 import axios from "axios";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
@@ -127,8 +127,8 @@ function ResetPasswordContent() {
           helperText={
             new_password.length > 0 && passwordErrors.length > 0
               ? passwordErrors.join(", ")
-              : new_password.length > 0
-              ? "A senha deve ter: mínimo 8 caracteres, 1 maiúscula, 1 minúscula, 1 número e 1 caractere especial"
+              : new_password.length > 0 && passwordErrors.length === 0
+              ? "Senha aceita"
               : ""
           }
           InputLabelProps={{
@@ -141,11 +141,17 @@ function ResetPasswordContent() {
             },
           }}
           FormHelperTextProps={{
-            sx: { color: "#ff6b6b", fontSize: "0.75rem" },
+            sx: {
+              color: new_password.length > 0 && passwordErrors.length === 0 ? "#4caf50" : "#ff6b6b",
+              fontSize: "0.75rem",
+            },
           }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
+                {new_password.length > 0 && passwordErrors.length === 0 ? (
+                  <CheckCircle sx={{ color: "#4caf50", mr: 1 }} />
+                ) : null}
                 <IconButton
                   onClick={() => setShowPassword((prev) => !prev)}
                   edge="end"
@@ -162,13 +168,28 @@ function ResetPasswordContent() {
               color: "#fff",
               borderRadius: "14px",
               "& fieldset": {
-                borderColor: new_password.length > 0 && passwordErrors.length > 0 ? "#ff6b6b" : "#fff",
+                borderColor:
+                  new_password.length > 0 && passwordErrors.length === 0
+                    ? "#4caf50"
+                    : new_password.length > 0 && passwordErrors.length > 0
+                    ? "#ff6b6b"
+                    : "#fff",
               },
               "&:hover fieldset": {
-                borderColor: new_password.length > 0 && passwordErrors.length > 0 ? "#ff6b6b" : "#fff",
+                borderColor:
+                  new_password.length > 0 && passwordErrors.length === 0
+                    ? "#4caf50"
+                    : new_password.length > 0 && passwordErrors.length > 0
+                    ? "#ff6b6b"
+                    : "#fff",
               },
               "&.Mui-focused fieldset": {
-                borderColor: new_password.length > 0 && passwordErrors.length > 0 ? "#ff6b6b" : "#fff",
+                borderColor:
+                  new_password.length > 0 && passwordErrors.length === 0
+                    ? "#4caf50"
+                    : new_password.length > 0 && passwordErrors.length > 0
+                    ? "#ff6b6b"
+                    : "#fff",
               },
               "&.Mui-error fieldset": {
                 borderColor: "#ff6b6b",

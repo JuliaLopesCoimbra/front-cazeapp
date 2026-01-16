@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Button,
   TextField,
@@ -9,7 +9,7 @@ import {
   IconButton,
   Container,
 } from "@mui/material";
-import { Visibility, VisibilityOff, ArrowBack } from "@mui/icons-material";
+import { Visibility, VisibilityOff, ArrowBack, CheckCircle } from "@mui/icons-material";
 import { registerUser } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import RegisterSuccess from "@/app/components/auth/RegisterSuccess";
@@ -64,59 +64,22 @@ const router = useRouter();
     }
   };
 
-  const inputStyle = {
-    "& .MuiOutlinedInput-root": {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      color: "#fff",
-      borderRadius: "14px",
-      transition: "all 0.3s ease",
+  const isPasswordValid = password.length > 0 && passwordErrors.length === 0;
+  const isPasswordError = password.length > 0 && passwordErrors.length > 0;
 
-      "& fieldset": {
-        borderColor: "rgba(255, 255, 255, 0.3)",
-        borderWidth: "1.5px",
-      },
-      "&:hover fieldset": {
-        borderColor: "rgba(255, 255, 255, 0.5)",
-      },
-      "&.Mui-focused": {
-        backgroundColor: "rgba(255, 255, 255, 0.15)",
-        "& fieldset": {
-          borderColor: "#fff",
-          borderWidth: "2px",
-        },
-      },
-      "& input:-webkit-autofill": {
-        WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.1) inset",
-        WebkitTextFillColor: "#fff",
-        transition: "background-color 9999s ease-in-out 0s",
-      },
-      "& input:-webkit-autofill:hover": {
-        WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
-        WebkitTextFillColor: "#fff",
-      },
-      "& input:-webkit-autofill:focus": {
-        WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
-        WebkitTextFillColor: "#fff",
-      },
-    },
-  };
+  const passwordFieldBorderColor = useMemo(() => {
+    if (isPasswordValid) return "#4caf50";
+    if (isPasswordError) return "#ff6b6b";
+    return "rgba(255, 255, 255, 0.3)";
+  }, [isPasswordValid, isPasswordError]);
 
-
-  const labelStyle = {
-    shrink: true,
-    sx: {
-      color: "#fff",
-      fontSize: 13,
-      transform: "translate(14px, -9px) scale(1)",
-      "&.Mui-focused": { color: "#fff" },
-    },
-  };
-if (registered) {
-  return <RegisterSuccess email={email} />;
-}
+  if (registered) {
+    return <RegisterSuccess email={email} />;
+  }
 
   return (
     <Box
+      suppressHydrationWarning
       sx={{
         minHeight: "100vh",
         backgroundImage: "url(/background/dashboard.png)",
@@ -204,8 +167,50 @@ if (registered) {
             label="Nome"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            InputLabelProps={labelStyle}
-            sx={inputStyle}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                color: "#fff",
+                fontSize: 13,
+                transform: "translate(14px, -9px) scale(1)",
+                "&.Mui-focused": { color: "#fff" },
+              },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                color: "#fff",
+                borderRadius: "14px",
+                transition: "all 0.3s ease",
+                "& fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.3)",
+                  borderWidth: "1.5px",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.5)",
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  "& fieldset": {
+                    borderColor: "#fff",
+                    borderWidth: "2px",
+                  },
+                },
+                "& input:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.1) inset",
+                  WebkitTextFillColor: "#fff",
+                  transition: "background-color 9999s ease-in-out 0s",
+                },
+                "& input:-webkit-autofill:hover": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
+                  WebkitTextFillColor: "#fff",
+                },
+                "& input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
+                  WebkitTextFillColor: "#fff",
+                },
+              },
+            }}
           />
 
           <TextField
@@ -214,8 +219,51 @@ if (registered) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            InputLabelProps={labelStyle}
-            sx={{ mt: 3, ...inputStyle }}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                color: "#fff",
+                fontSize: 13,
+                transform: "translate(14px, -9px) scale(1)",
+                "&.Mui-focused": { color: "#fff" },
+              },
+            }}
+            sx={{
+              mt: 3,
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                color: "#fff",
+                borderRadius: "14px",
+                transition: "all 0.3s ease",
+                "& fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.3)",
+                  borderWidth: "1.5px",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.5)",
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  "& fieldset": {
+                    borderColor: "#fff",
+                    borderWidth: "2px",
+                  },
+                },
+                "& input:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.1) inset",
+                  WebkitTextFillColor: "#fff",
+                  transition: "background-color 9999s ease-in-out 0s",
+                },
+                "& input:-webkit-autofill:hover": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
+                  WebkitTextFillColor: "#fff",
+                },
+                "& input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
+                  WebkitTextFillColor: "#fff",
+                },
+              },
+            }}
           />
 
           <TextField
@@ -228,18 +276,29 @@ if (registered) {
               const validation = validatePassword(e.target.value);
               setPasswordErrors(validation.errors);
             }}
-            error={password.length > 0 && passwordErrors.length > 0}
+            error={isPasswordError}
             helperText={
-              password.length > 0 && passwordErrors.length > 0
+              isPasswordError
                 ? passwordErrors.join(", ")
-                : password.length > 0
-                ? "A senha deve ter: mínimo 8 caracteres, 1 maiúscula, 1 minúscula, 1 número e 1 caractere especial"
+                : isPasswordValid
+                ? "Senha aceita"
                 : ""
             }
-            InputLabelProps={labelStyle}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                color: "#fff",
+                fontSize: 13,
+                transform: "translate(14px, -9px) scale(1)",
+                "&.Mui-focused": { color: "#fff" },
+              },
+            }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
+                  {isPasswordValid ? (
+                    <CheckCircle sx={{ color: "#4caf50", mr: 1 }} />
+                  ) : null}
                   <IconButton
                     onClick={() => setShowPassword((prev) => !prev)}
                     edge="end"
@@ -250,8 +309,48 @@ if (registered) {
                 </InputAdornment>
               ),
             }}
-            FormHelperTextProps={{ sx: { color: "#ff6b6b", fontSize: "0.75rem" } }}
-            sx={{ mt: 3, ...inputStyle }}
+            FormHelperTextProps={{
+              sx: {
+                color: isPasswordValid ? "#4caf50" : "#ff6b6b",
+                fontSize: "0.75rem",
+              },
+            }}
+            sx={{
+              mt: 3,
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                color: "#fff",
+                borderRadius: "14px",
+                transition: "all 0.3s ease",
+                "& fieldset": {
+                  borderColor: passwordFieldBorderColor,
+                  borderWidth: "1.5px",
+                },
+                "&:hover fieldset": {
+                  borderColor: passwordFieldBorderColor,
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  "& fieldset": {
+                    borderColor: passwordFieldBorderColor,
+                    borderWidth: "2px",
+                  },
+                },
+                "& input:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.1) inset",
+                  WebkitTextFillColor: "#fff",
+                  transition: "background-color 9999s ease-in-out 0s",
+                },
+                "& input:-webkit-autofill:hover": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
+                  WebkitTextFillColor: "#fff",
+                },
+                "& input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
+                  WebkitTextFillColor: "#fff",
+                },
+              },
+            }}
           />
 
           <TextField
@@ -264,9 +363,52 @@ if (registered) {
             helperText={
               confirmPassword && !passwordsMatch ? "As senhas não conferem" : ""
             }
-            InputLabelProps={labelStyle}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                color: "#fff",
+                fontSize: 13,
+                transform: "translate(14px, -9px) scale(1)",
+                "&.Mui-focused": { color: "#fff" },
+              },
+            }}
             FormHelperTextProps={{ sx: { color: "#ff6b6b" } }}
-            sx={{ mt: 3, ...inputStyle }}
+            sx={{
+              mt: 3,
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                color: "#fff",
+                borderRadius: "14px",
+                transition: "all 0.3s ease",
+                "& fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.3)",
+                  borderWidth: "1.5px",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.5)",
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  "& fieldset": {
+                    borderColor: "#fff",
+                    borderWidth: "2px",
+                  },
+                },
+                "& input:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.1) inset",
+                  WebkitTextFillColor: "#fff",
+                  transition: "background-color 9999s ease-in-out 0s",
+                },
+                "& input:-webkit-autofill:hover": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
+                  WebkitTextFillColor: "#fff",
+                },
+                "& input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset",
+                  WebkitTextFillColor: "#fff",
+                },
+              },
+            }}
           />
 
           <Button

@@ -178,8 +178,14 @@ const LoginForm: React.FC = () => {
           label="Endereço de e-mail"
           variant="outlined"
           margin="normal"
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          inputProps={{
+            autoCapitalize: "none",
+            autoCorrect: "off",
+            spellCheck: false,
+          }}
           InputLabelProps={{
             shrink: true, // ✅ fixa o label em cima
             sx: {
@@ -290,7 +296,7 @@ const LoginForm: React.FC = () => {
         />
 
         {/* Checkbox para manter-me conectado */}
-        <FormControlLabel
+        {/* <FormControlLabel
           control={
             <Checkbox
               checked={keepMeLoggedIn}
@@ -313,7 +319,7 @@ const LoginForm: React.FC = () => {
               fontSize: 14, // opcional
             },
           }}
-        />
+        /> */}
 
         <Button
           fullWidth
