@@ -14,6 +14,7 @@ import EventDetails from "@/app/components/home/EventDetails";
 import { useAuth } from "@/app/context/AuthContext";
 import PhotoAI from "@/app/components/home/PhotoAI";
 import Enredo from "@/app/components/home/Enredo";
+import EventIndisponivel from "@/app/components/event/EventIndisponivel";
 
 const STORAGE_KEY = "selectedEventId";
 
@@ -23,6 +24,7 @@ const Home: React.FC = () => {
   >("home");
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [eventsLoaded, setEventsLoaded] = useState(false);
   const currentEventIdRef = useRef<number | null>(null);
   const router = useRouter();
   const { isAdmin, authReady } = useAuth();
@@ -42,6 +44,8 @@ const Home: React.FC = () => {
       try {
         const data = await getEvents();
         setEvents(data);
+        setEventsLoaded(true);
+        
         if (data.length > 0) {
           // Tenta carregar o evento salvo do localStorage
           const savedEventId = localStorage.getItem(STORAGE_KEY);
@@ -57,6 +61,7 @@ const Home: React.FC = () => {
                   currentEventIdRef.current = activeEvent.id;
                   localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
                 } else {
+                  // Não há eventos ativos, mas mantém o evento salvo para admin
                   setCurrentEvent(savedEvent);
                   currentEventIdRef.current = savedEvent.id;
                 }
@@ -70,11 +75,17 @@ const Home: React.FC = () => {
           }
           // Se não encontrou evento salvo ou não existe mais, usa o primeiro ativo ou o primeiro disponível
           const activeEvent = data.find((event) => event.is_active);
-          const selectedEvent = activeEvent || data[0];
-          setCurrentEvent(selectedEvent);
-          currentEventIdRef.current = selectedEvent.id;
+          const selectedEvent = activeEvent || (isAdmin ? data[0] : null);
+          if (selectedEvent) {
+            setCurrentEvent(selectedEvent);
+            currentEventIdRef.current = selectedEvent.id;
+          }
+        } else {
+          // Não há eventos disponíveis
+          setEventsLoaded(true);
         }
       } catch {
+        setEventsLoaded(true);
         router.push("/");
       }
     };
@@ -98,6 +109,10 @@ const Home: React.FC = () => {
               setCurrentEvent(activeEvent);
               currentEventIdRef.current = activeEvent.id;
               localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
+            } else {
+              // Não há eventos ativos disponíveis para usuário não-admin
+              setCurrentEvent(null);
+              currentEventIdRef.current = null;
             }
           } else if (updatedEvent) {
             // Atualiza o evento atual com os dados mais recentes
@@ -111,6 +126,14 @@ const Home: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [router, isAdmin, authReady]);
+
+  // Se não há eventos ativos disponíveis para usuário não-admin, mostra Evento Indisponível
+  if (eventsLoaded && !currentEvent) {
+    const hasActiveEvents = events.some((event) => event.is_active);
+    if (!isAdmin && !hasActiveEvents) {
+      return <EventIndisponivel />;
+    }
+  }
 
   if (!currentEvent) {
     return (

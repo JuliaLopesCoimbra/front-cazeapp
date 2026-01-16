@@ -48,7 +48,7 @@ export default function EventIndisponivel() {
         O evento que você procurou não está mais disponível ou não está ativo no momento.
       </Typography>
       <Button
-        onClick={() => router.push("/")}
+        onClick={() => router.push("/pages/user/home")}
         sx={{
           backgroundColor: "#FFD600",
           color: "#000",
