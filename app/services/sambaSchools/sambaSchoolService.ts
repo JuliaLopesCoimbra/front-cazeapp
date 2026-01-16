@@ -24,10 +24,13 @@ export interface UpdateSambaSchoolData {
 }
 
 export const getSambaSchoolsByEvent = async (
-  eventId: number
+  eventId: number,
+  limit: number = 5,
+  offset: number = 0
 ): Promise<SambaSchoolResponse[]> => {
   const response = await api.get<SambaSchoolResponse[]>(
-    `/admin/events/${eventId}/samba-schools`
+    `/admin/events/${eventId}/samba-schools`,
+    { params: { limit, offset } }
   );
   return response.data;
 };

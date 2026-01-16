@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Box } from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
@@ -26,14 +26,54 @@ const Home: React.FC = () => {
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const currentEventIdRef = useRef<number | null>(null);
+  const isCheckingRef = useRef(false); // Previne múltiplas verificações simultâneas
   const router = useRouter();
   const { isAdmin, authReady } = useAuth();
+
+  // Função para verificar e atualizar eventos
+  const checkAndUpdateEvents = useCallback(async () => {
+    // Previne múltiplas chamadas simultâneas
+    if (isCheckingRef.current) return;
+    isCheckingRef.current = true;
+
+    try {
+      const data = await getEvents();
+      setEvents(data);
+      
+      const currentId = currentEventIdRef.current;
+      if (currentId) {
+        const updatedEvent = data.find((event) => event.id === currentId);
+        // Se o evento atual foi desativado e o usuário NÃO é admin/subadmin, troca para um ativo
+        if (updatedEvent && !updatedEvent.is_active && !isAdmin) {
+          const activeEvent = data.find((event) => event.is_active);
+          if (activeEvent) {
+            setCurrentEvent(activeEvent);
+            currentEventIdRef.current = activeEvent.id;
+            localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
+          } else {
+            // Não há eventos ativos disponíveis para usuário não-admin
+            setCurrentEvent(null);
+            currentEventIdRef.current = null;
+          }
+        } else if (updatedEvent) {
+          // Atualiza o evento atual com os dados mais recentes
+          setCurrentEvent(updatedEvent);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao verificar eventos:", error);
+    } finally {
+      isCheckingRef.current = false;
+    }
+  }, [isAdmin]);
 
   // Função para salvar evento selecionado no localStorage
   const handleSelectEvent = (event: EventResponse) => {
     localStorage.setItem(STORAGE_KEY, event.id.toString());
     setCurrentEvent(event);
     currentEventIdRef.current = event.id;
+    // Verifica eventos quando o usuário troca manualmente
+    checkAndUpdateEvents();
   };
 
   useEffect(() => {
@@ -92,40 +132,28 @@ const Home: React.FC = () => {
 
     fetchEvents();
 
-    // Verifica periodicamente se o evento atual foi desativado
-    // Admin/subadmin podem permanecer em eventos desativados
-    const interval = setInterval(async () => {
-      try {
-        const data = await getEvents();
-        setEvents(data);
-        
-        const currentId = currentEventIdRef.current;
-        if (currentId) {
-          const updatedEvent = data.find((event) => event.id === currentId);
-          // Se o evento atual foi desativado e o usuário NÃO é admin/subadmin, troca para um ativo
-          if (updatedEvent && !updatedEvent.is_active && !isAdmin) {
-            const activeEvent = data.find((event) => event.is_active);
-            if (activeEvent) {
-              setCurrentEvent(activeEvent);
-              currentEventIdRef.current = activeEvent.id;
-              localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
-            } else {
-              // Não há eventos ativos disponíveis para usuário não-admin
-              setCurrentEvent(null);
-              currentEventIdRef.current = null;
-            }
-          } else if (updatedEvent) {
-            // Atualiza o evento atual com os dados mais recentes
-            setCurrentEvent(updatedEvent);
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao verificar eventos:", error);
+    // Verifica quando a página/aba fica visível
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkAndUpdateEvents();
       }
-    }, 5000); // Verifica a cada 5 segundos
+    };
 
-    return () => clearInterval(interval);
-  }, [router, isAdmin, authReady]);
+    // Verifica quando a janela ganha foco
+    const handleFocus = () => {
+      checkAndUpdateEvents();
+    };
+
+    // Adiciona listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [router, isAdmin, authReady, checkAndUpdateEvents]);
 
   // Se não há eventos ativos disponíveis para usuário não-admin, mostra Evento Indisponível
   if (eventsLoaded && !currentEvent) {

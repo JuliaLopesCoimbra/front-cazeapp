@@ -44,13 +44,15 @@ export interface UpdateEventData {
   line_up?: string;
 }
 
-export const getEvents = async (): Promise<EventResponse[]> => {
-  const response = await api.get<EventResponse[]>("/admin/events");
+export const getEvents = async (limit: number = 5, offset: number = 0): Promise<EventResponse[]> => {
+  const response = await api.get<EventResponse[]>("/admin/events", {
+    params: { limit, offset }
+  });
   return response.data;
 };
 
 // Função pública para buscar eventos sem autenticação
-export const getPublicEvents = async (): Promise<EventResponse[]> => {
+export const getPublicEvents = async (limit: number = 5, offset: number = 0): Promise<EventResponse[]> => {
   const API_URL = getApiUrl();
   
   if (!API_URL) {
@@ -60,7 +62,9 @@ export const getPublicEvents = async (): Promise<EventResponse[]> => {
   const url = `${API_URL}/public/events`;
   
   try {
-    const response = await axios.get<EventResponse[]>(url);
+    const response = await axios.get<EventResponse[]>(url, {
+      params: { limit, offset }
+    });
     return response.data;
   } catch (error: any) {
     console.error("Erro ao buscar eventos públicos:", error);

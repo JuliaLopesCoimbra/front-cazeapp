@@ -27,10 +27,13 @@ export interface UpdateMusicLyricsData {
 }
 
 export const getMusicLyricsByEvent = async (
-  eventId: number
+  eventId: number,
+  limit: number = 5,
+  offset: number = 0
 ): Promise<MusicLyricsResponse[]> => {
   const response = await api.get<MusicLyricsResponse[]>(
-    `/admin/events/${eventId}/music-lyrics`
+    `/admin/events/${eventId}/music-lyrics`,
+    { params: { limit, offset } }
   );
   return response.data;
 };

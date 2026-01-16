@@ -63,6 +63,13 @@ export default function EventDetailsPage() {
   const [pendingCount, setPendingCount] = useState<number | null>(null);
   const [loadingPendingCount, setLoadingPendingCount] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [schoolsOffset, setSchoolsOffset] = useState(0);
+  const [musicsOffset, setMusicsOffset] = useState(0);
+  const [hasMoreSchools, setHasMoreSchools] = useState(false);
+  const [hasMoreMusics, setHasMoreMusics] = useState(false);
+  const [loadingMoreSchools, setLoadingMoreSchools] = useState(false);
+  const [loadingMoreMusics, setLoadingMoreMusics] = useState(false);
+  const ITEMS_PER_PAGE = 5;
 
   useEffect(() => {
     if (!eventId || isDeleted) return;
@@ -114,11 +121,15 @@ export default function EventDetailsPage() {
       try {
         setLoadingSchools(true);
         const [schoolsData, musicsData] = await Promise.all([
-          getSambaSchoolsByEvent(eventId),
-          getMusicLyricsByEvent(eventId),
+          getSambaSchoolsByEvent(eventId, ITEMS_PER_PAGE, 0),
+          getMusicLyricsByEvent(eventId, ITEMS_PER_PAGE, 0),
         ]);
         setSchools(schoolsData);
         setMusics(musicsData);
+        setSchoolsOffset(schoolsData.length);
+        setMusicsOffset(musicsData.length);
+        setHasMoreSchools(schoolsData.length >= ITEMS_PER_PAGE);
+        setHasMoreMusics(musicsData.length >= ITEMS_PER_PAGE);
       } catch (err) {
         console.error("Erro ao buscar escolas e músicas", err);
       } finally {
@@ -128,6 +139,48 @@ export default function EventDetailsPage() {
 
     fetchSchoolsAndMusics();
   }, [eventId]);
+
+  const loadMoreSchools = async () => {
+    if (!eventId || loadingMoreSchools || !hasMoreSchools) return;
+
+    setLoadingMoreSchools(true);
+    try {
+      const newSchools = await getSambaSchoolsByEvent(eventId, ITEMS_PER_PAGE, schoolsOffset);
+      if (newSchools.length > 0) {
+        setSchools((prev) => [...prev, ...newSchools]);
+        setSchoolsOffset((prev) => prev + newSchools.length);
+        setHasMoreSchools(newSchools.length >= ITEMS_PER_PAGE);
+      } else {
+        setHasMoreSchools(false);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar mais escolas", err);
+      showToast("Erro ao carregar mais escolas", "error");
+    } finally {
+      setLoadingMoreSchools(false);
+    }
+  };
+
+  const loadMoreMusics = async () => {
+    if (!eventId || loadingMoreMusics || !hasMoreMusics) return;
+
+    setLoadingMoreMusics(true);
+    try {
+      const newMusics = await getMusicLyricsByEvent(eventId, ITEMS_PER_PAGE, musicsOffset);
+      if (newMusics.length > 0) {
+        setMusics((prev) => [...prev, ...newMusics]);
+        setMusicsOffset((prev) => prev + newMusics.length);
+        setHasMoreMusics(newMusics.length >= ITEMS_PER_PAGE);
+      } else {
+        setHasMoreMusics(false);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar mais músicas", err);
+      showToast("Erro ao carregar mais músicas", "error");
+    } finally {
+      setLoadingMoreMusics(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!event) return;
@@ -682,78 +735,123 @@ export default function EventDetailsPage() {
               </Typography>
             </Paper>
           ) : (
-            musics.map((music) => (
-              <Paper
-                key={music.id}
-                elevation={0}
-                sx={{
-                  backgroundColor: "rgba(0, 0, 0, 0.4)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: 3,
-                  p: 2,
-                  mb: 2,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  "&:hover": {
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    transform: "translateY(-2px)",
-                    border: "1px solid rgba(255, 201, 31, 0.3)",
-                  },
-                }}
-                onClick={() =>
-                  router.push(
-                    `/pages/admin/music-lyrics/${eventId}/${music.id}`
-                  )
-                }
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  {music.image_url && (
-                    <Box
-                      component="img"
-                      src={music.image_url}
-                      alt={music.song_name}
-                      sx={{
-                        width: 60,
-                        height: 60,
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  )}
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      variant="h6"
-                      fontWeight={600}
-                      sx={{ color: "#fff", mb: 0.5 }}
-                    >
-                      {music.song_name}
-                    </Typography>
-                    {music.singer && (
+            <>
+              {musics.map((music) => (
+                <Paper
+                  key={music.id}
+                  elevation={0}
+                  sx={{
+                    backgroundColor: "rgba(0, 0, 0, 0.4)",
+                    backdropFilter: "blur(10px)",
+                    borderRadius: 3,
+                    p: 2,
+                    mb: 2,
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    "&:hover": {
+                      backgroundColor: "rgba(0, 0, 0, 0.5)",
+                      transform: "translateY(-2px)",
+                      border: "1px solid rgba(255, 201, 31, 0.3)",
+                    },
+                  }}
+                  onClick={() =>
+                    router.push(
+                      `/pages/admin/music-lyrics/${eventId}/${music.id}`
+                    )
+                  }
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    {music.image_url && (
+                      <Box
+                        component="img"
+                        src={music.image_url}
+                        alt={music.song_name}
+                        sx={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    )}
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="h6"
+                        fontWeight={600}
+                        sx={{ color: "#fff", mb: 0.5 }}
+                      >
+                        {music.song_name}
+                      </Typography>
+                      {music.singer && (
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
+                        >
+                          Cantor: {music.singer}
+                        </Typography>
+                      )}
                       <Typography
                         variant="body2"
-                        sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
+                        sx={{
+                          color: "rgba(255,255,255,0.6)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                        }}
                       >
-                        Cantor: {music.singer}
+                        {music.lyrics}
                       </Typography>
-                    )}
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "rgba(255,255,255,0.6)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                      }}
-                    >
-                      {music.lyrics}
-                    </Typography>
+                    </Box>
                   </Box>
+                </Paper>
+              ))}
+              
+              {/* Botão para carregar mais músicas */}
+              {hasMoreMusics && (
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 2, mb: 2 }}>
+                  <Button
+                    onClick={loadMoreMusics}
+                    disabled={loadingMoreMusics}
+                    variant="outlined"
+                    sx={{
+                      color: "rgba(255,255,255,0.9)",
+                      borderColor: "rgba(255,255,255,0.3)",
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                      backdropFilter: "blur(5px)",
+                      textTransform: "none",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      padding: "8px 24px",
+                      minWidth: "200px",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        borderColor: "rgba(255,255,255,0.5)",
+                        backgroundColor: "rgba(255,255,255,0.1)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      },
+                      "&:disabled": {
+                        color: "rgba(255,255,255,0.5)",
+                        borderColor: "rgba(255,255,255,0.2)",
+                        backgroundColor: "rgba(255,255,255,0.03)",
+                      },
+                    }}
+                  >
+                    {loadingMoreMusics ? (
+                      <>
+                        <CircularProgress size={16} sx={{ color: "#ffc91f", mr: 1 }} />
+                        Carregando...
+                      </>
+                    ) : (
+                      "Carregar mais músicas"
+                    )}
+                  </Button>
                 </Box>
-              </Paper>
-            ))
+              )}
+            </>
           )}
         </Box>
       </Box>

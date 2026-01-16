@@ -85,6 +85,10 @@ export default function NewsDetailPage() {
   const [submittingReply, setSubmittingReply] = useState<Record<number, boolean>>({});
   const [likingComment, setLikingComment] = useState<Record<number, boolean>>({});
   const [loadingReplies, setLoadingReplies] = useState<Record<number, boolean>>({});
+  const [repliesOffset, setRepliesOffset] = useState<Record<number, number>>({});
+  const [hasMoreReplies, setHasMoreReplies] = useState<Record<number, boolean>>({});
+  const [loadingMoreReplies, setLoadingMoreReplies] = useState<Record<number, boolean>>({});
+  const REPLIES_PER_PAGE = 5; // Carrega 5 respostas por vez
   const [deleteCommentModalOpen, setDeleteCommentModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<{ id: number; content: string } | null>(null);
   const [deletingComment, setDeletingComment] = useState(false);
@@ -93,6 +97,10 @@ export default function NewsDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [commentsOffset, setCommentsOffset] = useState(0);
+  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [loadingMoreComments, setLoadingMoreComments] = useState(false);
+  const COMMENTS_PER_PAGE = 20; // Carrega 20 comentários por vez
 
   const loadNewsDetails = async () => {
     if (!newsId) return;
@@ -121,7 +129,27 @@ export default function NewsDetailPage() {
         }
       }
       
+      // Carrega apenas os primeiros comentários se não vierem do backend
+      const initialComments = data.comments || [];
       setNews(data);
+      
+      // Se os comentários vieram do backend, verifica se há mais
+      if (initialComments.length > 0) {
+        setHasMoreComments(data.comments_count > initialComments.length);
+        setCommentsOffset(initialComments.length);
+      } else {
+        // Se não vieram comentários, carrega os primeiros
+        try {
+          const firstComments = await listComments(newsId, COMMENTS_PER_PAGE, 0);
+          setNews((prev) => prev ? { ...prev, comments: firstComments } : null);
+          setHasMoreComments(data.comments_count > firstComments.length);
+          setCommentsOffset(firstComments.length);
+        } catch (error) {
+          console.error("Erro ao carregar comentários iniciais", error);
+          setHasMoreComments(false);
+          setCommentsOffset(0);
+        }
+      }
 
       // Busca dados do usuário logado
       if (isAuthenticated) {
@@ -287,16 +315,18 @@ export default function NewsDetailPage() {
       
       // Recarrega os comentários do servidor para garantir sincronização
       try {
-        const comments = await listComments(newsId);
+        const comments = await listComments(newsId, COMMENTS_PER_PAGE, 0);
         setNews((prev) =>
           prev
             ? {
                 ...prev,
                 comments: comments,
-                comments_count: comments.length,
+                comments_count: prev.comments_count + 1,
               }
             : null
         );
+        setCommentsOffset(comments.length);
+        setHasMoreComments((news.comments_count + 1) > comments.length);
       } catch (syncError) {
         console.error("Erro ao sincronizar comentários", syncError);
         // Se falhar na sincronização, mantém o comentário adicionado otimisticamente
@@ -309,21 +339,52 @@ export default function NewsDetailPage() {
       
       // Em caso de erro, recarrega os comentários do servidor
       try {
-        const comments = await listComments(newsId);
+        const comments = await listComments(newsId, COMMENTS_PER_PAGE, 0);
         setNews((prev) =>
           prev
             ? {
                 ...prev,
                 comments: comments,
-                comments_count: comments.length,
+                comments_count: prev.comments_count || comments.length,
               }
             : null
         );
+        setCommentsOffset(comments.length);
+        setHasMoreComments((news?.comments_count || 0) > comments.length);
       } catch (reloadError) {
         console.error("Erro ao recarregar comentários", reloadError);
       }
     } finally {
       setSubmittingComment(false);
+    }
+  };
+
+  const loadMoreComments = async () => {
+    if (!news || loadingMoreComments || !hasMoreComments) return;
+
+    setLoadingMoreComments(true);
+    try {
+      const newComments = await listComments(newsId, COMMENTS_PER_PAGE, commentsOffset);
+      
+      if (newComments.length > 0) {
+        setNews((prev) =>
+          prev
+            ? {
+                ...prev,
+                comments: [...prev.comments, ...newComments],
+              }
+            : null
+        );
+        setCommentsOffset((prev) => prev + newComments.length);
+        setHasMoreComments(newComments.length >= COMMENTS_PER_PAGE && news.comments_count > commentsOffset + newComments.length);
+      } else {
+        setHasMoreComments(false);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar mais comentários", error);
+      showToast("Erro ao carregar mais comentários", "error");
+    } finally {
+      setLoadingMoreComments(false);
     }
   };
 
@@ -457,11 +518,18 @@ export default function NewsDetailPage() {
       // Abrir e carregar respostas
       setExpandedComments((prev) => new Set(prev).add(commentId));
       
-      if (!replies[commentId]) {
+      if (!replies[commentId] || replies[commentId].length === 0) {
         setLoadingReplies((prev) => ({ ...prev, [commentId]: true }));
         try {
-          const fetchedReplies = await listReplies(newsId, commentId);
+          // Carrega apenas as primeiras 5 respostas
+          const fetchedReplies = await listReplies(newsId, commentId, REPLIES_PER_PAGE, 0);
           setReplies((prev) => ({ ...prev, [commentId]: fetchedReplies }));
+          
+          // Verifica se há mais respostas
+          const comment = news?.comments.find(c => c.id === commentId);
+          const totalReplies = comment?.replies_count || 0;
+          setRepliesOffset((prev) => ({ ...prev, [commentId]: fetchedReplies.length }));
+          setHasMoreReplies((prev) => ({ ...prev, [commentId]: totalReplies > fetchedReplies.length }));
         } catch (error) {
           console.error("Erro ao carregar respostas", error);
           showToast("Erro ao carregar respostas", "error");
@@ -469,6 +537,38 @@ export default function NewsDetailPage() {
           setLoadingReplies((prev) => ({ ...prev, [commentId]: false }));
         }
       }
+    }
+  };
+
+  const loadMoreReplies = async (commentId: number) => {
+    if (loadingMoreReplies[commentId] || !hasMoreReplies[commentId] || !news) return;
+
+    setLoadingMoreReplies((prev) => ({ ...prev, [commentId]: true }));
+    try {
+      const currentOffset = repliesOffset[commentId] || 0;
+      const newReplies = await listReplies(newsId, commentId, REPLIES_PER_PAGE, currentOffset);
+      
+      if (newReplies.length > 0) {
+        setReplies((prev) => ({
+          ...prev,
+          [commentId]: [...(prev[commentId] || []), ...newReplies],
+        }));
+        
+        const newOffset = currentOffset + newReplies.length;
+        setRepliesOffset((prev) => ({ ...prev, [commentId]: newOffset }));
+        
+        // Verifica se há mais respostas
+        const comment = news.comments.find(c => c.id === commentId);
+        const totalReplies = comment?.replies_count || 0;
+        setHasMoreReplies((prev) => ({ ...prev, [commentId]: totalReplies > newOffset }));
+      } else {
+        setHasMoreReplies((prev) => ({ ...prev, [commentId]: false }));
+      }
+    } catch (error) {
+      console.error("Erro ao carregar mais respostas", error);
+      showToast("Erro ao carregar mais respostas", "error");
+    } finally {
+      setLoadingMoreReplies((prev) => ({ ...prev, [commentId]: false }));
     }
   };
 
@@ -503,10 +603,14 @@ export default function NewsDetailPage() {
       setReplyingTo(null);
       showToast("Resposta adicionada!", "success");
       
-      // Recarrega as respostas do servidor
+      // Recarrega as respostas do servidor (primeiras 5)
       try {
-        const fetchedReplies = await listReplies(newsId, commentId);
+        const fetchedReplies = await listReplies(newsId, commentId, REPLIES_PER_PAGE, 0);
         setReplies((prev) => ({ ...prev, [commentId]: fetchedReplies }));
+        setRepliesOffset((prev) => ({ ...prev, [commentId]: fetchedReplies.length }));
+        const comment = news.comments.find(c => c.id === commentId);
+        const totalReplies = comment?.replies_count || 0;
+        setHasMoreReplies((prev) => ({ ...prev, [commentId]: totalReplies > fetchedReplies.length }));
       } catch (syncError) {
         console.error("Erro ao sincronizar respostas", syncError);
       }
@@ -611,8 +715,12 @@ export default function NewsDetailPage() {
         for (const commentId of expandedIds) {
           if (commentId !== deletedCommentId) {
             try {
-              const fetchedReplies = await listReplies(newsId, commentId);
+              const fetchedReplies = await listReplies(newsId, commentId, REPLIES_PER_PAGE, 0);
               setReplies((prev) => ({ ...prev, [commentId]: fetchedReplies }));
+              const comment = news?.comments.find(c => c.id === commentId);
+              const totalReplies = comment?.replies_count || 0;
+              setRepliesOffset((prev) => ({ ...prev, [commentId]: fetchedReplies.length }));
+              setHasMoreReplies((prev) => ({ ...prev, [commentId]: totalReplies > fetchedReplies.length }));
             } catch (error) {
               console.error(`Erro ao recarregar replies do comentário ${commentId}`, error);
             }
@@ -1375,6 +1483,43 @@ export default function NewsDetailPage() {
                                   Nenhuma resposta ainda
                                 </Typography>
                               )}
+                              
+                              {/* Botão para carregar mais respostas */}
+                              {hasMoreReplies[comment.id] && (
+                                <Box sx={{ display: "flex", justifyContent: "center", mt: 1.5, mb: 1 }}>
+                                  <Button
+                                    onClick={() => loadMoreReplies(comment.id)}
+                                    disabled={loadingMoreReplies[comment.id]}
+                                    variant="text"
+                                    size="small"
+                                    sx={{
+                                      color: "rgba(255,255,255,0.7)",
+                                      textTransform: "none",
+                                      fontSize: "0.75rem",
+                                      fontWeight: 500,
+                                      padding: "4px 12px",
+                                      minWidth: "auto",
+                                      transition: "all 0.2s ease",
+                                      "&:hover": {
+                                        color: "#ffc91f",
+                                        backgroundColor: "rgba(255,201,31,0.1)",
+                                      },
+                                      "&:disabled": {
+                                        color: "rgba(255,255,255,0.3)",
+                                      },
+                                    }}
+                                  >
+                                    {loadingMoreReplies[comment.id] ? (
+                                      <>
+                                        <CircularProgress size={12} sx={{ color: "#ffc91f", mr: 0.5 }} />
+                                        Carregando...
+                                      </>
+                                    ) : (
+                                      `Ver mais respostas (${comment.replies_count - (repliesOffset[comment.id] || replies[comment.id]?.length || 0)} restantes)`
+                                    )}
+                                  </Button>
+                                </Box>
+                              )}
                             </>
                           )}
                         </Box>
@@ -1383,6 +1528,49 @@ export default function NewsDetailPage() {
                   </Box>
                 </Box>
               ))}
+              
+              {/* Botão para carregar mais comentários */}
+              {hasMoreComments && (
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 2, mb: 2 }}>
+                  <Button
+                    onClick={loadMoreComments}
+                    disabled={loadingMoreComments}
+                    variant="outlined"
+                    sx={{
+                      color: "rgba(255,255,255,0.9)",
+                      borderColor: "rgba(255,255,255,0.3)",
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                      backdropFilter: "blur(5px)",
+                      textTransform: "none",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      padding: "8px 24px",
+                      minWidth: "200px",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        borderColor: "rgba(255,255,255,0.5)",
+                        backgroundColor: "rgba(255,255,255,0.1)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      },
+                      "&:disabled": {
+                        color: "rgba(255,255,255,0.5)",
+                        borderColor: "rgba(255,255,255,0.2)",
+                        backgroundColor: "rgba(255,255,255,0.03)",
+                      },
+                    }}
+                  >
+                    {loadingMoreComments ? (
+                      <>
+                        <CircularProgress size={16} sx={{ color: "#ffc91f", mr: 1 }} />
+                        Carregando...
+                      </>
+                    ) : (
+                      `Carregar mais comentários (${news.comments_count - commentsOffset} restantes)`
+                    )}
+                  </Button>
+                </Box>
+              )}
             </Box>
 
             {/* Campo de comentário */}

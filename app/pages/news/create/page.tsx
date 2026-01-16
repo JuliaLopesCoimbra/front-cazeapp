@@ -12,7 +12,7 @@ import {
   IconButton,
   Divider,
 } from "@mui/material";
-import { ArrowBackIos, Close, NavigateBefore, NavigateNext } from "@mui/icons-material";
+import { ArrowBackIos, Close, NavigateBefore, NavigateNext, PhotoCamera, AddPhotoAlternate } from "@mui/icons-material";
 import { createNews } from "@/app/services/news/newsService";
 import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
@@ -311,19 +311,40 @@ function CreateNewsPageContent() {
                     <Button
                       component="span"
                       disabled={loading || images.length >= 5}
+                      variant="outlined"
+                      startIcon={images.length > 0 ? <AddPhotoAlternate /> : <PhotoCamera />}
                       sx={{
-                        color: "rgba(255,255,255,0.9)",
+                        color: "rgba(255,255,255,0.95)",
+                        borderColor: "rgba(255,255,255,0.3)",
                         textTransform: "none",
-                        fontSize: "0.875rem",
+                        fontSize: "0.9rem",
                         fontWeight: 600,
-                        padding: 0,
-                        minWidth: "auto",
+                        padding: "10px 20px",
+                        borderRadius: "8px",
+                        minWidth: "200px",
+                        transition: "all 0.3s ease",
+                        backgroundColor: images.length > 0 
+                          ? "rgba(255,255,255,0.1)" 
+                          : "rgba(255,255,255,0.05)",
+                        backdropFilter: "blur(10px)",
                         "&:hover": {
-                          backgroundColor: "transparent",
+                          backgroundColor: "rgba(255,255,255,0.15)",
+                          borderColor: "rgba(255,255,255,0.5)",
                           color: "#fff",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                        },
+                        "&:active": {
+                          transform: "translateY(0)",
                         },
                         "&:disabled": {
-                          color: "rgba(255,255,255,0.5)",
+                          color: "rgba(255,255,255,0.4)",
+                          borderColor: "rgba(255,255,255,0.15)",
+                          backgroundColor: "rgba(255,255,255,0.02)",
+                          cursor: "not-allowed",
+                        },
+                        "& .MuiButton-startIcon": {
+                          marginRight: "8px",
                         },
                       }}
                     >

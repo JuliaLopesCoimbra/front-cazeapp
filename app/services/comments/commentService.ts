@@ -24,12 +24,16 @@ export interface CommentResponse {
 }
 
 /**
- * Listar comentários de uma notícia
+ * Listar comentários de uma notícia com paginação
  */
 export const listComments = async (
-  newsId: number
+  newsId: number,
+  limit: number = 50,
+  offset: number = 0
 ): Promise<CommentResponse[]> => {
-  const response = await api.get(`/news/${newsId}/comments`);
+  const response = await api.get(`/news/${newsId}/comments`, {
+    params: { limit, offset }
+  });
   return response.data as CommentResponse[];
 };
 
@@ -65,14 +69,17 @@ export const createReply = async (
 };
 
 /**
- * Listar respostas de um comentário
+ * Listar respostas de um comentário com paginação
  */
 export const listReplies = async (
   newsId: number,
-  commentId: number
+  commentId: number,
+  limit: number = 50,
+  offset: number = 0
 ): Promise<CommentResponse[]> => {
   const response = await api.get(
-    `/news/${newsId}/comments/${commentId}/replies`
+    `/news/${newsId}/comments/${commentId}/replies`,
+    { params: { limit, offset } }
   );
   return response.data as CommentResponse[];
 };
