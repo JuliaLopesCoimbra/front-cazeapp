@@ -40,7 +40,6 @@ export default function ProfilePage() {
   const handlePhotoClick = () => {
     fileInputRef.current?.click();
   };
-
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -51,14 +50,46 @@ export default function ProfilePage() {
       return;
     }
 
+    // Validação de tamanho: máximo 5MB por imagem
+    const maxSizePerImage = 5 * 1024 * 1024; // 5MB
+    
+    if (file.size > maxSizePerImage) {
+      showToast("A imagem é muito grande. Máximo de 5MB por imagem.", "error");
+      return;
+    }
+
     setUploading(true);
     try {
       const updatedProfile = await updateProfilePhoto(file);
       setProfile(updatedProfile);
       showToast("Foto de perfil atualizada com sucesso!", "success");
-    } catch (error) {
-      console.error("Erro ao atualizar foto:", error);
-      showToast("Erro ao atualizar foto de perfil", "error");
+    } catch (error: any) {
+      // Log detalhado do erro para debug
+      console.error("Erro completo ao atualizar foto:", error);
+      console.error("Response data:", error?.response?.data);
+      console.error("Status code:", error?.response?.status);
+      console.error("Error message:", error?.message);
+      
+      // Extrai mensagem de erro específica
+      let errorMessage = "Erro ao atualizar foto de perfil";
+      
+      if (error?.response?.data?.detail) {
+        // Erro do backend (FastAPI)
+        errorMessage = error.response.data.detail;
+      } else if (error?.response?.status === 413) {
+        errorMessage = "A imagem é muito grande. Tente uma imagem menor.";
+      } else if (error?.response?.status === 400) {
+        errorMessage = error?.response?.data?.message || "Formato de imagem inválido";
+      } else if (error?.response?.status === 401) {
+        errorMessage = "Sessão expirada. Faça login novamente.";
+      } else if (error?.response?.status === 500) {
+        errorMessage = "Erro no servidor. Tente novamente mais tarde.";
+      } else if (error?.message) {
+        // Erro de rede ou outro
+        errorMessage = `Erro de conexão: ${error.message}`;
+      }
+      
+      showToast(errorMessage, "error");
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
