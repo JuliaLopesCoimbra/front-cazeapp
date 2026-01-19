@@ -90,11 +90,30 @@ function CreateNewsPageContent() {
     if (files) {
       const fileArray = Array.from(files);
       
+      // Validação de tamanho: máximo 5MB por imagem
+      const maxSizePerImage = 5 * 1024 * 1024; // 5MB
+      const invalidFiles = fileArray.filter(file => file.size > maxSizePerImage);
+      
+      if (invalidFiles.length > 0) {
+        showToast("Algumas imagens são muito grandes. Máximo de 5MB por imagem.", "error");
+        return;
+      }
+      
       // Limita a 5 imagens
       const filesToAdd = fileArray.slice(0, 5 - images.length);
       
       if (filesToAdd.length === 0) {
         showToast("Máximo de 5 imagens permitidas", "error");
+        return;
+      }
+      
+      // Validação de tamanho total: máximo 20MB total
+      const currentTotalSize = images.reduce((sum, img) => sum + img.size, 0);
+      const newFilesTotalSize = filesToAdd.reduce((sum, file) => sum + file.size, 0);
+      const maxTotalSize = 20 * 1024 * 1024; // 20MB
+      
+      if (currentTotalSize + newFilesTotalSize > maxTotalSize) {
+        showToast("O tamanho total das imagens excede 20MB. Reduza o número ou tamanho das imagens.", "error");
         return;
       }
       

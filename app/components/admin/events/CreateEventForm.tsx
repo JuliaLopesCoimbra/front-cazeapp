@@ -36,6 +36,14 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validação de tamanho: máximo 5MB por imagem
+      const maxSizePerImage = 5 * 1024 * 1024; // 5MB
+      
+      if (file.size > maxSizePerImage) {
+        showToast("A imagem é muito grande. Máximo de 5MB por imagem.", "error");
+        return;
+      }
+      
       setBannerImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -48,6 +56,14 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const handleMapImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validação de tamanho: máximo 5MB por imagem
+      const maxSizePerImage = 5 * 1024 * 1024; // 5MB
+      
+      if (file.size > maxSizePerImage) {
+        showToast("A imagem é muito grande. Máximo de 5MB por imagem.", "error");
+        return;
+      }
+      
       setImageMap(file);
       const reader = new FileReader();
       reader.onloadend = () => {
