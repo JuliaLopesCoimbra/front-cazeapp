@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Skeleton } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -111,11 +111,88 @@ export default function Roulette() {
           minHeight: "100vh",
           backgroundImage: "url(/background/dashboard.png)",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          textAlign: "center",
+          px: 2,
         }}
       >
-        <Typography color="white">Carregando roleta...</Typography>
+        {/* Title Skeleton */}
+        <Skeleton
+          variant="text"
+          width={300}
+          height={40}
+          sx={{
+            bgcolor: "rgba(255,255,255,0.1)",
+            mt: 5,
+            mb: 1,
+            borderRadius: 1,
+          }}
+        />
+
+        {/* Subtitle Skeleton */}
+        <Skeleton
+          variant="text"
+          width={400}
+          height={20}
+          sx={{
+            bgcolor: "rgba(255,255,255,0.1)",
+            mb: 4,
+            borderRadius: 1,
+          }}
+        />
+
+        {/* Roulette Skeleton - Circular */}
+        <Box
+          sx={{
+            position: "relative",
+            width: 380,
+            height: 380,
+            mb: 3,
+            mt: 8,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* Pointer Skeleton */}
+          <Skeleton
+            variant="rectangular"
+            width={90}
+            height={60}
+            sx={{
+              position: "absolute",
+              top: -30,
+              left: "50%",
+              transform: "translateX(-50%)",
+              bgcolor: "rgba(255,255,255,0.1)",
+              borderRadius: 2,
+              zIndex: 2,
+            }}
+          />
+
+          {/* Circular Roulette Skeleton */}
+          <Skeleton
+            variant="circular"
+            width={380}
+            height={380}
+            sx={{
+              bgcolor: "rgba(255,255,255,0.1)",
+            }}
+          />
+        </Box>
+
+        {/* Button Skeleton */}
+        <Skeleton
+          variant="rectangular"
+          width={180}
+          height={48}
+          sx={{
+            bgcolor: "rgba(255,255,255,0.1)",
+            borderRadius: "14px",
+            mt: 1,
+          }}
+        />
       </Box>
     );
   }

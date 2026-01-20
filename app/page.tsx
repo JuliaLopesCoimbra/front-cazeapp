@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Button, Box } from "@mui/material";
+import { Button, Box, Skeleton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { getPublicEvents, EventResponse } from "./services/events/eventAppService";
 import EventIndisponivel from "./components/event/EventIndisponivel";
@@ -47,13 +47,104 @@ export default function HomePage() {
           minHeight: "100vh",
           backgroundColor: "#f4f7fc",
           backgroundImage: "url(/background/dashboard.png)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
         }}
       >
-        Carregando eventos...
+        {/* Header Skeleton */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "16px 32px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Skeleton
+              variant="rectangular"
+              width={60}
+              height={60}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
+            />
+            <Skeleton
+              variant="text"
+              width={180}
+              height={32}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+            />
+          </div>
+          <Skeleton
+            variant="rectangular"
+            width={80}
+            height={36}
+            sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
+          />
+        </div>
+
+        {/* Main Content Skeleton */}
+        <main
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "32px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 24,
+              width: "100%",
+              maxWidth: 900,
+            }}
+          >
+            {/* Event Card Skeletons */}
+            {[1, 2].map((index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: 3,
+                  width: "100%",
+                }}
+              >
+                <Skeleton
+                  variant="rectangular"
+                  width="100%"
+                  height={400}
+                  sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2 }}
+                />
+                <Skeleton
+                  variant="text"
+                  width="60%"
+                  height={32}
+                  sx={{ bgcolor: "rgba(255,255,255,0.1)", mt: 2, mb: 1 }}
+                />
+                <Skeleton
+                  variant="text"
+                  width="90%"
+                  height={20}
+                  sx={{ bgcolor: "rgba(255,255,255,0.1)", mb: 0.5 }}
+                />
+                <Skeleton
+                  variant="text"
+                  width="75%"
+                  height={20}
+                  sx={{ bgcolor: "rgba(255,255,255,0.1)", mb: 2 }}
+                />
+                <Skeleton
+                  variant="rectangular"
+                  width={150}
+                  height={48}
+                  sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: "30px", mt: 1 }}
+                />
+              </Box>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }

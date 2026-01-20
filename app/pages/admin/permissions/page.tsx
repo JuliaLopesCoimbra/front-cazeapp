@@ -25,7 +25,7 @@ import ConfirmModal from "@/app/components/admin/permissions/ConfirmModal";
 import SearchBar from "@/app/components/admin/permissions/SearchBar";
 
 export default function PermissionsPage() {
-  const { isAdminMaster, isSubadmin } = useAuth();
+  const { isAdminMaster, isSubadmin, authReady } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
 
@@ -48,6 +48,26 @@ export default function PermissionsPage() {
     userName: string;
   } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+
+  // Aguardar o contexto estar pronto antes de renderizar
+  if (!authReady) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundImage: "url(/background/dashboard.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress sx={{ color: "#ffcc01" }} />
+      </Box>
+    );
+  }
 
   useEffect(() => {
     if (!isAdminMaster && !isSubadmin) {

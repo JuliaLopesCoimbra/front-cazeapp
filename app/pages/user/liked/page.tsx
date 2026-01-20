@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -22,6 +22,7 @@ import HomeHeader from "@/app/components/home/HeaderHome";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 
 const LIMIT = 5;
+const STORAGE_KEY = "selectedEventId";
 
 export default function LikedPostsPage() {
   const router = useRouter();
@@ -76,6 +77,55 @@ export default function LikedPostsPage() {
     }
   };
 
+  // Função para atualizar o evento atual baseado no localStorage
+  const updateCurrentEventFromStorage = (eventsList: EventResponse[]) => {
+    const savedEventId = localStorage.getItem(STORAGE_KEY);
+    if (savedEventId) {
+      const savedId = parseInt(savedEventId, 10);
+      const savedEvent = eventsList.find((event) => event.id === savedId);
+      if (savedEvent) {
+        setCurrentEvent(savedEvent);
+        return;
+      }
+    }
+    // Se não encontrou evento salvo, usa o primeiro disponível
+    if (eventsList.length > 0) {
+      setCurrentEvent(eventsList[0]);
+      localStorage.setItem(STORAGE_KEY, eventsList[0].id.toString());
+    }
+  };
+
+  // Função para recarregar posts quando o evento muda
+  const reloadPostsForEvent = useCallback(async (eventId: number) => {
+    if (!isAuthenticated) return;
+    setLoading(true);
+    setPosts([]);
+    setOffset(0);
+    setHasMore(true);
+    try {
+      const data = await getLikedPosts(eventId, LIMIT, 0);
+      setPosts(data);
+      setOffset(data.length);
+      setHasMore(data.length >= LIMIT);
+    } catch (err: any) {
+      console.error("Erro ao carregar posts curtidos", err);
+      showToast(
+        err.response?.data?.detail || "Erro ao carregar posts curtidos",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+      setInitialLoading(false);
+    }
+  }, [isAuthenticated, showToast]);
+
+  // Função para lidar com seleção de evento
+  const handleSelectEvent = useCallback((event: EventResponse) => {
+    localStorage.setItem(STORAGE_KEY, event.id.toString());
+    setCurrentEvent(event);
+    reloadPostsForEvent(event.id);
+  }, [reloadPostsForEvent]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/pages/auth/login");
@@ -86,9 +136,7 @@ export default function LikedPostsPage() {
     getEvents()
       .then((data) => {
         setEvents(data);
-        if (data.length > 0) {
-          setCurrentEvent(data[0]);
-        }
+        updateCurrentEventFromStorage(data);
       })
       .catch((error) => {
         console.error("Erro ao carregar eventos", error);
@@ -100,6 +148,44 @@ export default function LikedPostsPage() {
     loadPosts(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
+
+  // Escuta mudanças no localStorage (quando o evento é alterado em outra aba/componente)
+  useEffect(() => {
+    if (!isAuthenticated || events.length === 0) return;
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        const newEventId = parseInt(e.newValue, 10);
+        const newEvent = events.find((event) => event.id === newEventId);
+        if (newEvent && newEvent.id !== currentEvent?.id) {
+          handleSelectEvent(newEvent);
+        }
+      }
+    };
+
+    // Escuta mudanças no localStorage de outras abas/janelas
+    window.addEventListener("storage", handleStorageChange);
+
+    // Também verifica mudanças na mesma aba (polling mais eficiente)
+    const checkInterval = setInterval(() => {
+      const savedEventId = localStorage.getItem(STORAGE_KEY);
+      if (savedEventId) {
+        const savedId = parseInt(savedEventId, 10);
+        if (currentEvent?.id !== savedId) {
+          const savedEvent = events.find((event) => event.id === savedId);
+          if (savedEvent) {
+            setCurrentEvent(savedEvent);
+            reloadPostsForEvent(savedId);
+          }
+        }
+      }
+    }, 1000); // Verifica a cada 1 segundo (mais eficiente)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(checkInterval);
+    };
+  }, [isAuthenticated, events, currentEvent?.id, handleSelectEvent, reloadPostsForEvent]);
 
   // infinite scroll
   useEffect(() => {
@@ -191,7 +277,7 @@ export default function LikedPostsPage() {
             event={currentEvent}
             events={events}
             currentEvent={currentEvent}
-            onSelectEvent={setCurrentEvent}
+            onSelectEvent={handleSelectEvent}
           />
         )}
 

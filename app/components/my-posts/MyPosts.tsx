@@ -19,6 +19,36 @@ import { EventResponse } from "@/app/services/events/eventAppService";
 
 const LIMIT = 10;
 
+// Função para formatar data relativa ou extensa (mesma do NewsFeed)
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  // Se for menos de 24 horas, mostra relativo
+  if (diffHours < 24) {
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    
+    if (diffMinutes < 1) {
+      return "há menos de 1 minuto";
+    } else if (diffMinutes < 60) {
+      return `há ${diffMinutes} ${diffMinutes === 1 ? "minuto" : "minutos"} atrás`;
+    } else {
+      const hours = Math.floor(diffHours);
+      return `há ${hours} ${hours === 1 ? "hora" : "horas"} atrás`;
+    }
+  }
+
+  // Se for mais de 24 horas, mostra data extensa
+  return date.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 interface MyPostsProps {
   hideTitle?: boolean;
   currentEvent?: EventResponse | null;
@@ -197,11 +227,7 @@ export default function MyPosts({ hideTitle = false, currentEvent }: MyPostsProp
                   variant="body2"
                   sx={{ color: "rgba(255,255,255,0.6)", marginTop: 0.5, fontSize: "0.875rem" }}
                 >
-                  {new Date(post.created_at).toLocaleDateString("pt-BR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {formatDate(post.created_at)}
                 </Typography>
               </CardContent>
             </Card>

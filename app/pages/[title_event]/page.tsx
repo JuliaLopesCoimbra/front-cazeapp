@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
-import { Button, Box } from "@mui/material";
+import { Button, Box, Skeleton } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -100,7 +100,183 @@ export default function EventPage() {
     fetchEvent();
   }, [title]);
 
-  if (loading) return <div>Carregando evento...</div>;
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#f4f7fc",
+          backgroundImage: "url(/background/dashboard.png)",
+        }}
+      >
+        {/* Header Skeleton */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "16px 32px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Skeleton
+              variant="rectangular"
+              width={60}
+              height={60}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
+            />
+            <Skeleton
+              variant="text"
+              width={180}
+              height={32}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+            />
+          </div>
+          <Skeleton
+            variant="rectangular"
+            width={80}
+            height={36}
+            sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
+          />
+        </div>
+
+        {/* Main Content Skeleton */}
+        <main
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
+          {/* Banner Skeleton */}
+          <Skeleton
+            variant="rectangular"
+            width={900}
+            height={400}
+            sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2, maxWidth: "100%" }}
+          />
+
+          {/* Description Skeleton */}
+          <Box sx={{ maxWidth: 700, width: "100%", padding: "30px" }}>
+            <Skeleton
+              variant="text"
+              width="100%"
+              height={20}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)", mb: 1 }}
+            />
+            <Skeleton
+              variant="text"
+              width="90%"
+              height={20}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)", mb: 1 }}
+            />
+            <Skeleton
+              variant="text"
+              width="85%"
+              height={20}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+            />
+          </Box>
+
+          {/* Highlighted Text Skeleton */}
+          <Box sx={{ maxWidth: 700, width: "100%", padding: "30px" }}>
+            <Skeleton
+              variant="rectangular"
+              width="80%"
+              height={40}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
+            />
+          </Box>
+
+          {/* Event Info Skeleton */}
+          <Box
+            sx={{
+              maxWidth: 700,
+              width: "100%",
+              padding: "30px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            {[1, 2, 3].map((index) => (
+              <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Skeleton
+                  variant="circular"
+                  width={24}
+                  height={24}
+                  sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+                />
+                <Skeleton
+                  variant="text"
+                  width={200}
+                  height={20}
+                  sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+                />
+              </Box>
+            ))}
+          </Box>
+
+          {/* Map Skeleton */}
+          <Box sx={{ maxWidth: 700, width: "100%", padding: "20px" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+              <Skeleton
+                variant="circular"
+                width={24}
+                height={24}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+              />
+              <Skeleton
+                variant="text"
+                width={150}
+                height={24}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+              />
+            </Box>
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height={400}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2 }}
+            />
+          </Box>
+
+          {/* Line Up Skeleton */}
+          <Box sx={{ maxWidth: 700, width: "100%", padding: "20px" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+              <Skeleton
+                variant="circular"
+                width={24}
+                height={24}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+              />
+              <Skeleton
+                variant="text"
+                width={200}
+                height={24}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+              />
+            </Box>
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height={200}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2 }}
+            />
+          </Box>
+
+          {/* Button Skeleton */}
+          <Skeleton
+            variant="rectangular"
+            width={200}
+            height={48}
+            sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: "30px", mt: 3, mb: 3 }}
+          />
+        </main>
+      </div>
+    );
+  }
 
   if (!event) return <EventIndisponivel />; // Se não houver evento ou se não for ativo, exibe o componente de evento indisponível
 

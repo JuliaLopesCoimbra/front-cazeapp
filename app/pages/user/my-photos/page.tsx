@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Box, Typography, Skeleton, IconButton } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -14,6 +14,7 @@ import MyPendingPosts from "@/app/components/my-posts/MyPendingPosts";
 import MenuOptions from "@/app/components/my-photos/MenuOptions";
 
 type ViewMode = "menu" | "posts" | "photos" | "pending";
+const STORAGE_KEY = "selectedEventId";
 
 export default function MyPhotosPage() {
   const router = useRouter();
@@ -25,6 +26,30 @@ export default function MyPhotosPage() {
   
   // Para usuários comuns, sempre mostrar fotos diretamente
   const isRegularUser = !isAdminMaster && !isSubadmin && !isColunista;
+
+  // Função para atualizar o evento atual baseado no localStorage
+  const updateCurrentEventFromStorage = useCallback((eventsList: EventResponse[]) => {
+    const savedEventId = localStorage.getItem(STORAGE_KEY);
+    if (savedEventId) {
+      const savedId = parseInt(savedEventId, 10);
+      const savedEvent = eventsList.find((event) => event.id === savedId);
+      if (savedEvent) {
+        setCurrentEvent(savedEvent);
+        return;
+      }
+    }
+    // Se não encontrou evento salvo, usa o primeiro disponível
+    if (eventsList.length > 0) {
+      setCurrentEvent(eventsList[0]);
+      localStorage.setItem(STORAGE_KEY, eventsList[0].id.toString());
+    }
+  }, []);
+
+  // Função para lidar com seleção de evento
+  const handleSelectEvent = useCallback((event: EventResponse) => {
+    localStorage.setItem(STORAGE_KEY, event.id.toString());
+    setCurrentEvent(event);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -41,9 +66,7 @@ export default function MyPhotosPage() {
     getEvents()
       .then((data) => {
         setEvents(data);
-        if (data.length > 0) {
-          setCurrentEvent(data[0]);
-        }
+        updateCurrentEventFromStorage(data);
       })
       .catch((error) => {
         console.error("Erro ao carregar eventos", error);
@@ -51,7 +74,44 @@ export default function MyPhotosPage() {
       .finally(() => {
         setLoading(false);
       });
-  }, [isAuthenticated, router, isRegularUser]);
+  }, [isAuthenticated, router, isRegularUser, updateCurrentEventFromStorage]);
+
+  // Escuta mudanças no localStorage (quando o evento é alterado em outra aba/componente)
+  useEffect(() => {
+    if (!isAuthenticated || events.length === 0) return;
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        const newEventId = parseInt(e.newValue, 10);
+        const newEvent = events.find((event) => event.id === newEventId);
+        if (newEvent && newEvent.id !== currentEvent?.id) {
+          handleSelectEvent(newEvent);
+        }
+      }
+    };
+
+    // Escuta mudanças no localStorage de outras abas/janelas
+    window.addEventListener("storage", handleStorageChange);
+
+    // Também verifica mudanças na mesma aba (polling mais eficiente)
+    const checkInterval = setInterval(() => {
+      const savedEventId = localStorage.getItem(STORAGE_KEY);
+      if (savedEventId) {
+        const savedId = parseInt(savedEventId, 10);
+        if (currentEvent?.id !== savedId) {
+          const savedEvent = events.find((event) => event.id === savedId);
+          if (savedEvent) {
+            handleSelectEvent(savedEvent);
+          }
+        }
+      }
+    }, 1000); // Verifica a cada 1 segundo (mais eficiente)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(checkInterval);
+    };
+  }, [isAuthenticated, events, currentEvent?.id, handleSelectEvent]);
 
   const handleSelectOption = (option: string) => {
     setViewMode(option as ViewMode);
@@ -332,7 +392,7 @@ export default function MyPhotosPage() {
           event={currentEvent}
           events={events}
           currentEvent={currentEvent}
-          onSelectEvent={setCurrentEvent}
+          onSelectEvent={handleSelectEvent}
         />
 
         {/* Conteúdo baseado no tipo de usuário */}

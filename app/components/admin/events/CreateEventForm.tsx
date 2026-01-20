@@ -29,6 +29,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const [imageMap, setImageMap] = useState<File | null>(null);
   const [previewMap, setPreviewMap] = useState<string | null>(null);
   const [lineUp, setLineUp] = useState("");
+  const [eventDates, setEventDates] = useState("");
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
@@ -119,6 +120,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         location: location.trim() || undefined,
         starts_at: startsAt || undefined,
         ends_at: endsAt || undefined,
+        event_dates: eventDates.trim() || undefined,
         banner_image: bannerImage || undefined,
         image_map: imageMap || undefined,
         line_up: lineUp.trim() || undefined,
@@ -365,6 +367,40 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
+              },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Dias do Evento"
+            value={eventDates}
+            onChange={(e) => setEventDates(e.target.value)}
+            disabled={loading}
+            placeholder="Ex: 2024-01-09,2024-01-10,2024-01-20,2024-01-21"
+            helperText="Separe múltiplas datas por vírgula (formato: YYYY-MM-DD,YYYY-MM-DD)"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: "#fff",
+                "& fieldset": {
+                  borderColor: "rgba(255,255,255,0.1)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255,255,255,0.2)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ffc91f",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255,255,255,0.7)",
+                "&.Mui-focused": {
+                  color: "#ffc91f",
+                },
+              },
+              "& .MuiFormHelperText-root": {
+                color: "rgba(255,255,255,0.5)",
               },
             }}
           />
