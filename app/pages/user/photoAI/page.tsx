@@ -34,11 +34,8 @@ interface PhotoAIPageProps {
 }
 
 export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
-  // ===== CACHE (Instagram/TikTok style) =====
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `photo-ai-results-event-${eventId}`;
-  const [initialized, setInitialized] = useState(false);
-  // =========================================
   
   const [stage, setStage] = useState<Stage>("intro");
   const [isRequestingCamera, setIsRequestingCamera] = useState(false);
@@ -55,25 +52,35 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const previousEventIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => stopCamera();
   }, []);
 
-  // ===== CACHE: Carregar resultados ao montar =====
   useEffect(() => {
-    if (initialized) return;
+    const isEventChange = previousEventIdRef.current !== null && previousEventIdRef.current !== eventId;
+    
+    if (isEventChange) {
+      setStage("intro");
+      setResults([]);
+      setSearchMessage(null);
+      setCart([]);
+      setSelectedPhoto(null);
+      setIsUploading(false);
+      setCountdown(null);
+      setCameraError(null);
+      stopCamera();
+      previousEventIdRef.current = eventId;
+      return;
+    }
 
-    // Tenta carregar do cache
     const cached = getCache(cacheKey);
     
     if (cached && cached.data.length > 0) {
-      // ✅ Resultados encontrados no cache!
       setResults(cached.data);
       setStage("results");
-      setInitialized(true);
       
-      // Restaura posição do scroll
       const targetPosition = cached.scrollPosition;
       
       if ('scrollRestoration' in history) {
@@ -109,11 +116,11 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
           });
         }, delay);
       });
-    } else {
-      setInitialized(true);
     }
+
+    previousEventIdRef.current = eventId;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [eventId]);
 
   // ===== CACHE: Salvar scroll position quando em results =====
   const lastScrollPositionRef = useRef(0);
@@ -448,7 +455,6 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
           }}
         />
         
-        {/* Overlay para contagem regressiva */}
         {countdown !== null && (
           <Box
             sx={{
@@ -477,7 +483,6 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
           </Box>
         )}
 
-        {/* Overlay para loading */}
         {isUploading && countdown === null && (
           <Box
             sx={{
@@ -507,6 +512,35 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
             </Typography>
           </Box>
         )}
+
+        {countdown === null && !isUploading && (
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleSearch}
+            disabled={isUploading || countdown !== null}
+            sx={{ 
+              position: "absolute",
+              bottom: 20,
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "#6c54ff",
+              borderRadius: 2,
+              px: 3,
+              py: 1,
+              fontSize: 14,
+              fontWeight: 600,
+              textTransform: "none",
+              zIndex: 5,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+              "&:hover": {
+                background: "#5a3cf1",
+              },
+            }}
+          >
+            Pronto
+          </Button>
+        )}
       </Box>
 
       {cameraError && (
@@ -516,44 +550,31 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
       )}
 
       {countdown === null && !isUploading && (
-        <>
-          <Stack gap={0.5} sx={{ px: 1, py: 1 }}>
-            <Typography 
-              variant="body1" 
-              textAlign="center" 
-              fontWeight={700}
-              sx={{ 
-                color: "white",
-                fontSize: 16,
-                lineHeight: 1.4,
-              }}
-            >
-              Primeiro, posicione seu rosto dentro da marcação.
-            </Typography>
-            <Typography 
-              variant="body2" 
-              textAlign="center" 
-              sx={{ 
-                color: "#666",
-                fontSize: 14,
-                lineHeight: 1.4,
-              }}
-            >
-              Clique em "Pronto" quando estiver enquadrado.
-            </Typography>
-          </Stack>
-
-          <Button
-            variant="contained"
-            size="large"
-            fullWidth
-            sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5 }}
-            onClick={handleSearch}
-            disabled={isUploading || countdown !== null}
+        <Stack gap={0.5} sx={{ px: 1, py: 1 }}>
+          <Typography 
+            variant="body1" 
+            textAlign="center" 
+            fontWeight={700}
+            sx={{ 
+              color: "white",
+              fontSize: 16,
+              lineHeight: 1.4,
+            }}
           >
-            Pronto
-          </Button>
-        </>
+            Primeiro, posicione seu rosto dentro da marcação.
+          </Typography>
+          <Typography 
+            variant="body2" 
+            textAlign="center" 
+            sx={{ 
+              color: "#666",
+              fontSize: 14,
+              lineHeight: 1.4,
+            }}
+          >
+            Clique em "Pronto" quando estiver enquadrado.
+          </Typography>
+        </Stack>
       )}
 
       {countdown !== null && (
