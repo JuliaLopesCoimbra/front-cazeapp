@@ -106,20 +106,36 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
           const musicsChanged = cachedMusicIds !== freshMusicIds || cachedMusics.length !== freshMusics.length;
           
           if (schoolsChanged || musicsChanged) {
-            setSchools(freshSchools);
-            setMusics(freshMusics);
+            setSchools([...freshSchools]);
+            setMusics([...freshMusics]);
             
             const hasNewItems = freshSchools.length > cachedSchools.length || freshMusics.length > cachedMusics.length;
-            setCache(cacheKey, [freshSchools, freshMusics], hasNewItems ? 0 : targetPosition);
+            const hasRemovedItems = freshSchools.length < cachedSchools.length || freshMusics.length < cachedMusics.length;
             
             if (hasNewItems) {
+              setCache(cacheKey, [freshSchools, freshMusics], 0);
               setTimeout(() => {
                 window.scrollTo({
                   top: 0,
                   behavior: 'smooth'
                 });
               }, 500);
+            } else if (hasRemovedItems) {
+              const safeScrollPosition = Math.min(targetPosition, document.documentElement.scrollHeight - window.innerHeight);
+              setCache(cacheKey, [freshSchools, freshMusics], safeScrollPosition);
+            } else {
+              setCache(cacheKey, [freshSchools, freshMusics], targetPosition);
             }
+          } else {
+            const schoolsContentChanged = JSON.stringify(cachedSchools) !== JSON.stringify(freshSchools);
+            const musicsContentChanged = JSON.stringify(cachedMusics) !== JSON.stringify(freshMusics);
+            
+            if (schoolsContentChanged || musicsContentChanged) {
+              setSchools([...freshSchools]);
+              setMusics([...freshMusics]);
+            }
+            
+            setCache(cacheKey, [freshSchools, freshMusics], targetPosition);
           }
         } catch (err) {
           console.error('Erro ao revalidar cache:', err);

@@ -204,14 +204,12 @@ export default function LikedPostsPage() {
     const cached = getCache(cacheKey);
     
     if (cached && cached.data.length > 0) {
-      // ✅ Dados encontrados no cache!
       setPosts(cached.data);
       setOffset(cached.data.length);
       setHasMore(cached.data.length >= LIMIT);
       setInitialized(true);
       setInitialLoading(false);
       
-      // Restaura posição do scroll
       const targetPosition = cached.scrollPosition;
       
       if ('scrollRestoration' in history) {
@@ -247,6 +245,48 @@ export default function LikedPostsPage() {
           });
         }, delay);
       });
+      
+      (async () => {
+        try {
+          const limit = Math.max(cached.data.length, LIMIT * 3);
+          const freshData = await getLikedPosts(currentEvent?.id, limit, 0);
+          
+          const cachedIds = cached.data.map((p: NewsResponse) => p.id).sort().join(',');
+          const freshIds = freshData.map((p: NewsResponse) => p.id).sort().join(',');
+          
+          if (cachedIds !== freshIds || cached.data.length !== freshData.length) {
+            setPosts([...freshData]);
+            setOffset(freshData.length);
+            setHasMore(freshData.length >= limit);
+            
+            const hasNewItems = freshData.length > cached.data.length;
+            const hasRemovedItems = freshData.length < cached.data.length;
+            
+            if (hasNewItems) {
+              setCache(cacheKey, freshData, 0);
+              setTimeout(() => {
+                window.scrollTo({
+                  top: 0,
+                  behavior: 'smooth'
+                });
+              }, 500);
+            } else if (hasRemovedItems) {
+              const safeScrollPosition = Math.min(targetPosition, document.documentElement.scrollHeight - window.innerHeight);
+              setCache(cacheKey, freshData, safeScrollPosition);
+            } else {
+              setCache(cacheKey, freshData, targetPosition);
+            }
+          } else {
+            const contentChanged = JSON.stringify(cached.data) !== JSON.stringify(freshData);
+            if (contentChanged) {
+              setPosts([...freshData]);
+            }
+            setCache(cacheKey, freshData, targetPosition);
+          }
+        } catch (err) {
+          console.error('Erro ao revalidar cache:', err);
+        }
+      })();
     } else {
       setInitialized(true);
     }
