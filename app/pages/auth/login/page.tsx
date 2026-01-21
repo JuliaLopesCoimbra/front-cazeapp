@@ -150,25 +150,53 @@ const LoginForm: React.FC = () => {
       sx={{
         display: "flex",
         justifyContent: "center",
-
-        height: "100vh",
+        alignItems: "center",
+        minHeight: "100vh",
         backgroundImage: "url(/background/dashboard.png)",
-        padding: "20px",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        padding: { xs: "20px", md: "40px" },
       }}
     >
       <Box
         sx={{
-          padding: "30px",
+          padding: { xs: "30px", md: "40px" },
           color: "white",
           width: "100%",
-          maxWidth: "400px",
+          maxWidth: { xs: "100%", md: "450px" },
           textAlign: "left",
+          backgroundColor: "rgba(255, 255, 255, 0.08)",
+          backdropFilter: "blur(20px)",
+          borderRadius: { xs: "16px", md: "24px" },
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+          transition: "all 0.3s ease",
+          "&:hover": {
+            boxShadow: "0 12px 40px rgba(0, 0, 0, 0.4)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+          },
         }}
       >
-        <Typography variant="h5" sx={{ marginBottom: "20px" }}>
+        <Typography
+          variant="h4"
+          sx={{
+            marginBottom: { xs: "16px", md: "20px" },
+            fontWeight: 700,
+            fontSize: { xs: "24px", md: "28px" },
+            textAlign: "center",
+          }}
+        >
           Login
         </Typography>
-        <Typography variant="body2" sx={{ marginBottom: "20px" }}>
+        <Typography
+          variant="body2"
+          sx={{
+            marginBottom: { xs: "24px", md: "28px" },
+            textAlign: "center",
+            color: "rgba(255, 255, 255, 0.85)",
+            fontSize: { xs: "13px", md: "14px" },
+          }}
+        >
           Bem-vindo de volta. Entre com suas credenciais para acessar sua conta.
         </Typography>
 
@@ -199,26 +227,31 @@ const LoginForm: React.FC = () => {
           }}
           sx={{
             "& .MuiOutlinedInput-root": {
-              backgroundColor: "transparent",
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
               color: "#fff",
-              borderRadius: "14px",
+              borderRadius: "12px",
+              transition: "all 0.2s ease",
               "& fieldset": {
-                borderColor: "#fff",
+                borderColor: "rgba(255, 255, 255, 0.3)",
+                borderWidth: "1.5px",
               },
               "&:hover fieldset": {
-                borderColor: "#fff",
+                borderColor: "rgba(255, 255, 255, 0.5)",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#fff",
+                borderColor: "#ffcc01",
+                borderWidth: "2px",
+              },
+              "&.Mui-focused": {
+                backgroundColor: "rgba(255, 255, 255, 0.08)",
               },
               "& input:-webkit-autofill": {
-                WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.05) inset",
                 WebkitTextFillColor: "#fff",
                 transition: "background-color 9999s ease-in-out 0s",
               },
-
               "& input:-webkit-autofill:focus": {
-                WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.08) inset",
                 WebkitTextFillColor: "#fff",
               },
             },
@@ -266,29 +299,35 @@ const LoginForm: React.FC = () => {
           sx={{
             mt: 2,
             "& .MuiOutlinedInput-root": {
-              backgroundColor: "transparent",
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
               color: "#fff",
-              borderRadius: "14px",
+              borderRadius: "12px",
+              transition: "all 0.2s ease",
               "& fieldset": {
-                borderColor: "#fff",
+                borderColor: "rgba(255, 255, 255, 0.3)",
+                borderWidth: "1.5px",
               },
               "&:hover fieldset": {
-                borderColor: "#fff",
+                borderColor: "rgba(255, 255, 255, 0.5)",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#fff",
+                borderColor: "#ffcc01",
+                borderWidth: "2px",
               },
               "&.Mui-error fieldset": {
                 borderColor: "#ff6b6b",
+                borderWidth: "2px",
+              },
+              "&.Mui-focused": {
+                backgroundColor: "rgba(255, 255, 255, 0.08)",
               },
               "& input:-webkit-autofill": {
-                WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.05) inset",
                 WebkitTextFillColor: "#fff",
                 transition: "background-color 9999s ease-in-out 0s",
               },
-
               "& input:-webkit-autofill:focus": {
-                WebkitBoxShadow: "0 0 0 1000px transparent inset",
+                WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.08) inset",
                 WebkitTextFillColor: "#fff",
               },
             },
@@ -325,14 +364,21 @@ const LoginForm: React.FC = () => {
           fullWidth
           variant="contained"
           sx={{
-            mt: 2,
+            mt: { xs: 2, md: 3 },
+            mb: 1,
             backgroundColor: "#ffcc01",
-            color: "#000", // texto preto para contraste
-            fontWeight: 600,
-            borderRadius: "14px",
+            color: "#000",
+            fontWeight: 700,
+            borderRadius: "12px",
             textTransform: "none",
+            fontSize: { xs: "15px", md: "16px" },
+            padding: { xs: "12px", md: "14px" },
+            boxShadow: "0 4px 12px rgba(255, 204, 1, 0.3)",
+            transition: "all 0.2s ease",
             "&:hover": {
-              backgroundColor: "#e6b800", // hover mais escuro
+              backgroundColor: "#e6b800",
+              transform: "translateY(-2px)",
+              boxShadow: "0 6px 16px rgba(255, 204, 1, 0.4)",
             },
             "&.Mui-disabled": {
               backgroundColor: "rgba(255, 204, 1, 0.4)",
@@ -349,10 +395,12 @@ const LoginForm: React.FC = () => {
           <Box
             sx={{
               mt: 2,
-              p: 2,
-              backgroundColor: "rgba(255, 204, 1, 0.1)",
-              borderRadius: "14px",
-              border: "1px solid rgba(255, 204, 1, 0.3)",
+              p: { xs: 2, md: 2.5 },
+              backgroundColor: "rgba(255, 204, 1, 0.12)",
+              borderRadius: "12px",
+              border: "1px solid rgba(255, 204, 1, 0.4)",
+              backdropFilter: "blur(10px)",
+              transition: "all 0.2s ease",
             }}
           >
             <Typography
@@ -375,12 +423,16 @@ const LoginForm: React.FC = () => {
                 color: "#ffcc01",
                 borderColor: "#ffcc01",
                 backgroundColor: "transparent",
-                borderRadius: "14px",
+                borderRadius: "12px",
                 textTransform: "none",
                 fontWeight: 600,
+                fontSize: { xs: "13px", md: "14px" },
+                padding: { xs: "10px", md: "12px" },
+                transition: "all 0.2s ease",
                 "&:hover": {
-                  backgroundColor: "rgba(255, 204, 1, 0.1)",
+                  backgroundColor: "rgba(255, 204, 1, 0.15)",
                   borderColor: "#ffcc01",
+                  transform: "translateY(-2px)",
                 },
                 "&.Mui-disabled": {
                   color: "rgba(255, 204, 1, 0.5)",
@@ -414,7 +466,19 @@ const LoginForm: React.FC = () => {
         {showForgotPassword && (
           <Typography
             variant="body2"
-            sx={{ mt: 2, color: "#1976d2", cursor: "pointer" }}
+            sx={{
+              mt: 2,
+              color: "#ffcc01",
+              cursor: "pointer",
+              textAlign: "center",
+              fontSize: { xs: "13px", md: "14px" },
+              fontWeight: 500,
+              transition: "all 0.2s ease",
+              "&:hover": {
+                color: "#e6b800",
+                textDecoration: "underline",
+              },
+            }}
             onClick={() => router.push("/pages/auth/forgot-password")}
           >
             Esqueceu a senha?
@@ -422,18 +486,38 @@ const LoginForm: React.FC = () => {
         )}
         <Typography
           sx={{
-            mt: 3,
+            mt: { xs: 3, md: 3.5 },
             mb: 1.5,
             textAlign: "center",
             color: "rgba(255,255,255,0.7)",
-            fontSize: 13,
+            fontSize: { xs: 12, md: 13 },
             fontWeight: 500,
+            position: "relative",
+            "&::before, &::after": {
+              content: '""',
+              position: "absolute",
+              top: "50%",
+              width: "30%",
+              height: "1px",
+              backgroundColor: "rgba(255,255,255,0.2)",
+            },
+            "&::before": {
+              left: 0,
+            },
+            "&::after": {
+              right: 0,
+            },
           }}
         >
           ou logue com
         </Typography>
-        {/* Exibição de erro */}
-        <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: { xs: 1.5, md: 2 },
+            mt: 2,
+          }}
+        >
           <Button
             variant="outlined"
             startIcon={<Google />}
@@ -448,16 +532,21 @@ const LoginForm: React.FC = () => {
             sx={{
               flex: 1,
               color: "#fff",
-              borderColor: "#fff",
-              backgroundColor: "transparent",
-              borderRadius: "14px",
+              borderColor: "rgba(255, 255, 255, 0.3)",
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              borderRadius: "12px",
               textTransform: "none",
+              fontWeight: 600,
+              fontSize: { xs: "13px", md: "14px" },
+              padding: { xs: "10px", md: "12px" },
+              transition: "all 0.2s ease",
               "& .MuiSvgIcon-root": {
                 color: "#fff",
               },
               "&:hover": {
-                backgroundColor: "rgba(255,255,255,0.08)",
-                borderColor: "#fff",
+                backgroundColor: "rgba(255,255,255,0.12)",
+                borderColor: "rgba(255, 255, 255, 0.5)",
+                transform: "translateY(-2px)",
               },
             }}
           >
@@ -478,16 +567,21 @@ const LoginForm: React.FC = () => {
             sx={{
               flex: 1,
               color: "#fff",
-              borderColor: "#fff",
-              backgroundColor: "transparent",
-              borderRadius: "14px",
+              borderColor: "rgba(255, 255, 255, 0.3)",
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              borderRadius: "12px",
               textTransform: "none",
+              fontWeight: 600,
+              fontSize: { xs: "13px", md: "14px" },
+              padding: { xs: "10px", md: "12px" },
+              transition: "all 0.2s ease",
               "& .MuiSvgIcon-root": {
                 color: "#fff",
               },
               "&:hover": {
-                backgroundColor: "rgba(255,255,255,0.08)",
-                borderColor: "#fff",
+                backgroundColor: "rgba(255,255,255,0.12)",
+                borderColor: "rgba(255, 255, 255, 0.5)",
+                transform: "translateY(-2px)",
               },
             }}
           >
@@ -495,9 +589,33 @@ const LoginForm: React.FC = () => {
           </Button>
         </Box>
 
-        <Typography variant="body2" sx={{ marginTop: "20px" }}>
+        <Typography
+          variant="body2"
+          sx={{
+            marginTop: { xs: "20px", md: "24px" },
+            textAlign: "center",
+            color: "rgba(255, 255, 255, 0.85)",
+            fontSize: { xs: "13px", md: "14px" },
+          }}
+        >
           Não tem uma conta?{" "}
-          <a href="/pages/auth/register" style={{ textDecoration: "none", color: "#ffcc01" }}>
+          <a
+            href="/pages/auth/register"
+            style={{
+              textDecoration: "none",
+              color: "#ffcc01",
+              fontWeight: 600,
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#e6b800";
+              e.currentTarget.style.textDecoration = "underline";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#ffcc01";
+              e.currentTarget.style.textDecoration = "none";
+            }}
+          >
             Cadastre-se aqui
           </a>
         </Typography>

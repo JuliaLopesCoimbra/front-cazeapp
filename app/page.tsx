@@ -86,17 +86,23 @@ export default function HomePage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            justifyContent: "center",
             padding: "32px",
+            minHeight: "calc(100vh - 100px)",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 24,
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(auto-fit, minmax(320px, 1fr))",
+                md: "repeat(auto-fit, minmax(380px, 1fr))",
+              },
+              gap: { xs: 24, md: 32 },
               width: "100%",
-              maxWidth: 900,
+              maxWidth: { xs: "100%", md: 1200 },
+              justifyContent: "center",
             }}
           >
             {/* Event Card Skeletons */}
@@ -107,43 +113,47 @@ export default function HomePage() {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  padding: 3,
+                  padding: { xs: 2, md: 2.5 },
                   width: "100%",
+                  maxWidth: { xs: "100%", md: 450 },
                 }}
               >
                 <Skeleton
                   variant="rectangular"
                   width="100%"
-                  height={400}
-                  sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2 }}
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.1)",
+                    borderRadius: 2,
+                    height: { xs: 240, md: 280 },
+                  }}
                 />
                 <Skeleton
                   variant="text"
                   width="60%"
-                  height={32}
+                  height={28}
                   sx={{ bgcolor: "rgba(255,255,255,0.1)", mt: 2, mb: 1 }}
                 />
                 <Skeleton
                   variant="text"
                   width="90%"
-                  height={20}
+                  height={18}
                   sx={{ bgcolor: "rgba(255,255,255,0.1)", mb: 0.5 }}
                 />
                 <Skeleton
                   variant="text"
                   width="75%"
-                  height={20}
+                  height={18}
                   sx={{ bgcolor: "rgba(255,255,255,0.1)", mb: 2 }}
                 />
                 <Skeleton
                   variant="rectangular"
-                  width={150}
-                  height={48}
+                  width={120}
+                  height={40}
                   sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: "30px", mt: 1 }}
                 />
               </Box>
             ))}
-          </div>
+          </Box>
         </main>
       </div>
     );
@@ -200,19 +210,23 @@ export default function HomePage() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
           padding: "32px",
+          minHeight: "calc(100vh - 100px)",
         }}
       >
-    
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 24,
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(auto-fit, minmax(320px, 1fr))",
+              md: "repeat(auto-fit, minmax(380px, 1fr))",
+            },
+            gap: { xs: 6, md: 12 },
             width: "100%",
-            maxWidth: 900,
+            maxWidth: { xs: "100%", md: 1200 },
+            justifyContent: "center",
           }}
         >
           {events.map((event) => (
@@ -222,35 +236,55 @@ export default function HomePage() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                padding: 3,
+                padding: { xs: 2, md: 2.5 },
                 width: "100%",
+                maxWidth: { xs: "100%", md: 450 },
                 cursor: "pointer",
-                transition: "transform 0.2s",
+                transition: "all 0.3s ease",
+                borderRadius: 2,
+            
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 "&:hover": {
-                  transform: "translateY(-4px)",
+                  transform: { xs: "translateY(-2px)", md: "translateY(-6px) scale(1.02)" },
+                  boxShadow: "0 12px 24px rgba(0,0,0,0.3)",
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  "& .event-image": {
+                    transform: "scale(1.1)",
+                  },
                 },
               }}
               onClick={() => {
                 router.push(`/pages/${normalizeForUrl(event.title)}`);
               }}
             >
-              <Image
-                src={event.banner_image || "/components/dashboard-component.png"}
-                alt={event.title}
-                width={900}
-                height={400}
-                style={{
-                  borderRadius: 12,
-                  objectFit: "cover",
+              <Box
+                sx={{
                   width: "100%",
-                  height: "auto",
+                  height: { xs: 240, md: 280 },
+                  position: "relative",
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  
                 }}
-              />
+              >
+                <Image
+                  src={event.banner_image || "/components/dashboard-component.png"}
+                  alt={event.title}
+                  fill
+                  className="event-image"
+                  style={{
+                    objectFit: "cover",
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </Box>
               <h2
                 style={{
                   marginTop: 16,
                   marginBottom: 8,
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: 700,
                   color: "white",
                   textAlign: "center",
@@ -263,11 +297,15 @@ export default function HomePage() {
                   style={{
                     marginTop: 8,
                     marginBottom: 16,
-                    fontSize: 14,
-                    color: "white",
+                    fontSize: 13,
+                    color: "rgba(255, 255, 255, 0.9)",
                     textAlign: "center",
-                    maxWidth: 700,
-                    lineHeight: 1.6,
+                    maxWidth: "100%",
+                    lineHeight: 1.5,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
                   }}
                 >
                   {event.description}
@@ -275,17 +313,20 @@ export default function HomePage() {
               )}
               <Button
                 sx={{
-                  marginTop: 2,
+                  marginTop: 1,
                   backgroundColor: "#FFD600",
                   color: "#000",
                   fontWeight: 700,
-                  padding: "12px 32px",
+                  padding: { xs: "10px 24px", md: "10px 28px" },
                   borderRadius: "30px",
                   textTransform: "none",
-                  fontSize: 16,
+                  fontSize: { xs: 14, md: 15 },
                   boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+                  transition: "all 0.2s ease",
                   "&:hover": {
                     backgroundColor: "#FFC400",
+                    transform: "scale(1.05)",
+                    boxShadow: "0 6px 16px rgba(255, 214, 0, 0.4)",
                   },
                 }}
               >
@@ -293,7 +334,7 @@ export default function HomePage() {
               </Button>
             </Box>
           ))}
-        </div>
+        </Box>
       </main>
     </div>
   );
