@@ -298,46 +298,60 @@ export default function NewsDetailPage() {
       return;
     }
 
+    const commentContent = commentText.trim();
     setSubmittingComment(true);
+    
     try {
       // Cria o comentário usando o endpoint específico
-      const newComment = await createComment(newsId, commentText.trim());
+      const newComment = await createComment(newsId, commentContent);
       
-      // Atualiza os comentários localmente (otimisticamente)
-      setNews({
-        ...news,
-        comments: [newComment, ...news.comments],
-        comments_count: news.comments_count + 1,
-      });
+      // Atualização otimista imediata - mostra o comentário na hora
+      if (newComment) {
+        setNews({
+          ...news,
+          comments: [newComment, ...news.comments],
+          comments_count: news.comments_count + 1,
+        });
+        setCommentsOffset((prev) => prev + 1);
+      }
 
       setCommentText("");
       showToast("Comentário adicionado!", "success");
       
-      // Recarrega os comentários do servidor para garantir sincronização
-      try {
-        const comments = await listComments(newsId, COMMENTS_PER_PAGE, 0);
-        setNews((prev) =>
-          prev
-            ? {
-                ...prev,
-                comments: comments,
-                comments_count: prev.comments_count + 1,
-              }
-            : null
-        );
-        setCommentsOffset(comments.length);
-        setHasMoreComments((news.comments_count + 1) > comments.length);
-      } catch (syncError) {
-        console.error("Erro ao sincronizar comentários", syncError);
-        // Se falhar na sincronização, mantém o comentário adicionado otimisticamente
-      }
+      // Recarrega os comentários em background para garantir sincronização
+      // Não bloqueia a UI - o comentário já está visível
+      // O cache foi invalidado no backend antes de retornar, então podemos buscar imediatamente
+      (async () => {
+        try {
+          // Recarrega apenas os comentários (mais rápido que recarregar tudo)
+          const comments = await listComments(newsId, COMMENTS_PER_PAGE, 0);
+          
+          // Atualiza apenas se os comentários foram carregados com sucesso
+          setNews((prev) => {
+            if (!prev) return prev;
+            // Verifica se o novo comentário já está na lista
+            const hasNewComment = comments.some(c => c.id === newComment?.id);
+            return {
+              ...prev,
+              comments: comments,
+              comments_count: comments.length,
+            };
+          });
+          setCommentsOffset(comments.length);
+          setHasMoreComments(comments.length >= COMMENTS_PER_PAGE);
+        } catch (syncError) {
+          console.error("Erro ao sincronizar comentários em background", syncError);
+          // Não mostra erro ao usuário - o comentário já está visível
+        }
+      })();
+      
     } catch (error: any) {
       console.error("Erro ao comentar", error);
       const message =
         error.response?.data?.detail || "Erro ao adicionar comentário";
       showToast(message, "error");
       
-      // Em caso de erro, recarrega os comentários do servidor
+      // Em caso de erro, tenta recarregar os comentários
       try {
         const comments = await listComments(newsId, COMMENTS_PER_PAGE, 0);
         setNews((prev) =>
@@ -345,12 +359,11 @@ export default function NewsDetailPage() {
             ? {
                 ...prev,
                 comments: comments,
-                comments_count: prev.comments_count || comments.length,
+                comments_count: comments.length,
               }
             : null
         );
         setCommentsOffset(comments.length);
-        setHasMoreComments((news?.comments_count || 0) > comments.length);
       } catch (reloadError) {
         console.error("Erro ao recarregar comentários", reloadError);
       }

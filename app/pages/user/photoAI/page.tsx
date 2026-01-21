@@ -358,85 +358,125 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   };
 
   const renderIntro = () => (
-    <Box px={4} py={3} display="flex" flexDirection="column" gap={3}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: "#f4f7fc",
+        backgroundImage: "url(/background/dashboard.png)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      {/* Container centralizado para desktop */}
       <Box
         sx={{
-          background: "#e9e8ed",
-          borderRadius: 2,
+          width: "100%",
+          maxWidth: "1200px",
           display: "flex",
-          gap: 2,
-          p: 2,
-          alignItems: "center",
+          flexDirection: "column",
         }}
       >
-        <Box
-          sx={{
-            width: 54,
-            height: 54,
-            borderRadius: "50%",
-            border: "2px solid #4c36e0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#4c36e0",
-            background: "#fff",
-          }}
-        >
-          <ImageOutlinedIcon fontSize="medium" />
-        </Box>
-        <Box>
-          <Typography variant="body2" color="text.secondary">
-          Encontre suas fotos por reconhecimento facial.Tire uma selfie ou envie sua foto de rosto.
-          </Typography>
+        <Box px={4} py={3} display="flex" flexDirection="column" gap={3} sx={{ maxWidth: 700, width: "100%", alignSelf: "center" }}>
+          <Box
+            sx={{
+              background: "#e9e8ed",
+              borderRadius: 2,
+              display: "flex",
+              gap: 2,
+              p: 2,
+              alignItems: "center",
+            }}
+          >
+            <Box
+              sx={{
+                width: 54,
+                height: 54,
+                borderRadius: "50%",
+                border: "2px solid #4c36e0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#4c36e0",
+                background: "#fff",
+              }}
+            >
+              <ImageOutlinedIcon fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+              Encontre suas fotos por reconhecimento facial.Tire uma selfie ou envie sua foto de rosto.
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box display="flex" flexDirection="column" gap={1}>
+            <Typography variant="h6" fontWeight={700}>
+              Encontre suas fotos tiradas durante o evento
+            </Typography>
+            <Typography variant="body1">
+            Utilizamos reconhecimento facial para localizar suas fotos com rapidez e segurança.
+             Basta tirar uma selfie ou enviar uma foto do seu rosto, e o sistema encontrará automaticamente todas as imagens em que você aparece.
+            </Typography>
+          </Box>
+
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5 }}
+            onClick={requestCamera}
+            disabled={isRequestingCamera}
+          >
+            {isRequestingCamera ? (
+              <CircularProgress size={22} color="inherit" />
+            ) : (
+              "Procurar agora"
+            )}
+          </Button>
         </Box>
       </Box>
-
-      <Box display="flex" flexDirection="column" gap={1}>
-        <Typography variant="h6" fontWeight={700}>
-          Encontre suas fotos tiradas durante o evento
-        </Typography>
-        <Typography variant="body1">
-        Utilizamos reconhecimento facial para localizar suas fotos com rapidez e segurança.
-         Basta tirar uma selfie ou enviar uma foto do seu rosto, e o sistema encontrará automaticamente todas as imagens em que você aparece.
-        </Typography>
-      </Box>
-
-      <Button
-        variant="contained"
-        size="large"
-        fullWidth
-        sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5 }}
-        onClick={requestCamera}
-        disabled={isRequestingCamera}
-      >
-        {isRequestingCamera ? (
-          <CircularProgress size={22} color="inherit" />
-        ) : (
-          "Procurar agora"
-        )}
-      </Button>
     </Box>
   );
 
   const renderCamera = () => (
-    <Box px={2} py={2} display="flex" flexDirection="column" gap={2} sx={{ height: "100vh", overflow: "auto" }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: "#f4f7fc",
+        backgroundImage: "url(/background/dashboard.png)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      {/* Container centralizado para desktop */}
       <Box
         sx={{
           width: "100%",
-          maxWidth: 320,
-          margin: "0 auto",
-          aspectRatio: "3 / 4",
-          border: "3px solid #6c54ff",
-          borderRadius: "50%",
-          overflow: "hidden",
-          background: "#d9d9d9",
+          maxWidth: "1200px",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          flexShrink: 0,
+          flexDirection: "column",
         }}
       >
+        <Box px={2} py={2} display="flex" flexDirection="column" gap={2} sx={{ maxWidth: 700, width: "100%", alignSelf: "center" }}>
+          <Box
+            sx={{
+              width: "100%",
+              maxWidth: 320,
+              margin: "0 auto",
+              aspectRatio: "3 / 4",
+              border: "3px solid #6c54ff",
+              borderRadius: "50%",
+              overflow: "hidden",
+              background: "#d9d9d9",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              flexShrink: 0,
+            }}
+          >
         <video
           ref={videoRef}
           playsInline
@@ -590,6 +630,8 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
           Preparando captura...
         </Typography>
       )}
+        </Box>
+      </Box>
     </Box>
   );
 
@@ -620,92 +662,113 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   };
 
   const renderResults = () => (
-    <Box px={2} py={3} display="flex" flexDirection="column" gap={2}>
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Typography variant="h6" fontWeight={700}>
-          Minhas fotos
-        </Typography>
-        <Badge badgeContent={cart.length} color="primary">
-          <Box
-            onClick={handleCartClick}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              color: "#5a3cf1",
-              cursor: cart.length > 0 ? "pointer" : "default",
-              transition: "opacity 0.2s",
-              "&:hover": cart.length > 0 ? { opacity: 0.8 } : {},
-            }}
-          >
-            <ShoppingCartOutlinedIcon />
-          </Box>
-        </Badge>
-      </Box>
-
-      {searchMessage && (
-        <Typography variant="body2" >
-          {searchMessage}
-        </Typography>
-      )}
-
-      {results.length === 0 ? (
-        <Typography textAlign="center">
-          Nenhuma foto encontrada. Tente novamente com outra imagem.
-        </Typography>
-      ) : (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 2,
-          }}
-        >
-          {results.map((item, idx) => (
-            <Box
-              key={idx}
-              onClick={() => handlePhotoClick(item)}
-              sx={{
-                borderRadius: 2,
-                overflow: "hidden",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                background: "#fff",
-                cursor: "pointer",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                "&:hover": {
-                  transform: "scale(1.02)",
-                  boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
-                },
-              }}
-            >
-              <img
-                src={item.url}
-                alt={item.label || `Foto ${idx + 1}`}
-                style={{
-                  width: "100%",
-                  display: "block",
-                  aspectRatio: "3 / 4",
-                  objectFit: "cover",
-                }}
-              />
-            </Box>
-          ))}
-        </Box>
-      )}
-
-      <Button
-        variant="contained"
-        size="large"
-        fullWidth
-        sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5, mt: 1 }}
-        onClick={() => {
-          setResults([]);
-          setSearchMessage(null);
-          setStage("intro");
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: "#f4f7fc",
+        backgroundImage: "url(/background/dashboard.png)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      {/* Container centralizado para desktop */}
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: "1200px",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        Procurar novamente
-      </Button>
+        <Box px={2} py={3} display="flex" flexDirection="column" gap={2} sx={{ maxWidth: 700, width: "100%", alignSelf: "center" }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Typography variant="h6" fontWeight={700}>
+              Minhas fotos
+            </Typography>
+            <Badge badgeContent={cart.length} color="primary">
+              <Box
+                onClick={handleCartClick}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  color: "#5a3cf1",
+                  cursor: cart.length > 0 ? "pointer" : "default",
+                  transition: "opacity 0.2s",
+                  "&:hover": cart.length > 0 ? { opacity: 0.8 } : {},
+                }}
+              >
+                <ShoppingCartOutlinedIcon />
+              </Box>
+            </Badge>
+          </Box>
+
+          {searchMessage && (
+            <Typography variant="body2" >
+              {searchMessage}
+            </Typography>
+          )}
+
+          {results.length === 0 ? (
+            <Typography textAlign="center">
+              Nenhuma foto encontrada. Tente novamente com outra imagem.
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+                gap: 2,
+              }}
+            >
+              {results.map((item, idx) => (
+                <Box
+                  key={idx}
+                  onClick={() => handlePhotoClick(item)}
+                  sx={{
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    background: "#fff",
+                    cursor: "pointer",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      transform: "scale(1.02)",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
+                    },
+                  }}
+                >
+                  <img
+                    src={item.url}
+                    alt={item.label || `Foto ${idx + 1}`}
+                    style={{
+                      width: "100%",
+                      display: "block",
+                      aspectRatio: "3 / 4",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5, mt: 1 }}
+            onClick={() => {
+              setResults([]);
+              setSearchMessage(null);
+              setStage("intro");
+            }}
+          >
+            Procurar novamente
+          </Button>
+        </Box>
+      </Box>
     </Box>
   );
 
