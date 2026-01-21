@@ -262,120 +262,165 @@ export default function MyPendingPosts({ hideTitle = false }: MyPendingPostsProp
 
   if (loading && posts.length === 0) {
     return (
-      <Box padding={2}>
-        <Skeleton variant="rectangular" width="100%" height={200} sx={{ borderRadius: 2, marginBottom: 2 }} />
-        <Skeleton variant="rectangular" width="100%" height={100} sx={{ borderRadius: 2 }} />
+      <Box 
+        padding={2}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "100%", md: "800px" },
+          }}
+        >
+          <Skeleton variant="rectangular" width="100%" height={200} sx={{ borderRadius: 2, marginBottom: 2 }} />
+          <Skeleton variant="rectangular" width="100%" height={100} sx={{ borderRadius: 2 }} />
+        </Box>
       </Box>
     );
   }
 
   if (!loading && posts.length === 0) {
     return (
-      <Box padding={2} textAlign="center">
-        <Typography variant="body1" fontWeight={500} sx={{ color: "#fff", marginBottom: 1, fontSize: "0.9375rem" }}>
-          Nenhum post pendente
-        </Typography>
-        <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" }}>
-          Você não tem posts aguardando aprovação.
-        </Typography>
+      <Box 
+        padding={2} 
+        textAlign="center"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          width: "100%",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "100%", md: "800px" },
+          }}
+        >
+          <Typography variant="body1" fontWeight={500} sx={{ color: "#fff", marginBottom: 1, fontSize: "0.9375rem" }}>
+            Nenhum post pendente
+          </Typography>
+          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" }}>
+            Você não tem posts aguardando aprovação.
+          </Typography>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box padding={2}>
-      {!hideTitle && (
-        <Typography
-          variant="h6"
-          fontWeight={500}
-          sx={{ color: "#fff", marginBottom: 2, fontSize: "1rem" }}
-        >
-          Posts Pendentes
-        </Typography>
-      )}
+    <Box 
+      padding={2}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+      }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: { xs: "100%", md: "800px" },
+        }}
+      >
+        {!hideTitle && (
+          <Typography
+            variant="h6"
+            fontWeight={500}
+            sx={{ color: "#fff", marginBottom: 2, fontSize: "1rem" }}
+          >
+            Posts Pendentes
+          </Typography>
+        )}
 
-      <Box display="flex" flexDirection="column" gap={2}>
-        {posts.map((post, index) => (
-          <Box key={post.id}>
-            <Card
-              onClick={() => handlePostClick(post.id)}
-              sx={{
-                display: "flex",
-                gap: 2,
-                backgroundColor: "transparent",
-                boxShadow: "none",
-                color: "#fff",
-                paddingBottom: 1,
-                cursor: "default",
-                transition: "opacity 0.2s",
-                "&:hover": {
-                  opacity: 1,
-                },
-              }}
-            >
-              {post.images && post.images.length > 0 && (
-                <CardMedia
-                  component="img"
-                  image={post.images[0].image_url}
-                  alt={post.title}
+        <Box display="flex" flexDirection="column" gap={2}>
+          {posts.map((post, index) => (
+            <Box key={post.id}>
+              <Card
+                onClick={() => handlePostClick(post.id)}
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  backgroundColor: "transparent",
+                  boxShadow: "none",
+                  color: "#fff",
+                  paddingBottom: 1,
+                  cursor: "default",
+                  transition: "opacity 0.2s",
+                  "&:hover": {
+                    opacity: 1,
+                  },
+                }}
+              >
+                {post.images && post.images.length > 0 && (
+                  <CardMedia
+                    component="img"
+                    image={post.images[0].image_url}
+                    alt={post.title}
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 1,
+                      objectFit: "cover",
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+
+                <CardContent sx={{ padding: 1, flex: 1 }}>
+                  <Box display="flex" alignItems="center" gap={1} marginBottom={0.5}>
+                    <Typography fontWeight={500} sx={{ color: "#fff", fontSize: "0.9375rem" }}>
+                      {post.title}
+                    </Typography>
+                    <Chip
+                      label="Pendente"
+                      size="small"
+                      sx={{
+                        backgroundColor: "rgba(255, 193, 7, 0.2)",
+                        color: "#FFC107",
+                        fontSize: "0.7rem",
+                        height: 20,
+                      }}
+                    />
+                  </Box>
+
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "rgba(255,255,255,0.6)", marginTop: 0.5, fontSize: "0.875rem" }}
+                  >
+                    {formatDate(post.created_at)}
+                  </Typography>
+                </CardContent>
+              </Card>
+
+              {index !== posts.length - 1 && (
+                <Divider
                   sx={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 1,
-                    objectFit: "cover",
-                    flexShrink: 0,
+                    borderColor: "rgba(255,255,255,0.15)",
+                    marginTop: 2,
                   }}
                 />
               )}
-
-              <CardContent sx={{ padding: 1, flex: 1 }}>
-                <Box display="flex" alignItems="center" gap={1} marginBottom={0.5}>
-                  <Typography fontWeight={500} sx={{ color: "#fff", fontSize: "0.9375rem" }}>
-                    {post.title}
-                  </Typography>
-                  <Chip
-                    label="Pendente"
-                    size="small"
-                    sx={{
-                      backgroundColor: "rgba(255, 193, 7, 0.2)",
-                      color: "#FFC107",
-                      fontSize: "0.7rem",
-                      height: 20,
-                    }}
-                  />
-                </Box>
-
-                <Typography
-                  variant="body2"
-                  sx={{ color: "rgba(255,255,255,0.6)", marginTop: 0.5, fontSize: "0.875rem" }}
-                >
-                  {formatDate(post.created_at)}
-                </Typography>
-              </CardContent>
-            </Card>
-
-            {index !== posts.length - 1 && (
-              <Divider
-                sx={{
-                  borderColor: "rgba(255,255,255,0.15)",
-                  marginTop: 2,
-                }}
-              />
-            )}
-          </Box>
-        ))}
-      </Box>
-
-      {hasMore && (
-        <Box
-          ref={loaderRef}
-          display="flex"
-          justifyContent="center"
-          padding={2}
-        >
-          {loading && <CircularProgress size={24} sx={{ color: "#ffcc01" }} />}
+            </Box>
+          ))}
         </Box>
-      )}
+
+        {hasMore && (
+          <Box
+            ref={loaderRef}
+            display="flex"
+            justifyContent="center"
+            padding={2}
+          >
+            {loading && <CircularProgress size={24} sx={{ color: "#ffcc01" }} />}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }

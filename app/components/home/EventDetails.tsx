@@ -169,34 +169,42 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
             minHeight: "100vh",
             backgroundColor: "#f4f7fc",
             backgroundImage: "url(/background/dashboard.png)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
+          {/* Container centralizado para desktop */}
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "16px 32px",
-            }}
-          >
-            {/* LOGO + TEXTO */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-           
-
-              <strong style={{ fontSize: 22, color: "white" }}>Informações do Evento</strong>
-            </div>
-    
-          </div>
-    
-          <main
-            style={{
+              width: "100%",
+              maxWidth: "1200px",
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
-    
-              textAlign: "center",
             }}
           >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "16px 32px",
+              }}
+            >
+              {/* LOGO + TEXTO */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <strong style={{ fontSize: 22, color: "white" }}>Informações do Evento</strong>
+              </div>
+            </div>
+    
+            <main
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center",
+              }}
+            >
            {event.banner_image && (
         <Box
           component="img"
@@ -204,6 +212,7 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
           alt={event.title}
           sx={{
             width: "100%",
+            maxWidth: 700,
             maxHeight: 280,
             objectFit: "cover",
             borderRadius: 2,
@@ -231,7 +240,7 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
                 fontSize: 16,
                 padding: "30px",
                 color: "#000",
-                textAlign: "left",
+                textAlign: "center",
                 lineHeight: 1.6,
               }}
             >
@@ -250,11 +259,14 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
             <Box
               sx={{
                 maxWidth: 700,
+                width: "100%",
                 padding: "30px",
-                alignSelf: "flex-start",
                 color: "white",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 1.5,
               }}
-              // className="border border-amber-600"
             >
               {/* DATA */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -291,7 +303,7 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
                   padding: "20px",
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, marginBottom: 2 }}>
                   <MapIcon style={{ color: "yellow" }} />
                   <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
                     Mapa do Evento
@@ -321,7 +333,7 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
                   padding: "20px",
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, marginBottom: 2 }}>
                   <MusicNoteIcon style={{ color: "yellow" }} />
                   <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
                     Programação (Line Up)
@@ -350,10 +362,8 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
               </Box>
             )}
           
-          </main>
+            </main>
+          </div>
         </div>
-
-
-  
   );
 }

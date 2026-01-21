@@ -1,8 +1,7 @@
 "use client";
 
 import { Box, Card, Typography, CardContent } from "@mui/material";
-import { Article, PhotoLibrary, PendingActions } from "@mui/icons-material";
-import { useAuth } from "@/app/context/AuthContext";
+import { Article, PhotoLibrary } from "@mui/icons-material";
 
 interface MenuOption {
   id: string;
@@ -16,8 +15,6 @@ interface MenuOptionsProps {
 }
 
 export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
-  const { isAdminMaster, isSubadmin, isColunista } = useAuth();
-
   const options: MenuOption[] = [
     {
       id: "posts",
@@ -33,21 +30,24 @@ export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
     },
   ];
 
-  // Adiciona opção de posts pendentes apenas para colunistas
-  if (isColunista) {
-    options.push({
-      id: "pending",
-      title: "Posts Pendentes",
-      icon: <PendingActions sx={{ fontSize: 32 }} />,
-      onClick: () => onSelectOption("pending"),
-    });
-  }
-
   return (
-    <Box padding={2}>
-   
-
-      <Box display="flex" flexDirection="column" gap={2}>
+    <Box 
+      padding={2}
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        width: "100%",
+      }}
+    >
+      <Box 
+        display="flex" 
+        flexDirection="column" 
+        gap={2}
+        sx={{
+          width: "100%",
+          maxWidth: { xs: "100%", md: "600px" },
+        }}
+      >
         {options.map((option) => (
           <Card
             key={option.id}

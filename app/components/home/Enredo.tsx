@@ -251,9 +251,14 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "repeat(2, 1fr)" },
+            gridTemplateColumns: { 
+              xs: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+              lg: "repeat(4, 1fr)"
+            },
             gap: 2,
-            
+            maxWidth: { md: "1200px" },
+            mx: { md: "auto" },
           }}
         >
           {schools.map((school) => (
@@ -273,14 +278,14 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    p: 3,
-                    pb: 2,
+                    p: { xs: 3, md: 4 },
+                    pb: { xs: 2, md: 3 },
                   }}
                 >
                   <Box
                     sx={{
-                      width: 120,
-                      height: 120,
+                      width: { xs: 120, md: 160, lg: 180 },
+                      height: { xs: 120, md: 160, lg: 180 },
                       borderRadius: 2,
                       backgroundColor: "transparent",
                       display: "flex",
@@ -308,7 +313,7 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
                           color: "#fff",
                           fontWeight: 700,
                           textAlign: "center",
-                          fontSize: "0.9rem",
+                          fontSize: { xs: "0.9rem", md: "1.2rem", lg: "1.4rem" },
                         }}
                       >
                         {school.name.charAt(0)}
@@ -323,7 +328,7 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
                       color: "#fff",
                       mb: 1,
                       textAlign: "center",
-                      fontSize: "1rem",
+                      fontSize: { xs: "1rem", md: "1.2rem", lg: "1.3rem" },
                     }}
                   >
                     {school.name}
@@ -335,12 +340,12 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
                       sx={{
                         color: "rgba(255,255,255,0.7)",
                         textAlign: "center",
-                        fontSize: "0.85rem",
+                        fontSize: { xs: "0.85rem", md: "0.95rem", lg: "1rem" },
                         lineHeight: 1.5,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         display: "-webkit-box",
-                        WebkitLineClamp: 3,
+                        WebkitLineClamp: { xs: 3, md: 4 },
                         WebkitBoxOrient: "vertical",
                       }}
                     >
@@ -354,9 +359,40 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
         </Box>
       )}
 
-      <Divider sx={{ my: 4 }} />
+      {/* Spotify Playlist */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          my: 4,
+          px: 2,
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: { xs: "100%", md: "600px", lg: "700px" },
+          }}
+        >
+          <iframe
+            data-testid="embed-iframe"
+            style={{
+              borderRadius: "12px",
+              width: "100%",
+            }}
+            src="https://open.spotify.com/embed/playlist/7yhX7bo1ytC94v3alLA5Tp?utm_source=generator"
+            height="352"
+            frameBorder="0"
+            allowFullScreen
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+          />
+        </Box>
+      </Box>
 
-      <Typography 
+      {/* <Divider sx={{ my: 4 }} /> */}
+
+      {/* <Typography 
         variant="h6" 
         fontWeight={700} 
         mb={2}
@@ -366,9 +402,9 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
         }}
       >
         🎵 Letras de Música
-      </Typography>
+      </Typography> */}
 
-      {musics.length === 0 ? (
+      {/* {musics.length === 0 ? (
         <Typography 
           sx={{
             color: "rgba(255,255,255,0.6)",
@@ -454,7 +490,7 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
             </Card>
           );
         })
-      )}
+      )} */}
     </Box>
   );
 };
