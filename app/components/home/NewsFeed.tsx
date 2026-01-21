@@ -18,8 +18,8 @@ import { getEventNews, NewsResponse } from "@/app/services/news/newsService";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import EmptyNews from "./EmptyNews";
 import { useRouter } from "next/navigation";
-import CTVAd from "@/app/components/ads/CTVAd";
 import PendingPostsNotification from "@/app/components/admin/pending-posts/PendingPostsNotification";
+import AdBanner from "../ads/AdBanner";
 
 interface Props {
   eventId: number;
@@ -502,7 +502,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                 {/* CTVAd a cada 3 posts */}
                 {(index + 1) % 3 === 0 && index !== others.length - 1 && (
                   <>
-                    <CTVAd />
+                    <AdBanner />
                     <Divider
                       sx={{
                         borderColor: "rgba(255,255,255,0.15)",

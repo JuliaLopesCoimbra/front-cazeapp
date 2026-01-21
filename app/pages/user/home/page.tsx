@@ -9,7 +9,7 @@ import BottomNav from "@/app/components/layout/BottomNav";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import { Skeleton } from "@mui/material";
 import NewsFeed from "@/app/components/home/NewsFeed";
-import CTVAd from "@/app/components/ads/CTVAd";
+import AdBanner from "@/app/components/ads/AdBanner";
 import EventDetails from "@/app/components/home/EventDetails";
 import { useAuth } from "@/app/context/AuthContext";
 import PhotoAI from "@/app/components/home/PhotoAI";
@@ -326,7 +326,7 @@ const Home: React.FC = () => {
         {/* Conteúdo baseado na aba selecionada */}
         {activeTab === "home" && currentEvent && (
           <>
-            <CTVAd />
+            <AdBanner />
             <NewsFeed eventId={currentEvent.id} event={currentEvent} />
           </>
         )}
