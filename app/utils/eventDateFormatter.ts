@@ -22,11 +22,15 @@ export const formatEventDates = (event: EventResponse): string => {
     if (datesMatch && datesMatch.length > 0) {
       // Formata as datas
       const formattedDates = datesMatch.map((dateStr) => {
-        const date = new Date(dateStr);
+        // Parse manual da data para evitar problemas de timezone
+        // Formato: "YYYY-MM-DD"
+        const [year, month, day] = dateStr.split("-").map(Number);
+        // Cria uma data local (não UTC) para obter o nome do mês
+        const date = new Date(year, month - 1, day);
         return {
-          day: date.getDate(),
+          day: day, // Usa diretamente o dia extraído da string
           month: date.toLocaleDateString("pt-BR", { month: "long" }),
-          year: date.getFullYear(),
+          year: year, // Usa diretamente o ano extraído da string
         };
       });
 

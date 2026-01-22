@@ -24,6 +24,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import SchoolIcon from '@mui/icons-material/School';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { 
   getEventById, 
@@ -691,6 +692,25 @@ export default function EventDetailsPage() {
               </Typography>
               <Typography sx={{ color: "rgba(255,255,255,0.9)", lineHeight: 1.6 }}>
                 {new Date(event.ends_at).toLocaleString("pt-BR", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Typography>
+            </Box>
+          )}
+
+          {/* HORÁRIO DE SAÍDA DAS VANS */}
+          {event.van_departure_time && (
+            <Box sx={{ mb: 3 }}>
+              <Typography fontWeight={600} mb={1.5} sx={{ color: "#ffc91f", fontSize: "0.875rem", textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: 1 }}>
+                <DirectionsBusIcon sx={{ fontSize: "1rem" }} />
+                Horário de Saída das Vans
+              </Typography>
+              <Typography sx={{ color: "rgba(255,255,255,0.9)", lineHeight: 1.6 }}>
+                {new Date(event.van_departure_time).toLocaleString("pt-BR", {
                   day: "2-digit",
                   month: "long",
                   year: "numeric",

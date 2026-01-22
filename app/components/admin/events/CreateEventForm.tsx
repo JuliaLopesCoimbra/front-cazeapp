@@ -31,6 +31,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const [lineUp, setLineUp] = useState("");
   const [eventDates, setEventDates] = useState("");
   const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = useState("");
+  const [vanDepartureTime, setVanDepartureTime] = useState("");
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
@@ -122,6 +123,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         starts_at: startsAt || undefined,
         ends_at: endsAt || undefined,
         event_dates: eventDates.trim() || undefined,
+        van_departure_time: vanDepartureTime || undefined,
         banner_image: bannerImage || undefined,
         image_map: imageMap || undefined,
         line_up: lineUp.trim() || undefined,
@@ -182,7 +184,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         >
           <ArrowBackIosIcon fontSize="inherit" />
         </IconButton>
-        <Typography variant="h3" fontWeight={700} sx={{ color: "#fff", fontSize: { xs: "1.75rem", sm: "2rem" } }}>
+        <Typography variant="h3" fontWeight={700} sx={{ color: "#fff", fontSize: { xs: "1.3rem", sm: "2rem" } }}>
           Criar Novo Evento
         </Typography>
       </Box>
@@ -461,6 +463,51 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 color: "rgba(255,255,255,0.5)",
                 fontSize: "0.95rem",
                 marginTop: "6px",
+              },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Horário de Saída das Vans"
+            type="datetime-local"
+            value={vanDepartureTime}
+            onChange={(e) => setVanDepartureTime(e.target.value)}
+            disabled={loading}
+            inputProps={{
+              min: new Date().toISOString().slice(0, 16),
+            }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: "#fff",
+                fontSize: "1.1rem",
+                padding: "4px 0",
+                "& input": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                },
+                "& fieldset": {
+                  borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255,255,255,0.3)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ffc91f",
+                  borderWidth: "2px",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
+                "&.Mui-focused": {
+                  color: "#ffc91f",
+                },
               },
             }}
           />

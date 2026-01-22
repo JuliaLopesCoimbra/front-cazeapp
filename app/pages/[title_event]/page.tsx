@@ -9,6 +9,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapIcon from "@mui/icons-material/Map";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import { getEvents, EventResponse } from "../../services/events/eventAppService";
 import { formatEventDates } from "../../utils/eventDateFormatter";
 import { useAuth } from "../../context/AuthContext";
@@ -284,10 +285,9 @@ export default function EventPage() {
   const startDate = new Date(event.starts_at);
   const endDate = new Date(event.ends_at);
 
-  const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const vanDepartureTime = event.van_departure_time 
+    ? new Date(event.van_departure_time)
+    : null;
 
   return (
     <div
@@ -365,19 +365,31 @@ export default function EventPage() {
             />
           )}
 
-          {event.description && (
-            <p
-              style={{
+          {event.title && (
+            <Box
+              sx={{
                 maxWidth: 700,
-                marginTop: 16,
-                fontSize: 13,
-                padding: "30px",
-                color: "white",
-                textAlign: "left",
+                width: "100%",
+                marginTop: 3,
+                padding: { xs: "20px", md: "30px" },
+                textAlign: "center",
               }}
             >
-              {event.description}
-            </p>
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: "clamp(24px, 5vw, 42px)",
+                  fontWeight: 800,
+                  color: "#FFD600",
+                  textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 214, 0, 0.3)",
+                  letterSpacing: "0.5px",
+                  lineHeight: 1.2,
+                  textTransform: "uppercase",
+                }}
+              >
+                {event.title}
+              </h1>
+            </Box>
           )}
 
           <p
@@ -399,7 +411,7 @@ export default function EventPage() {
                 display: "inline",
               }}
             >
-              Prepare-se para sapucar como nunca antes. Te esperamos na Avenida!
+              {event.description}
             </span>
           </p>
 
@@ -411,25 +423,67 @@ export default function EventPage() {
               color: "white",
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
+              alignItems: { xs: "flex-start", md: "center" },
               gap: 1.5,
             }}
           >
-            {/* DATA */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <EventIcon style={{ color: "yellow" }} />
-              <p style={{ margin: 0, fontSize: 15 }}>
-                {formatEventDates(event)}
-              </p>
-            </Box>
+            {/* DIAS DO EVENTO */}
+            {event.event_dates && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <EventIcon style={{ color: "yellow" }} />
+                <p style={{ margin: 0, fontSize: 15 }}>
+                  {formatEventDates(event)}
+                </p>
+              </Box>
+            )}
 
-            {/* HORÁRIO */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <AccessTimeIcon style={{ color: "yellow" }} />
-              <p style={{ margin: 0, fontSize: 15 }}>
-                {timeFormatter.format(startDate)} às {timeFormatter.format(endDate)}
-              </p>
-            </Box>
+            {/* DATA E HORÁRIO DE INÍCIO */}
+            {event.starts_at && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <AccessTimeIcon style={{ color: "yellow" }} />
+                <p style={{ margin: 0, fontSize: 15 }}>
+                  Início: {new Date(event.starts_at).toLocaleString("pt-BR", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </Box>
+            )}
+
+            {/* DATA E HORÁRIO DE TÉRMINO */}
+            {event.ends_at && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <AccessTimeIcon style={{ color: "yellow" }} />
+                <p style={{ margin: 0, fontSize: 15 }}>
+                  Término: {new Date(event.ends_at).toLocaleString("pt-BR", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </Box>
+            )}
+
+            {/* HORÁRIO DE SAÍDA DAS VANS */}
+            {vanDepartureTime && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <DirectionsBusIcon style={{ color: "yellow" }} />
+                <p style={{ margin: 0, fontSize: 15 }}>
+                  Saída das Vans: {new Date(event.van_departure_time!).toLocaleString("pt-BR", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </Box>
+            )}
 
             {/* LOCAL */}
             {event.location && (

@@ -40,6 +40,7 @@ export default function EditEventForm({
   const [lineUp, setLineUp] = useState("");
   const [eventDates, setEventDates] = useState("");
   const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = useState("");
+  const [vanDepartureTime, setVanDepartureTime] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(true);
   const { showToast } = useToast();
@@ -90,6 +91,16 @@ export default function EditEventForm({
           setEventDates(event.event_dates);
         } else {
           setEventDates("");
+        }
+
+        if (event.van_departure_time) {
+          const vanDepartureTimeObj = new Date(event.van_departure_time);
+          const vanDepartureTimeStr = new Date(vanDepartureTimeObj.getTime() - vanDepartureTimeObj.getTimezoneOffset() * 60000)
+            .toISOString()
+            .slice(0, 16);
+          setVanDepartureTime(vanDepartureTimeStr);
+        } else {
+          setVanDepartureTime("");
         }
       } catch (err) {
         showToast("Erro ao carregar evento", "error");
@@ -209,6 +220,7 @@ export default function EditEventForm({
         start_date: startDate,
         end_date: endDate,
         event_dates: eventDates.trim() || undefined,
+        van_departure_time: vanDepartureTime || undefined,
         banner_image: bannerImage || undefined,
         image_map: imageMap || undefined,
         line_up: lineUp.trim() || undefined,
@@ -536,6 +548,43 @@ export default function EditEventForm({
               },
               "& .MuiFormHelperText-root": {
                 color: "rgba(255,255,255,0.5)",
+              },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Horário de Saída das Vans"
+            type="datetime-local"
+            value={vanDepartureTime}
+            onChange={(e) => setVanDepartureTime(e.target.value)}
+            disabled={loading}
+            inputProps={{
+              min: new Date().toISOString().slice(0, 16),
+            }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            variant="standard"
+            sx={{
+              "& .MuiInput-underline:before": {
+                borderBottomColor: "rgba(255,255,255,0.2)",
+              },
+              "& .MuiInput-underline:hover:before": {
+                borderBottomColor: "rgba(255,255,255,0.3)",
+              },
+              "& .MuiInput-underline:after": {
+                borderBottomColor: "#ffc91f",
+              },
+              "& .MuiInputBase-input": {
+                color: "#fff",
+                fontSize: "1rem",
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255,255,255,0.6)",
+                "&.Mui-focused": {
+                  color: "#ffc91f",
+                },
               },
             }}
           />

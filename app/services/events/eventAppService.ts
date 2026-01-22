@@ -17,6 +17,7 @@ export interface EventResponse {
   is_active: boolean;
   requires_post_approval: boolean;
   event_dates?: string; // Campo opcional para múltiplas datas (formato: "2024-01-09,2024-01-10,2024-01-20,2024-01-21" ou "09,10,20,21 de janeiro")
+  van_departure_time?: string;
   deleted_at?: string;
   deleted_by_id?: number;
 }
@@ -32,6 +33,7 @@ export interface CreateEventData {
   image_map?: File;
   line_up?: string;
   spotify_playlist_url?: string;
+  van_departure_time?: string;
 }
 
 export interface UpdateEventData {
@@ -45,6 +47,7 @@ export interface UpdateEventData {
   image_map?: File;
   line_up?: string;
   spotify_playlist_url?: string;
+  van_departure_time?: string;
 }
 
 export const getEvents = async (limit: number = 5, offset: number = 0): Promise<EventResponse[]> => {
@@ -92,6 +95,7 @@ export const createEvent = async (data: CreateEventData): Promise<EventResponse>
   if (data.starts_at) formData.append("starts_at", data.starts_at);
   if (data.ends_at) formData.append("ends_at", data.ends_at);
   if (data.event_dates) formData.append("event_dates", data.event_dates);
+  if (data.van_departure_time) formData.append("van_departure_time", data.van_departure_time);
   if (data.banner_image) formData.append("banner_image", data.banner_image);
   if (data.image_map) formData.append("image_map", data.image_map);
   if (data.line_up) formData.append("line_up", data.line_up);
@@ -116,6 +120,7 @@ export const updateEvent = async (
   formData.append("start_date", data.start_date);
   formData.append("end_date", data.end_date);
   if (data.event_dates) formData.append("event_dates", data.event_dates);
+  if (data.van_departure_time) formData.append("van_departure_time", data.van_departure_time);
   if (data.banner_image) formData.append("banner_image", data.banner_image);
   if (data.image_map) formData.append("image_map", data.image_map);
   if (data.line_up) formData.append("line_up", data.line_up);
