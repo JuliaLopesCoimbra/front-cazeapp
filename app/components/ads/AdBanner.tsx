@@ -1,42 +1,56 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box, Typography, Button, Skeleton } from "@mui/material";
-import Image from "next/image";
+import { Box, Skeleton, Typography } from "@mui/material";
 
 interface AdPlacement {
   image_url: string;
   redirect_url: string;
-  viewable_url: string;
+  viewable_url?: string;
   alt_text: string;
-  // O AdButler pode enviar título/descrição via metadados, 
-  // mas aqui usaremos os seus padrões caso não venham.
 }
+
+const FALLBACK_AD: AdPlacement = {
+  image_url: "/ads/coca.png",
+  redirect_url: "https://www.coca-cola.com/br/pt", // Link para onde o fallback deve levar
+  alt_text: "Oferta Exclusiva N1",
+};
 
 export default function AdBanner() {
   const [ad, setAd] = useState<AdPlacement | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchAd = async () => {
       try {
+        const random = Math.floor(Math.random() * 1000000);
         const res = await fetch(
-          "https://servedbyadbutler.com/adserve/;ID=189447;size=300x250;setID=1132395;type=json"
+          `https://servedbyadbutler.com/adserve/;ID=189447;size=300x250;setID=1132395;type=json;rnd=${random}`,
+          { cache: 'no-store' }
         );
+        
         const data = await res.json();
 
-        if (data.status === "SUCCESS" && data.placements.placement_1) {
+        // Verifica se o status é SUCESSO e se existe de fato um anúncio no objeto placements
+        if (data.status === "SUCCESS" && data.placements && data.placements.placement_1) {
           const placement = data.placements.placement_1;
           setAd(placement);
 
-          // REGISTRO DE VIEW (Impressão)
+          // REGISTRO DE VIEW (Apenas se não for o fallback)
           if (placement.viewable_url) {
             const img = new window.Image();
             img.src = placement.viewable_url;
           }
+        } else {
+          // Caso retorne "NO_ADS" ou placements vazio
+          console.log("AdButler retornou NO_ADS. Usando reserva.");
+          setAd(FALLBACK_AD);
         }
       } catch (error) {
-        console.error("Erro AdButler:", error);
+        // Caso ocorra erro de conexão, timeout ou AdBlock
+        console.warn("Erro de conexão com AdButler. Carregando anúncio reserva.");
+        setAd(FALLBACK_AD);
       } finally {
         setLoading(false);
       }
@@ -61,6 +75,7 @@ export default function AdBanner() {
     );
   }
 
+  // Se por algum motivo o ad ainda for null, não renderiza nada para não quebrar o layout
   if (!ad) return null;
 
   return (
@@ -88,22 +103,55 @@ export default function AdBanner() {
         sx={{
           position: "relative",
           width: "100%",
-          // AQUI ESTÃO OS SEUS BREAKPOINTS
           height: { xs: 100, sm: 250, md: 300 },
           backgroundColor: "#000",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-      <img
-  src={ad.image_url}
-  alt={ad.alt_text || "Propaganda AdButler"}
-  style={{
-    width: "100%",
-    height: "100%",
-    objectFit: "cover", // Mantém o preenchimento que você desejava
-    cursor: "pointer",
-  }}
-/>
-    
+        {!imageError ? (
+          <img
+            src={ad.image_url}
+            alt={ad.alt_text || "Propaganda N1"}
+            onError={(e) => {
+              console.warn("Erro ao carregar imagem do anúncio:", e);
+              setImageError(true);
+            }}
+            onLoad={() => setImageError(false)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              cursor: "pointer",
+            }}
+            
+          />
+        ) : (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: "100%",
+              color: "#fff",
+              padding: 2,
+              textAlign: "center",
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: "rgba(255,255,255,0.7)",
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              }}
+            >
+              Anúncio indisponível
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );

@@ -31,6 +31,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { EventResponse } from "@/app/services/events/eventAppService";
@@ -391,9 +392,29 @@ export default function HamburgerMenu({
               />
             </ListItemButton>
           </ListItem>
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                router.push("/pages/user/notifications");
+                setOpen(false);
+              }}
+            >
+              <NotificationsIcon sx={{ mr: 2, color: "white" }} />
+
+              <ListItemText
+                primary="Notificações"
+                secondary="Definir suas notificações"
+                primaryTypographyProps={{ fontWeight: 600 }}
+                secondaryTypographyProps={{
+                  sx: { color: "rgba(255,255,255,0.6)" },
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
          
   
-          <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+          {/* <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => {
@@ -412,7 +433,7 @@ export default function HamburgerMenu({
                 }}
               />
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
         
                 {/* ───────── PERMISSÕES (ADMIN MASTER E SUBADMIN) ───────── */}
                 {(isAdminMaster || isSubadmin) && (
@@ -442,7 +463,7 @@ export default function HamburgerMenu({
            )}
       
 
-          <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+          {/* <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
 
           <ListItem disablePadding>
             <ListItemButton
@@ -462,7 +483,7 @@ export default function HamburgerMenu({
                 }}
               />
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
 
           <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
 

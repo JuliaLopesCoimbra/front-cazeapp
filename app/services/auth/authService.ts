@@ -21,6 +21,7 @@ interface RegisterData {
   name: string;
   email: string;
   password: string;
+  birth_date: string;
 }
 export interface MeResponse {
   id: number;
@@ -49,11 +50,42 @@ export const loginUser = async (data: LoginData): Promise<LoginResponse> => {
       message?: string;
     };
 
-    const message =
+    // Verificar se precisa verificar idade - verificar primeiro antes de processar outros erros
+    const detail = err.response?.data?.detail;
+    if (detail) {
+      try {
+        const parsedDetail = JSON.parse(detail);
+        if (parsedDetail.requires_age_verification && parsedDetail.temp_token) {
+          // Criar um erro especial que será tratado no frontend
+          const specialError: any = new Error("AGE_VERIFICATION_REQUIRED");
+          specialError.tempToken = parsedDetail.temp_token;
+          throw specialError; // Lança o erro especial que será capturado no componente
+        }
+      } catch (parseError: any) {
+        // Se for o erro especial que criamos, relançar
+        if (parseError.message === "AGE_VERIFICATION_REQUIRED") {
+          throw parseError;
+        }
+        // Se não for JSON válido ou não for o erro especial, continua
+      }
+    }
+
+    // Extrair mensagem de erro normal
+    let message = 
       err.response?.data?.detail ||
       err.response?.data?.message ||
       err.message ||
       "Erro ao fazer login";
+
+    // Tentar parsear se for JSON (pode conter informações estruturadas)
+    try {
+      const parsed = JSON.parse(message);
+      if (typeof parsed === 'object' && parsed.message) {
+        message = parsed.message;
+      }
+    } catch {
+      // Não é JSON, usar mensagem original
+    }
 
     throw new Error(message);
   }
@@ -157,4 +189,35 @@ export const resendVerificationEmail = async (email: string): Promise<void> => {
 export const getMe = async (): Promise<MeResponse> => {
   const response = await api.get<MeResponse>("/auth/me");
   return response.data;
+};
+
+// ---------------------------
+// VERIFICAÇÃO DE IDADE
+// ---------------------------
+export const verifyAge = async (
+  birthDate: string,
+  confirmed: boolean,
+  token?: string
+): Promise<void> => {
+  try {
+    const headers: any = {
+      "Content-Type": "application/json",
+    };
+    
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
+    await axios.post(
+      `${API_URL}/auth/verify-age`,
+      { confirmed, birth_date: birthDate },
+      { headers }
+    );
+  } catch (error: any) {
+    const message =
+      error.response?.data?.detail ||
+      error.message ||
+      "Erro ao verificar idade";
+    throw new Error(message);
+  }
 };

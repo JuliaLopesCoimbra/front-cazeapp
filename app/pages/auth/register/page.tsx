@@ -10,6 +10,9 @@ import {
   Container,
 } from "@mui/material";
 import { Visibility, VisibilityOff, ArrowBack, CheckCircle } from "@mui/icons-material";
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { ptBR } from 'date-fns/locale';
 import { registerUser } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import RegisterSuccess from "@/app/components/auth/RegisterSuccess";
@@ -21,17 +24,34 @@ const RegisterForm: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-const router = useRouter();
+  const router = useRouter();
 
   const { showToast } = useToast();
 
   const passwordsMatch = password === confirmPassword;
 
   const handleRegister = async () => {
+    if (!birthDate) {
+      showToast("Por favor, informe sua data de nascimento", "error");
+      return;
+    }
+
+    // Validar idade no frontend
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear() - 
+      (today.getMonth() < birthDate.getMonth() || 
+       (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate()) ? 1 : 0);
+    
+    if (age < 18) {
+      showToast("Você deve ter pelo menos 18 anos para se cadastrar", "error");
+      return;
+    }
+
     if (!passwordsMatch) {
       showToast("As senhas não conferem", "error");
       return;
@@ -45,7 +65,14 @@ const router = useRouter();
 
     setLoading(true);
     try {
-      await registerUser({ name, email, password });
+      const formattedDate = birthDate.toISOString().split('T')[0];
+      
+      await registerUser({ 
+        name, 
+        email, 
+        password,
+        birth_date: formattedDate 
+      });
 
       showToast(
         "Cadastro realizado! Verifique seu e-mail para confirmar a conta.",
@@ -78,18 +105,19 @@ const router = useRouter();
   }
 
   return (
-    <Box
-      suppressHydrationWarning
-      sx={{
-        minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+      <Box
+        suppressHydrationWarning
+        sx={{
+          minHeight: "100vh",
+          backgroundImage: "url(/background/dashboard.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
       {/* Header */}
       <Box
         sx={{
@@ -266,6 +294,78 @@ const router = useRouter();
             }}
           />
 
+          <DatePicker
+            label="Data de Nascimento"
+            value={birthDate}
+            onChange={(newValue) => setBirthDate(newValue)}
+            maxDate={new Date()}
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                sx: {
+                  mt: 3,
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    color: "#fff !important",
+                    borderRadius: "14px",
+                    "& input": {
+                      color: "#fff !important",
+                      WebkitTextFillColor: "#fff !important",
+                      "&::placeholder": {
+                        color: "rgba(255, 255, 255, 0.5) !important",
+                        opacity: 1,
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#fff !important",
+                      WebkitTextFillColor: "#fff !important",
+                    },
+                    "& fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.3) !important",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.5) !important",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#fff !important",
+                    },
+                    "& input:-webkit-autofill": {
+                      WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.1) inset !important",
+                      WebkitTextFillColor: "#fff !important",
+                      transition: "background-color 9999s ease-in-out 0s",
+                    },
+                    "& input:-webkit-autofill:hover": {
+                      WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset !important",
+                      WebkitTextFillColor: "#fff !important",
+                    },
+                    "& input:-webkit-autofill:focus": {
+                      WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.15) inset !important",
+                      WebkitTextFillColor: "#fff !important",
+                    },
+                  },
+                },
+                InputLabelProps: {
+                  shrink: true,
+                  sx: { 
+                    color: "#fff",
+                    fontSize: 13,
+                    transform: "translate(14px, -9px) scale(1)",
+                    "&.Mui-focused": { color: "#fff" },
+                  },
+                },
+                InputProps: {
+                  sx: {
+                    color: "#fff !important",
+                    "& input": {
+                      color: "#fff !important",
+                      WebkitTextFillColor: "#fff !important",
+                    },
+                  },
+                },
+              },
+            }}
+          />
+
           <TextField
             fullWidth
             label="Senha"
@@ -436,7 +536,7 @@ const router = useRouter();
               },
               transition: "all 0.3s ease",
             }}
-            disabled={loading}
+            disabled={loading || !birthDate}
             onClick={handleRegister}
           >
             {loading ? "Criando conta..." : "Cadastrar"}
@@ -444,6 +544,7 @@ const router = useRouter();
         </Box>
       </Container>
     </Box>
+    </LocalizationProvider>
   );
 };
 

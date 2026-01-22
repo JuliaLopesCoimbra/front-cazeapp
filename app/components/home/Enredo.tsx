@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   Divider,
+  Button,
 } from "@mui/material";
 
 import { useFeedCache } from "@/app/context/FeedCacheContext";
@@ -23,9 +24,10 @@ import {
 
 interface Props {
   eventId: number;
+  spotifyPlaylistUrl?: string;
 }
 
-const Enredo: React.FC<Props> = ({ eventId }) => {
+const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `enredo-event-${eventId}`;
   const [initialized, setInitialized] = useState(false);
@@ -34,7 +36,30 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
   const [musics, setMusics] = useState<MusicLyricsResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
+  const [playlistOpened, setPlaylistOpened] = useState(false);
   const enredoSectionRef = useRef<HTMLDivElement>(null);
+
+  // Função para converter URL da playlist para formato embed
+  const convertToEmbedUrl = (url: string): string => {
+    if (!url) return "";
+    
+    // Se já estiver no formato embed, retorna como está
+    if (url.includes("/embed/")) {
+      return url;
+    }
+    
+    // Extrai o ID da playlist da URL
+    // Formato: https://open.spotify.com/playlist/ID?si=...
+    const playlistMatch = url.match(/playlist\/([a-zA-Z0-9]+)/);
+    if (playlistMatch && playlistMatch[1]) {
+      const playlistId = playlistMatch[1];
+      return `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator`;
+    }
+    
+    return url;
+  };
+
+  const embedUrl = spotifyPlaylistUrl ? convertToEmbedUrl(spotifyPlaylistUrl) : "";
 
   useEffect(() => {
     if (initialized) {
@@ -407,26 +432,198 @@ const Enredo: React.FC<Props> = ({ eventId }) => {
           px: 2,
         }}
       >
-        <Box
-          sx={{
-            width: "100%",
-            maxWidth: { xs: "100%", md: "600px", lg: "700px" },
-          }}
-        >
-          <iframe
-            data-testid="embed-iframe"
-            style={{
-              borderRadius: "12px",
+        {spotifyPlaylistUrl ? (
+          playlistOpened ? (
+            <Box
+              sx={{
+                width: "100%",
+                maxWidth: { xs: "100%", md: "600px", lg: "700px" },
+              }}
+            >
+              <iframe
+                data-testid="embed-iframe"
+                style={{
+                  borderRadius: "12px",
+                  width: "100%",
+                }}
+                src={embedUrl}
+                height="352"
+                frameBorder="0"
+                allowFullScreen
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+              />
+            </Box>
+          ) : (
+            <Card
+              sx={{
+                width: "100%",
+                maxWidth: { xs: "100%", md: "600px", lg: "700px" },
+                backgroundColor: "rgba(30, 215, 96, 0.1)",
+                backdropFilter: "blur(10px)",
+                borderRadius: 3,
+                border: "2px solid rgba(30, 215, 96, 0.3)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "352px",
+                py: 6,
+                px: 3,
+                transition: "all 0.3s ease",
+                cursor: "pointer",
+                "&:hover": {
+                  borderColor: "rgba(30, 215, 96, 0.5)",
+                  backgroundColor: "rgba(30, 215, 96, 0.15)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 8px 24px rgba(30, 215, 96, 0.2)",
+                },
+              }}
+              onClick={() => setPlaylistOpened(true)}
+            >
+              <CardContent
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 3,
+                  textAlign: "center",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: { xs: 80, md: 100 },
+                    height: { xs: 80, md: 100 },
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(30, 215, 96, 0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 1,
+                  }}
+                >
+                  <Box
+                    component="svg"
+                    sx={{
+                      width: { xs: 50, md: 60 },
+                      height: { xs: 50, md: 60 },
+                      fill: "#1DB954",
+                    }}
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.3z" />
+                  </Box>
+                </Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: "#fff",
+                    fontSize: { xs: "1.2rem", md: "1.4rem" },
+                    fontWeight: 700,
+                    mb: 0.5,
+                  }}
+                >
+                  Playlist do Spotify
+                </Typography>
+                <Typography
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.8)",
+                    fontSize: { xs: "0.95rem", md: "1.05rem" },
+                    mb: 2,
+                  }}
+                >
+                  Clique para ouvir a playlist
+                </Typography>
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "#1DB954",
+                    color: "#fff",
+                    fontWeight: 600,
+                    fontSize: { xs: "0.95rem", md: "1.05rem" },
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: "50px",
+                    textTransform: "none",
+                    "&:hover": {
+                      backgroundColor: "#1ed760",
+                      transform: "scale(1.05)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  Reproduzir Playlist
+                </Button>
+              </CardContent>
+            </Card>
+          )
+        ) : (
+          <Card
+            sx={{
               width: "100%",
+              maxWidth: { xs: "100%", md: "600px", lg: "700px" },
+              backgroundColor: "rgba(0, 0, 0, 0.3)",
+              backdropFilter: "blur(10px)",
+              borderRadius: 3,
+              border: "2px dashed rgba(255, 255, 255, 0.2)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "352px",
+              py: 6,
+              px: 3,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                borderColor: "rgba(255, 201, 31, 0.4)",
+                backgroundColor: "rgba(0, 0, 0, 0.4)",
+              },
             }}
-            src="https://open.spotify.com/embed/playlist/7yhX7bo1ytC94v3alLA5Tp?utm_source=generator"
-            height="352"
-            frameBorder="0"
-            allowFullScreen
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-          />
-        </Box>
+          >
+            <CardContent
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                textAlign: "center",
+              }}
+            >
+              <Box
+                sx={{
+                  fontSize: { xs: "4rem", md: "5rem" },
+                  lineHeight: 1,
+                  mb: 1,
+                  opacity: 0.7,
+                }}
+              >
+                🎵
+              </Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontSize: { xs: "1.1rem", md: "1.3rem" },
+                  fontWeight: 600,
+                  mb: 0.5,
+                }}
+              >
+                Playlist não disponível
+              </Typography>
+              <Typography
+                sx={{
+                  color: "rgba(255, 255, 255, 0.6)",
+                  fontSize: { xs: "0.9rem", md: "1rem" },
+                  maxWidth: "400px",
+                }}
+              >
+                Nenhuma playlist do Spotify foi cadastrada para este evento
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
       </Box>
 
       {/* Seção de Enredo da Escola de Samba */}

@@ -82,10 +82,10 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
       }}
     >
       <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
-          <Box sx={{ flex: 1 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             {/* Header com nome e status */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2, flexWrap: "wrap" }}>
               {getRoleIcon()}
               <Typography
                 variant="h6"
@@ -93,6 +93,9 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
                   color: "white",
                   fontWeight: 600,
                   flex: 1,
+                  minWidth: 0,
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
                 }}
               >
                 {user.name || "Sem nome"}
@@ -104,6 +107,7 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
                 sx={{
                   fontWeight: 600,
                   fontSize: "0.75rem",
+                  flexShrink: 0,
                 }}
               />
             </Box>
@@ -205,7 +209,7 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
           </Box>
 
           {/* Botões de ação */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
             {isActive ? (
               <Tooltip title="Desativar acesso" arrow>
                 <IconButton

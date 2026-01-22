@@ -502,7 +502,17 @@ export default function NewsFeed({ eventId, event }: Props) {
                 {/* CTVAd a cada 3 posts */}
                 {(index + 1) % 3 === 0 && index !== others.length - 1 && (
                   <>
-                    <AdBanner />
+                    <Box
+                      sx={{
+                        "& > div": {
+                          mx: "0 !important",
+                          maxWidth: "100% !important",
+                          width: "100% !important",
+                        },
+                      }}
+                    >
+                      <AdBanner />
+                    </Box>
                     <Divider
                       sx={{
                         borderColor: "rgba(255,255,255,0.15)",

@@ -30,6 +30,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const [previewMap, setPreviewMap] = useState<string | null>(null);
   const [lineUp, setLineUp] = useState("");
   const [eventDates, setEventDates] = useState("");
+  const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
@@ -124,6 +125,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         banner_image: bannerImage || undefined,
         image_map: imageMap || undefined,
         line_up: lineUp.trim() || undefined,
+        spotify_playlist_url: spotifyPlaylistUrl.trim() || undefined,
       };
 
       await createEvent(data);
@@ -149,6 +151,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
     <Box
       sx={{
         minHeight: "100vh",
+        backgroundImage: "url(/background/dashboard.png)",
         height: "100vh",
         overflowY: "auto",
         backgroundColor: "#000",
@@ -162,23 +165,24 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
-          p: 2,
+          gap: 2,
+          p: 3,
+          backgroundColor: "rgba(0, 0, 0, 0.3)",
+          backdropFilter: "blur(10px)",
           borderBottom: "1px solid rgba(255,255,255,0.1)",
           position: "sticky",
           top: 0,
-          backgroundColor: "#000",
           zIndex: 10,
         }}
       >
         <IconButton
           onClick={() => router.push("/pages/user/home")}
-          size="small"
-          sx={{ color: "#fff" }}
+          size="medium"
+          sx={{ color: "#fff", fontSize: "1.5rem" }}
         >
-          <ArrowBackIosIcon />
+          <ArrowBackIosIcon fontSize="inherit" />
         </IconButton>
-        <Typography variant="h5" fontWeight={700} sx={{ color: "#fff" }}>
+        <Typography variant="h3" fontWeight={700} sx={{ color: "#fff", fontSize: { xs: "1.75rem", sm: "2rem" } }}>
           Criar Novo Evento
         </Typography>
       </Box>
@@ -189,24 +193,24 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         onSubmit={handleSubmit}
         sx={{
           flex: 1,
-          p: 3,
-          maxWidth: 700,
+          p: { xs: 3, sm: 4 },
+          maxWidth: 800,
           width: "100%",
           mx: "auto",
           display: "flex",
           flexDirection: "column",
-          gap: 2,
+          gap: 3,
         }}
       >
         <Paper
           elevation={0}
           sx={{
-            backgroundColor: "rgba(255,255,255,0.05)",
-            borderRadius: 2,
-            p: 3,
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            borderRadius: 3,
+            p: { xs: 3, sm: 4 },
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            gap: 3,
           }}
         >
           <TextField
@@ -220,18 +224,27 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 color: "#fff",
+                fontSize: "1.1rem",
+                padding: "4px 0",
+                "& input": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
+                  borderColor: "rgba(255,255,255,0.3)",
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: "#ffc91f",
+                  borderWidth: "2px",
                 },
               },
               "& .MuiInputLabel-root": {
                 color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
@@ -251,18 +264,27 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 color: "#fff",
+                fontSize: "1.1rem",
+                "& textarea": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                  lineHeight: "1.6",
+                },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
+                  borderColor: "rgba(255,255,255,0.3)",
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: "#ffc91f",
+                  borderWidth: "2px",
                 },
               },
               "& .MuiInputLabel-root": {
                 color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
@@ -280,18 +302,27 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 color: "#fff",
+                fontSize: "1.1rem",
+                padding: "4px 0",
+                "& input": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
+                  borderColor: "rgba(255,255,255,0.3)",
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: "#ffc91f",
+                  borderWidth: "2px",
                 },
               },
               "& .MuiInputLabel-root": {
                 color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
@@ -316,18 +347,27 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 color: "#fff",
+                fontSize: "1.1rem",
+                padding: "4px 0",
+                "& input": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
+                  borderColor: "rgba(255,255,255,0.3)",
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: "#ffc91f",
+                  borderWidth: "2px",
                 },
               },
               "& .MuiInputLabel-root": {
                 color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
@@ -352,18 +392,27 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 color: "#fff",
+                fontSize: "1.1rem",
+                padding: "4px 0",
+                "& input": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
+                  borderColor: "rgba(255,255,255,0.3)",
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: "#ffc91f",
+                  borderWidth: "2px",
                 },
               },
               "& .MuiInputLabel-root": {
                 color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
@@ -383,30 +432,41 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 color: "#fff",
+                fontSize: "1.1rem",
+                padding: "4px 0",
+                "& input": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
+                  borderColor: "rgba(255,255,255,0.3)",
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: "#ffc91f",
+                  borderWidth: "2px",
                 },
               },
               "& .MuiInputLabel-root": {
                 color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
               },
               "& .MuiFormHelperText-root": {
                 color: "rgba(255,255,255,0.5)",
+                fontSize: "0.95rem",
+                marginTop: "6px",
               },
             }}
           />
 
           <Box>
-            <Typography variant="body2" sx={{ mb: 1, color: "rgba(255,255,255,0.7)" }}>
+            <Typography variant="body1" sx={{ mb: 2, color: "rgba(255,255,255,0.9)", fontSize: "1.1rem", fontWeight: 500 }}>
               Banner do Evento
             </Typography>
             <input
@@ -425,10 +485,15 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 fullWidth
                 sx={{
                   borderColor: "rgba(255,255,255,0.2)",
+                  borderWidth: "2px",
                   color: "#fff",
-                  py: 1.5,
+                  py: 2,
+                  fontSize: "1.05rem",
+                  fontWeight: 500,
+                  textTransform: "none",
                   "&:hover": {
                     borderColor: "#ffc91f",
+                    borderWidth: "2px",
                     backgroundColor: "rgba(255,201,31,0.1)",
                   },
                 }}
@@ -453,7 +518,7 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
           </Box>
 
           <Box>
-            <Typography variant="body2" sx={{ mb: 1, color: "rgba(255,255,255,0.7)" }}>
+            <Typography variant="body1" sx={{ mb: 2, color: "rgba(255,255,255,0.9)", fontSize: "1.1rem", fontWeight: 500 }}>
               Mapa do Evento
             </Typography>
             <input
@@ -472,10 +537,15 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 fullWidth
                 sx={{
                   borderColor: "rgba(255,255,255,0.2)",
+                  borderWidth: "2px",
                   color: "#fff",
-                  py: 1.5,
+                  py: 2,
+                  fontSize: "1.05rem",
+                  fontWeight: 500,
+                  textTransform: "none",
                   "&:hover": {
                     borderColor: "#ffc91f",
+                    borderWidth: "2px",
                     backgroundColor: "rgba(255,201,31,0.1)",
                   },
                 }}
@@ -512,27 +582,81 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               "& .MuiOutlinedInput-root": {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 color: "#fff",
+                fontSize: "1.1rem",
+                "& textarea": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                  lineHeight: "1.6",
+                },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
+                  borderColor: "rgba(255,255,255,0.3)",
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: "#ffc91f",
+                  borderWidth: "2px",
                 },
               },
               "& .MuiInputLabel-root": {
                 color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
               },
             }}
           />
+
+          <TextField
+            fullWidth
+            label="Link do Iframe da Playlist Spotify"
+            value={spotifyPlaylistUrl}
+            onChange={(e) => setSpotifyPlaylistUrl(e.target.value)}
+            disabled={loading}
+            placeholder="Ex: https://open.spotify.com/embed/playlist/7yhX7bo1ytC94v3alLA5Tp?utm_source=generator"
+            helperText="Cole aqui o link completo do iframe da playlist do Spotify"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: "#fff",
+                fontSize: "1.1rem",
+                padding: "4px 0",
+                "& input": {
+                  padding: "14px 16px",
+                  fontSize: "1.1rem",
+                },
+                "& fieldset": {
+                  borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "2px",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255,255,255,0.3)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ffc91f",
+                  borderWidth: "2px",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255,255,255,0.7)",
+                fontSize: "1.1rem",
+                "&.Mui-focused": {
+                  color: "#ffc91f",
+                },
+              },
+              "& .MuiFormHelperText-root": {
+                color: "rgba(255,255,255,0.5)",
+                fontSize: "0.95rem",
+                marginTop: "6px",
+              },
+            }}
+          />
         </Paper>
 
-        <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+        <Box sx={{ display: "flex", gap: 2, mt: 3, mb: 2 }}>
           <Button
             variant="outlined"
             onClick={() => router.push("/pages/user/home")}
@@ -540,9 +664,15 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             sx={{
               flex: 1,
               borderColor: "rgba(255,255,255,0.2)",
-              color: "rgba(255,255,255,0.7)",
+              borderWidth: "2px",
+              color: "rgba(255,255,255,0.9)",
+              py: 1.5,
+              fontSize: "1.05rem",
+              fontWeight: 600,
+              textTransform: "none",
               "&:hover": {
-                borderColor: "rgba(255,255,255,0.3)",
+                borderColor: "rgba(255,255,255,0.4)",
+                borderWidth: "2px",
                 backgroundColor: "rgba(255,255,255,0.05)",
               },
             }}
@@ -558,6 +688,9 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               backgroundColor: "#ffc91f",
               color: "#000",
               fontWeight: 600,
+              py: 1.5,
+              fontSize: "1.05rem",
+              textTransform: "none",
               "&:hover": {
                 backgroundColor: "#e6b800",
               },

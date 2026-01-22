@@ -59,8 +59,23 @@ const Home: React.FC = () => {
       const currentId = currentEventIdRef.current;
       if (currentId) {
         const updatedEvent = data.find((event) => event.id === currentId);
+          
+        // Se o evento não foi encontrado (foi deletado), troca para um ativo
+        if (!updatedEvent) {
+          const activeEvent = data.find((event) => event.is_active);
+          if (activeEvent) {
+            setCurrentEvent(activeEvent);
+            currentEventIdRef.current = activeEvent.id;
+            localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
+          } else {
+            // Não há eventos disponíveis
+            setCurrentEvent(null);
+            currentEventIdRef.current = null;
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        }
         // Se o evento atual foi desativado e o usuário NÃO é admin/subadmin, troca para um ativo
-        if (updatedEvent && !updatedEvent.is_active && !isAdmin) {
+        else if (!updatedEvent.is_active && !isAdmin) {
           const activeEvent = data.find((event) => event.is_active);
           if (activeEvent) {
             setCurrentEvent(activeEvent);
@@ -337,7 +352,7 @@ const Home: React.FC = () => {
         )}
 
         {activeTab === "enredo" && currentEvent && (
-          <Enredo eventId={currentEvent.id} />
+          <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} />
         )}
       </Box>
       <BottomNav />

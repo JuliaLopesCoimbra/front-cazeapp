@@ -125,15 +125,12 @@ export default function EventDetailsPage() {
   useEffect(() => {
     if (!eventId || initialized) return;
 
-    console.log('🔍 [Admin Events] Verificando cache para:', cacheKey);
     // Tenta carregar do cache
     const cached = getCache(cacheKey);
     
     if (cached && cached.data.length > 0) {
-      console.log('✅ [Admin Events] Cache encontrado!');
       // ✅ Dados encontrados no cache!
       const [cachedSchools, cachedMusics] = cached.data;
-      console.log('📦 [Admin Events] Escolas:', cachedSchools?.length || 0, 'Músicas:', cachedMusics?.length || 0);
       setSchools(cachedSchools || []);
       setMusics(cachedMusics || []);
       setSchoolsOffset(cachedSchools?.length || 0);
@@ -145,7 +142,6 @@ export default function EventDetailsPage() {
       
       // Restaura posição do scroll
       const targetPosition = cached.scrollPosition;
-      console.log(`🎯 [Admin Events] RESTAURANDO SCROLL para: ${targetPosition}px`);
       
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
@@ -166,12 +162,11 @@ export default function EventDetailsPage() {
         const diff = Math.abs(currentScroll - targetPosition);
         
         if (diff < 10) {
-          console.log(`✅ [Admin Events] SUCESSO! Scroll restaurado em ${attempts} tentativas: ${currentScroll}px`);
+          // Scroll restaurado com sucesso
         } else if (attempts < maxAttempts) {
-          console.log(`⏳ [Admin Events] Tentativa ${attempts}: atual=${currentScroll}, target=${targetPosition}, diff=${diff}`);
           requestAnimationFrame(attemptRestore);
         } else {
-          console.log(`⚠️ [Admin Events] Máximo de tentativas. Posição final: ${currentScroll}px`);
+          // Máximo de tentativas atingido
         }
       };
       
@@ -186,7 +181,6 @@ export default function EventDetailsPage() {
         }, delay);
       });
     } else {
-      console.log('❌ [Admin Events] Sem cache - carregando da API');
       // ❌ Sem cache - carrega da API
       const fetchSchoolsAndMusics = async () => {
         try {
@@ -234,17 +228,13 @@ export default function EventDetailsPage() {
     
     // Limpa listeners anteriores se existirem
     if (cleanupFnRef.current) {
-      console.log('🧹 [Admin Events] Limpando listeners anteriores');
       cleanupFnRef.current();
       cleanupFnRef.current = null;
     }
     
     if (!container) {
-      console.log('⚠️ [Admin Events] Container desmontado');
       return;
     }
-    
-    console.log('✅ [Admin Events] Container montado! Configurando listeners...');
     
     let throttleTimeout: NodeJS.Timeout | null = null;
     const THROTTLE_MS = 400; // Otimizado para performance
@@ -252,13 +242,6 @@ export default function EventDetailsPage() {
     const updateScrollPosition = () => {
       const containerScroll = container.scrollTop;
       const containerMaxScroll = container.scrollHeight - container.clientHeight;
-      
-      console.log(`📊 [Admin Events] SCROLL DETECTADO (CONTAINER):`, {
-        containerScrollTop: containerScroll,
-        containerMaxScroll,
-        containerScrollHeight: container.scrollHeight,
-        containerClientHeight: container.clientHeight
-      });
       
       lastScrollPositionRef.current = containerScroll;
       
@@ -269,13 +252,11 @@ export default function EventDetailsPage() {
         const currentMusics = musicsRef.current;
         if (currentSchools.length > 0 || currentMusics.length > 0) {
           setCache(cacheKey, [currentSchools, currentMusics], containerScroll);
-          console.log(`💾 [Admin Events] Cache atualizado (scroll): ${containerScroll}px, escolas: ${currentSchools.length}, músicas: ${currentMusics.length}`);
         }
       }, THROTTLE_MS);
     };
     
     const handleScroll = () => {
-      console.log('🔔 [Admin Events] Evento de scroll disparado!');
       updateScrollPosition();
     };
     
@@ -285,7 +266,6 @@ export default function EventDetailsPage() {
       if (currentSchools.length > 0 || currentMusics.length > 0) {
         const finalScroll = lastScrollPositionRef.current;
         setCache(cacheKey, [currentSchools, currentMusics], finalScroll);
-        console.log(`💾 [Admin Events] Cache salvo (pagehide): ${finalScroll}px`);
       }
     };
     
@@ -295,7 +275,6 @@ export default function EventDetailsPage() {
       if (currentSchools.length > 0 || currentMusics.length > 0) {
         const finalScroll = lastScrollPositionRef.current;
         setCache(cacheKey, [currentSchools, currentMusics], finalScroll);
-        console.log(`💾 [Admin Events] Cache salvo (beforeunload): ${finalScroll}px`);
       }
     };
     
@@ -305,7 +284,6 @@ export default function EventDetailsPage() {
       if (document.hidden && (currentSchools.length > 0 || currentMusics.length > 0)) {
         const finalScroll = lastScrollPositionRef.current;
         setCache(cacheKey, [currentSchools, currentMusics], finalScroll);
-        console.log(`💾 [Admin Events] Cache salvo (visibilitychange): ${finalScroll}px`);
       }
     };
     
@@ -315,7 +293,6 @@ export default function EventDetailsPage() {
       if (currentSchools.length > 0 || currentMusics.length > 0) {
         const finalScroll = lastScrollPositionRef.current;
         setCache(cacheKey, [currentSchools, currentMusics], finalScroll);
-        console.log(`💾 [Admin Events] Cache salvo (blur): ${finalScroll}px`);
       }
     };
     
@@ -340,7 +317,6 @@ export default function EventDetailsPage() {
       if (currentSchools.length > 0 || currentMusics.length > 0) {
         const finalScroll = lastScrollPositionRef.current;
         setCache(cacheKey, [currentSchools, currentMusics], finalScroll);
-        console.log(`💾 [Admin Events] Cache salvo (cleanup): ${finalScroll}px`);
       }
     };
   }, [cacheKey, setCache]);
@@ -515,7 +491,8 @@ export default function EventDetailsPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          p: 2,
+          p: { xs: 2, md: 3, lg: 4 },
+          py: { xs: 2, md: 3, lg: 3.5 },
           borderBottom: "1px solid rgba(255,255,255,0.1)",
           position: "sticky",
           top: 0,
@@ -524,35 +501,65 @@ export default function EventDetailsPage() {
           zIndex: 10,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, md: 2, lg: 2.5 } }}>
           <IconButton
             onClick={() => router.push("/pages/user/home")}
             size="small"
-            sx={{ color: "#fff" }}
+            sx={{ 
+              color: "#fff",
+              fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" },
+              "& svg": {
+                fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" }
+              }
+            }}
           >
             <ArrowBackIosIcon />
           </IconButton>
-          <Typography  fontWeight={700} sx={{ color: "#fff", fontSize: "1.2rem" }}>
+          <Typography  
+            fontWeight={700} 
+            sx={{ 
+              color: "#fff", 
+              fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" } 
+            }}
+          >
             Detalhes do Evento
           </Typography>
         </Box>
 
         {/* BOTÕES ADMIN */}
         {isAdmin && (
-          <Box sx={{ display: "flex", gap: 1 }}>
+          <Box sx={{ display: "flex", gap: { xs: 1, md: 1.5, lg: 2 } }}>
             <IconButton
               onClick={() => router.push(`/pages/admin/events/${eventId}/edit`)}
-              sx={{ color: "#ffc91f" }}
+              sx={{ 
+                color: "#ffc91f",
+                fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" },
+                "& svg": {
+                  fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" }
+                }
+              }}
             >
               <EditIcon />
             </IconButton>
             <IconButton
               onClick={() => setDeleteModalOpen(true)}
               disabled={deleting}
-              sx={{ color: "#ff3040" }}
+              sx={{ 
+                color: "#ff3040",
+                fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" },
+                "& svg": {
+                  fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" }
+                }
+              }}
             >
               {deleting ? (
-                <CircularProgress size={20} sx={{ color: "#ff3040" }} />
+                <CircularProgress 
+                  size={28}
+                  sx={{ 
+                    color: "#ff3040",
+                    fontSize: { xs: "20px", md: "24px", lg: "28px" }
+                  }} 
+                />
               ) : (
                 <DeleteIcon />
               )}
@@ -766,7 +773,7 @@ export default function EventDetailsPage() {
             >
               Adicionar Escola de Samba
             </Button>
-            <Button
+            {/* <Button
               variant="contained"
               startIcon={<MusicNoteIcon />}
               onClick={() => router.push(`/pages/admin/music-lyrics/create/${eventId}`)}
@@ -784,7 +791,7 @@ export default function EventDetailsPage() {
               }}
             >
               Adicionar Música/Letra
-            </Button>
+            </Button> */}
           </Box>
         )}
 
@@ -900,169 +907,172 @@ export default function EventDetailsPage() {
           )}
         </Box>
 
-        {/* LISTA DE MÚSICAS/LETRAS */}
-        <Box
-          sx={{
-            maxWidth: 900,
-            mx: "auto",
-            mt: 4,
-            mb: 3,
-          }}
-        >
+        {/* LISTA DE MÚSICAS/LETRAS - COMENTADO/OCULTO */}
+        {/* Seção de músicas/letras foi comentada e não será exibida na página */}
+        {false && (
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 2,
+              maxWidth: 900,
+              mx: "auto",
+              mt: 4,
+              mb: 3,
             }}
           >
-            <Typography variant="h6" fontWeight={700} sx={{ color: "#fff" }}>
-              <MusicNoteIcon sx={{ verticalAlign: "middle", mr: 1 }} />
-              Músicas/Letras
-            </Typography>
-          </Box>
-
-          {loadingSchools ? (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-              <CircularProgress sx={{ color: "#ffc91f" }} />
-            </Box>
-          ) : musics.length === 0 ? (
-            <Paper
-              elevation={0}
+            <Box
               sx={{
-                backgroundColor: "rgba(0, 0, 0, 0.4)",
-                backdropFilter: "blur(10px)",
-                borderRadius: 3,
-                p: 3,
-                textAlign: "center",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 2,
               }}
             >
-              <Typography sx={{ color: "rgba(255,255,255,0.6)" }}>
-                Nenhuma música/letra cadastrada.
+              <Typography variant="h6" fontWeight={700} sx={{ color: "#fff" }}>
+                <MusicNoteIcon sx={{ verticalAlign: "middle", mr: 1 }} />
+                Músicas/Letras
               </Typography>
-            </Paper>
-          ) : (
-            <>
-              {musics.map((music) => (
-                <Paper
-                  key={music.id}
-                  elevation={0}
-                  sx={{
-                    backgroundColor: "rgba(0, 0, 0, 0.4)",
-                    backdropFilter: "blur(10px)",
-                    borderRadius: 3,
-                    p: 2,
-                    mb: 2,
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    "&:hover": {
-                      backgroundColor: "rgba(0, 0, 0, 0.5)",
-                      transform: "translateY(-2px)",
-                      border: "1px solid rgba(255, 201, 31, 0.3)",
-                    },
-                  }}
-                  onClick={() =>
-                    router.push(
-                      `/pages/admin/music-lyrics/${eventId}/${music.id}`
-                    )
-                  }
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    {music.image_url && (
-                      <Box
-                        component="img"
-                        src={music.image_url}
-                        alt={music.song_name}
-                        sx={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    )}
-                    <Box sx={{ flex: 1 }}>
-                      <Typography
-                        variant="h6"
-                        fontWeight={600}
-                        sx={{ color: "#fff", mb: 0.5 }}
-                      >
-                        {music.song_name}
-                      </Typography>
-                      {music.singer && (
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
-                        >
-                          Cantor: {music.singer}
-                        </Typography>
-                      )}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "rgba(255,255,255,0.6)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                        }}
-                      >
-                        {music.lyrics}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Paper>
-              ))}
-              
-              {/* Botão para carregar mais músicas */}
-              {hasMoreMusics && (
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 2, mb: 2 }}>
-                  <Button
-                    onClick={loadMoreMusics}
-                    disabled={loadingMoreMusics}
-                    variant="outlined"
+            </Box>
+
+            {loadingSchools ? (
+              <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                <CircularProgress sx={{ color: "#ffc91f" }} />
+              </Box>
+            ) : musics.length === 0 ? (
+              <Paper
+                elevation={0}
+                sx={{
+                  backgroundColor: "rgba(0, 0, 0, 0.4)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: 3,
+                  p: 3,
+                  textAlign: "center",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              >
+                <Typography sx={{ color: "rgba(255,255,255,0.6)" }}>
+                  Nenhuma música/letra cadastrada.
+                </Typography>
+              </Paper>
+            ) : (
+              <>
+                {musics.map((music) => (
+                  <Paper
+                    key={music.id}
+                    elevation={0}
                     sx={{
-                      color: "rgba(255,255,255,0.9)",
-                      borderColor: "rgba(255,255,255,0.3)",
-                      backgroundColor: "rgba(255,255,255,0.05)",
-                      backdropFilter: "blur(5px)",
-                      textTransform: "none",
-                      fontSize: "0.875rem",
-                      fontWeight: 600,
-                      padding: "8px 24px",
-                      minWidth: "200px",
-                      transition: "all 0.3s ease",
+                      backgroundColor: "rgba(0, 0, 0, 0.4)",
+                      backdropFilter: "blur(10px)",
+                      borderRadius: 3,
+                      p: 2,
+                      mb: 2,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
                       "&:hover": {
-                        borderColor: "rgba(255,255,255,0.5)",
-                        backgroundColor: "rgba(255,255,255,0.1)",
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
                         transform: "translateY(-2px)",
-                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                      },
-                      "&:disabled": {
-                        color: "rgba(255,255,255,0.5)",
-                        borderColor: "rgba(255,255,255,0.2)",
-                        backgroundColor: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255, 201, 31, 0.3)",
                       },
                     }}
+                    onClick={() =>
+                      router.push(
+                        `/pages/admin/music-lyrics/${eventId}/${music.id}`
+                      )
+                    }
                   >
-                    {loadingMoreMusics ? (
-                      <>
-                        <CircularProgress size={16} sx={{ color: "#ffc91f", mr: 1 }} />
-                        Carregando...
-                      </>
-                    ) : (
-                      "Carregar mais músicas"
-                    )}
-                  </Button>
-                </Box>
-              )}
-            </>
-          )}
-        </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      {music.image_url && (
+                        <Box
+                          component="img"
+                          src={music.image_url}
+                          alt={music.song_name}
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      )}
+                      <Box sx={{ flex: 1 }}>
+                        <Typography
+                          variant="h6"
+                          fontWeight={600}
+                          sx={{ color: "#fff", mb: 0.5 }}
+                        >
+                          {music.song_name}
+                        </Typography>
+                        {music.singer && (
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
+                          >
+                            Cantor: {music.singer}
+                          </Typography>
+                        )}
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "rgba(255,255,255,0.6)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                          }}
+                        >
+                          {music.lyrics}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Paper>
+                ))}
+              
+                {hasMoreMusics && (
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 2, mb: 2 }}>
+                    <Button
+                      onClick={loadMoreMusics}
+                      disabled={loadingMoreMusics}
+                      variant="outlined"
+                      sx={{
+                        color: "rgba(255,255,255,0.9)",
+                        borderColor: "rgba(255,255,255,0.3)",
+                        backgroundColor: "rgba(255,255,255,0.05)",
+                        backdropFilter: "blur(5px)",
+                        textTransform: "none",
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                        padding: "8px 24px",
+                        minWidth: "200px",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          borderColor: "rgba(255,255,255,0.5)",
+                          backgroundColor: "rgba(255,255,255,0.1)",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                        },
+                        "&:disabled": {
+                          color: "rgba(255,255,255,0.5)",
+                          borderColor: "rgba(255,255,255,0.2)",
+                          backgroundColor: "rgba(255,255,255,0.03)",
+                        },
+                      }}
+                    >
+                      {loadingMoreMusics ? (
+                        <>
+                          <CircularProgress size={16} sx={{ color: "#ffc91f", mr: 1 }} />
+                          Carregando...
+                        </>
+                      ) : (
+                        "Carregar mais músicas"
+                      )}
+                    </Button>
+                  </Box>
+                )}
+              </>
+            )}
+          </Box>
+        )}
+        
       </Box>
 
       {/* Modal de Exclusão */}

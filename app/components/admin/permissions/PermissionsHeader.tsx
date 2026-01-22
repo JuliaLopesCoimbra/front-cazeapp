@@ -25,7 +25,7 @@ export default function PermissionsHeader() {
           maxWidth: "1400px",
           margin: "0 auto",
           px: { xs: 2, sm: 3, md: 4 },
-          py: 2,
+          py: { xs: 2, sm: 2.5, md: 3.5 },
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -38,9 +38,12 @@ export default function PermissionsHeader() {
             sx={{
               color: "#fff",
               transition: "all 0.2s ease",
+              "& .MuiSvgIcon-root": {
+                fontSize: { xs: 18, md: 22 },
+              },
             }}
           >
-            <ArrowBackIos sx={{ fontSize: 18 }} />
+            <ArrowBackIos />
           </IconButton>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box>
@@ -49,7 +52,7 @@ export default function PermissionsHeader() {
                 sx={{
                   color: "white",
                   fontWeight: 600,
-                  fontSize: { xs: "1rem", sm: "1.25rem" },
+                  fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem", lg: "1.75rem" },
                 }}
               >
                 Gerenciamento de Permissões
@@ -59,6 +62,7 @@ export default function PermissionsHeader() {
                 sx={{
                   color: "rgba(255,255,255,0.6)",
                   display: { xs: "none", sm: "block" },
+                  fontSize: { sm: "0.75rem", md: "0.875rem", lg: "0.9375rem" },
                 }}
               >
                 Gerencie usuários, permissões e acessos

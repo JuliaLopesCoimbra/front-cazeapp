@@ -10,6 +10,7 @@ export interface EventResponse {
   banner_image?: string;
   image_map?: string;
   line_up?: string;
+  spotify_playlist_url?: string;
   starts_at: string;
   ends_at: string;
   created_at: string;
@@ -30,6 +31,7 @@ export interface CreateEventData {
   banner_image?: File;
   image_map?: File;
   line_up?: string;
+  spotify_playlist_url?: string;
 }
 
 export interface UpdateEventData {
@@ -42,6 +44,7 @@ export interface UpdateEventData {
   banner_image?: File;
   image_map?: File;
   line_up?: string;
+  spotify_playlist_url?: string;
 }
 
 export const getEvents = async (limit: number = 5, offset: number = 0): Promise<EventResponse[]> => {
@@ -92,6 +95,7 @@ export const createEvent = async (data: CreateEventData): Promise<EventResponse>
   if (data.banner_image) formData.append("banner_image", data.banner_image);
   if (data.image_map) formData.append("image_map", data.image_map);
   if (data.line_up) formData.append("line_up", data.line_up);
+  if (data.spotify_playlist_url) formData.append("spotify_playlist_url", data.spotify_playlist_url);
 
   const response = await api.post<EventResponse>("/admin/events", formData, {
     headers: {
@@ -115,6 +119,7 @@ export const updateEvent = async (
   if (data.banner_image) formData.append("banner_image", data.banner_image);
   if (data.image_map) formData.append("image_map", data.image_map);
   if (data.line_up) formData.append("line_up", data.line_up);
+  if (data.spotify_playlist_url) formData.append("spotify_playlist_url", data.spotify_playlist_url);
 
   const response = await api.put<EventResponse>(
     `/admin/events/${eventId}`,

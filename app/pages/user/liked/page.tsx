@@ -28,7 +28,7 @@ const STORAGE_KEY = "selectedEventId";
 
 export default function LikedPostsPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const { showToast } = useToast();
   
   // ===== CACHE DO FEED (Instagram/TikTok style) =====
@@ -97,10 +97,12 @@ export default function LikedPostsPage() {
         return;
       }
     }
-    // Se não encontrou evento salvo, usa o primeiro disponível
-    if (eventsList.length > 0) {
-      setCurrentEvent(eventsList[0]);
-      localStorage.setItem(STORAGE_KEY, eventsList[0].id.toString());
+    // Se não encontrou evento salvo, usa o primeiro disponível (preferencialmente ativo)
+    const activeEvent = eventsList.find((event) => event.is_active);
+    const selectedEvent = activeEvent || (eventsList.length > 0 ? eventsList[0] : null);
+    if (selectedEvent) {
+      setCurrentEvent(selectedEvent);
+      localStorage.setItem(STORAGE_KEY, selectedEvent.id.toString());
     }
   };
 
@@ -127,6 +129,51 @@ export default function LikedPostsPage() {
       setInitialLoading(false);
     }
   }, [isAuthenticated, showToast]);
+
+  // Função para verificar e atualizar eventos (similar à página home)
+  const checkAndUpdateEvents = useCallback(async () => {
+    try {
+      const data = await getEvents();
+      setEvents(data);
+      
+      if (currentEvent?.id) {
+        const updatedEvent = data.find((event) => event.id === currentEvent.id);
+        
+        // Se o evento não foi encontrado (foi deletado), troca para um ativo
+        if (!updatedEvent) {
+          const activeEvent = data.find((event) => event.is_active);
+          if (activeEvent) {
+            setCurrentEvent(activeEvent);
+            localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
+            reloadPostsForEvent(activeEvent.id);
+          } else if (data.length > 0) {
+            // Se não há eventos ativos, usa o primeiro disponível
+            setCurrentEvent(data[0]);
+            localStorage.setItem(STORAGE_KEY, data[0].id.toString());
+            reloadPostsForEvent(data[0].id);
+          } else {
+            // Não há eventos disponíveis
+            setCurrentEvent(null);
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        }
+        // Se o evento atual foi desativado e o usuário NÃO é admin/subadmin, troca para um ativo
+        else if (!updatedEvent.is_active && !isAdmin) {
+          const activeEvent = data.find((event) => event.is_active);
+          if (activeEvent) {
+            setCurrentEvent(activeEvent);
+            localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
+            reloadPostsForEvent(activeEvent.id);
+          }
+        } else if (updatedEvent && updatedEvent.id !== currentEvent.id) {
+          // Atualiza o evento atual com os dados mais recentes
+          setCurrentEvent(updatedEvent);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao verificar eventos:", error);
+    }
+  }, [currentEvent, reloadPostsForEvent, isAdmin]);
 
   // Função para lidar com seleção de evento
   const handleSelectEvent = useCallback((event: EventResponse) => {
@@ -188,13 +235,38 @@ export default function LikedPostsPage() {
           }
         }
       }
+      // Verifica se o evento atual ainda existe (não foi deletado)
+      if (currentEvent?.id) {
+        const eventStillExists = events.find((event) => event.id === currentEvent.id);
+        if (!eventStillExists) {
+          checkAndUpdateEvents();
+        }
+      }
     }, 1000); // Verifica a cada 1 segundo (mais eficiente)
+
+    // Verifica quando a página/aba fica visível
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkAndUpdateEvents();
+      }
+    };
+
+    // Verifica quando a janela ganha foco
+    const handleFocus = () => {
+      checkAndUpdateEvents();
+    };
+
+    // Adiciona listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       clearInterval(checkInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
     };
-  }, [isAuthenticated, events, currentEvent?.id, handleSelectEvent, reloadPostsForEvent]);
+  }, [isAuthenticated, events, currentEvent?.id, handleSelectEvent, reloadPostsForEvent, checkAndUpdateEvents]);
 
   // ===== CACHE: Carregar dados ao montar =====
   useEffect(() => {
@@ -251,8 +323,8 @@ export default function LikedPostsPage() {
           const limit = Math.max(cached.data.length, LIMIT * 3);
           const freshData = await getLikedPosts(currentEvent?.id, limit, 0);
           
-          const cachedIds = cached.data.map((p: NewsResponse) => p.id).sort().join(',');
-          const freshIds = freshData.map((p: NewsResponse) => p.id).sort().join(',');
+          const cachedIds = cached.data.map((p: NewsDetailsResponse) => p.id).sort().join(',');
+          const freshIds = freshData.map((p: NewsDetailsResponse) => p.id).sort().join(',');
           
           if (cachedIds !== freshIds || cached.data.length !== freshData.length) {
             setPosts([...freshData]);

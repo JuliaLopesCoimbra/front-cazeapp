@@ -37,12 +37,56 @@ export default function MyPhotosPage() {
         return;
       }
     }
-    // Se não encontrou evento salvo, usa o primeiro disponível
-    if (eventsList.length > 0) {
-      setCurrentEvent(eventsList[0]);
-      localStorage.setItem(STORAGE_KEY, eventsList[0].id.toString());
+    // Se não encontrou evento salvo, usa o primeiro disponível (preferencialmente ativo)
+    const activeEvent = eventsList.find((event) => event.is_active);
+    const selectedEvent = activeEvent || (eventsList.length > 0 ? eventsList[0] : null);
+    if (selectedEvent) {
+      setCurrentEvent(selectedEvent);
+      localStorage.setItem(STORAGE_KEY, selectedEvent.id.toString());
     }
   }, []);
+
+  // Função para verificar e atualizar eventos (similar à página home)
+  const checkAndUpdateEvents = useCallback(async () => {
+    try {
+      const data = await getEvents();
+      setEvents(data);
+      
+      if (currentEvent?.id) {
+        const updatedEvent = data.find((event) => event.id === currentEvent.id);
+        
+        // Se o evento não foi encontrado (foi deletado), troca para um ativo
+        if (!updatedEvent) {
+          const activeEvent = data.find((event) => event.is_active);
+          if (activeEvent) {
+            setCurrentEvent(activeEvent);
+            localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
+          } else if (data.length > 0) {
+            // Se não há eventos ativos, usa o primeiro disponível
+            setCurrentEvent(data[0]);
+            localStorage.setItem(STORAGE_KEY, data[0].id.toString());
+          } else {
+            // Não há eventos disponíveis
+            setCurrentEvent(null);
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        }
+        // Se o evento atual foi desativado e o usuário NÃO é admin/subadmin, troca para um ativo
+        else if (!updatedEvent.is_active && !isAdmin) {
+          const activeEvent = data.find((event) => event.is_active);
+          if (activeEvent) {
+            setCurrentEvent(activeEvent);
+            localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
+          }
+        } else if (updatedEvent && updatedEvent.id !== currentEvent.id) {
+          // Atualiza o evento atual com os dados mais recentes
+          setCurrentEvent(updatedEvent);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao verificar eventos:", error);
+    }
+  }, [currentEvent, isAdmin]);
 
   // Função para lidar com seleção de evento
   const handleSelectEvent = useCallback((event: EventResponse) => {
@@ -104,13 +148,38 @@ export default function MyPhotosPage() {
           }
         }
       }
+      // Verifica se o evento atual ainda existe (não foi deletado)
+      if (currentEvent?.id) {
+        const eventStillExists = events.find((event) => event.id === currentEvent.id);
+        if (!eventStillExists) {
+          checkAndUpdateEvents();
+        }
+      }
     }, 1000); // Verifica a cada 1 segundo (mais eficiente)
+
+    // Verifica quando a página/aba fica visível
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkAndUpdateEvents();
+      }
+    };
+
+    // Verifica quando a janela ganha foco
+    const handleFocus = () => {
+      checkAndUpdateEvents();
+    };
+
+    // Adiciona listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       clearInterval(checkInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
     };
-  }, [isAuthenticated, events, currentEvent?.id, handleSelectEvent]);
+  }, [isAuthenticated, events, currentEvent?.id, handleSelectEvent, checkAndUpdateEvents]);
 
   const handleSelectOption = (option: string) => {
     setViewMode(option as ViewMode);

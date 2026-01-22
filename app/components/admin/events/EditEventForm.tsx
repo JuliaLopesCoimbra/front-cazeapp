@@ -38,6 +38,8 @@ export default function EditEventForm({
   const [imageMap, setImageMap] = useState<File | null>(null);
   const [previewMap, setPreviewMap] = useState<string | null>(null);
   const [lineUp, setLineUp] = useState("");
+  const [eventDates, setEventDates] = useState("");
+  const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(true);
   const { showToast } = useToast();
@@ -78,6 +80,16 @@ export default function EditEventForm({
         
         if (event.line_up) {
           setLineUp(event.line_up);
+        }
+        
+        if (event.spotify_playlist_url) {
+          setSpotifyPlaylistUrl(event.spotify_playlist_url);
+        }
+        
+        if (event.event_dates) {
+          setEventDates(event.event_dates);
+        } else {
+          setEventDates("");
         }
       } catch (err) {
         showToast("Erro ao carregar evento", "error");
@@ -196,9 +208,11 @@ export default function EditEventForm({
         location: location.trim(),
         start_date: startDate,
         end_date: endDate,
+        event_dates: eventDates.trim() || undefined,
         banner_image: bannerImage || undefined,
         image_map: imageMap || undefined,
         line_up: lineUp.trim() || undefined,
+        spotify_playlist_url: spotifyPlaylistUrl.trim() || undefined,
       };
 
       await updateEvent(eventId, data);
@@ -240,6 +254,7 @@ export default function EditEventForm({
     <Box
       sx={{
         minHeight: "100vh",
+        backgroundImage: "url(/background/dashboard.png)",
         height: "100vh",
         overflowY: "auto",
         color: "#fff",
@@ -252,8 +267,9 @@ export default function EditEventForm({
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
-          p: 2,
+          gap: { xs: 1.5, md: 2, lg: 2.5 },
+          p: { xs: 2, md: 3, lg: 4 },
+          py: { xs: 2, md: 3, lg: 3.5 },
           borderBottom: "1px solid rgba(255,255,255,0.1)",
           position: "sticky",
           top: 0,
@@ -265,11 +281,23 @@ export default function EditEventForm({
         <IconButton
           onClick={() => router.back()}
           size="small"
-          sx={{ color: "#fff" }}
+          sx={{ 
+            color: "#fff",
+            fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" },
+            "& svg": {
+              fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" }
+            }
+          }}
         >
           <ArrowBackIosIcon />
         </IconButton>
-        <Typography fontWeight={700} sx={{ color: "#fff", fontSize: "1.2rem" }}>
+        <Typography 
+          fontWeight={700} 
+          sx={{ 
+            color: "#fff", 
+            fontSize: { xs: "1.2rem", md: "1.5rem", lg: "1.8rem" } 
+          }}
+        >
           Editar Evento
         </Typography>
       </Box>
@@ -473,6 +501,45 @@ export default function EditEventForm({
             }}
           />
 
+          <TextField
+            fullWidth
+            label="Dias do Evento"
+            value={eventDates}
+            onChange={(e) => setEventDates(e.target.value)}
+            disabled={loading}
+            placeholder="Ex: 2024-01-09,2024-01-10,2024-01-20,2024-01-21"
+            helperText="Separe múltiplas datas por vírgula (formato: YYYY-MM-DD,YYYY-MM-DD)"
+            variant="standard"
+            sx={{
+              "& .MuiInput-underline:before": {
+                borderBottomColor: "rgba(255,255,255,0.2)",
+              },
+              "& .MuiInput-underline:hover:before": {
+                borderBottomColor: "rgba(255,255,255,0.3)",
+              },
+              "& .MuiInput-underline:after": {
+                borderBottomColor: "#ffc91f",
+              },
+              "& .MuiInputBase-input": {
+                color: "#fff",
+                fontSize: "1rem",
+                "&::placeholder": {
+                  color: "rgba(255,255,255,0.4)",
+                  opacity: 1,
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255,255,255,0.6)",
+                "&.Mui-focused": {
+                  color: "#ffc91f",
+                },
+              },
+              "& .MuiFormHelperText-root": {
+                color: "rgba(255,255,255,0.5)",
+              },
+            }}
+          />
+
           <Box>
             <Typography variant="body2" sx={{ mb: 1.5, color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" }}>
               Banner do Evento
@@ -604,6 +671,45 @@ export default function EditEventForm({
                 "&.Mui-focused": {
                   color: "#ffc91f",
                 },
+              },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Link do Iframe da Playlist Spotify"
+            value={spotifyPlaylistUrl}
+            onChange={(e) => setSpotifyPlaylistUrl(e.target.value)}
+            disabled={loading}
+            placeholder="Ex: https://open.spotify.com/embed/playlist/7yhX7bo1ytC94v3alLA5Tp?utm_source=generator"
+            helperText="Cole aqui o link completo do iframe da playlist do Spotify"
+            variant="standard"
+            sx={{
+              "& .MuiInput-underline:before": {
+                borderBottomColor: "rgba(255,255,255,0.2)",
+              },
+              "& .MuiInput-underline:hover:before": {
+                borderBottomColor: "rgba(255,255,255,0.3)",
+              },
+              "& .MuiInput-underline:after": {
+                borderBottomColor: "#ffc91f",
+              },
+              "& .MuiInputBase-input": {
+                color: "#fff",
+                fontSize: "1rem",
+                "&::placeholder": {
+                  color: "rgba(255,255,255,0.4)",
+                  opacity: 1,
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255,255,255,0.6)",
+                "&.Mui-focused": {
+                  color: "#ffc91f",
+                },
+              },
+              "& .MuiFormHelperText-root": {
+                color: "rgba(255,255,255,0.5)",
               },
             }}
           />

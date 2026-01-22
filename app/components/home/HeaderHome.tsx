@@ -1,13 +1,15 @@
 "use client";
 
-import { Box, Typography, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText } from "@mui/material";
+import { Box, Typography, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import PersonIcon from "@mui/icons-material/Person";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getMe, MeResponse } from "@/app/services/auth/authService";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
 import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
+import { useAuth } from "@/app/context/AuthContext";
 
 interface Props {
   event: EventResponse;
@@ -23,8 +25,11 @@ export default function HomeHeader({
   currentEvent,
 }: Props) {
   const router = useRouter();
+  const { logout } = useAuth();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
 
   useEffect(() => {
     getProfile()
@@ -92,7 +97,7 @@ export default function HomeHeader({
           
           <Avatar 
             src={profile.profile_photo || undefined} 
-            onClick={() => router.push("/pages/user/profile")}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
             sx={{ 
               width: { xs: 40, md: 56, lg: 64 }, 
               height: { xs: 40, md: 56, lg: 64 },
@@ -178,6 +183,60 @@ export default function HomeHeader({
           </DialogContentText>
         </DialogContent>
       </Dialog>
+
+      {/* MENU DO PERFIL */}
+      <Menu
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={() => setAnchorEl(null)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "#1a1a1a",
+            color: "white",
+            borderRadius: 2,
+            minWidth: 200,
+            mt: 1,
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        <MenuItem
+          onClick={() => {
+            setAnchorEl(null);
+            router.push("/pages/user/profile");
+          }}
+          sx={{
+            color: "white",
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+            },
+          }}
+        >
+          <ListItemIcon>
+            <PersonIcon sx={{ color: "white" }} fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Ver Perfil</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAnchorEl(null);
+            logout();
+            router.replace("/pages/auth/login");
+          }}
+          sx={{
+            color: "#ffc91f",
+            "&:hover": {
+              backgroundColor: "rgba(255, 201, 31, 0.1)",
+            },
+          }}
+        >
+          <ListItemIcon>
+            <LogoutIcon sx={{ color: "#ffc91f" }} fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Sair</ListItemText>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }

@@ -131,9 +131,9 @@ export default function Roulette() {
           {/* Title Skeleton */}
           <Skeleton
             variant="text"
-            width={{ xs: 300, md: 500 }}
             height={40}
             sx={{
+              width: { xs: 300, md: 500 },
               bgcolor: "rgba(255,255,255,0.1)",
               mt: 5,
               mb: 1,
@@ -144,9 +144,9 @@ export default function Roulette() {
           {/* Subtitle Skeleton */}
           <Skeleton
             variant="text"
-            width={{ xs: 400, md: 600 }}
             height={20}
             sx={{
+              width: { xs: 400, md: 600 },
               bgcolor: "rgba(255,255,255,0.1)",
               mb: 4,
               borderRadius: 1,
@@ -169,9 +169,9 @@ export default function Roulette() {
             {/* Pointer Skeleton */}
             <Skeleton
               variant="rectangular"
-              width={{ xs: 90, md: 140 }}
-              height={{ xs: 60, md: 90 }}
               sx={{
+                width: { xs: 90, md: 140 },
+                height: { xs: 60, md: 90 },
                 position: "absolute",
                 top: { xs: -30, md: -45 },
                 left: "50%",
@@ -185,9 +185,9 @@ export default function Roulette() {
             {/* Circular Roulette Skeleton */}
             <Skeleton
               variant="circular"
-              width={{ xs: 380, md: 600 }}
-              height={{ xs: 380, md: 600 }}
               sx={{
+                width: { xs: 380, md: 600 },
+                height: { xs: 380, md: 600 },
                 bgcolor: "rgba(255,255,255,0.1)",
               }}
             />

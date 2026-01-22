@@ -10,9 +10,9 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapIcon from "@mui/icons-material/Map";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { getEvents, EventResponse } from "../../services/events/eventAppService";
-import EventIndisponivel from "../../components/event/EventIndisponivel";
 import { formatEventDates } from "../../utils/eventDateFormatter";
 import { useAuth } from "../../context/AuthContext";
+import EventIndisponivelPublic from "@/app/components/event/EventIndisponivelPublic";
 
 export default function EventPage() {
   const router = useRouter();
@@ -278,7 +278,7 @@ export default function EventPage() {
     );
   }
 
-  if (!event) return <EventIndisponivel />; // Se não houver evento ou se não for ativo, exibe o componente de evento indisponível
+  if (!event) return <EventIndisponivelPublic />; // Se não houver evento ou se não for ativo, exibe o componente de evento indisponível
 
   // Formatação do horário
   const startDate = new Date(event.starts_at);

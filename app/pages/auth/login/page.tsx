@@ -94,6 +94,14 @@ const LoginForm: React.FC = () => {
       setShowForgotPassword(true);
 
       if (err instanceof Error) {
+        // Verificar se precisa verificar idade
+        if (err.message === "AGE_VERIFICATION_REQUIRED" && (err as any).tempToken) {
+          const tempToken = (err as any).tempToken;
+          // Redirecionar para página de verificação de idade
+          router.push(`/pages/auth/age-verification?temp_token=${tempToken}&requires_age_verification=true`);
+          return;
+        }
+
         const errorMessage = err.message.toLowerCase();
         // Verifica se o erro é de email não confirmado
         if (

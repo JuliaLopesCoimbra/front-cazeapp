@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button, Box, Skeleton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { getPublicEvents, EventResponse } from "./services/events/eventAppService";
-import EventIndisponivel from "./components/event/EventIndisponivel";
+import EventIndisponivelPublic from "./components/event/EventIndisponivelPublic";
 
 export default function HomePage() {
   const [events, setEvents] = useState<EventResponse[]>([]);
@@ -161,7 +161,7 @@ export default function HomePage() {
 
   // Se não houver eventos ou todos estiverem indisponíveis, mostra o componente EventIndisponivel
   if (events.length === 0) {
-    return <EventIndisponivel />;
+    return <EventIndisponivelPublic />;
   }
 
   return (
@@ -270,10 +270,11 @@ export default function HomePage() {
                 }}
               >
                 <Image
-                  src={event.banner_image || "/components/dashboard-component.png"}
+                  src={event.banner_image ? encodeURI(event.banner_image) : "/components/dashboard-component.png"}
                   alt={event.title}
                   fill
                   className="event-image"
+                  unoptimized={true}
                   style={{
                     objectFit: "cover",
                     transition: "transform 0.3s ease",
