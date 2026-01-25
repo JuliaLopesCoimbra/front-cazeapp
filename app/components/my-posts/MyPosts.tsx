@@ -61,7 +61,7 @@ type FilterStatus = "approved" | "pending" | "rejected" | "all";
 
 export default function MyPosts({ hideTitle = false, currentEvent }: MyPostsProps) {
   const router = useRouter();
-  const { isColunista } = useAuth();
+  const { isColunista, isAdmin, isSubadmin } = useAuth();
   const [posts, setPosts] = useState<NewsResponse[]>([]);
   const [pendingPosts, setPendingPosts] = useState<NewsResponse[]>([]);
   const [offset, setOffset] = useState(0);
@@ -168,8 +168,8 @@ export default function MyPosts({ hideTitle = false, currentEvent }: MyPostsProp
   }, [hasMore, offset, filterStatus]);
 
   const handlePostClick = (post: NewsResponse) => {
-    // Posts rejeitados e pendentes não podem ser abertos
-    if (post.status === "rejected" || post.status === "pending") {
+    // Posts pendentes não podem ser abertos, mas rejeitados podem
+    if (post.status === "pending") {
       return;
     }
     const eventIdParam = post.event_id ? `?eventId=${post.event_id}` : '';
@@ -287,7 +287,7 @@ export default function MyPosts({ hideTitle = false, currentEvent }: MyPostsProp
               },
             }}
           >
-            <Tab label="Aprovados" value="approved" />
+            <Tab label={isAdmin || isSubadmin ? "Postados" : "Aprovados"} value="approved" />
             {isColunista && <Tab label="Pendentes" value="pending" />}
             <Tab label="Rejeitados" value="rejected" />
           </Tabs>
@@ -328,11 +328,11 @@ export default function MyPosts({ hideTitle = false, currentEvent }: MyPostsProp
                   boxShadow: "none",
                   color: "#fff",
                   paddingBottom: 1,
-                  cursor: (post.status === "rejected" || post.status === "pending") ? "default" : "pointer",
+                  cursor: post.status === "pending" ? "default" : "pointer",
                   transition: "opacity 0.2s",
-                  opacity: (post.status === "rejected" || post.status === "pending") ? 0.6 : 1,
+                  opacity: post.status === "pending" ? 0.6 : post.status === "rejected" ? 0.7 : 1,
                   "&:hover": {
-                    opacity: (post.status === "rejected" || post.status === "pending") ? 0.6 : 0.8,
+                    opacity: post.status === "pending" ? 0.6 : post.status === "rejected" ? 0.9 : 0.8,
                   },
                 }}
               >

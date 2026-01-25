@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Card, Typography, CardContent } from "@mui/material";
-import { Article, PhotoLibrary } from "@mui/icons-material";
+import { Article, PhotoLibrary, Block } from "@mui/icons-material";
 
 interface MenuOption {
   id: string;
@@ -21,6 +21,12 @@ export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
       title: "Meus Posts",
       icon: <Article sx={{ fontSize: 32 }} />,
       onClick: () => onSelectOption("posts"),
+    },
+    {
+      id: "rejected",
+      title: "Posts Rejeitados por Mim",
+      icon: <Block sx={{ fontSize: 32 }} />,
+      onClick: () => onSelectOption("rejected"),
     },
     {
       id: "photos",

@@ -4,31 +4,19 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
-  TextField,
   Button,
-  Typography,
   CircularProgress,
   Paper,
-  IconButton,
-  Chip,
   Fade,
-  Slide,
 } from "@mui/material";
-import { 
-  ArrowBackIos, 
-  Close, 
-  NavigateBefore, 
-  NavigateNext, 
-  PhotoCamera, 
-  AddPhotoAlternate,
-  Event,
-  Title as TitleIcon,
-  Description,
-} from "@mui/icons-material";
 import { updateNews, getNewsDetails, NewsDetailsResponse } from "@/app/services/news/newsService";
 import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { getEvents, EventResponse } from "@/app/services/events/eventAppService";
+import NewsHeader from "@/app/components/news/NewsHeader";
+import EventBadge from "@/app/components/news/EventBadge";
+import ImageUploadSection from "@/app/components/news/ImageUploadSection";
+import NewsFormFields from "@/app/components/news/NewsFormFields";
 
 function EditNewsPageContent() {
   const router = useRouter();
@@ -44,13 +32,10 @@ function EditNewsPageContent() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]); // URLs das imagens existentes
   const [removedExistingImages, setRemovedExistingImages] = useState<Set<number>>(new Set()); // Índices das imagens existentes removidas
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [eventId, setEventId] = useState<number | null>(null);
   const [newsId, setNewsId] = useState<number | null>(null);
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [news, setNews] = useState<NewsDetailsResponse | null>(null);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   useEffect(() => {
     if (!canCreatePost) {
@@ -194,44 +179,8 @@ function EditNewsPageContent() {
       setImagePreviews(newPreviews);
     }
     
-    // Ajusta o índice atual se necessário
-    const newTotal = imagePreviews.length - 1;
-    if (currentImageIndex >= newTotal && newTotal > 0) {
-      setCurrentImageIndex(newTotal - 1);
-    } else if (newTotal === 0) {
-      setCurrentImageIndex(0);
-    }
   };
 
-  const handlePreviousImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? imagePreviews.length - 1 : prev - 1));
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === imagePreviews.length - 1 ? 0 : prev + 1));
-  };
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (touchStart === null || touchEnd === null) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe && imagePreviews.length > 1) {
-      handleNextImage();
-    }
-    if (isRightSwipe && imagePreviews.length > 1) {
-      handlePreviousImage();
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -331,82 +280,13 @@ function EditNewsPageContent() {
       }}
     >
       <Box sx={{ maxWidth: "900px", margin: "0 auto" }}>
-        {/* Header com design melhorado */}
-        <Fade in timeout={400}>
-          <Box 
-            sx={{ 
-              display: "flex", 
-              alignItems: "center", 
-              gap: 2, 
-              mb: 4,
-              position: "relative",
-            }}
-          >
-            <IconButton
-              onClick={() => router.back()}
-              sx={{
-                color: "#fff",
-                padding: 1.5,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "translateX(-4px)",
-                },
-              }}
-            >
-              <ArrowBackIos sx={{ fontSize: 18 }} />
-            </IconButton>
-            <Box sx={{ flex: 1 }}>
-              <Typography 
-                variant="h5" 
-                sx={{ 
-                  color: "#fff", 
-                  fontWeight: 700, 
-                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                Editar Publicação
-              </Typography>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: "rgba(255,255,255,0.7)", 
-                  fontSize: "0.875rem",
-                  mt: 0.5,
-                }}
-              >
-                Atualize suas fotos e informações
-              </Typography>
-            </Box>
-          </Box>
-        </Fade>
+        <NewsHeader
+          title="Editar Publicação"
+          subtitle="Atualize suas fotos e informações"
+        />
 
-        {/* Badge do Evento */}
         {eventId && selectedEvent && (
-          <Slide direction="down" in timeout={500}>
-            <Box sx={{ mb: 3 }}>
-              <Chip
-                icon={<Event sx={{ fontSize: 16, color: "#ffcc01 !important" }} />}
-                label={
-                  <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>
-                    {selectedEvent.title}
-                  </Typography>
-                }
-                sx={{
-                  backgroundColor: "rgba(255, 204, 1, 0.15)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 204, 1, 0.3)",
-                  color: "#ffcc01",
-                  fontWeight: 600,
-                  padding: "8px 4px",
-                  height: "auto",
-                  "& .MuiChip-icon": {
-                    color: "#ffcc01",
-                  },
-                }}
-              />
-            </Box>
-          </Slide>
+          <EventBadge eventTitle={selectedEvent.title} />
         )}
 
         {/* Form Container com Glassmorphism */}
@@ -424,399 +304,23 @@ function EditNewsPageContent() {
           >
             <form onSubmit={handleSubmit}>
               <Box sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
-                {/* Seção de Upload de Imagens */}
-                <Box sx={{ mb: 4 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                    <PhotoCamera sx={{ color: "#ffcc01", fontSize: 20 }} />
-                    <Typography 
-                      variant="subtitle1" 
-                      sx={{ 
-                        color: "#fff", 
-                        fontWeight: 600,
-                        fontSize: "1rem",
-                      }}
-                    >
-                      Fotos
-                    </Typography>
-                    {totalImagesCount > 0 && (
-                      <Chip
-                        label={`${totalImagesCount}/5`}
-                        size="small"
-                        sx={{
-                          backgroundColor: "rgba(255, 204, 1, 0.2)",
-                          color: "#ffcc01",
-                          fontWeight: 600,
-                          fontSize: "0.75rem",
-                          height: 20,
-                        }}
-                      />
-                    )}
-                  </Box>
+                <ImageUploadSection
+                  images={images}
+                  imagePreviews={imagePreviews}
+                  onImageChange={handleImageChange}
+                  onRemoveImage={handleRemoveImage}
+                  loading={loading}
+                  maxImages={5}
+                  existingImagesCount={existingImages.length}
+                />
 
-                  <input
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    id="image-upload"
-                    type="file"
-                    multiple
-                    onChange={handleImageChange}
-                    disabled={loading || totalImagesCount >= 5}
-                  />
-                  
-                  {imagePreviews.length === 0 ? (
-                    <label htmlFor="image-upload">
-                      <Box
-                        sx={{
-                          border: "2px dashed rgba(255, 255, 255, 0.3)",
-                          borderRadius: "16px",
-                          padding: { xs: 4, sm: 6 },
-                          textAlign: "center",
-                          cursor: loading || totalImagesCount >= 5 ? "not-allowed" : "pointer",
-                          transition: "all 0.3s ease",
-                          backgroundColor: "rgba(255, 255, 255, 0.03)",
-                          "&:hover": {
-                            borderColor: "rgba(255, 204, 1, 0.5)",
-                            backgroundColor: "rgba(255, 255, 255, 0.05)",
-                            transform: "translateY(-2px)",
-                          },
-                        }}
-                      >
-                        <PhotoCamera 
-                          sx={{ 
-                            fontSize: 48, 
-                            color: "rgba(255, 255, 255, 0.4)",
-                            mb: 2,
-                          }} 
-                        />
-                        <Typography 
-                          variant="body1" 
-                          sx={{ 
-                            color: "rgba(255, 255, 255, 0.8)",
-                            fontWeight: 600,
-                            mb: 1,
-                          }}
-                        >
-                          Adicione suas fotos
-                        </Typography>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            color: "rgba(255, 255, 255, 0.5)",
-                            fontSize: "0.875rem",
-                          }}
-                        >
-                          Clique para selecionar ou arraste aqui
-                        </Typography>
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            color: "rgba(255, 255, 255, 0.4)",
-                            fontSize: "0.75rem",
-                            mt: 1,
-                            display: "block",
-                          }}
-                        >
-                          Máximo 5 imagens • 5MB por imagem • 20MB total
-                        </Typography>
-                      </Box>
-                    </label>
-                  ) : (
-                    <Box sx={{ mt: 2 }}>
-                      {/* Carrossel de imagens melhorado */}
-                      <Box
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onTouchEnd}
-                        sx={{
-                          position: "relative",
-                          width: "100%",
-                          borderRadius: "16px",
-                          overflow: "hidden",
-                          backgroundColor: "rgba(0, 0, 0, 0.2)",
-                          touchAction: "pan-y",
-                          userSelect: "none",
-                          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-                        }}
-                      >
-                        {/* Imagem atual */}
-                        <Fade in key={currentImageIndex} timeout={300}>
-                          <Box
-                            component="img"
-                            src={imagePreviews[currentImageIndex]}
-                            alt={`Preview ${currentImageIndex + 1}`}
-                            sx={{
-                              width: "100%",
-                              aspectRatio: "1 / 1",
-                              objectFit: "cover",
-                              display: "block",
-                            }}
-                          />
-                        </Fade>
-
-                        {/* Botão de remover melhorado */}
-                        <IconButton
-                          onClick={() => handleRemoveImage(currentImageIndex)}
-                          disabled={loading}
-                          sx={{
-                            position: "absolute",
-                            top: 16,
-                            right: 16,
-                            backgroundColor: "rgba(0, 0, 0, 0.4)",
-                            backdropFilter: "blur(10px)",
-                            color: "#fff",
-                            width: 40,
-                            height: 40,
-                            border: "1px solid rgba(255, 255, 255, 0.2)",
-                            transition: "all 0.2s ease",
-                            "&:hover": {
-                              backgroundColor: "rgba(220, 38, 38, 0.8)",
-                              transform: "scale(1.1)",
-                            },
-                            zIndex: 2,
-                          }}
-                        >
-                          <Close sx={{ fontSize: 20 }} />
-                        </IconButton>
-
-                        {/* Botões de navegação melhorados */}
-                        {imagePreviews.length > 1 && (
-                          <>
-                            <IconButton
-                              onClick={handlePreviousImage}
-                              disabled={loading}
-                              sx={{
-                                position: "absolute",
-                                left: 16,
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                                backgroundColor: "rgba(0, 0, 0, 0.4)",
-                                backdropFilter: "blur(10px)",
-                                color: "#fff",
-                                width: 44,
-                                height: 44,
-                                border: "1px solid rgba(255, 255, 255, 0.2)",
-                                transition: "all 0.2s ease",
-                                "&:hover": {
-                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                                  transform: "translateY(-50%) scale(1.1)",
-                                },
-                                zIndex: 2,
-                              }}
-                            >
-                              <NavigateBefore sx={{ fontSize: 24 }} />
-                            </IconButton>
-                            <IconButton
-                              onClick={handleNextImage}
-                              disabled={loading}
-                              sx={{
-                                position: "absolute",
-                                right: 16,
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                                backgroundColor: "rgba(0, 0, 0, 0.4)",
-                                backdropFilter: "blur(10px)",
-                                color: "#fff",
-                                width: 44,
-                                height: 44,
-                                border: "1px solid rgba(255, 255, 255, 0.2)",
-                                transition: "all 0.2s ease",
-                                "&:hover": {
-                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                                  transform: "translateY(-50%) scale(1.1)",
-                                },
-                                zIndex: 2,
-                              }}
-                            >
-                              <NavigateNext sx={{ fontSize: 24 }} />
-                            </IconButton>
-                          </>
-                        )}
-
-                        {/* Indicadores de página melhorados */}
-                        {imagePreviews.length > 1 && (
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              bottom: 16,
-                              left: "50%",
-                              transform: "translateX(-50%)",
-                              display: "flex",
-                              gap: 1,
-                              zIndex: 2,
-                              backgroundColor: "rgba(0, 0, 0, 0.4)",
-                              backdropFilter: "blur(10px)",
-                              padding: "6px 12px",
-                              borderRadius: "20px",
-                              border: "1px solid rgba(255, 255, 255, 0.2)",
-                            }}
-                          >
-                            {imagePreviews.map((_, index) => (
-                              <Box
-                                key={index}
-                                onClick={() => setCurrentImageIndex(index)}
-                                sx={{
-                                  width: index === currentImageIndex ? 24 : 8,
-                                  height: 8,
-                                  borderRadius: "4px",
-                                  backgroundColor:
-                                    index === currentImageIndex
-                                      ? "#ffcc01"
-                                      : "rgba(255, 255, 255, 0.4)",
-                                  cursor: "pointer",
-                                  transition: "all 0.3s ease",
-                                  "&:hover": {
-                                    backgroundColor:
-                                      index === currentImageIndex
-                                        ? "#ffcc01"
-                                        : "rgba(255, 255, 255, 0.6)",
-                                  },
-                                }}
-                              />
-                            ))}
-                          </Box>
-                        )}
-                      </Box>
-
-                      {/* Botão para adicionar mais fotos */}
-                      {totalImagesCount < 5 && (
-                        <label htmlFor="image-upload" style={{ display: "block", marginTop: 16 }}>
-                          <Button
-                            component="span"
-                            disabled={loading}
-                            variant="outlined"
-                            startIcon={<AddPhotoAlternate />}
-                            fullWidth
-                            sx={{
-                              color: "rgba(255,255,255,0.9)",
-                              borderColor: "rgba(255,255,255,0.3)",
-                              textTransform: "none",
-                              fontSize: "0.875rem",
-                              fontWeight: 600,
-                              padding: "10px 20px",
-                              borderRadius: "12px",
-                              transition: "all 0.3s ease",
-                              backgroundColor: "rgba(255,255,255,0.05)",
-                              backdropFilter: "blur(10px)",
-                              "&:hover": {
-                                backgroundColor: "rgba(255,255,255,0.1)",
-                                borderColor: "rgba(255, 204, 1, 0.5)",
-                                color: "#ffcc01",
-                                transform: "translateY(-2px)",
-                              },
-                            }}
-                          >
-                            Adicionar mais fotos ({totalImagesCount}/5)
-                          </Button>
-                        </label>
-                      )}
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Seção de Título */}
-                <Box sx={{ mb: 4 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                    <TitleIcon sx={{ color: "#ffcc01", fontSize: 20 }} />
-                    <Typography 
-                      variant="subtitle1" 
-                      sx={{ 
-                        color: "#fff", 
-                        fontWeight: 600,
-                        fontSize: "1rem",
-                      }}
-                    >
-                      Título
-                    </Typography>
-                  </Box>
-                  <TextField
-                    placeholder="Dê um título à sua publicação..."
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    fullWidth
-                    disabled={loading}
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        backgroundColor: "rgba(255, 255, 255, 0.05)",
-                        backdropFilter: "blur(10px)",
-                        borderRadius: "12px",
-                        padding: "12px 16px",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          borderColor: "rgba(255, 255, 255, 0.2)",
-                        },
-                        "&.Mui-focused": {
-                          borderColor: "#ffcc01",
-                          backgroundColor: "rgba(255, 255, 255, 0.08)",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        color: "#fff",
-                        fontSize: "1.125rem",
-                        fontWeight: 500,
-                        "&::placeholder": {
-                          color: "rgba(255,255,255,0.4)",
-                          opacity: 1,
-                        },
-                      },
-                    }}
-                  />
-                </Box>
-
-                {/* Seção de Conteúdo */}
-                <Box sx={{ mb: 4 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                    <Description sx={{ color: "#ffcc01", fontSize: 20 }} />
-                    <Typography 
-                      variant="subtitle1" 
-                      sx={{ 
-                        color: "#fff", 
-                        fontWeight: 600,
-                        fontSize: "1rem",
-                      }}
-                    >
-                      Legenda
-                    </Typography>
-                  </Box>
-                  <TextField
-                    placeholder="Conte sua história, compartilhe seus momentos..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    required
-                    fullWidth
-                    multiline
-                    minRows={5}
-                    maxRows={12}
-                    disabled={loading}
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        backgroundColor: "rgba(255, 255, 255, 0.05)",
-                        backdropFilter: "blur(10px)",
-                        borderRadius: "12px",
-                        padding: "12px 16px",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          borderColor: "rgba(255, 255, 255, 0.2)",
-                        },
-                        "&.Mui-focused": {
-                          borderColor: "#ffcc01",
-                          backgroundColor: "rgba(255, 255, 255, 0.08)",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        color: "#fff",
-                        fontSize: "1rem",
-                        lineHeight: 1.6,
-                        "&::placeholder": {
-                          color: "rgba(255,255,255,0.4)",
-                          opacity: 1,
-                        },
-                      },
-                    }}
-                  />
-                </Box>
+                <NewsFormFields
+                  title={title}
+                  content={content}
+                  onTitleChange={setTitle}
+                  onContentChange={setContent}
+                  loading={loading}
+                />
 
                 {/* Actions melhoradas */}
                 <Box

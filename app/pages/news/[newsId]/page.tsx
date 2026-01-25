@@ -18,24 +18,28 @@ import {
   DialogContentText,
   Button,
 } from "@mui/material";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import SendIcon from "@mui/icons-material/Send";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import ReplyIcon from "@mui/icons-material/Reply";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import NewsDetailHeader from "@/app/components/news/NewsDetailHeader";
+import NewsImageCarousel from "@/app/components/news/NewsImageCarousel";
+import NewsActions from "@/app/components/news/NewsActions";
+import NewsContent from "@/app/components/news/NewsContent";
+import NewsLikeSection from "@/app/components/news/NewsLikeSection";
+import CommentInput from "@/app/components/news/CommentInput";
 import {
   getNewsDetails,
   NewsDetailsResponse,
   deleteNews,
   deactivatePost,
+  approvePost,
 } from "@/app/services/news/newsService";
 import {
   likeNews,
@@ -59,6 +63,7 @@ import DeleteNewsModal from "@/app/components/admin/news/DeleteNewsModal";
 import DeleteCommentModal from "@/app/components/comments/DeleteCommentModal";
 import { getMe } from "@/app/services/auth/authService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
+import { formatDate } from "@/app/utils/dateUtils";
 
 export default function NewsDetailPage() {
   const params = useParams();
@@ -93,10 +98,9 @@ export default function NewsDetailPage() {
   const [commentToDelete, setCommentToDelete] = useState<{ id: number; content: string } | null>(null);
   const [deletingComment, setDeletingComment] = useState(false);
   const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
+  const [reactivateModalOpen, setReactivateModalOpen] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
   const [commentsOffset, setCommentsOffset] = useState(0);
   const [hasMoreComments, setHasMoreComments] = useState(false);
   const [loadingMoreComments, setLoadingMoreComments] = useState(false);
@@ -292,8 +296,8 @@ export default function NewsDetailPage() {
   const handleComment = async () => {
     if (!isAuthenticated || !commentText.trim() || submittingComment || !news) return;
 
-    // Bloqueia comentar se o post estiver pendente
-    if (news.status === "pending") {
+    // Bloqueia comentar se o post estiver pendente ou rejeitado
+    if (news.status === "pending" || news.status === "rejected") {
       showToast("Este post ainda não foi aprovado.", "error");
       return;
     }
@@ -758,6 +762,27 @@ export default function NewsDetailPage() {
     }
   };
 
+  const handleReactivate = async () => {
+    if (!news || reactivating) return;
+
+    setReactivating(true);
+    try {
+      await approvePost(newsId);
+      showToast("Post reativado com sucesso!", "success");
+      setReactivateModalOpen(false);
+      // Recarrega os dados para atualizar o status
+      await loadNewsDetails();
+    } catch (error: any) {
+      console.error("Erro ao reativar post", error);
+      showToast(
+        error?.response?.data?.detail || "Erro ao reativar post",
+        "error"
+      );
+    } finally {
+      setReactivating(false);
+    }
+  };
+
   const handleDeactivate = async () => {
     if (!newsId) return;
 
@@ -776,63 +801,7 @@ export default function NewsDetailPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return "agora";
-    if (diffInSeconds < 3600)
-      return `${Math.floor(diffInSeconds / 60)}m`;
-    if (diffInSeconds < 86400)
-      return `${Math.floor(diffInSeconds / 3600)}h`;
-    if (diffInSeconds < 604800)
-      return `${Math.floor(diffInSeconds / 86400)}d`;
-
-    return date.toLocaleDateString("pt-BR", {
-      day: "numeric",
-      month: "short",
-    });
-  };
-
-  const images = news?.images || [];
-  const sortedImages = [...images].sort((a, b) => a.image_order - b.image_order);
-
-  const handlePreviousImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? sortedImages.length - 1 : prev - 1));
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === sortedImages.length - 1 ? 0 : prev + 1));
-  };
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe && sortedImages.length > 1) {
-      handleNextImage();
-    }
-    if (isRightSwipe && sortedImages.length > 1) {
-      handlePreviousImage();
-    }
-  };
-
-  useEffect(() => {
-    if (news && images.length > 0) {
-      setCurrentImageIndex(0);
-    }
-  }, [news, images.length]);
 
   if (loading) {
     return (
@@ -865,8 +834,8 @@ export default function NewsDetailPage() {
         }}
       >
         <Typography>Notícia não encontrada.</Typography>
-        <IconButton onClick={() =>  router.push("/pages/user/home")} sx={{ color: "#fff" }}>
-          <ArrowBackIosIcon />
+        <IconButton onClick={() => router.push("/pages/user/home")} sx={{ color: "#fff" }}>
+          ←
         </IconButton>
       </Box>
     );
@@ -887,303 +856,47 @@ export default function NewsDetailPage() {
         flexDirection: "column",
       }}
     >
-      {/* Botões de ação - Posicionados absolutamente no topo direito */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: 16,
-          right: 16,
-          zIndex: 1000,
-          display: "flex",
-          gap: 1,
-          alignItems: "center",
-        }}
-      >
-        {/* Botão de editar - apenas para autor */}
-        {isAuthor && (isAdmin || isColunista) && (
-          <IconButton
-            onClick={() => router.push(`/pages/news/edit?newsId=${newsId}&eventId=${eventId || news?.event_id || ''}`)}
-            size="small"
-            disabled={deleting}
-            sx={{
-              color: "#ffc91f",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              backdropFilter: "blur(10px)",
-              width: 40,
-              height: 40,
-              "&:hover": {
-                backgroundColor: "rgba(255, 201, 31, 0.3)",
-              },
-            }}
-            title="Editar post"
-          >
-            <EditIcon />
-          </IconButton>
+      <NewsActions
+        newsId={newsId}
+        eventId={eventId || news?.event_id || null}
+        isAuthor={isAuthor}
+        isAdmin={isAdmin}
+        isAdminMaster={isAdminMaster}
+        isSubadmin={isSubadmin}
+        isColunista={isColunista}
+        canDelete={Boolean(
+          (isAuthor && (isAdmin || isColunista)) || 
+          ((isAdminMaster || isSubadmin) && news && news.author && news.approved_by_id && news.approved_by_id === news.author.id) ||
+          // Admin e subadmin podem excluir posts rejeitados
+          ((isAdminMaster || isSubadmin) && news?.status === "rejected")
         )}
-        
-        {/* Botão de excluir - para autor OU para posts criados por admins */}
-        {((isAuthor && (isAdmin || isColunista)) || 
-          ((isAdminMaster || isSubadmin) && news && news.author && news.approved_by_id && news.approved_by_id === news.author.id)) && (
-          <IconButton
-            onClick={() => setDeleteModalOpen(true)}
-            size="small"
-            disabled={deleting}
-            sx={{
-              color: "#ff3040",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              backdropFilter: "blur(10px)",
-              width: 40,
-              height: 40,
-              "&:hover": {
-                backgroundColor: "rgba(255, 48, 64, 0.3)",
-              },
-            }}
-            title="Excluir post"
-          >
-            <DeleteIcon />
-          </IconButton>
-        )}
-        
-        {/* Botão X para desativar - sempre visível para admins */}
-        {(isAdminMaster || isSubadmin) && (
-          <IconButton
-            onClick={() => setDeactivateModalOpen(true)}
-            size="small"
-            disabled={deactivating}
-            sx={{
-              color: "#ff3040",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              backdropFilter: "blur(10px)",
-              width: 40,
-              height: 40,
-              "&:hover": {
-                backgroundColor: "rgba(255, 48, 64, 0.3)",
-              },
-            }}
-            title="Desativar post"
-          >
-            <CloseIcon />
-          </IconButton>
-        )}
-      </Box>
+        canDeactivate={Boolean((isAdminMaster || isSubadmin) && news?.status !== "rejected")}
+        onDelete={() => setDeleteModalOpen(true)}
+        onDeactivate={() => setDeactivateModalOpen(true)}
+        deleting={deleting}
+        deactivating={deactivating}
+      />
 
-      {/* Header com botão de voltar */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          p: 2,
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          position: "sticky",
-          top: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.3)",
-          backdropFilter: "blur(10px)",
-          zIndex: 10,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <IconButton
-            onClick={() =>  router.push("/pages/user/home")}
-            size="small"
-            sx={{ color: "#fff" }}
-          >
-            <ArrowBackIosIcon />
-          </IconButton>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Avatar
-              src={news.author?.profile_photo}
-              sx={{ width: 40, height: 40 }}
-            >
-              {news.author?.name?.[0]?.toUpperCase() || "?"}
-            </Avatar>
-            <Box>
-              <Typography fontWeight={600} fontSize={14}>
-                {news.author?.name || "Autor desconhecido"}
-              </Typography>
-              <Typography fontSize={12} color="rgba(255,255,255,0.6)">
-                {formatDate(news.created_at)}
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Box>
+      <NewsDetailHeader
+        authorName={news.author?.name}
+        authorPhoto={news.author?.profile_photo}
+        createdAt={news.created_at}
+      />
 
-      {/* Conteúdo */}
       <Box sx={{ pb: 2, flex: 1, overflowY: "auto" }}>
-        {/* Carrossel de imagens */}
-        {sortedImages.length > 0 && (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              width: "100%",
-              px: { xs: 0, sm: 2, md: 4 },
-            }}
-          >
-            <Box
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onTouchEnd}
-              sx={{
-                position: "relative",
-                width: "100%",
-                maxWidth: { xs: "100%", sm: "600px", md: "700px" },
-                margin: "0 auto",
-                borderRadius: 0,
-                overflow: "hidden",
-                backgroundColor: "transparent",
-                touchAction: "pan-y",
-                userSelect: "none",
-              }}
-            >
-              {/* Imagem atual */}
-              <Box
-                component="img"
-                src={sortedImages[currentImageIndex]?.image_url}
-                alt={news.title}
-                sx={{
-                  width: "100%",
-                  aspectRatio: "1 / 1",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-              />
-
-              {/* Botões de navegação (apenas se tiver mais de 1 imagem) */}
-              {sortedImages.length > 1 && (
-                <>
-                  <IconButton
-                    onClick={handlePreviousImage}
-                    sx={{
-                      position: "absolute",
-                      left: 12,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      backgroundColor: "rgba(0, 0, 0, 0.5)",
-                      color: "#fff",
-                      width: 32,
-                      height: 32,
-                      "&:hover": {
-                        backgroundColor: "rgba(0, 0, 0, 0.7)",
-                      },
-                      zIndex: 2,
-                    }}
-                  >
-                    <NavigateBeforeIcon sx={{ fontSize: 20 }} />
-                  </IconButton>
-                  <IconButton
-                    onClick={handleNextImage}
-                    sx={{
-                      position: "absolute",
-                      right: 12,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      backgroundColor: "rgba(0, 0, 0, 0.5)",
-                      color: "#fff",
-                      width: 32,
-                      height: 32,
-                      "&:hover": {
-                        backgroundColor: "rgba(0, 0, 0, 0.7)",
-                      },
-                      zIndex: 2,
-                    }}
-                  >
-                    <NavigateNextIcon sx={{ fontSize: 20 }} />
-                  </IconButton>
-                </>
-              )}
-
-              {/* Indicadores de página (dots) */}
-              {sortedImages.length > 1 && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: 12,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    display: "flex",
-                    gap: 0.75,
-                    zIndex: 2,
-                  }}
-                >
-                  {sortedImages.map((_, index) => (
-                    <Box
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      sx={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        backgroundColor:
-                          index === currentImageIndex
-                            ? "#fff"
-                            : "rgba(255, 255, 255, 0.4)",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                      }}
-                    />
-                  ))}
-                </Box>
-              )}
-            </Box>
-          </Box>
+        {news.images && news.images.length > 0 && (
+          <NewsImageCarousel images={news.images} alt={news.title} />
         )}
 
-        {/* Conteúdo */}
-        <Box 
-          sx={{ 
-            p: 2,
-            maxWidth: { xs: "100%", sm: "600px", md: "700px" },
-            margin: "0 auto",
-            width: "100%",
-          }}
-        >
-          {/* Título */}
-          <Typography
-            variant="h5"
-            fontWeight={700}
-            sx={{ color: "#fff", mb: 1 }}
-          >
-            {news.title}
-          </Typography>
+        <NewsContent title={news.title} content={news.content} />
 
-          {/* Texto */}
-          <Typography
-            variant="body1"
-            sx={{ color: "rgba(255,255,255,0.9)", mb: 2, whiteSpace: "pre-wrap" }}
-          >
-            {news.content}
-          </Typography>
-
-          {/* Ações (Curtir, Comentar) */}
-          <Box sx={{ display: "flex", gap: 1.5, mb: 1.5 }}>
-            <IconButton
-              onClick={handleLike}
-              disabled={!isAuthenticated || liking || news.status === "pending"}
-              sx={{ color: news.likes.user_liked ? "#ff3040" : "#fff" }}
-            >
-              {news.likes.user_liked ? (
-                <FavoriteIcon />
-              ) : (
-                <FavoriteBorderIcon />
-              )}
-            </IconButton>
-            <IconButton sx={{ color: "#fff" }}>
-              <ChatBubbleOutlineIcon />
-            </IconButton>
-          </Box>
-
-          {/* Contagem de curtidas */}
-          {news.likes.count > 0 && (
-            <Typography
-              fontWeight={600}
-              fontSize={14}
-              sx={{ color: "#fff", mb: 1.5 }}
-            >
-              {news.likes.count} {news.likes.count === 1 ? "curtida" : "curtidas"}
-            </Typography>
-          )}
+        <Box sx={{ px: 2, maxWidth: { xs: "100%", sm: "600px", md: "700px" }, margin: "0 auto", width: "100%" }}>
+          <NewsLikeSection
+            likesCount={news.likes.count}
+            userLiked={news.likes.user_liked}
+            onLike={handleLike}
+            disabled={!isAuthenticated || liking || news.status === "pending" || news.status === "rejected"}
+          />
 
           {/* Comentários */}
           <Box mt={2}>
@@ -1604,73 +1317,59 @@ export default function NewsDetailPage() {
               )}
             </Box>
 
-            {/* Campo de comentário */}
             {isAuthenticated && (
-              <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
-                <Avatar
-                  src={currentUser?.profile_photo || undefined}
-                  sx={{ width: 36, height: 36 }}
-                >
-                  {currentUser?.name?.[0]?.toUpperCase() || currentUser?.email?.[0]?.toUpperCase() || "U"}
-                </Avatar>
-                <TextField
-                  fullWidth
-                  placeholder="Adicione um comentário..."
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleComment();
-                    }
-                  }}
-                  multiline
-                  maxRows={4}
-                  disabled={submittingComment || news?.status === "pending"}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "rgba(255,255,255,0.05)",
-                      color: "#fff",
-                      borderRadius: 2,
-                      "& fieldset": {
-                        borderColor: "rgba(255,255,255,0.1)",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "rgba(255,255,255,0.2)",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#ffc91f",
-                      },
-                    },
-                    "& .MuiInputBase-input": {
-                      color: "#fff",
-                      "&::placeholder": {
-                        color: "rgba(255,255,255,0.5)",
-                        opacity: 1,
-                      },
-                    },
-                  }}
-                />
-                <IconButton
-                  onClick={handleComment}
-                  disabled={!commentText.trim() || submittingComment || news?.status === "pending"}
-                  sx={{
-                    color: commentText.trim()
-                      ? "#ffc91f"
-                      : "rgba(255,255,255,0.3)",
-                  }}
-                >
-                  {submittingComment ? (
-                    <CircularProgress size={20} sx={{ color: "#ffc91f" }} />
-                  ) : (
-                    <SendIcon />
-                  )}
-                </IconButton>
-              </Box>
+              <CommentInput
+                value={commentText}
+                onChange={setCommentText}
+                onSubmit={handleComment}
+                placeholder="Adicione um comentário..."
+                disabled={news?.status === "pending" || news?.status === "rejected"}
+                submitting={submittingComment}
+                userPhoto={currentUser?.profile_photo || undefined}
+                userName={currentUser?.name || undefined}
+                userEmail={currentUser?.email || undefined}
+              />
             )}
           </Box>
         </Box>
       </Box>
+
+      {/* Botão de reativar para posts rejeitados (apenas admin/subadmin) - no final da página */}
+      {news.status === "rejected" && (isAdminMaster || isSubadmin) && (
+        <Box
+          sx={{
+            px: 2,
+            pt: 3,
+            pb: 4,
+            display: "flex",
+            justifyContent: "center",
+            maxWidth: { xs: "100%", sm: "600px", md: "700px" },
+            margin: "0 auto",
+            width: "100%",
+          }}
+        >
+          <Button
+            variant="contained"
+            onClick={() => setReactivateModalOpen(true)}
+            sx={{
+              backgroundColor: "#4CAF50",
+              color: "#fff",
+              fontWeight: 600,
+              textTransform: "none",
+              borderRadius: 2,
+              px: 4,
+              py: 1.5,
+              minWidth: "200px",
+              "&:hover": {
+                backgroundColor: "#45a049",
+              },
+            }}
+            startIcon={<CheckCircleIcon />}
+          >
+            Reativar Post
+          </Button>
+        </Box>
+      )}
 
       {/* Modal de Exclusão */}
       {news && (
@@ -1766,6 +1465,77 @@ export default function NewsDetailPage() {
             }}
           >
             {deactivating ? "Desativando..." : "Desativar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de Reativação de Post */}
+      <Dialog
+        open={reactivateModalOpen}
+        onClose={() => !reactivating && setReactivateModalOpen(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "rgba(26, 26, 26, 0.95)",
+            backdropFilter: "blur(20px)",
+            color: "white",
+            borderRadius: 3,
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            minWidth: { xs: "90%", sm: "400px" },
+            maxWidth: "500px",
+          },
+        }}
+      >
+        <DialogTitle sx={{ pb: 1, fontWeight: 600 }}>
+          Reativar Post
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText
+            sx={{
+              color: "rgba(255,255,255,0.8)",
+              mb: 2,
+            }}
+          >
+            Tem certeza que deseja reativar este post? O post voltará a ser visível no feed e poderá receber curtidas e comentários novamente.
+          </DialogContentText>
+          <Box
+            sx={{
+              display: "block",
+              p: 2,
+              mt: 2,
+              backgroundColor: "rgba(76, 175, 80, 0.1)",
+              borderRadius: 2,
+              border: "1px solid rgba(76, 175, 80, 0.2)",
+            }}
+          >
+            O post será aprovado e voltará a aparecer no feed.
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 2 }}>
+          <Button
+            onClick={() => setReactivateModalOpen(false)}
+            disabled={reactivating}
+            sx={{
+              color: "rgba(255,255,255,0.7)",
+              textTransform: "none",
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleReactivate}
+            disabled={reactivating}
+            variant="contained"
+            startIcon={reactivating ? <CircularProgress size={16} sx={{ color: "#fff" }} /> : <CheckCircleIcon />}
+            sx={{
+              backgroundColor: "#4CAF50",
+              color: "white",
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#45a049",
+              },
+            }}
+          >
+            {reactivating ? "Reativando..." : "Reativar"}
           </Button>
         </DialogActions>
       </Dialog>

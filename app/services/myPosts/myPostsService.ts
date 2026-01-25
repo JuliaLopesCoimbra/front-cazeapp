@@ -29,3 +29,17 @@ export const getMyPendingPosts = async (
   return response.data as NewsResponse[];
 };
 
+export const getMyRejectedPosts = async (
+  eventId?: number,
+  limit = 10,
+  offset = 0
+): Promise<NewsResponse[]> => {
+  const params: any = { limit, offset };
+  if (eventId !== undefined) {
+    params.event_id = eventId;
+  }
+  const response = await api.get("/admin/events/my-rejected-posts", { params });
+
+  return response.data as NewsResponse[];
+};
+

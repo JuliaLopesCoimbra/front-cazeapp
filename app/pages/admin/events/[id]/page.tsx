@@ -25,6 +25,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import SchoolIcon from '@mui/icons-material/School';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import StoreIcon from '@mui/icons-material/Store';
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { 
   getEventById, 
@@ -774,6 +775,25 @@ export default function EventDetailsPage() {
               flexWrap: "wrap",
             }}
           >
+            <Button
+              variant="contained"
+              startIcon={<StoreIcon />}
+              onClick={() => router.push(`/pages/admin/events/${eventId}/products`)}
+              sx={{
+                flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 8px)" },
+                backgroundColor: "#ffc91f",
+                color: "#000",
+                fontWeight: 600,
+                py: 1.5,
+                borderRadius: "14px",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "#e6b800",
+                },
+              }}
+            >
+              Loja do Evento
+            </Button>
             <Button
               variant="contained"
               startIcon={<SchoolIcon />}

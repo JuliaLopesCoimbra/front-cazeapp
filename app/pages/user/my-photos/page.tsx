@@ -11,8 +11,9 @@ import { EventResponse, getEvents } from "@/app/services/events/eventAppService"
 import MyPosts from "@/app/components/my-posts/MyPosts";
 import MyPhotos from "@/app/components/my-photos/MyPhotos";
 import MenuOptions from "@/app/components/my-photos/MenuOptions";
+import RejectedPosts from "@/app/components/my-posts/RejectedPosts";
 
-type ViewMode = "menu" | "posts" | "photos";
+type ViewMode = "menu" | "posts" | "rejected" | "photos";
 const STORAGE_KEY = "selectedEventId";
 
 export default function MyPhotosPage() {
@@ -231,6 +232,40 @@ export default function MyPhotosPage() {
               </Typography>
             </Box>
             <MyPosts hideTitle currentEvent={currentEvent} />
+          </Box>
+        );
+      case "rejected":
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <Box 
+              display="flex" 
+              alignItems="center" 
+              gap={1} 
+              padding={2} 
+              paddingBottom={0}
+              sx={{
+                width: "100%",
+                maxWidth: { xs: "100%", md: "800px" },
+              }}
+            >
+              <IconButton
+                onClick={handleBackToMenu}
+                sx={{ color: "#fff" }}
+              >
+                <ArrowBackIosIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+              <Typography variant="h6" fontWeight={500} sx={{ color: "#fff", fontSize: "1rem" }}>
+                Posts Rejeitados por Mim
+              </Typography>
+            </Box>
+            <RejectedPosts hideTitle currentEvent={currentEvent} />
           </Box>
         );
       case "photos":

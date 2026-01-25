@@ -12,10 +12,10 @@ import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
 import { useAuth } from "@/app/context/AuthContext";
 
 interface Props {
-  event: EventResponse;
+  event: EventResponse | null;
   events: EventResponse[];
   onSelectEvent: (event: EventResponse) => void;
-  currentEvent: EventResponse;
+  currentEvent: EventResponse | null;
 }
 
 export default function HomeHeader({
@@ -64,7 +64,7 @@ export default function HomeHeader({
         <Box display="flex" alignItems="center" gap={{ xs: 1, md: 1.5, lg: 2 }}>
           <HamburgerMenu
             events={events}
-            currentEvent={currentEvent}
+            currentEvent={currentEvent || event}
             onSelectEvent={onSelectEvent}
           />
 
@@ -120,49 +120,51 @@ export default function HomeHeader({
       </Typography> */}
 
       {/* EVENTO + STATUS */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: { xs: 0.4, md: 0.6, lg: 0.8 },
-        }}
-      >
-        <Typography
-          variant="body1"
-          fontWeight={600}
-          sx={{ 
-            color: "#fff",
-            fontSize: { xs: "1rem", md: "1.25rem", lg: "1.5rem" },
+      {(event || currentEvent) && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: { xs: 0.4, md: 0.6, lg: 0.8 },
           }}
         >
-          {event.title}
-        </Typography>
-
-        <Box display="flex" alignItems="center" gap={{ xs: 0.6, md: 0.8, lg: 1 }}>
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body1"
+            fontWeight={600}
             sx={{ 
-              color: "white",
-              fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
+              color: "#fff",
+              fontSize: { xs: "1rem", md: "1.25rem", lg: "1.5rem" },
             }}
           >
-            {event.is_active ? "Ambiente ao vivo" : "Ambiente offline"}
+            {(event || currentEvent)?.title || "Carregando..."}
           </Typography>
 
-          <Box
-            sx={{
-              width: { xs: 8, md: 10, lg: 12 },
-              height: { xs: 8, md: 10, lg: 12 },
-              borderRadius: "50%",
-              backgroundColor: event.is_active ? "#2ecc71" : "#9e9e9e",
-              boxShadow: event.is_active 
-                ? "0 0 6px rgba(46, 204, 113, 0.8)" 
-                : "0 0 6px rgba(158, 158, 158, 0.5)",
-            }}
-          />
+          <Box display="flex" alignItems="center" gap={{ xs: 0.6, md: 0.8, lg: 1 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: "white",
+                fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
+              }}
+            >
+              {(event || currentEvent)?.is_active ? "Ambiente ao vivo" : "Ambiente offline"}
+            </Typography>
+
+            <Box
+              sx={{
+                width: { xs: 8, md: 10, lg: 12 },
+                height: { xs: 8, md: 10, lg: 12 },
+                borderRadius: "50%",
+                backgroundColor: (event || currentEvent)?.is_active ? "#2ecc71" : "#9e9e9e",
+                boxShadow: (event || currentEvent)?.is_active 
+                  ? "0 0 6px rgba(46, 204, 113, 0.8)" 
+                  : "0 0 6px rgba(158, 158, 158, 0.5)",
+              }}
+            />
+          </Box>
         </Box>
-      </Box>
+      )}
 
       {/* DIALOG DE NOTIFICAÇÕES */}
       <Dialog
