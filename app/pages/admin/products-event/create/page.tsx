@@ -4,9 +4,9 @@ import { Box, CircularProgress } from "@mui/material";
 import CreateProductForm from "@/app/components/admin/products-event/CreateProductForm";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 
-export default function CreateProductPage() {
+function CreateProductContent() {
   const { isAdmin, authReady } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -52,6 +52,28 @@ export default function CreateProductPage() {
     >
       <CreateProductForm eventId={eventId} />
     </Box>
+  );
+}
+
+export default function CreateProductPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            minHeight: "100vh",
+            backgroundColor: "#000",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress sx={{ color: "#ffc91f" }} />
+        </Box>
+      }
+    >
+      <CreateProductContent />
+    </Suspense>
   );
 }
 
