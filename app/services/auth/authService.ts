@@ -43,9 +43,10 @@ export const loginUser = async (data: LoginData): Promise<LoginResponse> => {
     const err = error as {
       response?: {
         data?: {
-          detail?: string;
+          detail?: string | Array<{ loc: string[]; msg: string; type: string }>;
           message?: string;
         };
+        status?: number;
       };
       message?: string;
     };
@@ -53,38 +54,79 @@ export const loginUser = async (data: LoginData): Promise<LoginResponse> => {
     // Verificar se precisa verificar idade - verificar primeiro antes de processar outros erros
     const detail = err.response?.data?.detail;
     if (detail) {
-      try {
-        const parsedDetail = JSON.parse(detail);
-        if (parsedDetail.requires_age_verification && parsedDetail.temp_token) {
-          // Criar um erro especial que será tratado no frontend
-          const specialError: any = new Error("AGE_VERIFICATION_REQUIRED");
-          specialError.tempToken = parsedDetail.temp_token;
-          throw specialError; // Lança o erro especial que será capturado no componente
+      // Se detail é string, tentar parsear como JSON
+      if (typeof detail === 'string') {
+        try {
+          const parsedDetail = JSON.parse(detail);
+          if (parsedDetail.requires_age_verification && parsedDetail.temp_token) {
+            // Criar um erro especial que será tratado no frontend
+            const specialError: any = new Error("AGE_VERIFICATION_REQUIRED");
+            specialError.tempToken = parsedDetail.temp_token;
+            throw specialError; // Lança o erro especial que será capturado no componente
+          }
+        } catch (parseError: any) {
+          // Se for o erro especial que criamos, relançar
+          if (parseError.message === "AGE_VERIFICATION_REQUIRED") {
+            throw parseError;
+          }
+          // Se não for JSON válido ou não for o erro especial, continua
         }
-      } catch (parseError: any) {
-        // Se for o erro especial que criamos, relançar
-        if (parseError.message === "AGE_VERIFICATION_REQUIRED") {
-          throw parseError;
-        }
-        // Se não for JSON válido ou não for o erro especial, continua
       }
     }
 
     // Extrair mensagem de erro normal
-    let message = 
-      err.response?.data?.detail ||
-      err.response?.data?.message ||
-      err.message ||
-      "Erro ao fazer login";
+    let message = "Erro ao fazer login";
 
-    // Tentar parsear se for JSON (pode conter informações estruturadas)
-    try {
-      const parsed = JSON.parse(message);
-      if (typeof parsed === 'object' && parsed.message) {
-        message = parsed.message;
+    // Tratar erros de validação do Pydantic (status 422)
+    if (err.response?.status === 422 && Array.isArray(err.response?.data?.detail)) {
+      const validationErrors = err.response.data.detail as Array<{ loc: string[]; msg: string; type: string }>;
+      const emailError = validationErrors.find(
+        (error) => error.loc.includes('email') || error.type.includes('email')
+      );
+      
+      if (emailError) {
+        // Traduzir erro de email inválido
+        if (emailError.type.includes('email') || emailError.msg.includes('email')) {
+          message = "Forneça um email válido";
+        } else {
+          message = emailError.msg;
+        }
+      } else if (validationErrors.length > 0) {
+        // Usar a primeira mensagem de erro de validação
+        message = validationErrors[0].msg;
       }
-    } catch {
-      // Não é JSON, usar mensagem original
+    } else {
+      // Tratar outros tipos de erro
+      const detailValue = err.response?.data?.detail;
+      
+      if (typeof detailValue === 'string') {
+        message = detailValue;
+      } else if (Array.isArray(detailValue) && detailValue.length > 0) {
+        // Se for array mas não foi tratado acima
+        const firstError = detailValue[0];
+        if (typeof firstError === 'object' && 'msg' in firstError) {
+          message = firstError.msg;
+        } else {
+          message = String(firstError);
+        }
+      } else {
+        message = 
+          err.response?.data?.message ||
+          err.message ||
+          "Erro ao fazer login";
+      }
+
+      // Tentar parsear se for JSON (pode conter informações estruturadas)
+      if (typeof message === 'string') {
+        try {
+          const parsed = JSON.parse(message);
+          if (typeof parsed === 'object' && parsed.message) {
+            message = parsed.message;
+          }
+        } catch {
+          // Não é JSON, usar mensagem original
+        }
+      }
     }
 
     throw new Error(message);
@@ -139,18 +181,56 @@ export const registerUser = async (
     const err = error as {
       response?: {
         data?: {
-          detail?: string;
+          detail?: string | Array<{ loc: string[]; msg: string; type: string }>;
           message?: string;
         };
+        status?: number;
       };
       message?: string;
     };
 
-    const message =
-      err.response?.data?.detail ||
-      err.response?.data?.message ||
-      err.message ||
-      "Erro ao realizar cadastro";
+    // Extrair mensagem de erro
+    let message = "Erro ao realizar cadastro";
+
+    // Tratar erros de validação do Pydantic (status 422)
+    if (err.response?.status === 422 && Array.isArray(err.response?.data?.detail)) {
+      const validationErrors = err.response.data.detail as Array<{ loc: string[]; msg: string; type: string }>;
+      const emailError = validationErrors.find(
+        (error) => error.loc.includes('email') || error.type.includes('email')
+      );
+      
+      if (emailError) {
+        // Traduzir erro de email inválido
+        if (emailError.type.includes('email') || emailError.msg.includes('email')) {
+          message = "Forneça um email válido";
+        } else {
+          message = emailError.msg;
+        }
+      } else if (validationErrors.length > 0) {
+        // Usar a primeira mensagem de erro de validação
+        message = validationErrors[0].msg;
+      }
+    } else {
+      // Tratar outros tipos de erro
+      const detailValue = err.response?.data?.detail;
+      
+      if (typeof detailValue === 'string') {
+        message = detailValue;
+      } else if (Array.isArray(detailValue) && detailValue.length > 0) {
+        // Se for array mas não foi tratado acima
+        const firstError = detailValue[0];
+        if (typeof firstError === 'object' && 'msg' in firstError) {
+          message = firstError.msg;
+        } else {
+          message = String(firstError);
+        }
+      } else {
+        message = 
+          err.response?.data?.message ||
+          err.message ||
+          "Erro ao realizar cadastro";
+      }
+    }
 
     throw new Error(message);
   }

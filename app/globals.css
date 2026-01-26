@@ -52,3 +52,23 @@ nextjs-portal {
   top: 0px !important;
   left: 0px !important;
 }
+
+/* Garantir que elementos fixed não sejam afetados durante scroll */
+[data-fixed-bottom] {
+  position: fixed !important;
+  bottom: 0 !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+  -webkit-transform: translateZ(0) !important;
+}
+
+/* Prevenir espaços em branco abaixo do BottomNav */
+body {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+html {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Typography, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, Menu, MenuItem, ListItemIcon, ListItemText, Skeleton } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -29,6 +29,7 @@ export default function HomeHeader({
   const router = useRouter();
   const { logout } = useAuth();
   const [profile, setProfile] = useState<ProfileResponse | null>(profileProp || null);
+  const [loadingProfile, setLoadingProfile] = useState(!profileProp);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
@@ -37,19 +38,110 @@ export default function HomeHeader({
     // Se o perfil foi passado como prop, não precisa buscar
     if (profileProp) {
       setProfile(profileProp);
+      setLoadingProfile(false);
       return;
     }
     
     // Caso contrário, busca o perfil (compatibilidade com outros usos)
+    setLoadingProfile(true);
     getProfile()
-      .then(setProfile)
+      .then((data) => {
+        setProfile(data);
+        setLoadingProfile(false);
+      })
       .catch((error) => {
         console.error("Erro ao buscar perfil:", error);
+        setLoadingProfile(false);
       });
   }, [profileProp]);
 
-  // Se não há perfil e não foi passado como prop, retorna null
-  if (!profile) return null;
+  // Se está carregando o perfil, mostra skeleton
+  if (loadingProfile || !profile) {
+    return (
+      <Box
+        sx={{
+          padding: { xs: 2, md: 3, lg: 4 },
+          borderBottom: "solid 1px rgba(255,255,255,0.2)",
+          display: "flex",
+          flexDirection: "column",
+          gap: { xs: 1, md: 1.5, lg: 2 },
+        }}
+      >
+        {/* LINHA SUPERIOR - Skeleton */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* ESQUERDA: HAMBURGER + NOME - Skeleton */}
+          <Box display="flex" alignItems="center" gap={{ xs: 1, md: 1.5, lg: 2 }}>
+            <HamburgerMenu
+              events={events}
+              currentEvent={currentEvent || event}
+              onSelectEvent={onSelectEvent}
+            />
+            <Skeleton
+              variant="text"
+              width={150}
+              height={32}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+            />
+          </Box>
+
+          {/* DIREITA: NOTIFICAÇÕES + AVATAR - Skeleton */}
+          <Box display="flex" alignItems="center" gap={{ xs: 1, md: 1.5, lg: 2 }}>
+            <Skeleton
+              variant="circular"
+              width={40}
+              height={40}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+            />
+            <Skeleton
+              variant="circular"
+              width={40}
+              height={40}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+            />
+          </Box>
+        </Box>
+
+        {/* EVENTO + STATUS - Skeleton */}
+        {(event || currentEvent) && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: { xs: 0.4, md: 0.6, lg: 0.8 },
+            }}
+          >
+            <Skeleton
+              variant="text"
+              width={200}
+              height={24}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+            />
+            <Box display="flex" alignItems="center" gap={{ xs: 0.6, md: 0.8, lg: 1 }}>
+              <Skeleton
+                variant="text"
+                width={120}
+                height={20}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+              />
+              <Skeleton
+                variant="circular"
+                width={12}
+                height={12}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+              />
+            </Box>
+          </Box>
+        )}
+      </Box>
+    );
+  }
 
   return (
     <Box

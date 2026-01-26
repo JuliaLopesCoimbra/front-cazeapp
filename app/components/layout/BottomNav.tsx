@@ -28,19 +28,31 @@ export default function BottomNav() {
 
   return (
     <Box
+      data-fixed-bottom="true"
       sx={{
         position: "fixed",
         bottom: 0,
         left: 0,
         right: 0,
-        height: 64,
+        width: "100%",
+        height: "calc(64px + env(safe-area-inset-bottom))",
+        minHeight: 64,
         backgroundColor: "rgba(0,0,0,0.85)",
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
         borderTop: "1px solid rgba(255,255,255,0.1)",
         backdropFilter: "blur(6px)",
-        zIndex: 1300,
+        zIndex: 9999,
+        transform: "translateZ(0)",
+        willChange: "transform",
+        WebkitTransform: "translateZ(0)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        boxSizing: "border-box",
+        margin: 0,
+        flexShrink: 0,
+        touchAction: "none",
+        pointerEvents: "auto",
       }}
     >
       {items.map((item) => {
