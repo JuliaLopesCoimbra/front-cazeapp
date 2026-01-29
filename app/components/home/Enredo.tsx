@@ -883,9 +883,9 @@ function EnredoSkeleton() {
             >
               <Skeleton
                 variant="rectangular"
-                width={{ xs: 120, md: 160, lg: 180 }}
-                height={{ xs: 120, md: 160, lg: 180 }}
                 sx={{
+                  width: { xs: 120, md: 160, lg: 180 },
+                  height: { xs: 120, md: 160, lg: 180 },
                   bgcolor: "rgba(255,255,255,0.1)",
                   borderRadius: 2,
                   mb: 2,
