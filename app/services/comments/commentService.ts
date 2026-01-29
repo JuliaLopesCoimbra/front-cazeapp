@@ -108,3 +108,23 @@ export const deleteComment = async (commentId: number) => {
   return response.data;
 };
 
+export interface UserWhoLikedComment {
+  id: number;
+  name: string | null;
+  profile_photo: string | null;
+}
+
+/**
+ * Listar usuários que curtiram um comentário
+ */
+export const getUsersWhoLikedComment = async (
+  commentId: number,
+  limit: number = 10,
+  offset: number = 0
+): Promise<UserWhoLikedComment[]> => {
+  const response = await api.get(`/news/comments/${commentId}/likes/users`, {
+    params: { limit, offset },
+  });
+  return response.data as UserWhoLikedComment[];
+};
+

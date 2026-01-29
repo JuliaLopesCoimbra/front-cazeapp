@@ -21,6 +21,7 @@ interface NewsActionsProps {
   onDeactivate: () => void;
   deleting?: boolean;
   deactivating?: boolean;
+  postStatus?: "pending" | "approved" | "rejected" | "deleted";
 }
 
 export default function NewsActions({
@@ -37,8 +38,13 @@ export default function NewsActions({
   onDeactivate,
   deleting = false,
   deactivating = false,
+  postStatus,
 }: NewsActionsProps) {
   const router = useRouter();
+
+  // Colunistas não podem editar ou excluir posts rejeitados (desativados)
+  const isPostRejected = postStatus === "rejected";
+  const canColunistaEditOrDelete = isColunista && !isPostRejected;
 
   return (
     <Box
@@ -52,7 +58,7 @@ export default function NewsActions({
         alignItems: "center",
       }}
     >
-      {isAuthor && (isAdmin || isColunista) && (
+      {isAuthor && (isAdmin || canColunistaEditOrDelete) && (
         <IconButton
           onClick={() => router.push(`/pages/news/edit?newsId=${newsId}&eventId=${eventId || ''}`)}
           size="small"
@@ -73,7 +79,7 @@ export default function NewsActions({
         </IconButton>
       )}
 
-      {canDelete && (
+      {canDelete && !(isColunista && isPostRejected) && (
         <IconButton
           onClick={onDelete}
           size="small"

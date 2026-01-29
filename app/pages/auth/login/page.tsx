@@ -153,6 +153,12 @@ const LoginForm: React.FC = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" && email && password && !loading) {
+      handleLogin();
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -217,6 +223,7 @@ const LoginForm: React.FC = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={handleKeyDown}
           inputProps={{
             autoCapitalize: "none",
             autoCorrect: "off",
@@ -273,6 +280,7 @@ const LoginForm: React.FC = () => {
           type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
           error={Boolean(password && password.length < 6)}
           helperText={
             password && password.length < 6

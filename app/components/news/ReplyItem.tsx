@@ -1,11 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Box, Avatar, Typography, IconButton, Paper } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { CommentResponse } from "@/app/services/comments/commentService";
 import { formatDate } from "@/app/utils/dateUtils";
+import UserProfileModal from "@/app/components/user/UserProfileModal";
+import UsersWhoLikedModal from "@/app/components/common/UsersWhoLikedModal";
 
 interface ReplyItemProps {
   reply: CommentResponse;
@@ -29,6 +31,18 @@ export default function ReplyItem({
   liking,
 }: ReplyItemProps) {
   const canDelete = isAuthenticated && (isAdminMaster || isSubadmin || reply.user.id === currentUserId);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [likesModalOpen, setLikesModalOpen] = useState(false);
+
+  const handleUserClick = () => {
+    setProfileModalOpen(true);
+  };
+
+  const handleLikesClick = () => {
+    if (reply.likes.count > 0) {
+      setLikesModalOpen(true);
+    }
+  };
 
   return (
     <Box 
@@ -41,7 +55,16 @@ export default function ReplyItem({
       <Box sx={{ display: "flex", gap: 1 }}>
         <Avatar
           src={reply.user.profile_photo}
-          sx={{ width: 24, height: 24 }}
+          onClick={handleUserClick}
+          sx={{
+            width: 24,
+            height: 24,
+            cursor: "pointer",
+            transition: "opacity 0.2s",
+            "&:hover": {
+              opacity: 0.8,
+            },
+          }}
         >
           {reply.user.name[0]?.toUpperCase()}
         </Avatar>
@@ -57,13 +80,27 @@ export default function ReplyItem({
             <Typography
               fontWeight={600}
               fontSize={12}
-              sx={{ color: "#fff", mb: 0.3 }}
+              onClick={handleUserClick}
+              sx={{
+                color: "#fff",
+                mb: 0.3,
+                cursor: "pointer",
+                transition: "opacity 0.2s",
+                "&:hover": {
+                  opacity: 0.8,
+                },
+              }}
             >
               {reply.user.name}
             </Typography>
             <Typography
               fontSize={13}
-              sx={{ color: "rgba(255,255,255,0.9)" }}
+              sx={{ 
+                color: "rgba(255,255,255,0.9)",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "pre-wrap",
+              }}
             >
               {reply.content}
             </Typography>
@@ -89,7 +126,16 @@ export default function ReplyItem({
             {reply.likes.count > 0 && (
               <Typography
                 fontSize={10}
-                sx={{ color: "rgba(255,255,255,0.4)" }}
+                onClick={handleLikesClick}
+                sx={{
+                  color: "rgba(255,255,255,0.4)",
+                  cursor: "pointer",
+                  transition: "opacity 0.2s",
+                  "&:hover": {
+                    opacity: 0.8,
+                    textDecoration: "underline",
+                  },
+                }}
               >
                 {reply.likes.count}
               </Typography>
@@ -110,6 +156,21 @@ export default function ReplyItem({
           </Box>
         </Box>
       </Box>
+
+      <UserProfileModal
+        open={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        userId={reply.user.id}
+      />
+
+      {/* Modal de usuários que curtiram a resposta */}
+      <UsersWhoLikedModal
+        open={likesModalOpen}
+        onClose={() => setLikesModalOpen(false)}
+        type="comment"
+        id={reply.id}
+        likesCount={reply.likes.count}
+      />
     </Box>
   );
 }

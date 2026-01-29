@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -24,6 +24,8 @@ import { ProfileResponse } from "@/app/services/profile/profileService";
 import { formatDate } from "@/app/utils/dateUtils";
 import CommentInput from "./CommentInput";
 import ReplyItem from "./ReplyItem";
+import UserProfileModal from "@/app/components/user/UserProfileModal";
+import UsersWhoLikedModal from "@/app/components/common/UsersWhoLikedModal";
 
 interface CommentSectionProps {
   news: NewsDetailsResponse;
@@ -90,6 +92,23 @@ export default function CommentSection({
   onLoadMoreReplies,
   onLoadMoreComments,
 }: CommentSectionProps) {
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [likesModalOpen, setLikesModalOpen] = useState(false);
+  const [selectedCommentId, setSelectedCommentId] = useState<number | null>(null);
+
+  const handleUserClick = (userId: number) => {
+    setSelectedUserId(userId);
+    setProfileModalOpen(true);
+  };
+
+  const handleLikesClick = (commentId: number, likesCount: number) => {
+    if (likesCount > 0) {
+      setSelectedCommentId(commentId);
+      setLikesModalOpen(true);
+    }
+  };
+
   return (
     <Box mt={2}>
       <Typography
@@ -137,7 +156,16 @@ export default function CommentSection({
             <Box sx={{ display: "flex", gap: 1.5 }}>
               <Avatar
                 src={comment.user.profile_photo}
-                sx={{ width: 32, height: 32 }}
+                onClick={() => handleUserClick(comment.user.id)}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  cursor: "pointer",
+                  transition: "opacity 0.2s",
+                  "&:hover": {
+                    opacity: 0.8,
+                  },
+                }}
               >
                 {comment.user.name[0]?.toUpperCase()}
               </Avatar>
@@ -153,13 +181,27 @@ export default function CommentSection({
                   <Typography
                     fontWeight={600}
                     fontSize={13}
-                    sx={{ color: "#fff", mb: 0.5 }}
+                    onClick={() => handleUserClick(comment.user.id)}
+                    sx={{
+                      color: "#fff",
+                      mb: 0.5,
+                      cursor: "pointer",
+                      transition: "opacity 0.2s",
+                      "&:hover": {
+                        opacity: 0.8,
+                      },
+                    }}
                   >
                     {comment.user.name}
                   </Typography>
                   <Typography
                     fontSize={14}
-                    sx={{ color: "rgba(255,255,255,0.9)" }}
+                    sx={{ 
+                      color: "rgba(255,255,255,0.9)",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                      whiteSpace: "pre-wrap",
+                    }}
                   >
                     {comment.content}
                   </Typography>
@@ -189,7 +231,17 @@ export default function CommentSection({
                     {comment.likes.count > 0 && (
                       <Typography
                         fontSize={11}
-                        sx={{ color: "rgba(255,255,255,0.5)", mr: 1 }}
+                        onClick={() => handleLikesClick(comment.id, comment.likes.count)}
+                        sx={{
+                          color: "rgba(255,255,255,0.5)",
+                          mr: 1,
+                          cursor: "pointer",
+                          transition: "opacity 0.2s",
+                          "&:hover": {
+                            opacity: 0.8,
+                            textDecoration: "underline",
+                          },
+                        }}
                       >
                         {comment.likes.count}
                       </Typography>
@@ -260,7 +312,12 @@ export default function CommentSection({
                       fullWidth
                       placeholder="Escreva uma resposta..."
                       value={replyTexts[comment.id] || ""}
-                      onChange={(e) => onReplyTextChange(comment.id, e.target.value)}
+                      onChange={(e) => {
+                        const newValue = e.target.value;
+                        if (newValue.length <= 500) {
+                          onReplyTextChange(comment.id, newValue);
+                        }
+                      }}
                       onKeyPress={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
@@ -271,6 +328,17 @@ export default function CommentSection({
                       maxRows={3}
                       disabled={submittingReply[comment.id]}
                       size="small"
+                      inputProps={{
+                        maxLength: 500,
+                      }}
+                      helperText={`${(replyTexts[comment.id] || "").length}/500 caracteres`}
+                      FormHelperTextProps={{
+                        sx: {
+                          color: "rgba(255,255,255,0.5)",
+                          fontSize: "0.7rem",
+                          mt: 0.5,
+                        },
+                      }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           backgroundColor: "rgba(255,255,255,0.05)",
@@ -289,6 +357,8 @@ export default function CommentSection({
                         "& .MuiInputBase-input": {
                           color: "#fff",
                           fontSize: "13px",
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
                           "&::placeholder": {
                             color: "rgba(255,255,255,0.5)",
                             opacity: 1,
@@ -451,6 +521,31 @@ export default function CommentSection({
           userPhoto={currentUser?.profile_photo || undefined}
           userName={currentUser?.name || undefined}
           userEmail={currentUser?.email || undefined}
+        />
+      )}
+
+      {selectedUserId && (
+        <UserProfileModal
+          open={profileModalOpen}
+          onClose={() => {
+            setProfileModalOpen(false);
+            setSelectedUserId(null);
+          }}
+          userId={selectedUserId}
+        />
+      )}
+
+      {/* Modal de usuários que curtiram o comentário */}
+      {selectedCommentId && (
+        <UsersWhoLikedModal
+          open={likesModalOpen}
+          onClose={() => {
+            setLikesModalOpen(false);
+            setSelectedCommentId(null);
+          }}
+          type="comment"
+          id={selectedCommentId}
+          likesCount={news.comments.find(c => c.id === selectedCommentId)?.likes.count || 0}
         />
       )}
     </Box>

@@ -39,10 +39,26 @@ export default function NewsFormFields({
         <TextField
           placeholder="Dê um título à sua publicação..."
           value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            if (newValue.length <= 100) {
+              onTitleChange(newValue);
+            }
+          }}
           required
           fullWidth
           disabled={loading}
+          inputProps={{
+            maxLength: 100,
+          }}
+          helperText={`${title.length}/100 caracteres`}
+          FormHelperTextProps={{
+            sx: {
+              color: "rgba(255,255,255,0.5)",
+              fontSize: "0.875rem",
+              mt: 1,
+            },
+          }}
           sx={{
             "& .MuiInputBase-root": {
               backgroundColor: "rgba(255, 255, 255, 0.05)",
@@ -63,6 +79,8 @@ export default function NewsFormFields({
               color: "#fff",
               fontSize: "1.125rem",
               fontWeight: 500,
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
               "&::placeholder": {
                 color: "rgba(255,255,255,0.4)",
                 opacity: 1,
@@ -90,13 +108,29 @@ export default function NewsFormFields({
         <TextField
           placeholder="Conte sua história, compartilhe seus momentos..."
           value={content}
-          onChange={(e) => onContentChange(e.target.value)}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            if (newValue.length <= 2000) {
+              onContentChange(newValue);
+            }
+          }}
           required
           fullWidth
           multiline
           minRows={5}
           maxRows={12}
           disabled={loading}
+          inputProps={{
+            maxLength: 2000,
+          }}
+          helperText={`${content.length}/2000 caracteres`}
+          FormHelperTextProps={{
+            sx: {
+              color: "rgba(255,255,255,0.5)",
+              fontSize: "0.875rem",
+              mt: 1,
+            },
+          }}
           sx={{
             "& .MuiInputBase-root": {
               backgroundColor: "rgba(255, 255, 255, 0.05)",
@@ -117,6 +151,8 @@ export default function NewsFormFields({
               color: "#fff",
               fontSize: "1rem",
               lineHeight: 1.6,
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
               "&::placeholder": {
                 color: "rgba(255,255,255,0.4)",
                 opacity: 1,

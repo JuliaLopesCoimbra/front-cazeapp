@@ -162,10 +162,25 @@ export default function CreateNewsModal({
             <TextField
               label="Título"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue.length <= 100) {
+                  setTitle(newValue);
+                }
+              }}
               required
               fullWidth
               disabled={loading}
+              inputProps={{
+                maxLength: 100,
+              }}
+              helperText={`${title.length}/100 caracteres`}
+              FormHelperTextProps={{
+                sx: {
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: "0.875rem",
+                },
+              }}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "rgba(255,255,255,0.05)",
@@ -185,6 +200,10 @@ export default function CreateNewsModal({
                   "&.Mui-focused": {
                     color: "#ffc91f",
                   },
+                },
+                "& .MuiInputBase-input": {
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
                 },
               }}
             />
@@ -193,12 +212,27 @@ export default function CreateNewsModal({
             <TextField
               label="Conteúdo"
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue.length <= 2000) {
+                  setContent(newValue);
+                }
+              }}
               required
               fullWidth
               multiline
               rows={6}
               disabled={loading}
+              inputProps={{
+                maxLength: 2000,
+              }}
+              helperText={`${content.length}/2000 caracteres`}
+              FormHelperTextProps={{
+                sx: {
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: "0.875rem",
+                },
+              }}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "rgba(255,255,255,0.05)",
@@ -218,6 +252,10 @@ export default function CreateNewsModal({
                   "&.Mui-focused": {
                     color: "#ffc91f",
                   },
+                },
+                "& .MuiInputBase-input": {
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
                 },
               }}
             />

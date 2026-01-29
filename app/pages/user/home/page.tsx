@@ -262,14 +262,23 @@ const HomeContent: React.FC = () => {
   };
 
   useEffect(() => {
-    // restaura scroll salvo
+    // restaura scroll salvo apenas se não estiver na aba "home" (NewsFeed cuida disso)
+    // ou se não houver cache do feed
     const savedScroll = sessionStorage.getItem(SCROLL_KEY);
-    if (savedScroll) {
-      requestAnimationFrame(() => {
-        window.scrollTo(0, parseInt(savedScroll, 10) || 0);
-      });
+    if (savedScroll && activeTab !== "home") {
+      // Aguarda um pouco para garantir que o conteúdo está renderizado
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, parseInt(savedScroll, 10) || 0);
+        });
+      }, 100);
     }
-    const onScroll = () => sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
+    const onScroll = () => {
+      // Só salva scroll se não estiver na aba "home" (NewsFeed cuida disso)
+      if (activeTab !== "home") {
+        sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
+      }
+    };
     window.addEventListener("scroll", onScroll);
 
     // Se BottomNav marcou para restaurar home (volta da my-photos/liked), não mudar aba
@@ -398,7 +407,7 @@ const HomeContent: React.FC = () => {
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [router, isAdmin, authReady, checkAndUpdateEvents]);
+  }, [router, isAdmin, authReady, checkAndUpdateEvents, activeTab]);
 
   // Se não há eventos ativos disponíveis para usuário não-admin, mostra Evento Indisponível
   if (eventsLoaded && !currentEvent) {

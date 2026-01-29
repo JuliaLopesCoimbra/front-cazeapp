@@ -2,6 +2,7 @@
 
 import { Box, Card, Typography, CardContent } from "@mui/material";
 import { Article, PhotoLibrary, Block } from "@mui/icons-material";
+import { useAuth } from "@/app/context/AuthContext";
 
 interface MenuOption {
   id: string;
@@ -15,7 +16,9 @@ interface MenuOptionsProps {
 }
 
 export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
-  const options: MenuOption[] = [
+  const { isAdminMaster, isSubadmin } = useAuth();
+  
+  const allOptions: MenuOption[] = [
     {
       id: "posts",
       title: "Meus Posts",
@@ -35,6 +38,14 @@ export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
       onClick: () => onSelectOption("photos"),
     },
   ];
+
+  // Filtra opções: "Posts Rejeitados por Mim" só aparece para subadmin e admin master
+  const options = allOptions.filter((option) => {
+    if (option.id === "rejected") {
+      return isAdminMaster || isSubadmin;
+    }
+    return true;
+  });
 
   return (
     <Box 

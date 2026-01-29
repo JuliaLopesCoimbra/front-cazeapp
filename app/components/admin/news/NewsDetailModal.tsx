@@ -34,6 +34,7 @@ import { useToast } from "@/app/context/ToastContext";
 import EditNewsModal from "./EditNewsModal";
 import DeleteNewsModal from "./DeleteNewsModal";
 import { getMe } from "@/app/services/auth/authService";
+import UserProfileModal from "@/app/components/user/UserProfileModal";
 
 interface Props {
   open: boolean;
@@ -62,6 +63,13 @@ export default function NewsDetailModal({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+
+  const handleUserClick = (userId: number) => {
+    setSelectedUserId(userId);
+    setProfileModalOpen(true);
+  };
 
   const loadNewsDetails = async () => {
     if (!newsId) return;
@@ -266,7 +274,8 @@ export default function NewsDetailModal({
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
               {/* Botões de editar/excluir apenas para autor (admin ou colunista) */}
-              {isAuthor && (isAdmin || isColunista) && (
+              {/* Colunistas não podem editar/excluir posts rejeitados (desativados) */}
+              {isAuthor && (isAdmin || (isColunista && news?.status !== "rejected")) && (
                 <>
                   <IconButton
                     onClick={() => setEditModalOpen(true)}
@@ -397,7 +406,16 @@ export default function NewsDetailModal({
                       <Box display="flex" gap={1.5}>
                         <Avatar
                           src={comment.user.profile_photo}
-                          sx={{ width: 32, height: 32 }}
+                          onClick={() => handleUserClick(comment.user.id)}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            cursor: "pointer",
+                            transition: "opacity 0.2s",
+                            "&:hover": {
+                              opacity: 0.8,
+                            },
+                          }}
                         >
                           {comment.user.name[0]?.toUpperCase()}
                         </Avatar>
@@ -413,7 +431,16 @@ export default function NewsDetailModal({
                             <Typography
                               fontWeight={600}
                               fontSize={13}
-                              sx={{ color: "#fff", mb: 0.5 }}
+                              onClick={() => handleUserClick(comment.user.id)}
+                              sx={{
+                                color: "#fff",
+                                mb: 0.5,
+                                cursor: "pointer",
+                                transition: "opacity 0.2s",
+                                "&:hover": {
+                                  opacity: 0.8,
+                                },
+                              }}
                             >
                               {comment.user.name}
                             </Typography>
@@ -450,7 +477,12 @@ export default function NewsDetailModal({
                       fullWidth
                       placeholder="Adicione um comentário..."
                       value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
+                      onChange={(e) => {
+                        const newValue = e.target.value;
+                        if (newValue.length <= 500) {
+                          setCommentText(newValue);
+                        }
+                      }}
                       onKeyPress={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
@@ -460,6 +492,17 @@ export default function NewsDetailModal({
                       multiline
                       maxRows={4}
                       disabled={submittingComment}
+                      inputProps={{
+                        maxLength: 500,
+                      }}
+                      helperText={`${commentText.length}/500 caracteres`}
+                      FormHelperTextProps={{
+                        sx: {
+                          color: "rgba(255,255,255,0.5)",
+                          fontSize: "0.75rem",
+                          mt: 0.5,
+                        },
+                      }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           backgroundColor: "rgba(255,255,255,0.05)",
@@ -477,6 +520,8 @@ export default function NewsDetailModal({
                         },
                         "& .MuiInputBase-input": {
                           color: "#fff",
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
                           "&::placeholder": {
                             color: "rgba(255,255,255,0.5)",
                             opacity: 1,
@@ -526,6 +571,18 @@ export default function NewsDetailModal({
           onClose={() => setDeleteModalOpen(false)}
           onConfirm={handleDelete}
           loading={deleting}
+        />
+      )}
+
+      {/* Modal de Perfil do Usuário */}
+      {selectedUserId && (
+        <UserProfileModal
+          open={profileModalOpen}
+          onClose={() => {
+            setProfileModalOpen(false);
+            setSelectedUserId(null);
+          }}
+          userId={selectedUserId}
         />
       )}
     </Dialog>

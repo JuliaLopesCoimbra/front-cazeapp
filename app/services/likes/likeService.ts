@@ -59,3 +59,23 @@ export const getLikedPosts = async (
   return response.data as NewsDetailsResponse[];
 };
 
+export interface UserWhoLiked {
+  id: number;
+  name: string | null;
+  profile_photo: string | null;
+}
+
+/**
+ * Listar usuários que curtiram uma notícia
+ */
+export const getUsersWhoLiked = async (
+  newsId: number,
+  limit: number = 10,
+  offset: number = 0
+): Promise<UserWhoLiked[]> => {
+  const response = await api.get(`/news/${newsId}/likes/users`, {
+    params: { limit, offset },
+  });
+  return response.data as UserWhoLiked[];
+};
+

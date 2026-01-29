@@ -21,14 +21,25 @@ export default function NewsContent({ title, content }: NewsContentProps) {
       <Typography
         variant="h5"
         fontWeight={700}
-        sx={{ color: "#fff", mb: 1 }}
+        sx={{ 
+          color: "#fff", 
+          mb: 1,
+          wordBreak: "break-word",
+          overflowWrap: "break-word",
+        }}
       >
         {title}
       </Typography>
 
       <Typography
         variant="body1"
-        sx={{ color: "rgba(255,255,255,0.9)", mb: 2, whiteSpace: "pre-wrap" }}
+        sx={{ 
+          color: "rgba(255,255,255,0.9)", 
+          mb: 2, 
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+          overflowWrap: "break-word",
+        }}
       >
         {content}
       </Typography>

@@ -4,6 +4,14 @@ import { Box, Typography, Avatar, IconButton, Menu, MenuItem, ListItemIcon, List
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import BlockIcon from "@mui/icons-material/Block";
+import EventIcon from "@mui/icons-material/Event";
+import ArticleIcon from "@mui/icons-material/Article";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import CommentIcon from "@mui/icons-material/Comment";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EventResponse } from "@/app/services/events/eventAppService";
@@ -300,6 +308,36 @@ export default function HomeHeader({
     if (diffHours < 24) return `${diffHours}h atrás`;
     if (diffDays < 7) return `${diffDays}d atrás`;
     return date.toLocaleDateString("pt-BR");
+  };
+
+  const getNotificationIcon = (type: string) => {
+    const iconStyle = {
+      fontSize: 24,
+      color: "#ffcc01",
+    };
+
+    switch (type) {
+      case "new_event":
+        return <EventIcon sx={iconStyle} />;
+      case "new_post":
+        return <ArticleIcon sx={iconStyle} />;
+      case "lineup_updated":
+        return <MusicNoteIcon sx={iconStyle} />;
+      case "comment_reply":
+      case "post_comment":
+        return <CommentIcon sx={iconStyle} />;
+      case "comment_like":
+        return <FavoriteIcon sx={iconStyle} />;
+      case "post_approved":
+      case "post_approved_admin":
+        return <CheckCircleIcon sx={{ ...iconStyle, color: "#4caf50" }} />;
+      case "post_rejected":
+        return <CancelIcon sx={{ ...iconStyle, color: "#f44336" }} />;
+      case "post_deactivated":
+        return <BlockIcon sx={{ ...iconStyle, color: "#ff9800" }} />;
+      default:
+        return <NotificationsIcon sx={iconStyle} />;
+    }
   };
 
   // Função para carregar mais notificações
@@ -691,6 +729,22 @@ export default function HomeHeader({
                       }}
                     >
                       <Box sx={{ width: "100%", display: "flex", gap: 1.5 }}>
+                        {/* Ícone do tipo de notificação */}
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: "rgba(255, 204, 1, 0.15)",
+                            borderRadius: "50%",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {getNotificationIcon(notification.type)}
+                        </Box>
+
                         {/* Avatar do usuário relacionado (se houver) */}
                         {notification.related_user && (
                           <Avatar

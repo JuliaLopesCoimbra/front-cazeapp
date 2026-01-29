@@ -129,10 +129,27 @@ export default function NewsFeed({ eventId, event }: Props) {
         history.scrollRestoration = 'manual';
       }
       
+      // Flag para prevenir restauração se o usuário já fez scroll
+      let userScrolled = false;
+      let restoreCompleted = false;
+      const timeouts: NodeJS.Timeout[] = [];
+      
+      // Detecta se o usuário fez scroll manualmente
+      const handleUserScroll = () => {
+        if (!restoreCompleted) {
+          userScrolled = true;
+        }
+      };
+      
+      // Adiciona listener temporário para detectar scroll do usuário
+      window.addEventListener('scroll', handleUserScroll, { passive: true, once: false });
+      
       let attempts = 0;
-      const maxAttempts = 20;
+      const maxAttempts = 10; // Reduzido de 20 para 10
       
       const attemptRestore = () => {
+        if (userScrolled || restoreCompleted) return;
+        
         attempts++;
         
         window.scrollTo({
@@ -143,20 +160,38 @@ export default function NewsFeed({ eventId, event }: Props) {
         const currentScroll = window.scrollY;
         const diff = Math.abs(currentScroll - targetPosition);
         
-        if (diff >= 10 && attempts < maxAttempts) {
+        if (diff < 10) {
+          restoreCompleted = true;
+          window.removeEventListener('scroll', handleUserScroll);
+        } else if (attempts < maxAttempts && !userScrolled) {
           requestAnimationFrame(attemptRestore);
+        } else {
+          restoreCompleted = true;
+          window.removeEventListener('scroll', handleUserScroll);
         }
       };
       
-      requestAnimationFrame(attemptRestore);
+      // Aguarda um pouco antes de começar a restaurar
+      const initialTimeout = setTimeout(() => {
+        if (!userScrolled) {
+          requestAnimationFrame(attemptRestore);
+        }
+      }, 100);
+      timeouts.push(initialTimeout);
       
-      [50, 100, 200, 400, 800, 1600].forEach(delay => {
-        setTimeout(() => {
-          window.scrollTo({
-            top: targetPosition,
-            behavior: 'instant' as ScrollBehavior
-          });
+      // Reduzido para apenas alguns delays essenciais
+      [200, 500].forEach(delay => {
+        const timeout = setTimeout(() => {
+          if (!userScrolled && !restoreCompleted) {
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'instant' as ScrollBehavior
+            });
+            restoreCompleted = true;
+            window.removeEventListener('scroll', handleUserScroll);
+          }
         }, delay);
+        timeouts.push(timeout);
       });
       
       (async () => {
@@ -172,14 +207,20 @@ export default function NewsFeed({ eventId, event }: Props) {
             setOffset(freshData.length);
             setHasMore(freshData.length >= limit);
             const shouldResetScroll = freshData.length > cached.data.length;
-            setCache(cacheKey, freshData, shouldResetScroll ? 0 : targetPosition);
+            const currentScroll = window.scrollY;
+            // Só reseta scroll se o usuário estiver no topo ou muito próximo
+            const shouldReset = shouldResetScroll && currentScroll < 100;
+            setCache(cacheKey, freshData, shouldReset ? 0 : currentScroll);
             
-            if (shouldResetScroll) {
+            if (shouldReset) {
               setTimeout(() => {
-                window.scrollTo({
-                  top: 0,
-                  behavior: 'smooth'
-                });
+                // Só faz scroll para o topo se o usuário não estiver fazendo scroll
+                if (window.scrollY < 100) {
+                  window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                  });
+                }
               }, 500);
             }
           }
@@ -187,6 +228,12 @@ export default function NewsFeed({ eventId, event }: Props) {
           console.error('Erro ao revalidar cache:', err);
         }
       })();
+      
+      // Cleanup: remove listeners e cancela timeouts
+      return () => {
+        window.removeEventListener('scroll', handleUserScroll);
+        timeouts.forEach(timeout => clearTimeout(timeout));
+      };
     } else {
       setNews([]);
       setOffset(0);

@@ -3,11 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Typography,
-  CircularProgress,
   Card,
   CardContent,
   Divider,
   Button,
+  Skeleton,
 } from "@mui/material";
 
 import { useFeedCache } from "@/app/context/FeedCacheContext";
@@ -269,11 +269,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
   }, [selectedSchoolId]);
 
   if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
-      </Box>
-    );
+    return <EnredoSkeleton />;
   }
 
   return (
@@ -836,5 +832,111 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
     </Box>
   );
 };
+
+function EnredoSkeleton() {
+  return (
+    <Box px={2} pb={4}>
+      {/* Título Skeleton */}
+      <Skeleton
+        variant="text"
+        width={280}
+        height={32}
+        sx={{
+          bgcolor: "rgba(255,255,255,0.1)",
+          mx: "auto",
+          mt: 2,
+          mb: 3,
+        }}
+      />
+
+      {/* Grid de Escolas Skeleton */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+            lg: "repeat(4, 1fr)",
+          },
+          gap: 2,
+          maxWidth: { md: "1200px" },
+          mx: { md: "auto" },
+        }}
+      >
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Card
+            key={i}
+            sx={{
+              backgroundColor: "transparent",
+              boxShadow: "none",
+              border: "none",
+            }}
+          >
+            <CardContent
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                p: { xs: 3, md: 4 },
+                pb: { xs: 2, md: 3 },
+              }}
+            >
+              <Skeleton
+                variant="rectangular"
+                width={{ xs: 120, md: 160, lg: 180 }}
+                height={{ xs: 120, md: 160, lg: 180 }}
+                sx={{
+                  bgcolor: "rgba(255,255,255,0.1)",
+                  borderRadius: 2,
+                  mb: 2,
+                }}
+              />
+              <Skeleton
+                variant="text"
+                width="80%"
+                height={24}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)", mb: 1 }}
+              />
+              <Skeleton
+                variant="text"
+                width="90%"
+                height={16}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+              />
+              <Skeleton
+                variant="text"
+                width="70%"
+                height={16}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)", mt: 0.5 }}
+              />
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+
+      {/* Spotify Playlist Skeleton */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          my: 4,
+          px: 2,
+          width: "100%",
+          maxWidth: { xs: "100%", md: "600px", lg: "700px" },
+        }}
+      >
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height={352}
+          sx={{
+            bgcolor: "rgba(255,255,255,0.1)",
+            borderRadius: 3,
+          }}
+        />
+      </Box>
+    </Box>
+  );
+}
 
 export default Enredo;

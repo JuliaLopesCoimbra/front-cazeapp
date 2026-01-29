@@ -46,11 +46,27 @@ export default function CommentInput({
         fullWidth
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const newValue = e.target.value;
+          if (newValue.length <= 500) {
+            onChange(newValue);
+          }
+        }}
         onKeyPress={handleKeyPress}
         multiline
         maxRows={4}
         disabled={disabled || submitting}
+        inputProps={{
+          maxLength: 500,
+        }}
+        helperText={`${value.length}/500 caracteres`}
+        FormHelperTextProps={{
+          sx: {
+            color: "rgba(255,255,255,0.5)",
+            fontSize: "0.75rem",
+            mt: 0.5,
+          },
+        }}
         sx={{
           "& .MuiOutlinedInput-root": {
             backgroundColor: "rgba(255,255,255,0.05)",
@@ -68,6 +84,8 @@ export default function CommentInput({
           },
           "& .MuiInputBase-input": {
             color: "#fff",
+            wordBreak: "break-word",
+            overflowWrap: "break-word",
             "&::placeholder": {
               color: "rgba(255,255,255,0.5)",
               opacity: 1,

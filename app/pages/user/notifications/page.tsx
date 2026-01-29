@@ -25,6 +25,15 @@ import {
   Notifications as NotificationsIcon,
   ArrowBackIos as ArrowBackIosIcon,
   Settings as SettingsIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Block as BlockIcon,
+  Event as EventIcon,
+  Article as ArticleIcon,
+  MusicNote as MusicNoteIcon,
+  Comment as CommentIcon,
+  Favorite as FavoriteIcon,
+  Star as StarIcon,
 } from "@mui/icons-material";
 import { useToast } from "@/app/context/ToastContext";
 import {
@@ -113,8 +122,17 @@ const NotificationsPage: React.FC = () => {
       }
     }
 
-    // Navegar para o evento se houver related_event_id
-    if (notification.related_event_id) {
+    // Navegar para o post se houver related_news_id (prioridade para notificações de post)
+    if (notification.related_news_id) {
+      // Para notificações de post aprovado/rejeitado/desativado, navega direto para o post
+      if (notification.type === "post_approved_admin" || 
+          notification.type === "post_rejected" || 
+          notification.type === "post_deactivated") {
+        router.push(`/pages/news/${notification.related_news_id}`);
+      } else {
+        router.push(`/pages/user/home?post=${notification.related_news_id}`);
+      }
+    } else if (notification.related_event_id) {
       // Verifica se o evento está disponível antes de navegar
       try {
         const { getEventById } = await import("@/app/services/events/eventAppService");
@@ -140,8 +158,6 @@ const NotificationsPage: React.FC = () => {
         // Remove a notificação da lista local se o evento não estiver disponível
         setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
       }
-    } else if (notification.related_news_id) {
-      router.push(`/pages/user/home?post=${notification.related_news_id}`);
     }
   };
 
@@ -196,22 +212,33 @@ const NotificationsPage: React.FC = () => {
   };
 
   const getNotificationIcon = (type: string) => {
+    const iconStyle = {
+      fontSize: 24,
+      color: "#ffcc01",
+    };
+
     switch (type) {
       case "new_event":
-        return "🎉";
+        return <EventIcon sx={iconStyle} />;
       case "new_post":
-        return "📰";
+        return <ArticleIcon sx={iconStyle} />;
       case "lineup_updated":
-        return "🎵";
+        return <MusicNoteIcon sx={iconStyle} />;
       case "comment_reply":
       case "post_comment":
-        return "💬";
+        return <CommentIcon sx={iconStyle} />;
       case "comment_like":
-        return "❤️";
+      case "post_like":
+        return <FavoriteIcon sx={iconStyle} />;
       case "post_approved":
-        return "✅";
+      case "post_approved_admin":
+        return <CheckCircleIcon sx={{ ...iconStyle, color: "#4caf50" }} />;
+      case "post_rejected":
+        return <CancelIcon sx={{ ...iconStyle, color: "#f44336" }} />;
+      case "post_deactivated":
+        return <BlockIcon sx={{ ...iconStyle, color: "#ff9800" }} />;
       default:
-        return "🔔";
+        return <NotificationsIcon sx={iconStyle} />;
     }
   };
 
@@ -436,10 +463,9 @@ const NotificationsPage: React.FC = () => {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                bgcolor: "rgba(255, 204, 1, 0.2)",
+                                bgcolor: "rgba(255, 204, 1, 0.15)",
                                 borderRadius: "50%",
                                 flexShrink: 0,
-                                fontSize: "1.2rem",
                               }}
                             >
                               {getNotificationIcon(notification.type)}

@@ -30,3 +30,11 @@ export const updateProfilePhoto = async (photo: File): Promise<ProfileResponse> 
   return response.data;
 };
 
+/**
+ * Buscar perfil de outro usuário por ID
+ */
+export const getUserProfile = async (userId: number): Promise<ProfileResponse> => {
+  const response = await api.get<ProfileResponse>(`/user/profile/${userId}`);
+  return response.data;
+};
+
