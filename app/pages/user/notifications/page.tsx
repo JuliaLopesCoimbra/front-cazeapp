@@ -13,10 +13,18 @@ import {
   CircularProgress,
   IconButton,
   Divider,
+  Tabs,
+  Tab,
+  List,
+  ListItem,
+  ListItemButton,
+  Avatar,
+  Chip,
 } from "@mui/material";
 import {
   Notifications as NotificationsIcon,
   ArrowBackIos as ArrowBackIosIcon,
+  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { useToast } from "@/app/context/ToastContext";
 import {
@@ -24,17 +32,28 @@ import {
   updateNotificationPreferences,
   NotificationPreferences,
 } from "@/app/services/notifications/notificationPreferenceService";
+import {
+  getNotifications,
+  markAsRead,
+  markAllAsRead,
+  Notification,
+} from "@/app/services/notifications/notificationService";
 
 const NotificationsPage: React.FC = () => {
   const router = useRouter();
   const { showToast } = useToast();
+  const [tabValue, setTabValue] = useState(0);
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [localPreferences, setLocalPreferences] = useState({
     lineup_updated: true,
     news_feed: true,
     interactions: true,
+    new_events: true,
   });
 
   useEffect(() => {
@@ -46,6 +65,7 @@ const NotificationsPage: React.FC = () => {
           lineup_updated: data.lineup_updated,
           news_feed: data.news_feed,
           interactions: data.interactions,
+          new_events: data.new_events,
         });
       } catch (error) {
         console.error("Erro ao buscar preferências:", error);
@@ -57,6 +77,102 @@ const NotificationsPage: React.FC = () => {
 
     fetchPreferences();
   }, [showToast]);
+
+  useEffect(() => {
+    if (tabValue === 0) {
+      fetchNotifications();
+    }
+  }, [tabValue]);
+
+  const fetchNotifications = async () => {
+    setLoadingNotifications(true);
+    try {
+      const response = await getNotifications(50, 0, false);
+      setNotifications(response.notifications);
+      setUnreadCount(response.unread_count);
+    } catch (error) {
+      console.error("Erro ao buscar notificações:", error);
+      showToast("Erro ao carregar notificações", "error");
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      try {
+        await markAsRead(notification.id);
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, is_read: true } : n
+          )
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      } catch (error) {
+        console.error("Erro ao marcar notificação como lida:", error);
+      }
+    }
+
+    // Navegar para o evento se houver related_event_id
+    if (notification.related_event_id) {
+      // Verifica se o evento está disponível antes de navegar
+      try {
+        const { getEventById } = await import("@/app/services/events/eventAppService");
+        const event = await getEventById(notification.related_event_id);
+        
+        // Verifica se o evento está ativo e não foi deletado
+        if (!event.is_active || event.deleted_at) {
+          showToast("Este evento não está disponível no momento", "error");
+          // Remove a notificação da lista local se o evento não estiver disponível
+          setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+          return;
+        }
+        
+        // Navega para a aba "eventos" (event details) quando vem de notificação de novo evento
+        router.push(`/pages/user/home?event=${notification.related_event_id}&tab=eventos`);
+      } catch (error: any) {
+        // Se o evento não foi encontrado (404) ou está inacessível
+        if (error?.response?.status === 404) {
+          showToast("Este evento não está disponível ou foi removido", "error");
+        } else {
+          showToast("Erro ao verificar evento. Tente novamente.", "error");
+        }
+        // Remove a notificação da lista local se o evento não estiver disponível
+        setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+      }
+    } else if (notification.related_news_id) {
+      router.push(`/pages/user/home?post=${notification.related_news_id}`);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead();
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, is_read: true }))
+      );
+      setUnreadCount(0);
+      showToast("Todas as notificações foram marcadas como lidas", "success");
+    } catch (error) {
+      console.error("Erro ao marcar todas como lidas:", error);
+      showToast("Erro ao marcar notificações como lidas", "error");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 1) return "Agora";
+    if (minutes < 60) return `${minutes} min atrás`;
+    if (hours < 24) return `${hours}h atrás`;
+    if (days < 7) return `${days}d atrás`;
+    return date.toLocaleDateString("pt-BR");
+  };
 
   const handleToggle = (key: keyof typeof localPreferences) => {
     setLocalPreferences((prev) => ({
@@ -76,6 +192,26 @@ const NotificationsPage: React.FC = () => {
       showToast("Erro ao salvar preferências", "error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "new_event":
+        return "🎉";
+      case "new_post":
+        return "📰";
+      case "lineup_updated":
+        return "🎵";
+      case "comment_reply":
+      case "post_comment":
+        return "💬";
+      case "comment_like":
+        return "❤️";
+      case "post_approved":
+        return "✅";
+      default:
+        return "🔔";
     }
   };
 
@@ -159,20 +295,247 @@ const NotificationsPage: React.FC = () => {
                 fontWeight: 700,
               }}
             >
-              Preferências de Notificações
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "rgba(255, 255, 255, 0.7)",
-                textAlign: "center",
-              }}
-            >
-              Escolha quais tipos de notificações você deseja receber
+              Notificações
             </Typography>
           </Box>
 
           <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.2)", mb: 3 }} />
+
+          <Tabs
+            value={tabValue}
+            onChange={(_, newValue) => setTabValue(newValue)}
+            sx={{
+              mb: 3,
+              "& .MuiTab-root": {
+                color: "rgba(255, 255, 255, 0.7)",
+                "&.Mui-selected": {
+                  color: "#ffcc01",
+                },
+              },
+              "& .MuiTabs-indicator": {
+                backgroundColor: "#ffcc01",
+              },
+            }}
+          >
+            <Tab
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <NotificationsIcon />
+                  <span>Notificações</span>
+                  {unreadCount > 0 && (
+                    <Chip
+                      label={unreadCount}
+                      size="small"
+                      sx={{
+                        backgroundColor: "#ffcc01",
+                        color: "#000",
+                        fontWeight: 700,
+                        height: 20,
+                        minWidth: 20,
+                        fontSize: "0.7rem",
+                      }}
+                    />
+                  )}
+                </Box>
+              }
+            />
+            <Tab
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <SettingsIcon />
+                  <span>Preferências</span>
+                </Box>
+              }
+            />
+          </Tabs>
+
+          {tabValue === 0 ? (
+            <Box>
+              {unreadCount > 0 && (
+                <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleMarkAllAsRead}
+                    sx={{
+                      color: "#ffcc01",
+                      borderColor: "#ffcc01",
+                      "&:hover": {
+                        borderColor: "#ffd633",
+                        backgroundColor: "rgba(255, 204, 1, 0.1)",
+                      },
+                    }}
+                  >
+                    Marcar todas como lidas
+                  </Button>
+                </Box>
+              )}
+
+              {loadingNotifications ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    py: 4,
+                  }}
+                >
+                  <CircularProgress sx={{ color: "#ffcc01" }} />
+                </Box>
+              ) : notifications.length === 0 ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    py: 4,
+                    px: 2,
+                  }}
+                >
+                  <NotificationsIcon
+                    sx={{ fontSize: 48, color: "rgba(255, 255, 255, 0.3)", mb: 2 }}
+                  />
+                  <Typography
+                    sx={{
+                      color: "rgba(255, 255, 255, 0.7)",
+                      textAlign: "center",
+                    }}
+                  >
+                    Ainda não há notificações.
+                  </Typography>
+                </Box>
+              ) : (
+                <List sx={{ p: 0 }}>
+                  {notifications.map((notification, index) => (
+                    <Box key={notification.id}>
+                      <ListItem
+                        disablePadding
+                        sx={{
+                          backgroundColor: notification.is_read
+                            ? "transparent"
+                            : "rgba(255, 204, 1, 0.1)",
+                        }}
+                      >
+                        <ListItemButton
+                          onClick={() => handleNotificationClick(notification)}
+                          sx={{
+                            py: 1.5,
+                            px: 2,
+                            "&:hover": {
+                              backgroundColor: "rgba(255, 255, 255, 0.05)",
+                            },
+                          }}
+                        >
+                          <Box sx={{ width: "100%", display: "flex", gap: 1.5 }}>
+                            {/* Ícone do tipo de notificação */}
+                            <Box
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                bgcolor: "rgba(255, 204, 1, 0.2)",
+                                borderRadius: "50%",
+                                flexShrink: 0,
+                                fontSize: "1.2rem",
+                              }}
+                            >
+                              {getNotificationIcon(notification.type)}
+                            </Box>
+
+                            {/* Avatar do usuário relacionado (se houver) */}
+                            {notification.related_user && (
+                              <Avatar
+                                src={notification.related_user.profile_photo || undefined}
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor: "rgba(255, 204, 1, 0.2)",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {!notification.related_user.profile_photo &&
+                                  (notification.related_user.name?.[0] || "U").toUpperCase()}
+                              </Avatar>
+                            )}
+
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "flex-start",
+                                  mb: 0.5,
+                                }}
+                              >
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    color: "white",
+                                    fontWeight: notification.is_read ? 400 : 700,
+                                    fontSize: "0.9rem",
+                                  }}
+                                >
+                                  {notification.title}
+                                </Typography>
+                                {!notification.is_read && (
+                                  <Box
+                                    sx={{
+                                      width: 8,
+                                      height: 8,
+                                      borderRadius: "50%",
+                                      backgroundColor: "#ffcc01",
+                                      ml: 1,
+                                      flexShrink: 0,
+                                    }}
+                                  />
+                                )}
+                              </Box>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: "rgba(255, 255, 255, 0.7)",
+                                  fontSize: "0.85rem",
+                                  mb: 0.5,
+                                }}
+                              >
+                                {notification.message}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: "rgba(255, 255, 255, 0.5)",
+                                  fontSize: "0.75rem",
+                                }}
+                              >
+                                {formatDate(notification.created_at)}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </ListItemButton>
+                      </ListItem>
+                      {index < notifications.length - 1 && (
+                        <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.1)" }} />
+                      )}
+                    </Box>
+                  ))}
+                </List>
+              )}
+            </Box>
+          ) : (
+            <Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.7)",
+                  textAlign: "center",
+                  mb: 3,
+                }}
+              >
+                Escolha quais tipos de notificações você deseja receber
+              </Typography>
 
           <Box
             sx={{
@@ -319,6 +682,52 @@ const NotificationsPage: React.FC = () => {
                 }
               />
             </Paper>
+
+            <Paper
+              sx={{
+                padding: 3,
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderRadius: 2,
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={localPreferences.new_events}
+                    onChange={() => handleToggle("new_events")}
+                    sx={{
+                      color: "#ffcc01",
+                      "&.Mui-checked": {
+                        color: "#ffcc01",
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography
+                      sx={{
+                        color: "#fff",
+                        fontWeight: 600,
+                        fontSize: "1.1rem",
+                        mb: 0.5,
+                      }}
+                    >
+                      Novos Eventos
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: "rgba(255, 255, 255, 0.7)",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      Receba notificações quando novos eventos forem criados
+                    </Typography>
+                  </Box>
+                }
+              />
+            </Paper>
           </Box>
 
           <Button
@@ -343,6 +752,8 @@ const NotificationsPage: React.FC = () => {
           >
             {saving ? <CircularProgress size={24} sx={{ color: "#000" }} /> : "Salvar Preferências"}
           </Button>
+            </Box>
+          )}
         </Paper>
       </Container>
     </Box>

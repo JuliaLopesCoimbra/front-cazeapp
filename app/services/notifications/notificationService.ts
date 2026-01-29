@@ -8,7 +8,7 @@ export interface RelatedUser {
 
 export interface Notification {
   id: number;
-  type: "comment_reply" | "comment_like" | "post_approved" | "new_post" | "lineup_updated";
+  type: "comment_reply" | "comment_like" | "post_approved" | "new_post" | "lineup_updated" | "post_comment" | "new_event";
   title: string;
   message: string;
   related_user_id?: number;

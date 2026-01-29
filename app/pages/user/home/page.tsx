@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Box } from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
 import HomeTabs from "@/app/components/home/HomeTabs";
@@ -21,11 +21,18 @@ const STORAGE_KEY = "selectedEventId";
 const SCROLL_KEY = "homeScrollY";
 const TAB_KEY = "homeActiveTab";
 
-const Home: React.FC = () => {
+const HomeContent: React.FC = () => {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<
     "home" | "eventos" | "foto" | "enredo"
   >(() => {
     if (typeof window === "undefined") return "home";
+    // Verifica se há parâmetro na URL para definir a aba (lê diretamente da URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlTab = urlParams.get("tab");
+    if (urlTab === "home" || urlTab === "eventos" || urlTab === "foto" || urlTab === "enredo") {
+      return urlTab;
+    }
     const saved = sessionStorage.getItem(TAB_KEY);
     if (saved === "home" || saved === "eventos" || saved === "foto" || saved === "enredo") {
       return saved;
@@ -39,6 +46,7 @@ const Home: React.FC = () => {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const currentEventIdRef = useRef<number | null>(null);
   const isCheckingRef = useRef(false); // Previne múltiplas verificações simultâneas
+  const scrollExecutedRef = useRef(false);
   const router = useRouter();
   const { isAdmin, authReady } = useAuth();
 
@@ -48,6 +56,142 @@ const Home: React.FC = () => {
       sessionStorage.setItem(TAB_KEY, activeTab);
     }
   }, [activeTab]);
+
+  // Monitora mudanças na URL e atualiza a aba e evento se necessário
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Usa searchParams se disponível, senão lê diretamente da URL
+    const urlParams = searchParams 
+      ? new URLSearchParams(searchParams.toString())
+      : new URLSearchParams(window.location.search);
+    
+    const urlTab = urlParams.get("tab");
+    const urlEventId = urlParams.get("eventId") || urlParams.get("event"); // Suporta ambos "eventId" e "event"
+
+    // Atualiza a aba se houver parâmetro na URL (sempre, mesmo sem eventos carregados)
+    if (urlTab && (urlTab === "home" || urlTab === "eventos" || urlTab === "foto" || urlTab === "enredo")) {
+      if (activeTab !== urlTab) {
+        setActiveTab(urlTab);
+      }
+    }
+
+    // Atualiza o evento se houver parâmetro na URL e eventos já carregados
+    if (urlEventId && events.length > 0) {
+      const urlId = parseInt(urlEventId, 10);
+      const urlEvent = events.find((event) => event.id === urlId);
+      if (urlEvent && (!currentEvent || currentEvent.id !== urlEvent.id)) {
+        setCurrentEvent(urlEvent);
+        currentEventIdRef.current = urlEvent.id;
+        localStorage.setItem(STORAGE_KEY, urlEvent.id.toString());
+        
+        // Limpa o parâmetro event/eventId da URL após processar, mas mantém tab se existir
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("event");
+        newUrl.searchParams.delete("eventId");
+        // Mantém outros parâmetros como "tab" e "post" se existirem
+        window.history.replaceState({}, "", newUrl.toString());
+      }
+    }
+  }, [searchParams, events, currentEvent]); // Removido activeTab das dependências para evitar loop
+
+  // Scroll para o line up quando houver o parâmetro scrollToLineup na URL
+  useEffect(() => {
+    const scrollToLineup = searchParams?.get("scrollToLineup");
+    const eventIdParam = searchParams?.get("eventId");
+    
+    if (!scrollToLineup || !currentEvent || !currentEvent.line_up || scrollExecutedRef.current || activeTab !== "eventos") {
+      return;
+    }
+    
+    // Verifica se é o evento correto
+    if (eventIdParam && parseInt(eventIdParam) !== currentEvent.id) {
+      return;
+    }
+
+    const tryScrollToLineup = () => {
+      const lineupElement = document.getElementById("event-lineup-section");
+      
+      if (!lineupElement) {
+        // Tenta novamente após um delay se o elemento ainda não estiver renderizado
+        setTimeout(tryScrollToLineup, 200);
+        return;
+      }
+
+      scrollExecutedRef.current = true;
+
+      // Encontra o container scrollável
+      let scrollContainer: HTMLElement | null = null;
+      
+      // Procura pelo elemento scrollável mais próximo
+      let parent = lineupElement.parentElement;
+      while (parent && parent !== document.body) {
+        const hasScroll = parent.scrollHeight > parent.clientHeight;
+        if (hasScroll || getComputedStyle(parent).overflowY !== "visible") {
+          scrollContainer = parent;
+          break;
+        }
+        parent = parent.parentElement;
+      }
+
+      // Se não encontrou, usa window
+      if (!scrollContainer) {
+        scrollContainer = document.documentElement;
+      }
+
+      // Função para fazer scroll e destacar
+      const highlightAndScroll = () => {
+        const rect = lineupElement.getBoundingClientRect();
+        const containerRect = scrollContainer === document.documentElement 
+          ? { top: 0, left: 0 } 
+          : scrollContainer!.getBoundingClientRect();
+        
+        const scrollTop = scrollContainer === document.documentElement
+          ? window.pageYOffset || document.documentElement.scrollTop
+          : scrollContainer!.scrollTop;
+        
+        const targetScroll = scrollTop + rect.top - containerRect.top - 100; // 100px de margem
+
+        // Aplica destaque visual
+        lineupElement.style.borderLeft = "4px solid white";
+        lineupElement.style.transition = "border-left 0.3s ease";
+
+        // Faz scroll
+        if (scrollContainer === document.documentElement) {
+          window.scrollTo({
+            top: targetScroll,
+            behavior: "smooth",
+          });
+        } else {
+          scrollContainer!.scrollTo({
+            top: targetScroll,
+            behavior: "smooth",
+          });
+        }
+
+        // Remove o destaque após 3 segundos
+        setTimeout(() => {
+          lineupElement.style.borderLeft = "";
+        }, 3000);
+
+        // Remove o parâmetro da URL após 4.5 segundos
+        setTimeout(() => {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("scrollToLineup");
+          url.searchParams.delete("eventId");
+          url.searchParams.delete("tab");
+          window.history.replaceState({}, "", url.toString());
+          scrollExecutedRef.current = false; // Permite scroll novamente se necessário
+        }, 4500);
+      };
+
+      // Aguarda um pouco para garantir que o layout está estável
+      setTimeout(highlightAndScroll, 100);
+    };
+
+    // Aguarda um pouco antes de tentar fazer scroll
+    setTimeout(tryScrollToLineup, 300);
+  }, [currentEvent, activeTab, searchParams]);
 
   // Função para verificar e atualizar eventos
   const checkAndUpdateEvents = useCallback(async () => {
@@ -106,6 +250,13 @@ const Home: React.FC = () => {
     localStorage.setItem(STORAGE_KEY, event.id.toString());
     setCurrentEvent(event);
     currentEventIdRef.current = event.id;
+    
+    // Limpa parâmetros event/eventId da URL para permitir troca livre
+    const url = new URL(window.location.href);
+    url.searchParams.delete("event");
+    url.searchParams.delete("eventId");
+    window.history.replaceState({}, "", url.toString());
+    
     // Verifica eventos quando o usuário troca manualmente
     checkAndUpdateEvents();
   };
@@ -152,6 +303,33 @@ const Home: React.FC = () => {
         setEventsLoaded(true);
         
         if (data.length > 0) {
+          // Verifica se há eventId ou event na URL (vindo de notificação)
+          const urlParams = new URLSearchParams(window.location.search);
+          const urlEventId = urlParams.get("eventId") || urlParams.get("event");
+          if (urlEventId) {
+            const urlId = parseInt(urlEventId, 10);
+            const urlEvent = data.find((event) => event.id === urlId);
+            if (urlEvent) {
+              setCurrentEvent(urlEvent);
+              currentEventIdRef.current = urlEvent.id;
+              localStorage.setItem(STORAGE_KEY, urlEvent.id.toString());
+              // Se houver tab na URL, atualiza a aba
+              const urlTab = urlParams.get("tab");
+              if (urlTab === "home" || urlTab === "eventos" || urlTab === "foto" || urlTab === "enredo") {
+                setActiveTab(urlTab);
+              }
+              
+              // Limpa o parâmetro event/eventId da URL após processar para permitir troca manual
+              const newUrl = new URL(window.location.href);
+              newUrl.searchParams.delete("event");
+              newUrl.searchParams.delete("eventId");
+              // Mantém outros parâmetros como "tab" e "post" se existirem
+              window.history.replaceState({}, "", newUrl.toString());
+              
+              return;
+            }
+          }
+          
           // Tenta carregar o evento salvo do localStorage
           const savedEventId = localStorage.getItem(STORAGE_KEY);
           if (savedEventId) {
@@ -354,7 +532,16 @@ const Home: React.FC = () => {
         />
 
         {/* Tabs */}
-        <HomeTabs active={activeTab} onChange={setActiveTab} />
+        <HomeTabs 
+          active={activeTab} 
+          onChange={(newTab) => {
+            setActiveTab(newTab);
+            // Atualiza a URL para refletir a aba selecionada, mas não força navegação
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", newTab);
+            window.history.replaceState({}, "", url.toString());
+          }} 
+        />
 
         {/* Conteúdo baseado na aba selecionada */}
         {activeTab === "home" && currentEvent && (
@@ -363,7 +550,7 @@ const Home: React.FC = () => {
             <NewsFeed eventId={currentEvent.id} event={currentEvent} />
           </>
         )}
-        {activeTab === "eventos" && <EventDetails event={currentEvent} />}
+        {activeTab === "eventos" && currentEvent && <EventDetails event={currentEvent} />}
 
         {activeTab === "foto" && currentEvent && (
           <PhotoAI eventId={currentEvent.id} />
@@ -375,6 +562,62 @@ const Home: React.FC = () => {
       </Box>
       <BottomNav />
     </>
+  );
+};
+
+const Home: React.FC = () => {
+  return (
+    <Suspense fallback={
+      <Box
+        style={{
+          minHeight: "100vh",
+          paddingBottom: "72px",
+          backgroundColor: "#f4f7fc",
+          backgroundImage: "url(/background/dashboard.png)",
+        }}
+      >
+        <Box
+          sx={{
+            padding: 2,
+            borderBottom: "solid 1px rgba(255,255,255,0.2)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box display="flex" alignItems="center" gap={1}>
+              <Skeleton
+                variant="rectangular"
+                width={40}
+                height={40}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
+              />
+              <Skeleton
+                variant="text"
+                width={150}
+                height={32}
+                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+              />
+            </Box>
+            <Skeleton
+              variant="circular"
+              width={40}
+              height={40}
+              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+            />
+          </Box>
+        </Box>
+      </Box>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 };
 

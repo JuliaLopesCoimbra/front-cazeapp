@@ -183,9 +183,18 @@ export default function NewsDetailModal({
 
     setDeleting(true);
     try {
+      const deletedNewsId = news.id;
       await deleteNews(eventId, news.id);
       showToast("Notícia excluída com sucesso!", "success");
       setDeleteModalOpen(false);
+      
+      // Dispara evento para remover notificações relacionadas
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('notificationRemoved', {
+          detail: { newsId: deletedNewsId, type: 'post_deleted' }
+        }));
+      }
+      
       if (onUpdate) onUpdate();
       onClose();
     } catch (error: any) {

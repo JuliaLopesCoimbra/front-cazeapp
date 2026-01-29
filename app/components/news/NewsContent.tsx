@@ -37,3 +37,5 @@ export default function NewsContent({ title, content }: NewsContentProps) {
 }
 
 
+
+

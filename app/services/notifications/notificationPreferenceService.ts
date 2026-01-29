@@ -5,12 +5,14 @@ export interface NotificationPreferences {
   lineup_updated: boolean;
   news_feed: boolean;
   interactions: boolean;
+  new_events: boolean;
 }
 
 export interface UpdateNotificationPreferences {
   lineup_updated?: boolean;
   news_feed?: boolean;
   interactions?: boolean;
+  new_events?: boolean;
 }
 
 export const getNotificationPreferences = async (): Promise<NotificationPreferences> => {

@@ -83,8 +83,9 @@ export default function HomeHeader({
     // Escuta evento de remoção de notificação
     const handleNotificationRemoved = (event: CustomEvent) => {
       const { commentId, type } = event.detail;
+      
       if (type === 'comment_like') {
-        // Remove a notificação da lista local
+        // Remove a notificação de like da lista local
         setNotifications((prev) => {
           const filtered = prev.filter(
             (n) => !(n.type === 'comment_like' && n.related_comment_id === commentId)
@@ -100,6 +101,55 @@ export default function HomeHeader({
         });
         // Atualiza o contador total
         setTotalNotifications((prev) => Math.max(0, prev - 1));
+      } else if (type === 'comment_deleted') {
+        // Remove todas as notificações relacionadas a este comentário (like, reply e post_comment)
+        setNotifications((prev) => {
+          const filtered = prev.filter(
+            (n) => !(n.related_comment_id === commentId && 
+                    (n.type === 'comment_like' || n.type === 'comment_reply' || n.type === 'post_comment'))
+          );
+          // Conta quantas notificações não lidas foram removidas
+          const removedUnreadCount = prev.filter(
+            (n) => n.related_comment_id === commentId && 
+                   (n.type === 'comment_like' || n.type === 'comment_reply' || n.type === 'post_comment') &&
+                   !n.is_read
+          ).length;
+          if (removedUnreadCount > 0) {
+            setUnreadCount((count) => Math.max(0, count - removedUnreadCount));
+          }
+          // Atualiza o contador total
+          const removedCount = prev.filter(
+            (n) => n.related_comment_id === commentId && 
+                   (n.type === 'comment_like' || n.type === 'comment_reply' || n.type === 'post_comment')
+          ).length;
+          setTotalNotifications((total) => Math.max(0, total - removedCount));
+          return filtered;
+        });
+      } else if (type === 'post_deleted') {
+        // Remove todas as notificações relacionadas a este post (new_post e post_approved)
+        const { newsId } = event.detail;
+        setNotifications((prev) => {
+          const filtered = prev.filter(
+            (n) => !(n.related_news_id === newsId && 
+                    (n.type === 'new_post' || n.type === 'post_approved'))
+          );
+          // Conta quantas notificações não lidas foram removidas
+          const removedUnreadCount = prev.filter(
+            (n) => n.related_news_id === newsId && 
+                   (n.type === 'new_post' || n.type === 'post_approved') &&
+                   !n.is_read
+          ).length;
+          if (removedUnreadCount > 0) {
+            setUnreadCount((count) => Math.max(0, count - removedUnreadCount));
+          }
+          // Atualiza o contador total
+          const removedCount = prev.filter(
+            (n) => n.related_news_id === newsId && 
+                   (n.type === 'new_post' || n.type === 'post_approved')
+          ).length;
+          setTotalNotifications((total) => Math.max(0, total - removedCount));
+          return filtered;
+        });
       }
     };
     
@@ -140,34 +190,86 @@ export default function HomeHeader({
     }
   }, [notificationsOpen, showToast]);
 
-  const handleNotificationClick = async (notification: Notification) => {
-    // Marcar como lida se não estiver lida
+  const handleNotificationClick = (notification: Notification) => {
+    // Fecha o menu imediatamente para melhor UX
+    setNotificationsAnchorEl(null);
+
+    // Marcar como lida em background (não bloqueia a navegação)
     if (!notification.is_read) {
-      try {
-        await markAsRead(notification.id);
+      // Atualiza o estado local imediatamente (otimista)
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === notification.id ? { ...n, is_read: true } : n
+        )
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+      
+      // Faz a chamada da API em background (fire and forget)
+      markAsRead(notification.id).catch((error) => {
+        console.error("Erro ao marcar notificação como lida:", error);
+        // Reverte o estado se falhar
         setNotifications((prev) =>
           prev.map((n) =>
-            n.id === notification.id ? { ...n, is_read: true } : n
+            n.id === notification.id ? { ...n, is_read: false } : n
           )
         );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      } catch (error) {
-        console.error("Erro ao marcar notificação como lida:", error);
-      }
+        setUnreadCount((prev) => prev + 1);
+      });
     }
 
-    // Navegar para o conteúdo relacionado
+    // Navega imediatamente sem esperar nada
     if (notification.related_news_id) {
-      // Se tem comment_id, adiciona como query param para scroll direto
-      if (notification.related_comment_id) {
-        router.push(`/pages/news/${notification.related_news_id}?commentId=${notification.related_comment_id}`);
+      // Verifica se o post existe antes de navegar (para notificações de new_post e post_approved)
+      if (notification.type === 'new_post' || notification.type === 'post_approved') {
+        // Tenta verificar se o post existe antes de navegar
+        // Se falhar, mostra mensagem de erro
+        fetch(`/api/news/${notification.related_news_id}/exists`, { method: 'HEAD' })
+          .then((response) => {
+            if (!response.ok) {
+              showToast("Este post não está mais disponível", "error");
+              // Remove a notificação da lista local
+              setNotifications((prev) => {
+                const filtered = prev.filter((n) => n.id !== notification.id);
+                if (!notification.is_read) {
+                  setUnreadCount((count) => Math.max(0, count - 1));
+                }
+                setTotalNotifications((total) => Math.max(0, total - 1));
+                return filtered;
+              });
+              return;
+            }
+            // Se o post existe, navega normalmente
+            if (notification.related_comment_id) {
+              router.push(`/pages/news/${notification.related_news_id}?commentId=${notification.related_comment_id}`);
+            } else {
+              router.push(`/pages/news/${notification.related_news_id}`);
+            }
+          })
+          .catch(() => {
+            // Se falhar a verificação, tenta navegar mesmo assim
+            // A página de detalhes vai tratar o erro
+            if (notification.related_comment_id) {
+              router.push(`/pages/news/${notification.related_news_id}?commentId=${notification.related_comment_id}`);
+            } else {
+              router.push(`/pages/news/${notification.related_news_id}`);
+            }
+          });
       } else {
-        router.push(`/pages/news/${notification.related_news_id}`);
+        // Para outros tipos de notificação (comment_like, comment_reply, post_comment), navega normalmente
+        if (notification.related_comment_id) {
+          router.push(`/pages/news/${notification.related_news_id}?commentId=${notification.related_comment_id}`);
+        } else {
+          router.push(`/pages/news/${notification.related_news_id}`);
+        }
       }
-      setNotificationsAnchorEl(null);
     } else if (notification.related_event_id) {
-      router.push(`/pages/[title_event]?eventId=${notification.related_event_id}`);
-      setNotificationsAnchorEl(null);
+      // Navega para a página interna do usuário (home) na aba eventos
+      // Se for notificação de line up, adiciona parâmetro para scroll
+      if (notification.type === 'lineup_updated') {
+        router.push(`/pages/user/home?eventId=${notification.related_event_id}&tab=eventos&scrollToLineup=true`);
+      } else {
+        router.push(`/pages/user/home?eventId=${notification.related_event_id}&tab=eventos`);
+      }
     }
   };
 
@@ -372,7 +474,7 @@ export default function HomeHeader({
             }}
           >
             <Badge badgeContent={unreadCount > 0 ? unreadCount : 0} color="error" max={99}>
-              <NotificationsIcon sx={{ fontSize: "inherit" }} />
+            <NotificationsIcon sx={{ fontSize: "inherit" }} />
             </Badge>
           </IconButton>
           
@@ -563,7 +665,7 @@ export default function HomeHeader({
                   textAlign: "center",
                 }}
               >
-                Ainda não há notificações.
+            Ainda não há notificações.
               </Typography>
             </Box>
           ) : (

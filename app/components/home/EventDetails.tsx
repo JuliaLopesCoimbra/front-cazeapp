@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { Box } from "@mui/material";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
@@ -21,6 +22,8 @@ export default function EventDetails({ event }: Props) {
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `event-details-${event.id}`;
   const lastScrollPositionRef = useRef(0);
+  const searchParams = useSearchParams();
+  const scrollExecutedRef = useRef(false);
   
   // Restaura scroll ao montar
   useEffect(() => {
@@ -156,6 +159,109 @@ export default function EventDetails({ event }: Props) {
       console.log(`💾 [EventDetails] Cache salvo (cleanup final): ${finalScroll}px`);
     };
   }, [cacheKey, setCache]);
+  // ======================================================
+
+  // Scroll para o line up quando houver o parâmetro scrollToLineup na URL
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const scrollToLineup = urlParams.get("scrollToLineup");
+    const eventIdParam = urlParams.get("eventId");
+    
+    // Verifica se é o evento correto e se deve fazer scroll
+    if (!scrollToLineup || !event.line_up || scrollExecutedRef.current) {
+      return;
+    }
+    
+    // Se houver eventId na URL, verifica se corresponde ao evento atual
+    if (eventIdParam && parseInt(eventIdParam) !== event.id) {
+      return;
+    }
+
+    const tryScrollToLineup = () => {
+      const lineupElement = document.getElementById("event-lineup-section");
+      
+      if (!lineupElement) {
+        // Tenta novamente após um delay se o elemento ainda não estiver renderizado
+        setTimeout(tryScrollToLineup, 200);
+        return;
+      }
+
+      scrollExecutedRef.current = true;
+
+      // Encontra o container scrollável
+      let scrollContainer: HTMLElement | null = null;
+      
+      // Procura pelo elemento scrollável mais próximo
+      let parent = lineupElement.parentElement;
+      while (parent && parent !== document.body) {
+        const hasScroll = parent.scrollHeight > parent.clientHeight;
+        if (hasScroll || getComputedStyle(parent).overflowY !== "visible") {
+          scrollContainer = parent;
+          break;
+        }
+        parent = parent.parentElement;
+      }
+
+      // Se não encontrou, usa window
+      if (!scrollContainer) {
+        scrollContainer = document.documentElement;
+      }
+
+      // Função para fazer scroll e destacar
+      const highlightAndScroll = () => {
+        const rect = lineupElement.getBoundingClientRect();
+        const containerRect = scrollContainer === document.documentElement 
+          ? { top: 0, left: 0 } 
+          : scrollContainer!.getBoundingClientRect();
+        
+        const scrollTop = scrollContainer === document.documentElement
+          ? window.pageYOffset || document.documentElement.scrollTop
+          : scrollContainer!.scrollTop;
+        
+        const targetScroll = scrollTop + rect.top - containerRect.top - 100; // 100px de margem
+
+        // Aplica destaque visual
+        lineupElement.style.borderLeft = "4px solid white";
+        lineupElement.style.transition = "border-left 0.3s ease";
+
+        // Faz scroll
+        if (scrollContainer === document.documentElement) {
+          window.scrollTo({
+            top: targetScroll,
+            behavior: "smooth",
+          });
+        } else {
+          scrollContainer!.scrollTo({
+            top: targetScroll,
+            behavior: "smooth",
+          });
+        }
+
+        // Remove o destaque após 3 segundos
+        setTimeout(() => {
+          lineupElement.style.borderLeft = "";
+        }, 3000);
+
+        // Remove o parâmetro da URL após 4.5 segundos
+        setTimeout(() => {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("scrollToLineup");
+          url.searchParams.delete("eventId");
+          window.history.replaceState({}, "", url.toString());
+          scrollExecutedRef.current = false; // Permite scroll novamente se necessário
+        }, 4500);
+      };
+
+      // Aguarda um pouco para garantir que o layout está estável
+      setTimeout(highlightAndScroll, 100);
+    };
+
+    // Aguarda um pouco antes de tentar fazer scroll
+    setTimeout(tryScrollToLineup, 300);
+  }, [event.id, event.line_up]);
+
   // ======================================================
     const startDate = new Date(event.starts_at);
 const endDate = new Date(event.ends_at);
@@ -385,17 +491,18 @@ const vanDepartureTime = event.van_departure_time
             {/* LINE UP / PROGRAMAÇÃO */}
             {event.line_up && (
               <Box
+                id="event-lineup-section"
                 sx={{
                   maxWidth: 700,
                   width: "100%",
-                
                   padding: "20px",
+                  scrollMarginTop: "100px",
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, marginBottom: 2 }}>
                   <MusicNoteIcon style={{ color: "yellow" }} />
                   <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
-                    Programação (Line Up)
+                    Programação (Liddne Up)
                   </h3>
                 </Box>
                 <Box
