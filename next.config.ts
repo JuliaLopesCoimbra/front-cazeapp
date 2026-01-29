@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "app-n1-bucket-s3.s3.sa-east-1.amazonaws.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "d2gggyluh33xh5.cloudfront.net",
+        pathname: "/**",
+      },
     ],
   },
   // Configuração do Turbopack para resolução de módulos

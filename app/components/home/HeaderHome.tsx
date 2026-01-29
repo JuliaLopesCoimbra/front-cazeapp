@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, Menu, MenuItem, ListItemIcon, ListItemText, Skeleton } from "@mui/material";
+import { Box, Typography, Avatar, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Skeleton, Badge, List, ListItem, ListItemButton, Divider, Button, CircularProgress, Paper } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -10,6 +10,8 @@ import { EventResponse } from "@/app/services/events/eventAppService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
 import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
 import { useAuth } from "@/app/context/AuthContext";
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, Notification } from "@/app/services/notifications/notificationService";
+import { useToast } from "@/app/context/ToastContext";
 
 interface Props {
   event: EventResponse | null;
@@ -28,11 +30,19 @@ export default function HomeHeader({
 }: Props) {
   const router = useRouter();
   const { logout } = useAuth();
+  const { showToast } = useToast();
   const [profile, setProfile] = useState<ProfileResponse | null>(profileProp || null);
   const [loadingProfile, setLoadingProfile] = useState(!profileProp);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsAnchorEl, setNotificationsAnchorEl] = useState<null | HTMLElement>(null);
+  const notificationsOpen = Boolean(notificationsAnchorEl);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalNotifications, setTotalNotifications] = useState(0);
 
   useEffect(() => {
     // Se o perfil foi passado como prop, não precisa buscar
@@ -54,6 +64,174 @@ export default function HomeHeader({
         setLoadingProfile(false);
       });
   }, [profileProp]);
+
+  // Buscar contador de notificações não lidas
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const count = await getUnreadCount();
+        setUnreadCount(count);
+      } catch (error) {
+        console.error("Erro ao buscar contador de notificações:", error);
+      }
+    };
+
+    fetchUnreadCount();
+    // Atualizar a cada 30 segundos
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    // Escuta evento de remoção de notificação
+    const handleNotificationRemoved = (event: CustomEvent) => {
+      const { commentId, type } = event.detail;
+      if (type === 'comment_like') {
+        // Remove a notificação da lista local
+        setNotifications((prev) => {
+          const filtered = prev.filter(
+            (n) => !(n.type === 'comment_like' && n.related_comment_id === commentId)
+          );
+          // Atualiza o contador se a notificação removida não estava lida
+          const removedNotification = prev.find(
+            (n) => n.type === 'comment_like' && n.related_comment_id === commentId
+          );
+          if (removedNotification && !removedNotification.is_read) {
+            setUnreadCount((count) => Math.max(0, count - 1));
+          }
+          return filtered;
+        });
+        // Atualiza o contador total
+        setTotalNotifications((prev) => Math.max(0, prev - 1));
+      }
+    };
+    
+    window.addEventListener('notificationRemoved', handleNotificationRemoved as EventListener);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notificationRemoved', handleNotificationRemoved as EventListener);
+    };
+  }, []);
+
+  // Buscar notificações quando o menu abrir
+  useEffect(() => {
+    if (notificationsOpen) {
+      const fetchNotifications = async () => {
+        setLoadingNotifications(true);
+        try {
+          const response = await getNotifications(20, 0, false);
+          setNotifications(response.notifications);
+          setUnreadCount(response.unread_count);
+          setTotalNotifications(response.total);
+          setOffset(20);
+          setHasMore(response.notifications.length < response.total);
+        } catch (error) {
+          console.error("Erro ao buscar notificações:", error);
+          showToast("Erro ao carregar notificações", "error");
+        } finally {
+          setLoadingNotifications(false);
+        }
+      };
+      fetchNotifications();
+    } else {
+      // Reset quando fechar o popup
+      setOffset(0);
+      setHasMore(true);
+      setNotifications([]);
+      setTotalNotifications(0);
+    }
+  }, [notificationsOpen, showToast]);
+
+  const handleNotificationClick = async (notification: Notification) => {
+    // Marcar como lida se não estiver lida
+    if (!notification.is_read) {
+      try {
+        await markAsRead(notification.id);
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, is_read: true } : n
+          )
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      } catch (error) {
+        console.error("Erro ao marcar notificação como lida:", error);
+      }
+    }
+
+    // Navegar para o conteúdo relacionado
+    if (notification.related_news_id) {
+      // Se tem comment_id, adiciona como query param para scroll direto
+      if (notification.related_comment_id) {
+        router.push(`/pages/news/${notification.related_news_id}?commentId=${notification.related_comment_id}`);
+      } else {
+        router.push(`/pages/news/${notification.related_news_id}`);
+      }
+      setNotificationsAnchorEl(null);
+    } else if (notification.related_event_id) {
+      router.push(`/pages/[title_event]?eventId=${notification.related_event_id}`);
+      setNotificationsAnchorEl(null);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead();
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, is_read: true }))
+      );
+      setUnreadCount(0);
+      showToast("Todas as notificações foram marcadas como lidas", "success");
+    } catch (error) {
+      console.error("Erro ao marcar todas como lidas:", error);
+      showToast("Erro ao marcar notificações como lidas", "error");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Agora";
+    if (diffMins < 60) return `${diffMins}m atrás`;
+    if (diffHours < 24) return `${diffHours}h atrás`;
+    if (diffDays < 7) return `${diffDays}d atrás`;
+    return date.toLocaleDateString("pt-BR");
+  };
+
+  // Função para carregar mais notificações
+  const loadMoreNotifications = async () => {
+    if (loadingNotifications || !hasMore) return;
+    
+    setLoadingNotifications(true);
+    try {
+      const response = await getNotifications(20, offset, false);
+      setNotifications((prev) => {
+        const newNotifications = [...prev, ...response.notifications];
+        // Verifica se ainda há mais notificações para carregar
+        setHasMore(newNotifications.length < totalNotifications);
+        return newNotifications;
+      });
+      setOffset((prev) => prev + 20);
+    } catch (error) {
+      console.error("Erro ao carregar mais notificações:", error);
+      showToast("Erro ao carregar mais notificações", "error");
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  // Handler para detectar quando chegou no final do scroll
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const scrollBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+    
+    // Carrega mais quando está a 100px do final
+    if (scrollBottom < 100 && hasMore && !loadingNotifications) {
+      loadMoreNotifications();
+    }
+  };
 
   // Se está carregando o perfil, mostra skeleton
   if (loadingProfile || !profile) {
@@ -184,7 +362,7 @@ export default function HomeHeader({
         {/* DIREITA: NOTIFICAÇÕES + AVATAR */}
         <Box display="flex" alignItems="center" gap={{ xs: 1, md: 1.5, lg: 2 }}>
           <IconButton
-            onClick={() => setNotificationsOpen(true)}
+            onClick={(e) => setNotificationsAnchorEl(e.currentTarget)}
             sx={{
               color: "white",
               "&:hover": {
@@ -193,7 +371,9 @@ export default function HomeHeader({
               fontSize: { xs: "1.5rem", md: "1.75rem", lg: "2rem" },
             }}
           >
-            <NotificationsIcon sx={{ fontSize: "inherit" }} />
+            <Badge badgeContent={unreadCount > 0 ? unreadCount : 0} color="error" max={99}>
+              <NotificationsIcon sx={{ fontSize: "inherit" }} />
+            </Badge>
           </IconButton>
           
           <Avatar 
@@ -267,25 +447,264 @@ export default function HomeHeader({
         </Box>
       )}
 
-      {/* DIALOG DE NOTIFICAÇÕES */}
-      <Dialog
+      {/* MENU DE NOTIFICAÇÕES (POPUP) */}
+      <Menu
+        anchorEl={notificationsAnchorEl}
         open={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
+        onClose={() => setNotificationsAnchorEl(null)}
         PaperProps={{
           sx: {
             backgroundColor: "#1a1a1a",
             color: "white",
             borderRadius: 2,
+            width: { xs: "90vw", sm: 400 },
+            maxWidth: 400,
+            maxHeight: "80vh",
+            mt: 1,
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5)",
           },
         }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        MenuListProps={{
+          sx: { p: 0 },
+        }}
       >
-        <DialogTitle sx={{ color: "white" }}>Notificações</DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "rgba(255, 255, 255, 0.7)" }}>
-            Ainda não há notificações.
-          </DialogContentText>
-        </DialogContent>
-      </Dialog>
+        {/* HEADER DO MENU */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            p: 2,
+            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              color: "white",
+              fontWeight: 700,
+              fontSize: "1.1rem",
+            }}
+          >
+            Notificações
+          </Typography>
+          {unreadCount > 0 && (
+            <Button
+              size="small"
+              onClick={handleMarkAllAsRead}
+              sx={{
+                color: "#ffcc01",
+                fontSize: "0.75rem",
+                textTransform: "none",
+                minWidth: "auto",
+                px: 1,
+                "&:hover": {
+                  backgroundColor: "rgba(255, 204, 1, 0.1)",
+                },
+              }}
+            >
+              Marcar todas como lidas
+            </Button>
+          )}
+        </Box>
+
+        {/* CONTEÚDO */}
+        <Box 
+          sx={{ 
+            maxHeight: "60vh", 
+            overflowY: "auto",
+            // Estilização do scrollbar para ficar mais bonito
+            "&::-webkit-scrollbar": {
+              width: "6px",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              borderRadius: "3px",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.3)",
+              },
+            },
+          }}
+          onScroll={handleScroll}
+        >
+          {loadingNotifications && notifications.length === 0 ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                py: 4,
+              }}
+            >
+              <CircularProgress sx={{ color: "#ffcc01" }} />
+            </Box>
+          ) : notifications.length === 0 ? (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                py: 4,
+                px: 2,
+              }}
+            >
+              <NotificationsIcon
+                sx={{ fontSize: 48, color: "rgba(255, 255, 255, 0.3)", mb: 2 }}
+              />
+              <Typography
+                sx={{
+                  color: "rgba(255, 255, 255, 0.7)",
+                  textAlign: "center",
+                }}
+              >
+                Ainda não há notificações.
+              </Typography>
+            </Box>
+          ) : (
+            <List sx={{ p: 0 }}>
+              {notifications.map((notification, index) => (
+                <Box key={notification.id}>
+                  <ListItem
+                    disablePadding
+                    sx={{
+                      backgroundColor: notification.is_read
+                        ? "transparent"
+                        : "rgba(255, 204, 1, 0.1)",
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => handleNotificationClick(notification)}
+                      sx={{
+                        py: 1.5,
+                        px: 2,
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.05)",
+                        },
+                      }}
+                    >
+                      <Box sx={{ width: "100%", display: "flex", gap: 1.5 }}>
+                        {/* Avatar do usuário relacionado (se houver) */}
+                        {notification.related_user && (
+                          <Avatar
+                            src={notification.related_user.profile_photo || undefined}
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              bgcolor: "rgba(255, 204, 1, 0.2)",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {!notification.related_user.profile_photo && 
+                              (notification.related_user.name?.[0] || "U").toUpperCase()}
+                          </Avatar>
+                        )}
+                        
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              mb: 0.5,
+                            }}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                color: "white",
+                                fontWeight: notification.is_read ? 400 : 700,
+                                fontSize: "0.9rem",
+                              }}
+                            >
+                              {notification.title}
+                            </Typography>
+                            {!notification.is_read && (
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: "50%",
+                                  backgroundColor: "#ffcc01",
+                                  ml: 1,
+                                  flexShrink: 0,
+                                }}
+                              />
+                            )}
+                          </Box>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "rgba(255, 255, 255, 0.7)",
+                              fontSize: "0.85rem",
+                              mb: 0.5,
+                            }}
+                          >
+                            {notification.message}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: "rgba(255, 255, 255, 0.5)",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {formatDate(notification.created_at)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </ListItemButton>
+                  </ListItem>
+                  {index < notifications.length - 1 && (
+                    <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.1)" }} />
+                  )}
+                </Box>
+              ))}
+            </List>
+          )}
+          
+          {/* Indicador de carregamento no final (quando está carregando mais) */}
+          {loadingNotifications && notifications.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                py: 2,
+              }}
+            >
+              <CircularProgress size={20} sx={{ color: "#ffcc01" }} />
+            </Box>
+          )}
+          
+          {/* Mensagem quando não há mais notificações */}
+          {!hasMore && notifications.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                py: 2,
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.5)",
+                  fontSize: "0.75rem",
+                }}
+              >
+                Todas as notificações foram carregadas
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Menu>
 
       {/* MENU DO PERFIL */}
       <Menu

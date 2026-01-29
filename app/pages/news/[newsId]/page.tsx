@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
@@ -20,8 +20,6 @@ import {
   Skeleton,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import SendIcon from "@mui/icons-material/Send";
 import ReplyIcon from "@mui/icons-material/Reply";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -106,6 +104,9 @@ export default function NewsDetailPage() {
   const [hasMoreComments, setHasMoreComments] = useState(false);
   const [loadingMoreComments, setLoadingMoreComments] = useState(false);
   const COMMENTS_PER_PAGE = 20; // Carrega 20 comentários por vez
+  
+  // Ref para rastrear se o scroll já foi executado para evitar múltiplas execuções
+  const scrollExecutedRef = useRef<number | null>(null);
 
   const loadNewsDetails = async () => {
     if (!newsId) return;
@@ -121,9 +122,13 @@ export default function NewsDetailPage() {
         // Se não tiver, tenta carregar sem eventId (endpoint unificado permite para posts aprovados)
         try {
           data = await getNewsDetails(newsId);
-          // Se conseguir carregar e tiver event_id na resposta, atualiza a URL
+          // Se conseguir carregar e tiver event_id na resposta, atualiza a URL preservando o commentId se existir
           if (data.event_id) {
-            const newUrl = `/pages/news/${newsId}?eventId=${data.event_id}`;
+            const urlParams = new URLSearchParams(window.location.search);
+            const commentId = urlParams.get("commentId");
+            const newUrl = commentId 
+              ? `/pages/news/${newsId}?eventId=${data.event_id}&commentId=${commentId}`
+              : `/pages/news/${newsId}?eventId=${data.event_id}`;
             window.history.replaceState({}, '', newUrl);
           }
         } catch (error: any) {
@@ -184,6 +189,265 @@ export default function NewsDetailPage() {
       loadNewsDetails();
     }
   }, [newsId, isAuthenticated, isAdmin]);
+
+  // Scroll automático para o comentário quando há commentId na URL
+  // Este useEffect monitora quando news e loading mudam, e então verifica se há commentId na URL
+  useEffect(() => {
+    // Só executa quando a news foi carregada e não está mais carregando
+    if (!news || loading) {
+      return;
+    }
+    
+    // Função para ler o commentId da URL
+    const getCommentIdFromUrl = (): number | null => {
+      if (typeof window === 'undefined') return null;
+      const urlParams = new URLSearchParams(window.location.search);
+      const commentIdParam = urlParams.get("commentId");
+      return commentIdParam ? parseInt(commentIdParam, 10) : null;
+    };
+    
+    // Lê o commentId diretamente da URL usando window.location para garantir que seja atualizado
+    const targetCommentId = getCommentIdFromUrl();
+    
+    // Se não tem commentId, limpa o ref e retorna
+    if (!targetCommentId) {
+      if (scrollExecutedRef.current !== null) {
+        scrollExecutedRef.current = null;
+      }
+      return;
+    }
+    
+    // Se já executou o scroll para este commentId, não executa novamente
+    if (scrollExecutedRef.current === targetCommentId) {
+      return;
+    }
+    
+    // Agora tem tudo: commentId, news carregada e não está mais carregando
+    // Marca que o scroll será executado para este commentId
+    scrollExecutedRef.current = targetCommentId;
+    
+    if (targetCommentId && news && !loading) {
+      // Marca que o scroll será executado para este commentId
+      scrollExecutedRef.current = targetCommentId;
+      const highlightAndScroll = (element: HTMLElement) => {
+        // Encontra o container de scroll - procura pelo id "news-content-scroll-container"
+        let scrollContainer: HTMLElement | null = document.getElementById("news-content-scroll-container");
+        
+        // Se não encontrou, procura por um parent com scroll
+        if (!scrollContainer) {
+          scrollContainer = element.parentElement;
+          while (scrollContainer && scrollContainer !== document.body) {
+            const style = window.getComputedStyle(scrollContainer);
+            if (style.overflowY === "auto" || style.overflowY === "scroll" || style.maxHeight) {
+              break;
+            }
+            scrollContainer = scrollContainer.parentElement;
+          }
+        }
+        
+        // Se não encontrou container com scroll, usa window
+        if (!scrollContainer || scrollContainer === document.body) {
+          scrollContainer = null;
+        }
+        
+        // Faz scroll suave
+        if (scrollContainer) {
+          // Scroll no container
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          const scrollTop = scrollContainer.scrollTop;
+          const relativeTop = elementRect.top - containerRect.top;
+          const targetScroll = scrollTop + relativeTop - 100; // 100px de margem para header fixo
+          
+          const finalScroll = Math.max(0, Math.min(targetScroll, scrollContainer.scrollHeight - containerRect.height));
+          
+          // Verifica se o container pode fazer scroll
+          if (scrollContainer.scrollHeight <= containerRect.height) {
+            // Se não pode fazer scroll no container, tenta na window
+            element.scrollIntoView({ 
+              behavior: "smooth", 
+              block: "center",
+              inline: "nearest"
+            });
+          } else {
+            // Força o scroll usando múltiplas abordagens para garantir que funcione
+            // Primeiro tenta scroll suave
+            scrollContainer.scrollTo({
+              top: finalScroll,
+              behavior: "smooth"
+            });
+            
+            // Como fallback, verifica se o scroll realmente aconteceu e tenta novamente se necessário
+            const checkAndRetry = (attempts = 0) => {
+              setTimeout(() => {
+                const currentScroll = scrollContainer.scrollTop;
+                const diff = Math.abs(currentScroll - finalScroll);
+                
+                // Se a diferença for grande (mais de 50px), tenta novamente
+                if (diff > 50 && attempts < 3) {
+                  // Tenta scroll instantâneo
+                  scrollContainer.scrollTop = finalScroll;
+                  // Se ainda não funcionou, tenta novamente
+                  if (attempts < 2) {
+                    checkAndRetry(attempts + 1);
+                  }
+                } else if (diff > 50) {
+                  // Último recurso: tenta scrollIntoView
+                  element.scrollIntoView({ 
+                    behavior: "smooth", 
+                    block: "center",
+                    inline: "nearest"
+                  });
+                }
+              }, attempts === 0 ? 100 : 200);
+            };
+            
+            checkAndRetry();
+          }
+        } else {
+          // Scroll na window - também tenta no container se existir mas não foi detectado
+          // Tenta encontrar o container novamente antes de usar window
+          const container = document.getElementById("news-content-scroll-container");
+          if (container) {
+            // Tenta fazer scroll no container usando scrollIntoView com block: "nearest"
+            // Isso força o scroll no container pai
+            element.scrollIntoView({ 
+              behavior: "smooth", 
+              block: "center",
+              inline: "nearest"
+            });
+            
+            // Como fallback, também tenta scroll direto no container
+            setTimeout(() => {
+              const elementRect = element.getBoundingClientRect();
+              const containerRect = container.getBoundingClientRect();
+              const relativeTop = elementRect.top - containerRect.top;
+              const targetScroll = container.scrollTop + relativeTop - 100;
+              container.scrollTop = Math.max(0, targetScroll);
+            }, 200);
+          } else {
+            element.scrollIntoView({ 
+              behavior: "smooth", 
+              block: "center",
+              inline: "nearest"
+            });
+          }
+        }
+        
+        // Aguarda um pouco antes de destacar para garantir que o scroll terminou
+        setTimeout(() => {
+          // Adiciona destaque temporário minimalista
+          element.style.transition = "all 0.3s ease";
+          element.style.borderLeft = "3px solid rgba(255, 255, 255, 0.5)";
+          element.style.paddingLeft = "12px";
+          
+          // Remove o destaque após 3 segundos
+          setTimeout(() => {
+            element.style.transition = "all 0.5s ease";
+            element.style.borderLeft = "none";
+            element.style.paddingLeft = "0";
+          }, 3000);
+        }, 1000);
+        
+        // Remove o commentId da URL após scroll e highlight (após 4.5 segundos total)
+        setTimeout(() => {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("commentId");
+          window.history.replaceState({}, "", url.toString());
+          // Limpa o ref quando remove da URL
+          if (scrollExecutedRef.current === targetCommentId) {
+            scrollExecutedRef.current = null;
+          }
+        }, 4500);
+      };
+
+      const tryScrollToComment = (attempts = 0) => {
+        const commentElement = document.getElementById(`comment-${targetCommentId}`);
+        
+        if (commentElement) {
+          highlightAndScroll(commentElement);
+          return;
+        }
+        
+        // Se não encontrou e ainda tem tentativas, tenta novamente
+        if (attempts < 15) {
+          setTimeout(() => tryScrollToComment(attempts + 1), 300);
+        }
+      };
+
+      const scrollToComment = async () => {
+        // Verifica se é um comentário principal
+        const isMainComment = news.comments.some(c => c.id === targetCommentId);
+        
+        if (isMainComment) {
+          // É um comentário principal - tenta scroll após um delay maior
+          setTimeout(() => tryScrollToComment(), 800);
+        } else {
+          // É uma resposta - precisa encontrar o comentário pai e expandir
+          let foundParent = false;
+          
+          for (const comment of news.comments) {
+            if (comment.replies_count > 0) {
+              // Verifica se a resposta está na lista já carregada
+              const replyList = replies[comment.id] || [];
+              const hasReply = replyList.some(r => r.id === targetCommentId);
+              
+              if (hasReply) {
+                foundParent = true;
+                // Expande se não estiver expandido
+                if (!expandedComments.has(comment.id)) {
+                  setExpandedComments(prev => new Set(prev).add(comment.id));
+                }
+                // Aguarda renderização e tenta scroll
+                setTimeout(() => tryScrollToComment(), 1200);
+                break;
+              }
+              
+              // Se não encontrou, expande e carrega para verificar
+              if (!expandedComments.has(comment.id)) {
+                setExpandedComments(prev => new Set(prev).add(comment.id));
+                
+                // Carrega as respostas se ainda não foram carregadas
+                if (!replies[comment.id] || replies[comment.id].length === 0) {
+                  setLoadingReplies(prev => ({ ...prev, [comment.id]: true }));
+                  try {
+                    const fetchedReplies = await listReplies(newsId, comment.id, REPLIES_PER_PAGE, 0);
+                    setReplies(prev => ({ ...prev, [comment.id]: fetchedReplies }));
+                    setRepliesOffset(prev => ({ ...prev, [comment.id]: fetchedReplies.length }));
+                    const totalReplies = comment.replies_count || 0;
+                    setHasMoreReplies(prev => ({ ...prev, [comment.id]: totalReplies > fetchedReplies.length }));
+                    
+                    // Verifica se encontrou a resposta após carregar
+                    if (fetchedReplies.some(r => r.id === targetCommentId)) {
+                      foundParent = true;
+                      setTimeout(() => tryScrollToComment(), 1500);
+                      break;
+                    }
+                  } catch (error) {
+                    console.error("Erro ao carregar respostas", error);
+                  } finally {
+                    setLoadingReplies(prev => ({ ...prev, [comment.id]: false }));
+                  }
+                }
+              }
+            }
+          }
+          
+          // Se não encontrou em nenhum comentário, tenta scroll mesmo assim (pode estar carregando)
+          if (!foundParent) {
+            setTimeout(() => tryScrollToComment(), 2000);
+          }
+        }
+      };
+      
+      // Aguarda um pouco mais para garantir que o DOM foi renderizado completamente
+      const timer = setTimeout(() => {
+        scrollToComment();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [news, loading, newsId]); // Monitora apenas news, loading e newsId - quando news carrega e loading vira false, executa
 
   const handleLike = async () => {
     if (!isAuthenticated || !news || liking) return;
@@ -457,6 +721,13 @@ export default function NewsDetailPage() {
                 : r
             ),
           }));
+          
+          // Dispara evento para remover notificação da lista
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('notificationRemoved', {
+              detail: { commentId, type: 'comment_like' }
+            }));
+          }
         } else {
           await likeComment(commentId);
           setReplies((prev) => ({
@@ -496,6 +767,13 @@ export default function NewsDetailPage() {
                 : c
             ),
           });
+          
+          // Dispara evento para remover notificação da lista
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('notificationRemoved', {
+              detail: { commentId, type: 'comment_like' }
+            }));
+          }
         } else {
           await likeComment(commentId);
           setNews({
@@ -1033,6 +1311,7 @@ export default function NewsDetailPage() {
 
   return (
     <Box
+      id="news-content-scroll-container"
       sx={{
         minHeight: "100vh",
         height: "100vh",
@@ -1124,7 +1403,14 @@ export default function NewsDetailPage() {
               }}
             >
               {news.comments.map((comment) => (
-                <Box key={comment.id} sx={{ mb: 2 }}>
+                <Box 
+                  key={comment.id} 
+                  id={`comment-${comment.id}`}
+                  sx={{ 
+                    mb: 2,
+                    scrollMarginTop: "100px", // Espaço para o header fixo
+                  }}
+                >
                   <Box sx={{ display: "flex", gap: 1.5 }}>
                     <Avatar
                       src={comment.user.profile_photo}
@@ -1333,7 +1619,14 @@ export default function NewsDetailPage() {
                           ) : (
                             <>
                               {(replies[comment.id] || []).map((reply) => (
-                                <Box key={reply.id} sx={{ mb: 1.5 }}>
+                                <Box 
+                                  key={reply.id} 
+                                  id={`comment-${reply.id}`}
+                                  sx={{ 
+                                    mb: 1.5,
+                                    scrollMarginTop: "100px",
+                                  }}
+                                >
                                   <Box sx={{ display: "flex", gap: 1 }}>
                                     <Avatar
                                       src={reply.user.profile_photo}
