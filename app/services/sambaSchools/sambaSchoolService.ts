@@ -25,7 +25,7 @@ export interface UpdateSambaSchoolData {
 
 export const getSambaSchoolsByEvent = async (
   eventId: number,
-  limit: number = 5,
+  limit: number = 100,
   offset: number = 0
 ): Promise<SambaSchoolResponse[]> => {
   const response = await api.get<SambaSchoolResponse[]>(

@@ -75,7 +75,11 @@ function CompleteProfileContent() {
       const tempToken = params.get("temp_token");
       const cpfClean = cpf.replace(/\D/g, ''); // Remove formatação do CPF
 
-      const response = await axios.post(
+      const response = await axios.post<{
+        access_token: string;
+        refresh_token: string;
+        token_type?: string;
+      }>(
         `${API_URL}/auth/complete-profile`,
         {
           cpf: cpfClean,

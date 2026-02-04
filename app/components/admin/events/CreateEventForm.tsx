@@ -29,7 +29,6 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [mapImages, setMapImages] = useState<File[]>([]);
   const [mapImagePreviews, setMapImagePreviews] = useState<string[]>([]);
-  const [lineUp, setLineUp] = useState("");
   const [eventDates, setEventDates] = useState("");
   const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = useState("");
   const [vanArrivalTimeStart, setVanArrivalTimeStart] = useState("");
@@ -156,7 +155,6 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         van_departure_time_end: vanDepartureTimeEnd || undefined,
         banner_image: bannerImage || undefined,
         map_images: mapImages.length > 0 ? mapImages : undefined,
-        line_up: lineUp.trim() || undefined,
         spotify_playlist_url: spotifyPlaylistUrl.trim() || undefined,
       };
 
@@ -851,58 +849,6 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
               </Box>
             )}
           </Box>
-
-          <TextField
-            fullWidth
-            label="Line Up (Programação do Show)"
-            value={lineUp}
-            onChange={(e) => {
-              if (e.target.value.length <= 2000) {
-                setLineUp(e.target.value);
-              }
-            }}
-            multiline
-            rows={6}
-            disabled={loading}
-            placeholder="Ex: 20:00 - Artista A&#10;21:30 - Artista B&#10;23:00 - Artista C"
-            inputProps={{ maxLength: 2000 }}
-            helperText={`${lineUp.length}/2000 caracteres`}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#fff",
-                fontSize: "1.1rem",
-                "& textarea": {
-                  padding: "14px 16px",
-                  fontSize: "1.1rem",
-                  lineHeight: "1.6",
-                },
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.1)",
-                  borderWidth: "2px",
-                },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.3)",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffc91f",
-                  borderWidth: "2px",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255,255,255,0.7)",
-                fontSize: "1.1rem",
-                "&.Mui-focused": {
-                  color: "#ffc91f",
-                },
-              },
-              "& .MuiFormHelperText-root": {
-                color: "rgba(255,255,255,0.5)",
-                fontSize: "0.95rem",
-                marginTop: "6px",
-              },
-            }}
-          />
 
           <TextField
             fullWidth

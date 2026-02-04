@@ -40,7 +40,6 @@ export default function EditEventForm({
   const [mapImagePreviews, setMapImagePreviews] = useState<string[]>([]);
   const [existingMapImages, setExistingMapImages] = useState<Array<{id: number; image_url: string; image_order: number}>>([]);
   const [replaceMapImages, setReplaceMapImages] = useState(false);
-  const [lineUp, setLineUp] = useState("");
   const [eventDates, setEventDates] = useState("");
   const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = useState("");
   const [vanArrivalTimeStart, setVanArrivalTimeStart] = useState("");
@@ -91,9 +90,6 @@ export default function EditEventForm({
           setMapImagePreviews([]);
         }
         
-        if (event.line_up) {
-          setLineUp(event.line_up);
-        }
         
         if (event.spotify_playlist_url) {
           setSpotifyPlaylistUrl(event.spotify_playlist_url);
@@ -295,7 +291,6 @@ export default function EditEventForm({
         banner_image: bannerImage || undefined,
         map_images: mapImages.length > 0 ? mapImages : undefined,
         replace_map_images: replaceMapImages,
-        line_up: lineUp.trim() || undefined,
         spotify_playlist_url: spotifyPlaylistUrl.trim() || undefined,
       };
 
@@ -891,43 +886,6 @@ export default function EditEventForm({
               </Box>
             )}
           </Box>
-
-          <TextField
-            fullWidth
-            label="Line Up (Programação do Show)"
-            value={lineUp}
-            onChange={(e) => setLineUp(e.target.value)}
-            multiline
-            rows={6}
-            disabled={loading}
-            placeholder="Ex: 20:00 - Artista A&#10;21:30 - Artista B&#10;23:00 - Artista C"
-            variant="standard"
-            sx={{
-              "& .MuiInput-underline:before": {
-                borderBottomColor: "rgba(255,255,255,0.2)",
-              },
-              "& .MuiInput-underline:hover:before": {
-                borderBottomColor: "rgba(255,255,255,0.3)",
-              },
-              "& .MuiInput-underline:after": {
-                borderBottomColor: "#ffc91f",
-              },
-              "& .MuiInputBase-input": {
-                color: "#fff",
-                fontSize: "1rem",
-                "&::placeholder": {
-                  color: "rgba(255,255,255,0.4)",
-                  opacity: 1,
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255,255,255,0.6)",
-                "&.Mui-focused": {
-                  color: "#ffc91f",
-                },
-              },
-            }}
-          />
 
           <TextField
             fullWidth

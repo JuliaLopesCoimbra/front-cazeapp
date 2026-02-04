@@ -1,0 +1,84 @@
+"use client";
+
+import { Box, CircularProgress } from "@mui/material";
+import CreateLineupItemForm from "@/app/components/admin/lineup/CreateLineupItemForm";
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter, useParams } from "next/navigation";
+import { useEffect } from "react";
+
+export default function EditLineupItemPage() {
+  const { isAdmin, authReady } = useAuth();
+  const router = useRouter();
+  const params = useParams();
+  const eventId = Number(params.id);
+  const lineupItemId = Number(params.lineupItemId);
+
+  useEffect(() => {
+    if (authReady && !isAdmin) {
+      router.push("/pages/user/home");
+    }
+  }, [isAdmin, router, authReady]);
+
+  if (!authReady) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundImage: "url(/background/dashboard.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress sx={{ color: "#ffc91f" }} />
+      </Box>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  if (!eventId || isNaN(eventId) || !lineupItemId || isNaN(lineupItemId)) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundImage: "url(/background/dashboard.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box>ID inválido</Box>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        height: "100vh",
+        overflowY: "auto",
+        backgroundImage: "url(/background/dashboard.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+        color: "#fff",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <CreateLineupItemForm eventId={eventId} lineupItemId={lineupItemId} />
+    </Box>
+  );
+}
+

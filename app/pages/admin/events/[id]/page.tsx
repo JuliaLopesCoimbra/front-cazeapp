@@ -27,6 +27,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import StoreIcon from '@mui/icons-material/Store';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { 
   getEventById, 
@@ -927,6 +928,25 @@ export default function EventDetailsPage() {
               }}
             >
               Adicionar Escola de Samba
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<QueueMusicIcon />}
+              onClick={() => router.push(`/pages/admin/events/${eventId}/lineup`)}
+              sx={{
+                flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 8px)" },
+                backgroundColor: "#ffc91f",
+                color: "#000",
+                fontWeight: 600,
+                py: 1.5,
+                borderRadius: "14px",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "#e6b800",
+                },
+              }}
+            >
+              Line Up
             </Button>
             {/* <Button
               variant="contained"

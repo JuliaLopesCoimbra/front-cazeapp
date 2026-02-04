@@ -640,47 +640,38 @@ export default function EventPage() {
             </Box>
           ) : null}
 
-          {/* LINE UP / PROGRAMAÇÃO */}
-          {event.line_up && (
-            <Box
-              id="event-lineup-section"
-              sx={{
-                maxWidth: 700,
-                width: "100%",
-                padding: "20px",
-                scrollMarginTop: "100px",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, marginBottom: 2 }}>
-                <MusicNoteIcon style={{ color: "yellow" }} />
-                <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
-                  Programação (Line Up)
-                </h3>
-              </Box>
-              <Box
+          {/* BOTÃO VER LINE UP */}
+          <Box
+            sx={{
+              maxWidth: 700,
+              width: "100%",
+              padding: "20px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+              <Button
+                onClick={() => router.push(`/pages/events/${event.id}/lineup`)}
+                startIcon={<MusicNoteIcon />}
                 sx={{
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  borderRadius: 2,
-                  padding: 3,
-                  color: "white",
+                  backgroundColor: "#FFD600",
+                  color: "#000",
+                  fontWeight: 700,
+                  padding: "12px 32px",
+                  borderRadius: "30px",
+                  textTransform: "none",
+                  fontSize: 16,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+                  "&:hover": {
+                    backgroundColor: "#FFC400",
+                  },
                 }}
               >
-                <pre
-                  style={{
-                    margin: 0,
-                    fontSize: 14,
-                    lineHeight: 1.8,
-                    whiteSpace: "pre-wrap",
-                    fontFamily: "inherit",
-                  }}
-                >
-                  {event.line_up}
-                </pre>
-              </Box>
-            </Box>
-          )}
+                Ver Line Up
+              </Button>
+          </Box>
 
-          <Button
+          {/* <Button
             onClick={() => router.push("/comprar")}
             sx={{
               marginTop: 3,
@@ -699,7 +690,7 @@ export default function EventPage() {
             }}
           >
             Comprar ingressos
-          </Button>
+          </Button> */}
         </main>
       </div>
     </div>

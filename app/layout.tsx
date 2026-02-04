@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Roboto, Inter } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
@@ -12,6 +12,12 @@ const roboto = Roboto({
   variable: "--font-roboto",
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -38,7 +44,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
       <body
-        className={`${roboto.variable} antialiased`}
+        className={`${roboto.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: 'var(--font-roboto), Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}
       >
         <EmotionCacheProvider>
