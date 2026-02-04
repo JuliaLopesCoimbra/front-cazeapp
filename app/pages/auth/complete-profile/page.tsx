@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/app/context/ToastContext";
+import { useAuth } from "@/app/context/AuthContext";
 import axios from "axios";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
 
@@ -39,6 +40,7 @@ function CompleteProfileContent() {
   const router = useRouter();
   const params = useSearchParams();
   const { showToast } = useToast();
+  const { login } = useAuth();
 
   useEffect(() => {
     const tempToken = params.get("temp_token");
@@ -73,7 +75,7 @@ function CompleteProfileContent() {
       const tempToken = params.get("temp_token");
       const cpfClean = cpf.replace(/\D/g, ''); // Remove formatação do CPF
 
-      await axios.post(
+      const response = await axios.post(
         `${API_URL}/auth/complete-profile`,
         {
           cpf: cpfClean,
@@ -88,11 +90,22 @@ function CompleteProfileContent() {
         }
       );
 
+      // Fazer login automaticamente com os tokens retornados
+      const { access_token, refresh_token } = response.data;
+      
+      // Usar a função login do AuthContext
+      login(access_token, refresh_token);
+      
+      // Salvar tokens
+      localStorage.setItem("access_token", access_token);
+      document.cookie = `refresh_token=${refresh_token}; path=/; secure`;
+
       showToast("Perfil completado com sucesso! Redirecionando...", "success");
       
+      // Pequeno delay para garantir que o contexto seja atualizado
       setTimeout(() => {
         router.push("/pages/user/home");
-      }, 1500);
+      }, 100);
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail || err.message || "Erro ao completar perfil";
       showToast(errorMessage, "error");
