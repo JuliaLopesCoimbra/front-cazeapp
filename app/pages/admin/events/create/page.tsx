@@ -42,7 +42,6 @@ export default function CreateEventPage() {
         minHeight: "100vh",
         height: "100vh",
         overflowY: "auto",
-        backgroundColor: "#000",
         color: "#fff",
         display: "flex",
         flexDirection: "column",

@@ -681,17 +681,35 @@ export default function EventDetailsPage() {
         {event.banner_image && (
           <Box sx={{ mb: 3, display: "flex", justifyContent: "center" }}>
             <Box
-              component="img"
-              src={event.banner_image}
-              alt={event.title}
               sx={{
                 width: 200,
                 height: 200,
-                objectFit: "cover",
-                borderRadius: "50%",
-                border: "3px solid rgba(255, 201, 31, 0.3)",
+              
+                border: "1px solid rgba(255, 201, 31, 0.3)",
+                overflow: "hidden",
+                position: "relative",
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              <Box
+                component="img"
+                src={event.banner_image}
+                alt={event.title}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  minWidth: "100%",
+                  minHeight: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center",
+                  display: "block",
+                  borderRadius: "50%",
+                }}
+              />
+            </Box>
           </Box>
         )}
 

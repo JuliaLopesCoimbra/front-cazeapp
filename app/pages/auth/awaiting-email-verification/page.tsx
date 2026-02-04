@@ -43,26 +43,26 @@ function AwaitingEmailVerificationContent() {
     try {
       await resendVerificationEmail(email);
       showToast("Email de verificação reenviado com sucesso!", "success");
-      setCooldown(60); // 60 segundos de cooldown
+      setCooldown(60); // 60 segundos (1 minuto) de cooldown
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail || err.message || "Erro ao reenviar email";
       showToast(errorMessage, "error");
       if (errorMessage.includes("Aguarde")) {
-        // Extrair segundos do erro
+        // Extrair segundos do erro, mas garantir pelo menos 60 segundos
         const match = errorMessage.match(/(\d+)\s+segundos/);
         if (match) {
-          setCooldown(parseInt(match[1]));
+          const seconds = parseInt(match[1]);
+          setCooldown(Math.max(60, seconds)); // Garantir pelo menos 1 minuto
+        } else {
+          setCooldown(60); // Se não conseguir extrair, usar 60 segundos
         }
+      } else {
+        // Se houver erro, ainda aplicar cooldown de 1 minuto
+        setCooldown(60);
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleCheckVerification = () => {
-    // Verificar se o email foi verificado fazendo uma requisição
-    // Por enquanto, apenas redireciona para login
-    router.push("/pages/auth/login");
   };
 
   return (
@@ -121,7 +121,6 @@ function AwaitingEmailVerificationContent() {
             onClick={handleResendEmail}
             disabled={loading || cooldown > 0}
             sx={{
-              mb: 2,
               py: 1.5,
               borderRadius: "12px",
               backgroundColor: "#ffcc01",
@@ -145,27 +144,6 @@ function AwaitingEmailVerificationContent() {
             ) : (
               "Reenviar Email de Verificação"
             )}
-          </Button>
-
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={handleCheckVerification}
-            sx={{
-              py: 1.5,
-              borderRadius: "12px",
-              borderColor: "rgba(255, 255, 255, 0.5)",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: "16px",
-              textTransform: "none",
-              "&:hover": {
-                borderColor: "#fff",
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-              },
-            }}
-          >
-            Já verifiquei meu email
           </Button>
         </Box>
       </Container>

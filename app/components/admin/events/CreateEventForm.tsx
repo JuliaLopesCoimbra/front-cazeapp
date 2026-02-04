@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CloseIcon from "@mui/icons-material/Close";
+import ImageCarousel from "@/app/components/news/ImageCarousel";
 import { createEvent, CreateEventData } from "@/app/services/events/eventAppService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
@@ -179,17 +180,19 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
 
   return (
     <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundColor: "#000",
-        color: "#fff",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+        sx={{
+          minHeight: "100vh",
+          backgroundImage: "url(/background/dashboard.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          height: "100vh",
+          overflowY: "auto",
+          color: "#fff",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
       {/* Header com botão de voltar */}
       <Box
         sx={{
@@ -415,6 +418,13 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 "& input": {
                   padding: "14px 16px",
                   fontSize: "1.1rem",
+                  "&::-webkit-calendar-picker-indicator": {
+                    filter: "invert(1)",
+                    cursor: "pointer",
+                  },
+                  "&::-webkit-datetime-edit": {
+                    color: "#fff",
+                  },
                 },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
@@ -460,6 +470,13 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 "& input": {
                   padding: "14px 16px",
                   fontSize: "1.1rem",
+                  "&::-webkit-calendar-picker-indicator": {
+                    filter: "invert(1)",
+                    cursor: "pointer",
+                  },
+                  "&::-webkit-datetime-edit": {
+                    color: "#fff",
+                  },
                 },
                 "& fieldset": {
                   borderColor: "rgba(255,255,255,0.1)",
@@ -529,9 +546,20 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 color: "rgba(255,255,255,0.5)",
                 fontSize: "0.8rem",
                 marginTop: "6px",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal",
+                maxWidth: "100%",
+                lineHeight: 1.4,
               },
             }}
           />
+
+          <Box>
+            <Typography variant="body1" sx={{ mb: 2, color: "rgba(255,255,255,0.9)", fontSize: "1.1rem", fontWeight: 500 }}>
+              Horários das Vans
+            </Typography>
+          </Box>
 
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
@@ -553,6 +581,13 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                   "& input": {
                     padding: "14px 16px",
                     fontSize: "1.1rem",
+                    "&::-webkit-calendar-picker-indicator": {
+                      filter: "invert(1)",
+                      cursor: "pointer",
+                    },
+                    "&::-webkit-datetime-edit": {
+                      color: "#fff",
+                    },
                   },
                   "& fieldset": {
                     borderColor: "rgba(255,255,255,0.1)",
@@ -594,6 +629,13 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                   "& input": {
                     padding: "14px 16px",
                     fontSize: "1.1rem",
+                    "&::-webkit-calendar-picker-indicator": {
+                      filter: "invert(1)",
+                      cursor: "pointer",
+                    },
+                    "&::-webkit-datetime-edit": {
+                      color: "#fff",
+                    },
                   },
                   "& fieldset": {
                     borderColor: "rgba(255,255,255,0.1)",
@@ -638,6 +680,13 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                   "& input": {
                     padding: "14px 16px",
                     fontSize: "1.1rem",
+                    "&::-webkit-calendar-picker-indicator": {
+                      filter: "invert(1)",
+                      cursor: "pointer",
+                    },
+                    "&::-webkit-datetime-edit": {
+                      color: "#fff",
+                    },
                   },
                   "& fieldset": {
                     borderColor: "rgba(255,255,255,0.1)",
@@ -679,6 +728,13 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                   "& input": {
                     padding: "14px 16px",
                     fontSize: "1.1rem",
+                    "&::-webkit-calendar-picker-indicator": {
+                      filter: "invert(1)",
+                      cursor: "pointer",
+                    },
+                    "&::-webkit-datetime-edit": {
+                      color: "#fff",
+                    },
                   },
                   "& fieldset": {
                     borderColor: "rgba(255,255,255,0.1)",
@@ -741,17 +797,27 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             </label>
             {preview && (
               <Box
-                component="img"
-                src={preview}
-                alt="Preview"
                 sx={{
                   mt: 2,
-                  maxWidth: "100%",
-                  maxHeight: 200,
-                  objectFit: "contain",
-                  borderRadius: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
                 }}
-              />
+              >
+                <Box
+                  component="img"
+                  src={preview}
+                  alt="Preview Banner"
+                  sx={{
+                    maxWidth: "100%",
+                    maxHeight: 300,
+                    objectFit: "contain",
+                    borderRadius: 2,
+                    margin: "0 auto",
+                  }}
+                />
+              </Box>
             )}
           </Box>
 
@@ -798,54 +864,15 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
             </label>
             {mapImagePreviews.length > 0 && (
               <Box sx={{ mt: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1, color: "rgba(255,255,255,0.7)", fontSize: "0.9rem" }}>
+                <Typography variant="body2" sx={{ mb: 2, color: "rgba(255,255,255,0.7)", fontSize: "0.9rem" }}>
                   {mapImages.length} imagem(ns) selecionada(s)
                 </Typography>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                  {mapImagePreviews.map((preview, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        position: "relative",
-                        width: "150px",
-                        height: "150px",
-                        borderRadius: 2,
-                        overflow: "hidden",
-                        border: "2px solid rgba(255,255,255,0.2)",
-                      }}
-                    >
-                      <Box
-                        component="img"
-                        src={preview}
-                        alt={`Preview Mapa ${index + 1}`}
-                        sx={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                      <IconButton
-                        onClick={() => handleRemoveMapImage(index)}
-                        disabled={loading}
-                        sx={{
-                          position: "absolute",
-                          top: 4,
-                          right: 4,
-                          backgroundColor: "rgba(0, 0, 0, 0.6)",
-                          color: "#fff",
-                          "&:hover": {
-                            backgroundColor: "rgba(255, 0, 0, 0.8)",
-                          },
-                          width: 32,
-                          height: 32,
-                        }}
-                        size="small"
-                      >
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  ))}
-                </Box>
+                <ImageCarousel
+                  images={mapImagePreviews}
+                  onRemove={handleRemoveMapImage}
+                  showRemoveButton={true}
+                  disabled={loading}
+                />
               </Box>
             )}
           </Box>
@@ -896,6 +923,11 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 color: "rgba(255,255,255,0.5)",
                 fontSize: "0.8rem",
                 marginTop: "6px",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal",
+                maxWidth: "100%",
+                lineHeight: 1.4,
               },
             }}
           />
