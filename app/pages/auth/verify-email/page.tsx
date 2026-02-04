@@ -7,6 +7,13 @@ import { Box, Typography, Button } from "@mui/material";
 
 type Status = "loading" | "success" | "error";
 
+interface VerifyEmailResponse {
+  message: string;
+  needs_age_verification?: boolean;
+  needs_profile_completion?: boolean;
+  temp_token?: string;
+}
+
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -27,7 +34,7 @@ function VerifyEmailContent() {
 
     const verify = async () => {
       try {
-        const result = await verifyEmail(token);
+        const result = await verifyEmail(token) as VerifyEmailResponse;
         setStatus("success");
         showToast("E-mail confirmado com sucesso!", "success");
         
