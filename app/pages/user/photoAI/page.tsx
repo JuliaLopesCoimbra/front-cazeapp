@@ -11,15 +11,17 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Badge,
+  // Badge, // sistema de compra (carrinho) desativado
 } from "@mui/material";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+// import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined"; // sistema de compra desativado
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import DownloadIcon from "@mui/icons-material/Download";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { searchFace } from "@/app/services/ai/searchFaceService";
 import { useToast } from "@/app/context/ToastContext";
-import { useRouter } from "next/navigation";
+import api from "@/app/services/auth/axiosConfig";
+// import { useRouter } from "next/navigation"; // usado só para carrinho/roulette
 type Stage = "intro" | "camera" | "results";
 
 interface SearchResult {
@@ -45,9 +47,9 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<SearchResult | null>(null);
   const [cartModalOpen, setCartModalOpen] = useState(false);
-  const [cart, setCart] = useState<SearchResult[]>([]);
+  // const [cart, setCart] = useState<SearchResult[]>([]); // sistema de compra desativado
   const { showToast } = useToast();
-  const router = useRouter();
+  // const router = useRouter(); // usado só para carrinho/roulette
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -64,7 +66,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
       setStage("intro");
       setResults([]);
       setSearchMessage(null);
-      setCart([]);
+      // setCart([]); // sistema de compra desativado
       setSelectedPhoto(null);
       setIsUploading(false);
       setCountdown(null);
@@ -640,26 +642,36 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
     setCartModalOpen(true);
   };
 
-  const handleAddToCart = () => {
-    if (selectedPhoto) {
-      // Verifica se a foto já está no carrinho
-      const isAlreadyInCart = cart.some(item => item.url === selectedPhoto.url);
-      if (!isAlreadyInCart) {
-        setCart([...cart, selectedPhoto]);
-        showToast("Foto adicionada ao carrinho!", "success");
-      } else {
-        showToast("Esta foto já está no carrinho", "info");
-      }
+  const handleDownloadPhoto = async () => {
+    if (!selectedPhoto) return;
+    try {
+      const res = await api.get("/photo-ai/download-image", {
+        params: { url: selectedPhoto.url },
+        responseType: "blob",
+      });
+      const blob = res.data as Blob;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `foto-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Foto baixada com sucesso!", "success");
       setCartModalOpen(false);
       setSelectedPhoto(null);
+    } catch {
+      showToast("Não foi possível baixar a foto. Tente novamente.", "error");
     }
   };
 
-  const handleCartClick = () => {
-    if (cart.length > 0) {
-      router.push(`/pages/user/roulette/${eventId}`);
-    }
-  };
+  // Sistema de compra (carrinho) desativado por enquanto
+  // const handleCartClick = () => {
+  //   if (cart.length > 0) {
+  //     router.push(`/pages/user/roulette/${eventId}`);
+  //   }
+  // };
 
   const renderResults = () => (
     <Box
@@ -684,6 +696,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
             <Typography variant="h6" fontWeight={700}>
               Minhas fotos
             </Typography>
+            {/* Botão carrinho / sistema de compra desativado por enquanto
             <Badge badgeContent={cart.length} color="primary">
               <Box
                 onClick={handleCartClick}
@@ -700,6 +713,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
                 <ShoppingCartOutlinedIcon />
               </Box>
             </Badge>
+            */}
           </Box>
 
           {searchMessage && (
@@ -776,7 +790,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
       {stage === "results" && renderResults()}
       {stage === "intro" && renderIntro()}
 
-      {/* Modal para adicionar foto ao carrinho */}
+      {/* Modal da foto: visualizar e baixar */}
       <Dialog
         open={cartModalOpen}
         onClose={() => {
@@ -822,9 +836,9 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
               backgroundColor: "rgba(90, 60, 241, 0.1)",
             }}
           >
-            <ShoppingCartOutlinedIcon sx={{ color: "#5a3cf1", fontSize: 28 }} />
+            <ImageOutlinedIcon sx={{ color: "#5a3cf1", fontSize: 28 }} />
           </Box>
-          Adicionar ao Carrinho
+          Foto
         </DialogTitle>
 
         <DialogContent sx={{ pt: 3, pb: 2 }}>
@@ -858,13 +872,6 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
                 />
               </Box>
             )}
-            <Typography
-              variant="body1"
-              textAlign="center"
-              sx={{ color: "rgba(255,255,255,0.9)" }}
-            >
-              Adicionar essa foto no carrinho?
-            </Typography>
           </Box>
         </DialogContent>
 
@@ -890,9 +897,9 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
             Cancelar
           </Button>
           <Button
-            onClick={handleAddToCart}
+            onClick={handleDownloadPhoto}
             variant="contained"
-            startIcon={<ShoppingCartOutlinedIcon />}
+            startIcon={<DownloadIcon />}
             sx={{
               backgroundColor: "#5a3cf1",
               color: "#fff",
@@ -902,7 +909,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
               },
             }}
           >
-            Adicionar
+            Baixar
           </Button>
         </DialogActions>
       </Dialog>
