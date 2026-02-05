@@ -1,5 +1,5 @@
 import { Box, Button } from "@mui/material";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 
 type Tab = "home" | "eventos" | "mapa" | "lineup" | "foto" | "enredo";
 
@@ -8,8 +8,15 @@ interface Props {
   onChange: (tab: Tab) => void;
 }
 
+const DRAG_THRESHOLD_PX = 5;
+
 export default function HomeTabs({ active, onChange }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const dragStartXRef = useRef<number | null>(null);
+  const dragStartScrollLeftRef = useRef<number>(0);
+  const dragOccurredRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
+  const pendingScrollLeftRef = useRef<number>(0);
 
   const tabs: { label: string; value: Tab }[] = [
     { label: "Home", value: "home" },
@@ -27,39 +34,79 @@ export default function HomeTabs({ active, onChange }: Props) {
   // lg: 3*140 + 2*16 + 125 = 577px
   const containerWidth = { xs: "401px", md: "489px", lg: "577px" };
 
-  // Adiciona suporte para scroll horizontal com a roda do mouse
+  // Arrastar com o mouse no desktop: scroll instantâneo + rAF para fluidez
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (dragStartXRef.current === null || !container) return;
+      const dx = dragStartXRef.current - e.clientX;
+      if (Math.abs(dx) > DRAG_THRESHOLD_PX) dragOccurredRef.current = true;
+      const targetScroll = dragStartScrollLeftRef.current + dx;
+      pendingScrollLeftRef.current = Math.max(0, Math.min(targetScroll, container.scrollWidth - container.clientWidth));
+      e.preventDefault();
+      if (rafIdRef.current !== null) return;
+      rafIdRef.current = requestAnimationFrame(() => {
+        rafIdRef.current = null;
+        if (!scrollContainerRef.current) return;
+        scrollContainerRef.current.scrollLeft = pendingScrollLeftRef.current;
+      });
+    };
+
+    const handleMouseUp = () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+      const el = scrollContainerRef.current;
+      if (el) el.style.scrollBehavior = "";
+      dragStartXRef.current = null;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { capture: true });
+    window.addEventListener("mouseup", handleMouseUp, { capture: true });
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove, { capture: true });
+      window.removeEventListener("mouseup", handleMouseUp, { capture: true });
+      if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, []);
+
+  const handleContainerMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.style.scrollBehavior = "auto"; // scroll instantâneo durante o arraste
+    dragStartXRef.current = e.clientX;
+    dragStartScrollLeftRef.current = el.scrollLeft;
+    dragOccurredRef.current = false;
+  }, []);
+
+  // Scroll horizontal com a roda do mouse
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const handleWheel = (e: WheelEvent) => {
-      // Verifica se há scroll horizontal disponível
       const hasHorizontalScroll = container.scrollWidth > container.clientWidth;
-      
       if (!hasHorizontalScroll) return;
 
-      // Verifica se o mouse está sobre o container
       const rect = container.getBoundingClientRect();
-      const isOverContainer = 
-        e.clientX >= rect.left - 50 && // Margem de 50px para facilitar
+      const isOverContainer =
+        e.clientX >= rect.left - 50 &&
         e.clientX <= rect.right + 50 &&
         e.clientY >= rect.top - 50 &&
         e.clientY <= rect.bottom + 50;
 
       if (isOverContainer) {
-        // Previne o scroll vertical padrão apenas se houver scroll horizontal
         e.preventDefault();
         e.stopPropagation();
-        
-        // Usa deltaX se disponível (scroll horizontal nativo), senão converte deltaY
         const scrollAmount = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
         container.scrollLeft += scrollAmount;
       }
     };
 
-    // Adiciona o listener no container com capture para garantir que seja capturado
     container.addEventListener("wheel", handleWheel, { passive: false, capture: true });
-
     return () => {
       container.removeEventListener("wheel", handleWheel, { capture: true } as EventListenerOptions);
     };
@@ -77,6 +124,7 @@ export default function HomeTabs({ active, onChange }: Props) {
     >
       <Box
         ref={scrollContainerRef}
+        onMouseDown={handleContainerMouseDown}
         sx={{
           display: "flex",
           gap: { xs: 1, md: 1.5, lg: 2 },
@@ -88,13 +136,11 @@ export default function HomeTabs({ active, onChange }: Props) {
             display: "none", // Chrome, Safari, Edge
           },
           WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
-          // Garante que o scroll funcione
-          scrollBehavior: "smooth",
-          cursor: "grab", // Indica que é scrollável
+          scrollBehavior: "smooth", // restaurado no mouseup após arraste
+          cursor: "grab",
           "&:active": {
-            cursor: "grabbing", // Muda o cursor quando está arrastando
+            cursor: "grabbing",
           },
-          // Permite scroll com mouse mesmo quando não está diretamente sobre o elemento
           userSelect: "none",
         }}
       >
@@ -104,7 +150,10 @@ export default function HomeTabs({ active, onChange }: Props) {
           return (
             <Button
               key={tab.value}
-              onClick={() => onChange(tab.value)}
+              onClick={() => {
+                if (dragOccurredRef.current) return;
+                onChange(tab.value);
+              }}
               sx={{
                 borderRadius: "999px",
                 textTransform: "none",
