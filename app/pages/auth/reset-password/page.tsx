@@ -15,6 +15,7 @@ import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { validatePassword } from "@/app/utils/passwordValidator";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const API_URL = getApiUrl();
 
@@ -74,8 +75,8 @@ function ResetPasswordContent() {
         sx={{
           display: "flex",
           justifyContent: "center",
+          ...dashboardBackgroundSx,
           height: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
           padding: "20px",
           alignItems: "center",
         }}
@@ -88,10 +89,10 @@ function ResetPasswordContent() {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         display: "flex",
         justifyContent: "center",
         height: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
         padding: "20px",
       }}
     >
@@ -321,10 +322,10 @@ export default function ResetPasswordPage() {
       fallback={
         <Box
           sx={{
+            ...dashboardBackgroundSx,
             display: "flex",
             justifyContent: "center",
             height: "100vh",
-            backgroundImage: "url(/background/dashboard.png)",
             padding: "20px",
             alignItems: "center",
           }}

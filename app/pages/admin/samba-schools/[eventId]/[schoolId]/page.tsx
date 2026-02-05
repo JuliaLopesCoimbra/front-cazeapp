@@ -26,6 +26,7 @@ import {
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
 import DeleteSambaSchoolModal from "@/app/components/admin/samba-schools/DeleteSambaSchoolModal";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import CreateMusicModal from "@/app/components/admin/samba-schools/CreateMusicModal";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import AddIcon from "@mui/icons-material/Add";
@@ -169,13 +170,8 @@ export default function SambaSchoolDetailsPage() {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         minHeight: "100vh",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
         color: "#fff",
         display: "flex",
         flexDirection: "column",

@@ -17,6 +17,7 @@ import NewsHeader from "@/app/components/news/NewsHeader";
 import EventBadge from "@/app/components/news/EventBadge";
 import ImageUploadSection from "@/app/components/news/ImageUploadSection";
 import NewsFormFields from "@/app/components/news/NewsFormFields";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 function EditNewsPageContent() {
   const router = useRouter();
@@ -249,11 +250,8 @@ function EditNewsPageContent() {
     return (
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -270,11 +268,8 @@ function EditNewsPageContent() {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
         padding: { xs: 2, sm: 3, md: 4 },
         pb: { xs: 10, sm: 4 },
       }}
@@ -404,15 +399,12 @@ export default function EditNewsPage() {
       fallback={
         <Box
           sx={{
+...dashboardBackgroundSx,
             minHeight: "100vh",
-            backgroundImage: "url(/background/dashboard.png)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-          }}
+        }}
         >
           <CircularProgress sx={{ color: "#ffcc01" }} />
         </Box>

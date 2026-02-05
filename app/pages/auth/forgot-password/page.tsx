@@ -5,6 +5,7 @@ import axios from "axios";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const API_URL = getApiUrl();
 const isValidEmail = (email: string): boolean => {
@@ -71,9 +72,9 @@ export default function ForgotPasswordPage() {
     <Box
       sx={{
         display: "flex",
+        ...dashboardBackgroundSx,
         justifyContent: "center",
         height: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
         padding: "20px",
       }}
     >

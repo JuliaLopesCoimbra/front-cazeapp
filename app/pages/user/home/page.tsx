@@ -16,6 +16,7 @@ import PhotoAI from "@/app/components/home/PhotoAI";
 import Enredo from "@/app/components/home/Enredo";
 import EventIndisponivel from "@/app/components/event/EventIndisponivel";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const STORAGE_KEY = "selectedEventId";
 const SCROLL_KEY = "homeScrollY";
@@ -23,22 +24,11 @@ const TAB_KEY = "homeActiveTab";
 
 const HomeContent: React.FC = () => {
   const searchParams = useSearchParams();
+  // Inicializa sempre "home" para evitar hydration mismatch (server vs client).
+  // A aba é sincronizada da URL/sessionStorage no useEffect.
   const [activeTab, setActiveTab] = useState<
     "home" | "eventos" | "foto" | "enredo"
-  >(() => {
-    if (typeof window === "undefined") return "home";
-    // Verifica se há parâmetro na URL para definir a aba (lê diretamente da URL)
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlTab = urlParams.get("tab");
-    if (urlTab === "home" || urlTab === "eventos" || urlTab === "foto" || urlTab === "enredo") {
-      return urlTab;
-    }
-    const saved = sessionStorage.getItem(TAB_KEY);
-    if (saved === "home" || saved === "eventos" || saved === "foto" || saved === "enredo") {
-      return saved;
-    }
-    return "home";
-  });
+  >("home");
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
   const [eventsLoaded, setEventsLoaded] = useState(false);
@@ -69,11 +59,18 @@ const HomeContent: React.FC = () => {
     const urlTab = urlParams.get("tab");
     const urlEventId = urlParams.get("eventId") || urlParams.get("event"); // Suporta ambos "eventId" e "event"
 
-    // Atualiza a aba se houver parâmetro na URL (sempre, mesmo sem eventos carregados)
-    if (urlTab && (urlTab === "home" || urlTab === "eventos" || urlTab === "foto" || urlTab === "enredo")) {
-      if (activeTab !== urlTab) {
-        setActiveTab(urlTab);
-      }
+    // Define aba: URL tem prioridade, senão sessionStorage, senão "home"
+    type Tab = "home" | "eventos" | "foto" | "enredo";
+    const validTabs: Tab[] = ["home", "eventos", "foto", "enredo"];
+    const targetTab: Tab =
+      urlTab && validTabs.includes(urlTab as Tab)
+        ? (urlTab as Tab)
+        : (() => {
+            const saved = sessionStorage.getItem(TAB_KEY);
+            return saved && validTabs.includes(saved as Tab) ? (saved as Tab) : "home";
+          })();
+    if (activeTab !== targetTab) {
+      setActiveTab(targetTab);
     }
 
     // Atualiza o evento se houver parâmetro na URL e eventos já carregados
@@ -417,15 +414,17 @@ const HomeContent: React.FC = () => {
     }
   }
 
+  // Todas as abas usam o fundo responsivo (prizebackgroundpc no PC, dashboard no mobile)
+  const pageBackgroundSx = dashboardBackgroundSx;
+
   // Mostra skeleton até que tanto o evento quanto o perfil estejam carregados
   if (!currentEvent || !profileLoaded) {
     return (
       <Box
-        style={{
+        sx={{
           minHeight: "100vh",
+          ...pageBackgroundSx,
           paddingBottom: "72px",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
         }}
       >
         {/* Header Skeleton */}
@@ -524,11 +523,10 @@ const HomeContent: React.FC = () => {
   return (
     <>
       <Box
-        style={{
+        sx={{
           minHeight: "100vh",
+          ...pageBackgroundSx,
           paddingBottom: "72px", // espaço pro rodapé
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
         }}
       >
         {/* Header com nome, foto e data */}
@@ -578,11 +576,10 @@ const Home: React.FC = () => {
   return (
     <Suspense fallback={
       <Box
-        style={{
+        sx={{
           minHeight: "100vh",
+          ...dashboardBackgroundSx,
           paddingBottom: "72px",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
         }}
       >
         <Box

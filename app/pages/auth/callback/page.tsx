@@ -35,11 +35,10 @@ function AuthCallbackContent() {
 
   return (
     <Box
+      className="dashboard-page-background"
       style={{
         minHeight: "100vh",
         paddingBottom: "72px",
-        backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
       }}
     >
       {/* Header Skeleton */}
@@ -140,11 +139,10 @@ export default function AuthCallbackPage() {
     <Suspense
       fallback={
         <Box
+          className="dashboard-page-background"
           style={{
             minHeight: "100vh",
             paddingBottom: "72px",
-            backgroundColor: "#f4f7fc",
-            backgroundImage: "url(/background/dashboard.png)",
           }}
         >
           {/* Header Skeleton */}

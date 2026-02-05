@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { verifyEmail } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import { Box, Typography, Button } from "@mui/material";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 type Status = "loading" | "success" | "error";
 
@@ -84,8 +85,8 @@ function VerifyEmailContent() {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         height: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -198,8 +199,8 @@ export default function VerifyEmailPage() {
       fallback={
         <Box
           sx={{
+            ...dashboardBackgroundSx,
             height: "100vh",
-            backgroundImage: "url(/background/dashboard.png)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

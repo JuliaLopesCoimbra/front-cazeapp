@@ -8,12 +8,7 @@ export default function NewsDetailSkeleton() {
     <Box
       sx={{
         minHeight: "100vh",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
+        ...dashboardBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

@@ -8,6 +8,7 @@ import {
   spinRoulette,
   RouletteResponse,
 } from "@/app/services/roulette/rouletteService";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const SLICE_COUNT = 12;
 const SLICE_ANGLE = 360 / SLICE_COUNT;
@@ -108,9 +109,8 @@ export default function Roulette() {
     return (
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -213,9 +213,8 @@ export default function Roulette() {
     return (
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -267,9 +266,8 @@ export default function Roulette() {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         minHeight: "100vh",
-        backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

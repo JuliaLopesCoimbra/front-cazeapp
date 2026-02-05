@@ -19,6 +19,7 @@ import NewsDetailSkeleton from "@/app/components/news/NewsDetailSkeleton";
 import DeactivatePostModal from "@/app/components/news/DeactivatePostModal";
 import ReactivatePostModal from "@/app/components/news/ReactivatePostModal";
 import { useCommentScroll } from "@/app/hooks/useCommentScroll";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import {
   getNewsDetails,
   NewsDetailsResponse,
@@ -859,12 +860,7 @@ export default function NewsDetailPage() {
       id="news-content-scroll-container"
       sx={{
         minHeight: "100vh",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
+        ...dashboardBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

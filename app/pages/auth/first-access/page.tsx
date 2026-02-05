@@ -14,6 +14,7 @@ import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { firstAccess } from "@/app/services/auth/authAdminService";
 import { validatePassword } from "@/app/utils/passwordValidator";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 function FirstAccessContent() {
   const params = useSearchParams();
@@ -76,8 +77,8 @@ function FirstAccessContent() {
         sx={{
           display: "flex",
           justifyContent: "center",
+          ...dashboardBackgroundSx,
           height: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
           padding: "20px",
           alignItems: "center",
         }}
@@ -92,8 +93,8 @@ function FirstAccessContent() {
       sx={{
         display: "flex",
         justifyContent: "center",
+        ...dashboardBackgroundSx,
         height: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
         padding: "20px",
       }}
     >
@@ -315,8 +316,8 @@ export default function FirstAccessPage() {
           sx={{
             display: "flex",
             justifyContent: "center",
+            ...dashboardBackgroundSx,
             height: "100vh",
-            backgroundImage: "url(/background/dashboard.png)",
             padding: "20px",
             alignItems: "center",
           }}

@@ -20,7 +20,6 @@ import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { searchFace } from "@/app/services/ai/searchFaceService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
-
 type Stage = "intro" | "camera" | "results";
 
 interface SearchResult {
@@ -361,8 +360,6 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -443,8 +440,6 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -670,8 +665,6 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

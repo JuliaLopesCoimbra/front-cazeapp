@@ -33,6 +33,7 @@ import {
 import { getEvents, EventResponse } from "@/app/services/events/eventAppService";
 import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function PendingPostDetailPage() {
   const params = useParams();
@@ -253,10 +254,7 @@ export default function PendingPostDetailPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
+          ...dashboardBackgroundSx,
           padding: { xs: 2, sm: 3, md: 4 },
         }}
       >

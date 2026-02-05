@@ -1,6 +1,7 @@
 "use client";
 import { Box, Typography, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 interface RegisterSuccessProps {
   email: string;
@@ -13,7 +14,7 @@ const RegisterSuccess: React.FC<RegisterSuccessProps> = ({ email }) => {
     <Box
       sx={{
         height: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
+        ...dashboardBackgroundSx,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

@@ -28,6 +28,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import StoreIcon from '@mui/icons-material/Store';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -585,13 +586,8 @@ export default function EventDetailsPage() {
     <Box
       ref={scrollContainerRef}
       sx={{
+        ...dashboardBackgroundSx,
         minHeight: "100vh",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
         color: "#fff",
         display: "flex",
         flexDirection: "column",

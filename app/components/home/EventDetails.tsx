@@ -285,8 +285,6 @@ const formatTime = (timeStr: string | undefined): string => {
      <div
           style={{
             minHeight: "100vh",
-            backgroundColor: "#f4f7fc",
-            backgroundImage: "url(/background/dashboard.png)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

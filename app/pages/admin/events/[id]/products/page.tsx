@@ -18,6 +18,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { getProductsByEvent, ProductEventResponse } from "@/app/services/productsEvent/productEventService";
 import { getEventById, EventResponse } from "@/app/services/events/eventAppService";
 import { useAuth } from "@/app/context/AuthContext";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import { useToast } from "@/app/context/ToastContext";
 
 export default function EventProductsPage() {
@@ -91,10 +92,7 @@ export default function EventProductsPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundColor: "#000",
+        ...dashboardBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

@@ -27,6 +27,7 @@ import {
   initGoogleLogin,
   initFacebookLogin,
 } from "@/app/services/auth/authService";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 interface LoginData {
   email: string;
@@ -183,13 +184,11 @@ const LoginForm: React.FC = () => {
     return (
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
           padding: { xs: "20px", md: "40px" },
         }}
       >
@@ -339,13 +338,11 @@ const LoginForm: React.FC = () => {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
         padding: { xs: "20px", md: "40px" },
       }}
     >

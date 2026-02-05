@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import ImageCarousel from "@/app/components/news/ImageCarousel";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 interface EditEventFormProps {
   eventId: number;
@@ -355,10 +356,8 @@ export default function EditEventForm({
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        height: "100vh",
-        overflowY: "auto",
         color: "#fff",
         display: "flex",
         flexDirection: "column",

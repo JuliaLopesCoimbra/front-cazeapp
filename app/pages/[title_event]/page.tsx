@@ -203,13 +203,7 @@ export default function EventPage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
-        }}
-      >
+      <div className="dashboard-page-background" style={{ minHeight: "100vh" }}>
         {/* Header Skeleton */}
         <div
           style={{
@@ -394,10 +388,9 @@ export default function EventPage() {
 
   return (
     <div
+      className="dashboard-page-background"
       style={{
         minHeight: "100vh",
-        backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

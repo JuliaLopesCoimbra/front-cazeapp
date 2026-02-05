@@ -22,6 +22,7 @@ import BottomNav from "@/app/components/layout/BottomNav";
 import { CircularProgress } from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const LIMIT = 5;
 const STORAGE_KEY = "selectedEventId";
@@ -538,9 +539,8 @@ export default function LikedPostsPage() {
         <Box
           style={{
             minHeight: "100vh",
+            ...dashboardBackgroundSx,
             paddingBottom: "72px",
-            backgroundColor: "#f4f7fc",
-            backgroundImage: "url(/background/dashboard.png)",
           }}
         >
           <Box
@@ -590,9 +590,8 @@ export default function LikedPostsPage() {
       <Box
         style={{
           minHeight: "100vh",
+          ...dashboardBackgroundSx,
           paddingBottom: "72px",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
         }}
       >
         {/* Header com nome, foto e data */}

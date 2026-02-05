@@ -14,6 +14,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { getLineupItemsByEvent, LineupItemResponse } from "@/app/services/lineup/lineupService";
 import { getPublicEventById } from "@/app/services/events/eventAppService";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function LineupPage() {
   const params = useParams();
@@ -87,9 +88,7 @@ export default function LineupPage() {
       sx={{
         minHeight: "100vh",
         backgroundColor: "#000",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        ...dashboardBackgroundSx,
         backgroundAttachment: "fixed",
         color: "#fff",
       }}

@@ -15,6 +15,7 @@ import { getProductEventById, ProductEventResponse } from "@/app/services/produc
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
 import BottomNav from "@/app/components/layout/BottomNav";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function ProductDetailsPage() {
   const params = useParams();
@@ -148,11 +149,8 @@ export default function ProductDetailsPage() {
     <>
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          height: "100vh",
-          overflowY: "auto",
-          backgroundColor: "#000",
           color: "#fff",
           display: "flex",
           flexDirection: "column",

@@ -5,6 +5,7 @@ import EditEventForm from "@/app/components/admin/events/EditEventForm";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect } from "react";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function EditEventPage() {
   const { isAdmin, authReady } = useAuth();
@@ -42,12 +43,7 @@ export default function EditEventPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
+        ...dashboardBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

@@ -28,6 +28,7 @@ import {
 } from "@/app/services/productsEvent/productEventService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import ImageCarousel from "@/app/components/news/ImageCarousel";
 
 interface EditProductFormProps {
@@ -215,10 +216,7 @@ export default function EditProductForm({
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundColor: "#000",
+        ...dashboardBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

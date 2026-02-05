@@ -18,6 +18,7 @@ import ImageCarousel from "@/app/components/news/ImageCarousel";
 import { createEvent, CreateEventData } from "@/app/services/events/eventAppService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 interface CreateEventFormProps {
   onSuccess?: () => void;
@@ -193,13 +194,8 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   return (
     <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          height: "100vh",
-          overflowY: "auto",
           color: "#fff",
           display: "flex",
           flexDirection: "column",

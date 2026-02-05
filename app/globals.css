@@ -120,3 +120,22 @@ html {
 [style*="position:fixed"][style*="right"] {
   right: max(0px, min(16px, calc(100vw - 100%))) !important;
 }
+
+/* Vertical/portrait = dashboard.png | Horizontal/wide = prizebackgroundpc.png (tecido infinito) */
+/* min-width garante que PC e telas largas usem prizebackgroundpc (orientation em desktop é imprevisível) */
+.dashboard-page-background {
+  background-image: url(/background/dashboard.png);
+  background-size: 100% 100vh;
+  background-repeat: repeat;
+  background-position: 0 0;
+  background-attachment: scroll;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (min-width: 1024px) {
+  .dashboard-page-background {
+    background-image: url(/background/prizebackgroundpc.png);
+    background-size: 100% 100svh;
+  }
+}

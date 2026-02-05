@@ -18,6 +18,7 @@ import { ArrowBackIos } from "@mui/icons-material";
 import { getPendingPosts, NewsResponse } from "@/app/services/news/newsService";
 import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 function PendingPostsContent() {
   const router = useRouter();
@@ -95,10 +96,7 @@ function PendingPostsContent() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
+        ...dashboardBackgroundSx,
         padding: { xs: 2, sm: 3, md: 4 },
       }}
     >
@@ -282,10 +280,7 @@ export default function PendingPostsPage() {
         <Box
           sx={{
             minHeight: "100vh",
-            backgroundImage: "url(/background/dashboard.png)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
+            ...dashboardBackgroundSx,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",

@@ -23,6 +23,7 @@ import UsersTab from "@/app/components/admin/permissions/UsersTab";
 import InviteModal from "@/app/components/admin/permissions/InviteModal";
 import ConfirmModal from "@/app/components/admin/permissions/ConfirmModal";
 import SearchBar from "@/app/components/admin/permissions/SearchBar";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function PermissionsPage() {
   const { isAdminMaster, isSubadmin, authReady } = useAuth();
@@ -55,10 +56,7 @@ export default function PermissionsPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
+          ...dashboardBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -171,10 +169,7 @@ export default function PermissionsPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
+        ...dashboardBackgroundSx,
         position: "relative",
       }}
     >

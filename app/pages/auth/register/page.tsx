@@ -23,6 +23,7 @@ import { ptBR } from 'date-fns/locale';
 import { registerUser } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import RegisterSuccess from "@/app/components/auth/RegisterSuccess";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import { useRouter } from "next/navigation";
 import { validatePassword } from "@/app/utils/passwordValidator";
 
@@ -160,11 +161,8 @@ const RegisterForm: React.FC = () => {
       <Box
         suppressHydrationWarning
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
           display: "flex",
           flexDirection: "column",
         }}
@@ -261,11 +259,8 @@ const RegisterForm: React.FC = () => {
       <Box
         suppressHydrationWarning
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
           display: "flex",
           flexDirection: "column",
         }}

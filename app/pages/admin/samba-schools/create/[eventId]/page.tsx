@@ -5,6 +5,7 @@ import CreateSambaSchoolForm from "@/app/components/admin/samba-schools/CreateSa
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect } from "react";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function CreateSambaSchoolPage() {
   const { isAdmin, authReady } = useAuth();
@@ -59,12 +60,7 @@ export default function CreateSambaSchoolPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
+        ...dashboardBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

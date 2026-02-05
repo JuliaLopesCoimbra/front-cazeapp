@@ -18,6 +18,7 @@ import HomeHeader from "@/app/components/home/HeaderHome";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import { getProductsByEvent, ProductEventResponse } from "@/app/services/productsEvent/productEventService";
 import { useToast } from "@/app/context/ToastContext";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const STORAGE_KEY = "selectedEventId";
 
@@ -217,10 +218,9 @@ export default function StorePage() {
     <>
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
           paddingBottom: "72px",
-          backgroundColor: "#000",
-          backgroundImage: "url(/background/dashboard.png)",
         }}
       >
         {/* Header */}

@@ -11,6 +11,7 @@ import { inviteAdmin, resendAdminInvite } from "@/app/services/auth/authAdminSer
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function InviteAdminPage() {
   const [name, setName] = useState("");
@@ -90,8 +91,8 @@ export default function InviteAdminPage() {
       sx={{
         display: "flex",
         justifyContent: "center",
+        ...dashboardBackgroundSx,
         height: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
         padding: "20px",
         position: "relative",
       }}

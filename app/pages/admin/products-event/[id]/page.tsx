@@ -23,6 +23,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getProductEventById, ProductEventResponse, deleteProductEvent } from "@/app/services/productsEvent/productEventService";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
 import DeleteProductModal from "@/app/components/admin/products-event/DeleteProductModal";
@@ -129,10 +130,7 @@ export default function ProductDetailsPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundColor: "#000",
+        ...dashboardBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

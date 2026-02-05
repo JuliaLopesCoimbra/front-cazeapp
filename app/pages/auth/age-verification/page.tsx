@@ -15,6 +15,7 @@ import { ptBR } from 'date-fns/locale';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/app/context/ToastContext";
 import { verifyAge } from "@/app/services/auth/authService";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 function AgeVerificationContent() {
   const [birthDate, setBirthDate] = useState<Date | null>(null);
@@ -87,9 +88,8 @@ function AgeVerificationContent() {
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

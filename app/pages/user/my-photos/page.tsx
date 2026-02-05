@@ -310,11 +310,10 @@ export default function MyPhotosPage() {
   if (!isAuthenticated || loading) {
     return (
       <Box
+        className="dashboard-page-background"
         style={{
           minHeight: "100vh",
           paddingBottom: "72px",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
         }}
       >
         {/* Header Skeleton */}
@@ -405,11 +404,10 @@ export default function MyPhotosPage() {
   if (!currentEvent) {
     return (
       <Box
+        className="dashboard-page-background"
         style={{
           minHeight: "100vh",
           paddingBottom: "72px",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
         }}
       >
         {/* Header Skeleton */}
@@ -500,11 +498,10 @@ export default function MyPhotosPage() {
   return (
     <>
       <Box
+        className="dashboard-page-background"
         style={{
           minHeight: "100vh",
           paddingBottom: "72px",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
         }}
       >
         {/* Header com nome, foto e data */}

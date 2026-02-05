@@ -24,6 +24,7 @@ import { createProductEvent, CreateProductEventData, getProductsByEvent } from "
 import { getEvents, EventResponse } from "@/app/services/events/eventAppService";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import ImageCarousel from "@/app/components/news/ImageCarousel";
 
 interface CreateProductFormProps {
@@ -170,10 +171,7 @@ export default function CreateProductForm({ onSuccess, eventId: initialEventId }
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundColor: "#000",
+        ...dashboardBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

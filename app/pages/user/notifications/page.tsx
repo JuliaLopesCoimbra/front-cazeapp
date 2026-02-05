@@ -20,6 +20,7 @@ import {
   Avatar,
   Chip,
 } from "@mui/material";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import {
   Notifications as NotificationsIcon,
   ArrowBackIos as ArrowBackIosIcon,
@@ -254,11 +255,7 @@ const NotificationsPage: React.FC = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          ...dashboardBackgroundSx,
         }}
       >
         <CircularProgress sx={{ color: "#ffcc01" }} />
@@ -270,12 +267,8 @@ const NotificationsPage: React.FC = () => {
     <Box
       sx={{
         minHeight: "100vh",
+        ...dashboardBackgroundSx,
         paddingBottom: "72px",
-        backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
       }}
     >
       <Container maxWidth="md" sx={{ paddingTop: { xs: 1, sm: 2 }, paddingBottom: 4, width: "100%", maxWidth: "100%", px: { xs: 1, sm: 2 } }}>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import CreateLineupItemForm from "@/app/components/admin/lineup/CreateLineupItemForm";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
@@ -23,11 +24,8 @@ export default function EditLineupItemPage() {
     return (
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -46,11 +44,8 @@ export default function EditLineupItemPage() {
     return (
       <Box
         sx={{
+          ...dashboardBackgroundSx,
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
           color: "#fff",
           display: "flex",
           alignItems: "center",
@@ -65,13 +60,8 @@ export default function EditLineupItemPage() {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         minHeight: "100vh",
-        height: "100vh",
-        overflowY: "auto",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
         color: "#fff",
         display: "flex",
         flexDirection: "column",

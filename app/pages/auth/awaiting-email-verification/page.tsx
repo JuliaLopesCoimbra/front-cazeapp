@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/app/context/ToastContext";
 import { resendVerificationEmail } from "@/app/services/auth/authService";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const API_URL = getApiUrl();
 
@@ -68,9 +69,8 @@ function AwaitingEmailVerificationContent() {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

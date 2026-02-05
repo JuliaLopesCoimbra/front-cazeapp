@@ -2,6 +2,7 @@
 
 import { Button, Box, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function EventIndisponivelPublic() {
   const router = useRouter();
@@ -11,10 +12,7 @@ export default function EventIndisponivelPublic() {
       sx={{
         minHeight: "100vh",
         backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        ...dashboardBackgroundSx,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

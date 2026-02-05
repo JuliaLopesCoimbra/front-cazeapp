@@ -341,10 +341,10 @@ export default function HomeHeader({
       <Box
         sx={{
           padding: { xs: 2, md: 3, lg: 4 },
-          borderBottom: "solid 1px rgba(255,255,255,0.2)",
           display: "flex",
           flexDirection: "column",
           gap: { xs: 1, md: 1.5, lg: 2 },
+          boxShadow: "inset 0 -20px 24px -12px rgba(0,0,0,0.3)",
         }}
       >
         {/* LINHA SUPERIOR - Skeleton */}
@@ -427,10 +427,10 @@ export default function HomeHeader({
     <Box
       sx={{
         padding: { xs: 2, md: 3, lg: 4 },
-        borderBottom: "solid 1px rgba(255,255,255,0.2)",
         display: "flex",
         flexDirection: "column",
         gap: { xs: 1, md: 1.5, lg: 2 },
+        boxShadow: "inset 0 -20px 24px -12px rgba(0,0,0,0.3)",
       }}
     >
       {/* LINHA SUPERIOR */}

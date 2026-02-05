@@ -113,10 +113,9 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div
+        className="dashboard-page-background"
         style={{
           minHeight: "100vh",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -131,10 +130,9 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <div
+        className="dashboard-page-background"
         style={{
           minHeight: "100vh",
-          backgroundColor: "#f4f7fc",
-          backgroundImage: "url(/background/dashboard.png)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -148,10 +146,9 @@ export default function ProfilePage() {
 
   return (
     <div
+      className="dashboard-page-background"
       style={{
         minHeight: "100vh",
-        backgroundColor: "#f4f7fc",
-        backgroundImage: "url(/background/dashboard.png)",
         display: "flex",
         flexDirection: "column",
       }}

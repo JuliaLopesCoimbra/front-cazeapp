@@ -19,6 +19,7 @@ import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
 import axios from "axios";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const API_URL = getApiUrl();
 
@@ -115,9 +116,8 @@ function CompleteProfileContent() {
   return (
     <Box
       sx={{
+        ...dashboardBackgroundSx,
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

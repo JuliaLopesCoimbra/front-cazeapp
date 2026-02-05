@@ -23,6 +23,7 @@ import {
   deleteLineupItem,
   LineupItemResponse,
 } from "@/app/services/lineup/lineupService";
+import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import { getEventById } from "@/app/services/events/eventAppService";
 import DeleteLineupItemModal from "@/app/components/admin/lineup/DeleteLineupItemModal";
 
@@ -106,10 +107,7 @@ export default function LineupManagementPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundImage: "url(/background/dashboard.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
+          ...dashboardBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -124,10 +122,7 @@ export default function LineupManagementPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: "url(/background/dashboard.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
+        ...dashboardBackgroundSx,
         color: "#fff",
       }}
     >
