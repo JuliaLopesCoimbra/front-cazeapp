@@ -6,7 +6,6 @@ import {
   Typography,
   CircularProgress,
   Paper,
-  Avatar,
 } from "@mui/material";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { getLineupItemsByEvent, LineupItemResponse } from "@/app/services/lineup/lineupService";
@@ -24,13 +23,11 @@ export default function LineupView({ eventId }: LineupViewProps) {
     const fetchLineup = async () => {
       try {
         setLoading(true);
-        const items = await getLineupItemsByEvent(eventId);
-        setLineupItems(items);
+        const items = await getLineupItemsByEvent(eventId).catch(() => []); // Retorna lista vazia se der erro
+        setLineupItems(items || []);
         setError(null);
       } catch (err: any) {
         console.error("Erro ao buscar lineup:", err);
-        // Se for 404, pode ser que não há lineup ainda ou a rota não existe
-        // Tratamos como lista vazia ao invés de erro
         if (err?.response?.status === 404) {
           setLineupItems([]);
           setError(null);
@@ -48,7 +45,6 @@ export default function LineupView({ eventId }: LineupViewProps) {
   }, [eventId]);
 
   const formatTime = (timeString: string): string => {
-    // Formato esperado: HH:mm:ss ou HH:mm
     const parts = timeString.split(":");
     if (parts.length >= 2) {
       return `${parts[0]}:${parts[1]}`;
@@ -60,10 +56,11 @@ export default function LineupView({ eventId }: LineupViewProps) {
     return (
       <Box
         sx={{
+          minHeight: "100vh",
+          backgroundColor: "#000",
           display: "flex",
-          justifyContent: "center",
           alignItems: "center",
-          p: 3,
+          justifyContent: "center",
         }}
       >
         <CircularProgress sx={{ color: "#ffc91f" }} />
@@ -71,146 +68,221 @@ export default function LineupView({ eventId }: LineupViewProps) {
     );
   }
 
-  if (error) {
-    return (
-      <Box
-        sx={{
-          p: 3,
-          textAlign: "center",
-        }}
-      >
-        <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>{error}</Typography>
-      </Box>
-    );
-  }
-
-  if (lineupItems.length === 0) {
-    return (
-      <Box
-        sx={{
-          p: 3,
-          textAlign: "center",
-        }}
-      >
-        <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
-          Nenhum artista cadastrado no lineup ainda.
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box
       sx={{
-        maxWidth: 700,
-        width: "100%",
-        padding: "20px",
+        pt: 3,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        maxWidth: 800,
+        mx: "auto",
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 1,
-          marginBottom: 3,
-        }}
-      >
-        <MusicNoteIcon style={{ color: "#ffc91f" }} />
-        <Typography
-          variant="h6"
+      {error ? (
+        <Paper
+          elevation={0}
           sx={{
-            margin: 0,
-            color: "white",
-            fontSize: 18,
-            fontWeight: 600,
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(10px)",
+            borderRadius: 3,
+            p: 4,
+            textAlign: "center",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            width: "100%",
           }}
         >
-          Programação (Line Up)
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}
-      >
-        {lineupItems.map((item) => (
-          <Paper
-            key={item.id}
-            elevation={0}
-            sx={{
-              backgroundColor: "rgba(255,255,255,0.1)",
-              borderRadius: 2,
-              padding: 3,
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 3,
-              border: "1px solid rgba(255,255,255,0.1)",
-            }}
-          >
-            {/* Foto do Artista - Esquerda */}
-            {item.artist_image_url ? (
-              <Avatar
-                src={item.artist_image_url}
-                alt={item.artist_name}
-                sx={{
-                  width: 100,
-                  height: 100,
-                  border: "3px solid rgba(255, 201, 31, 0.3)",
-                  flexShrink: 0,
-                }}
-              />
-            ) : (
-              <Avatar
-                sx={{
-                  width: 100,
-                  height: 100,
-                  backgroundColor: "rgba(255, 201, 31, 0.2)",
-                  border: "3px solid rgba(255, 201, 31, 0.3)",
-                  flexShrink: 0,
-                }}
-              >
-                <MusicNoteIcon sx={{ fontSize: "2.5rem" }} />
-              </Avatar>
-            )}
-
-            {/* Informações - Direita */}
-            <Box
+          <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
+            {error}
+          </Typography>
+        </Paper>
+      ) : lineupItems.length === 0 ? (
+        <Paper
+          elevation={0}
+          sx={{
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(10px)",
+            borderRadius: 3,
+            p: 4,
+            textAlign: "center",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            width: "100%",
+          }}
+        >
+          <MusicNoteIcon sx={{ fontSize: 64, color: "rgba(255,255,255,0.3)", mb: 2 }} />
+          <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
+            Nenhum artista cadastrado no lineup ainda.
+          </Typography>
+        </Paper>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+            width: "100%",
+            px: { xs: 1, sm: 2 },
+          }}
+        >
+          {lineupItems.map((item) => (
+            <Paper
+              key={item.id}
+              elevation={0}
               sx={{
+                backgroundColor: "rgba(255,255,255,0.05)",
+                borderRadius: 3,
                 display: "flex",
-                flexDirection: "column",
-                gap: 1,
-                flex: 1,
+                alignItems: "stretch",
+                gap: { xs: 2, md: 3 },
+                border: "1px solid rgba(255,255,255,0.1)",
+                transition: "all 0.3s ease",
+                width: "100%",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 12px 24px rgba(0,0,0,0.4)",
+                },
               }}
             >
-              {/* Nome do Artista */}
-              <Typography
+              {/* Container da Foto - Ultra Padronizado */}
+              <Box
                 sx={{
-                  color: "white",
-                  fontSize: "1.25rem",
-                  fontWeight: 600,
+                  width: { xs: 150, sm: 180, md: 200 },
+                  minWidth: { xs: 150, sm: 180, md: 200 },
+                  maxWidth: { xs: 150, sm: 180, md: 200 },
+                  height: { xs: 150, sm: 180, md: 200 },
+                  flexShrink: 0,
+                  aspectRatio: "1 / 1",
+                  overflow: "hidden",
+                  borderRadius: 2,
+                  backgroundColor: "rgba(255, 201, 31, 0.1)",
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                {item.artist_name}
-              </Typography>
+                {item.artist_image_url ? (
+                  <Box
+                    component="img"
+                    src={item.artist_image_url}
+                    alt={item.artist_name}
+                    sx={{
+                      width: "100%",
+                      height: "100% !important",
+                      maxHeight: "100% !important",
+                      objectFit: "cover",
+                      objectPosition: "center",
+                      display: "block",
+                    }}
+                  />
+                ) : (
+                  <MusicNoteIcon
+                    sx={{
+                      fontSize: { xs: "2rem", md: "3rem" },
+                      color: "rgba(255, 201, 31, 0.3)",
+                    }}
+                  />
+                )}
+              </Box>
 
-              {/* Horário */}
-              <Typography
+              {/* Informações - Alinhadas à direita da foto */}
+              <Box
                 sx={{
-                  color: "#ffc91f",
-                  fontSize: "1rem",
-                  fontWeight: 500,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  flex: 1,
+                  py: 0.5,
                 }}
               >
-                {formatTime(item.performance_time)}
-              </Typography>
-            </Box>
-          </Paper>
-        ))}
-      </Box>
+                <Box>
+                  <Typography
+                    sx={{
+                      color: "#fff",
+                      pt: 2,
+                      fontSize: { xs: "1.1rem", md: "1.4rem" },
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      lineHeight: 1.2,
+                      mb: 1,
+                    }}
+                  >
+                    {item.artist_name}
+                  </Typography>
+
+                  {item.stage && (
+                    <Typography
+                      sx={{
+                        color: "#ffc91f",
+                        fontSize: { xs: "0.9rem", md: "1rem" },
+                        fontWeight: 600,
+                        mb: 0.5,
+                      }}
+                    >
+                      {item.stage}
+                    </Typography>
+                  )}
+
+                  {item.event_date && (
+                    <Typography
+                      sx={{
+                        color: "rgba(255,255,255,0.8)",
+                        fontSize: { xs: "0.85rem", md: "0.95rem" },
+                        fontWeight: 500,
+                        mb: 1,
+                      }}
+                    >
+                      {new Date(item.event_date).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}
+                    </Typography>
+                  )}
+                </Box>
+
+                <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography
+                    sx={{
+                      color: "#fff",
+                      fontSize: { xs: "1.8rem", md: "1.9rem" },
+                      fontWeight: 700,
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {formatTime(item.performance_time)}
+                  </Typography>
+                  {item.performance_end_time && (
+                    <>
+                      <Typography
+                        sx={{
+                          color: "rgba(255,255,255,0.7)",
+                          fontSize: { xs: "1.2rem", md: "1.3rem" },
+                          fontWeight: 500,
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        -
+                      </Typography>
+                      <Typography
+                        sx={{
+                          color: "rgba(255,255,255,0.7)",
+                          fontSize: { xs: "1.2rem", md: "1.3rem" },
+                          fontWeight: 500,
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        {formatTime(item.performance_end_time)}
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+              </Box>
+            </Paper>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }

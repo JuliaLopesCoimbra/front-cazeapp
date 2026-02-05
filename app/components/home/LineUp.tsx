@@ -14,7 +14,7 @@ export default function LineUp({ eventId }: LineUpProps) {
         display: "flex",
         justifyContent: "center",
         width: "100%",
-        paddingY: 2,
+        paddingBottom: 3,
       }}
     >
       <LineupView eventId={eventId} />

@@ -308,34 +308,73 @@ export default function LineupPage() {
           {item.artist_name}
         </Typography>
 
-        {item.description && (
+        {item.stage && (
           <Typography
             sx={{
-              color: "rgba(255,255,255,0.6)",
-              fontSize: { xs: "0.85rem", md: "0.95rem" },
-              display: "-webkit-box",
-              WebkitLineClamp: 3, // Limita a 3 linhas para não quebrar o layout
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              lineHeight: 1.4,
+              color: "#ffc91f",
+              fontSize: { xs: "0.9rem", md: "1rem" },
+              fontWeight: 600,
+              mb: 0.5,
             }}
           >
-            {item.description}
+            {item.stage}
+          </Typography>
+        )}
+
+        {item.event_date && (
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.8)",
+              fontSize: { xs: "0.85rem", md: "0.95rem" },
+              fontWeight: 500,
+              mb: 1,
+            }}
+          >
+            {new Date(item.event_date).toLocaleDateString('pt-BR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })}
           </Typography>
         )}
       </Box>
 
-      <Typography
-        sx={{
-          color: "#fff",
-          fontSize: { xs: "1.8rem", md: "1.9rem" },
-          fontWeight: 700,
-          mt: 1,
-          fontFamily: "monospace", // Estilo relógio para o horário
-        }}
-      >
-        {formatTime(item.performance_time)}
-      </Typography>
+      <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
+        <Typography
+          sx={{
+            color: "#fff",
+            fontSize: { xs: "1.8rem", md: "1.9rem" },
+            fontWeight: 700,
+            fontFamily: "monospace", // Estilo relógio para o horário
+          }}
+        >
+          {formatTime(item.performance_time)}
+        </Typography>
+        {item.performance_end_time && (
+          <>
+            <Typography
+              sx={{
+                color: "rgba(255,255,255,0.7)",
+                fontSize: { xs: "1.2rem", md: "1.3rem" },
+                fontWeight: 500,
+                fontFamily: "monospace",
+              }}
+            >
+              -
+            </Typography>
+            <Typography
+              sx={{
+                color: "rgba(255,255,255,0.7)",
+                fontSize: { xs: "1.2rem", md: "1.3rem" },
+                fontWeight: 500,
+                fontFamily: "monospace",
+              }}
+            >
+              {formatTime(item.performance_end_time)}
+            </Typography>
+          </>
+        )}
+      </Box>
     </Box>
   </Paper>
 ))}

@@ -38,8 +38,11 @@ export default function CreateLineupItemForm({
 }: CreateLineupItemFormProps) {
   const [artistName, setArtistName] = useState("");
   const [performanceTime, setPerformanceTime] = useState("");
-  const [displayOrder, setDisplayOrder] = useState<number | undefined>(undefined);
-  const [originalDisplayOrder, setOriginalDisplayOrder] = useState<number | undefined>(undefined);
+  const [performanceEndTime, setPerformanceEndTime] = useState("");
+  const [stage, setStage] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [displayOrder, setDisplayOrder] = useState<number>(0);
+  const [originalDisplayOrder, setOriginalDisplayOrder] = useState<number>(0);
   const [description, setDescription] = useState("");
   const [artistImage, setArtistImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -60,8 +63,11 @@ export default function CreateLineupItemForm({
           const item = await getLineupItem(lineupItemId);
           setArtistName(item.artist_name);
           setPerformanceTime(item.performance_time.substring(0, 5)); // HH:mm
-          setDisplayOrder(item.display_order);
-          setOriginalDisplayOrder(item.display_order);
+          setPerformanceEndTime(item.performance_end_time ? item.performance_end_time.substring(0, 5) : ""); // HH:mm
+          setStage(item.stage || "");
+          setEventDate(item.event_date || ""); // YYYY-MM-DD
+          setDisplayOrder(item.display_order ?? 0);
+          setOriginalDisplayOrder(item.display_order ?? 0);
           setDescription(item.description || "");
           if (item.artist_image_url) {
             setPreview(item.artist_image_url);
@@ -121,6 +127,9 @@ export default function CreateLineupItemForm({
         const data: UpdateLineupItemData = {
           artist_name: artistName,
           performance_time: performanceTime,
+          performance_end_time: performanceEndTime || undefined,
+          stage: stage || undefined,
+          event_date: eventDate || undefined,
           // Só envia display_order se foi alterado
           display_order: displayOrder !== originalDisplayOrder ? displayOrder : undefined,
           artist_image: artistImage || undefined,
@@ -134,6 +143,9 @@ export default function CreateLineupItemForm({
           event_id: eventId,
           artist_name: artistName,
           performance_time: performanceTime,
+          performance_end_time: performanceEndTime || undefined,
+          stage: stage || undefined,
+          event_date: eventDate || undefined,
           display_order: displayOrder,
           artist_image: artistImage || undefined,
           description: description || undefined,
@@ -264,10 +276,10 @@ export default function CreateLineupItemForm({
               }}
             />
 
-            {/* Horário */}
+            {/* Horário de Início */}
             <TextField
               fullWidth
-              label="Horário (HH:mm)"
+              label="Horário de Início (HH:mm)"
               type="time"
               value={performanceTime}
               onChange={(e) => setPerformanceTime(e.target.value)}
@@ -277,6 +289,117 @@ export default function CreateLineupItemForm({
               }}
               inputProps={{
                 step: 300, // 5 minutos
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  color: "#fff",
+                  "& input": {
+                    "&::-webkit-calendar-picker-indicator": {
+                      filter: "invert(1)",
+                      cursor: "pointer",
+                    },
+                  },
+                  "& fieldset": {
+                    borderColor: "rgba(255,255,255,0.2)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255,255,255,0.3)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#ffc91f",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(255,255,255,0.7)",
+                  "&.Mui-focused": {
+                    color: "#ffc91f",
+                  },
+                },
+              }}
+            />
+
+            {/* Horário de Término */}
+            <TextField
+              fullWidth
+              label="Horário de Término (HH:mm)"
+              type="time"
+              value={performanceEndTime}
+              onChange={(e) => setPerformanceEndTime(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              inputProps={{
+                step: 300, // 5 minutos
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  color: "#fff",
+                  "& input": {
+                    "&::-webkit-calendar-picker-indicator": {
+                      filter: "invert(1)",
+                      cursor: "pointer",
+                    },
+                  },
+                  "& fieldset": {
+                    borderColor: "rgba(255,255,255,0.2)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255,255,255,0.3)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#ffc91f",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(255,255,255,0.7)",
+                  "&.Mui-focused": {
+                    color: "#ffc91f",
+                  },
+                },
+              }}
+            />
+
+            {/* Palco */}
+            <TextField
+              fullWidth
+              label="Palco"
+              value={stage}
+              onChange={(e) => setStage(e.target.value)}
+              placeholder="Ex: Palco Principal, Palco 2, etc."
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  color: "#fff",
+                  "& fieldset": {
+                    borderColor: "rgba(255,255,255,0.2)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255,255,255,0.3)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#ffc91f",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(255,255,255,0.7)",
+                  "&.Mui-focused": {
+                    color: "#ffc91f",
+                  },
+                },
+              }}
+            />
+
+            {/* Data do Evento */}
+            <TextField
+              fullWidth
+              label="Data do Evento"
+              type="date"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
               }}
               sx={{
                 "& .MuiOutlinedInput-root": {

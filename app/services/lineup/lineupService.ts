@@ -8,6 +8,9 @@ export interface LineupItemResponse {
   artist_name: string;
   artist_image_url?: string;
   performance_time: string; // Formato: HH:mm:ss
+  performance_end_time?: string; // Formato: HH:mm:ss
+  stage?: string; // Palco onde o artista irá apresentar
+  event_date?: string; // Formato: YYYY-MM-DD - Data do evento em que o artista irá apresentar
   display_order: number;
   description?: string;
   created_at: string;
@@ -18,6 +21,9 @@ export interface CreateLineupItemData {
   event_id: number;
   artist_name: string;
   performance_time: string; // Formato: HH:mm
+  performance_end_time?: string; // Formato: HH:mm
+  stage?: string; // Palco onde o artista irá apresentar
+  event_date?: string; // Formato: YYYY-MM-DD - Data do evento em que o artista irá apresentar
   display_order?: number;
   artist_image?: File;
   description?: string;
@@ -26,6 +32,9 @@ export interface CreateLineupItemData {
 export interface UpdateLineupItemData {
   artist_name?: string;
   performance_time?: string; // Formato: HH:mm
+  performance_end_time?: string; // Formato: HH:mm
+  stage?: string; // Palco onde o artista irá apresentar
+  event_date?: string; // Formato: YYYY-MM-DD - Data do evento em que o artista irá apresentar
   display_order?: number;
   artist_image?: File;
   remove_image?: boolean;
@@ -69,6 +78,15 @@ export const createLineupItem = async (data: CreateLineupItemData): Promise<Line
   formData.append("event_id", data.event_id.toString());
   formData.append("artist_name", data.artist_name);
   formData.append("performance_time", data.performance_time);
+  if (data.performance_end_time !== undefined && data.performance_end_time !== null) {
+    formData.append("performance_end_time", data.performance_end_time);
+  }
+  if (data.stage !== undefined && data.stage !== null) {
+    formData.append("stage", data.stage);
+  }
+  if (data.event_date !== undefined && data.event_date !== null) {
+    formData.append("event_date", data.event_date);
+  }
   if (data.display_order !== undefined) {
     formData.append("display_order", data.display_order.toString());
   }
@@ -99,6 +117,15 @@ export const updateLineupItem = async (
   }
   if (data.performance_time !== undefined) {
     formData.append("performance_time", data.performance_time);
+  }
+  if (data.performance_end_time !== undefined) {
+    formData.append("performance_end_time", data.performance_end_time || "");
+  }
+  if (data.stage !== undefined) {
+    formData.append("stage", data.stage || "");
+  }
+  if (data.event_date !== undefined) {
+    formData.append("event_date", data.event_date || "");
   }
   if (data.display_order !== undefined) {
     formData.append("display_order", data.display_order.toString());
