@@ -10,6 +10,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapIcon from "@mui/icons-material/Map";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import { getEvents, EventResponse } from "../../services/events/eventAppService";
 import { formatEventDates } from "../../utils/eventDateFormatter";
 import { useAuth } from "../../context/AuthContext";
@@ -603,6 +604,67 @@ export default function EventPage() {
               </Box>
             )}
           </Box>
+
+          {/* MEETING POINT */}
+          {(event.meeting_point_location || (event.meeting_point_schedule && event.meeting_point_schedule.length > 0)) && (
+            <Box
+              sx={{
+                maxWidth: 700,
+                width: "100%",
+                padding: "20px",
+                marginTop: 2,
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderRadius: 2,
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                <MeetingRoomIcon style={{ color: "yellow" }} />
+                <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
+                  Meeting Point
+                </h3>
+              </Box>
+
+              {event.meeting_point_location && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                  <LocationOnIcon style={{ color: "yellow" }} />
+                  <p style={{ margin: 0, fontSize: 15, color: "white" }}>{event.meeting_point_location}</p>
+                </Box>
+              )}
+
+              {event.meeting_point_schedule && event.meeting_point_schedule.length > 0 && (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  <p style={{ margin: 0, color: "white", fontSize: 15, fontWeight: 600, marginBottom: 8 }}>
+                    Dias de Funcionamento:
+                  </p>
+                  {event.meeting_point_schedule.map((schedule, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        padding: "12px",
+                        backgroundColor: "rgba(0, 0, 0, 0.2)",
+                        borderRadius: 1,
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 1 }}>
+                        <EventIcon style={{ color: "yellow", fontSize: 18 }} />
+                        <p style={{ margin: 0, color: "white", fontSize: 14, fontWeight: 600 }}>
+                          Dias {schedule.days.join(", ")} de fevereiro
+                        </p>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <AccessTimeIcon style={{ color: "yellow", fontSize: 18 }} />
+                        <p style={{ margin: 0, color: "white", fontSize: 14 }}>
+                          Das {schedule.start_time} às {schedule.end_time}
+                        </p>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
 
           {/* MAPA DO EVENTO */}
           {(event.map_images && event.map_images.length > 0) || event.image_map ? (

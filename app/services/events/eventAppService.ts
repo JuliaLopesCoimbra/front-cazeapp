@@ -28,6 +28,12 @@ export interface EventResponse {
   van_arrival_time_end?: string; // Horário de fim da ida (formato: HH:mm)
   van_departure_time_start?: string; // Horário de início da volta (formato: HH:mm)
   van_departure_time_end?: string; // Horário de fim da volta (formato: HH:mm)
+  meeting_point_location?: string; // Local do meeting point
+  meeting_point_schedule?: Array<{
+    days: number[]; // Dias do mês (ex: [13, 14, 20])
+    start_time: string; // Horário de início (formato: HH:mm)
+    end_time: string; // Horário de fim (formato: HH:mm)
+  }>; // Horários de funcionamento
   deleted_at?: string;
   deleted_by_id?: number;
 }
@@ -47,6 +53,12 @@ export interface CreateEventData {
   van_arrival_time_end?: string; // Horário de fim da ida (formato: HH:mm)
   van_departure_time_start?: string; // Horário de início da volta (formato: HH:mm)
   van_departure_time_end?: string; // Horário de fim da volta (formato: HH:mm)
+  meeting_point_location?: string; // Local do meeting point
+  meeting_point_schedule?: Array<{
+    days: number[]; // Dias do mês (ex: [13, 14, 20])
+    start_time: string; // Horário de início (formato: HH:mm)
+    end_time: string; // Horário de fim (formato: HH:mm)
+  }>; // Horários de funcionamento
 }
 
 export interface UpdateEventData {
@@ -65,6 +77,12 @@ export interface UpdateEventData {
   van_arrival_time_end?: string; // Horário de fim da ida (formato: HH:mm)
   van_departure_time_start?: string; // Horário de início da volta (formato: HH:mm)
   van_departure_time_end?: string; // Horário de fim da volta (formato: HH:mm)
+  meeting_point_location?: string; // Local do meeting point
+  meeting_point_schedule?: Array<{
+    days: number[]; // Dias do mês (ex: [13, 14, 20])
+    start_time: string; // Horário de início (formato: HH:mm)
+    end_time: string; // Horário de fim (formato: HH:mm)
+  }>; // Horários de funcionamento
 }
 
 export const getEvents = async (limit: number = 5, offset: number = 0): Promise<EventResponse[]> => {
@@ -139,6 +157,8 @@ export const createEvent = async (data: CreateEventData): Promise<EventResponse>
   if (data.van_arrival_time_end) formData.append("van_arrival_time_end", data.van_arrival_time_end);
   if (data.van_departure_time_start) formData.append("van_departure_time_start", data.van_departure_time_start);
   if (data.van_departure_time_end) formData.append("van_departure_time_end", data.van_departure_time_end);
+  if (data.meeting_point_location) formData.append("meeting_point_location", data.meeting_point_location);
+  if (data.meeting_point_schedule) formData.append("meeting_point_schedule", JSON.stringify(data.meeting_point_schedule));
   if (data.banner_image) formData.append("banner_image", data.banner_image);
   if (data.map_images && data.map_images.length > 0) {
     data.map_images.forEach((image) => {
@@ -171,6 +191,8 @@ export const updateEvent = async (
   if (data.van_arrival_time_end) formData.append("van_arrival_time_end", data.van_arrival_time_end);
   if (data.van_departure_time_start) formData.append("van_departure_time_start", data.van_departure_time_start);
   if (data.van_departure_time_end) formData.append("van_departure_time_end", data.van_departure_time_end);
+  if (data.meeting_point_location) formData.append("meeting_point_location", data.meeting_point_location);
+  if (data.meeting_point_schedule) formData.append("meeting_point_schedule", JSON.stringify(data.meeting_point_schedule));
   if (data.banner_image) formData.append("banner_image", data.banner_image);
   if (data.map_images && data.map_images.length > 0) {
     data.map_images.forEach((image) => {

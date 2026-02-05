@@ -9,6 +9,7 @@ import {
   IconButton,
   Paper,
   Divider,
+  Button,
 } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import EditIcon from "@mui/icons-material/Edit";
@@ -18,9 +19,16 @@ import {
   SambaSchoolResponse,
   deleteSambaSchool,
 } from "@/app/services/sambaSchools/sambaSchoolService";
+import {
+  getMusicLyricsBySambaSchool,
+  MusicLyricsResponse,
+} from "@/app/services/musicLyrics/musicLyricsService";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
 import DeleteSambaSchoolModal from "@/app/components/admin/samba-schools/DeleteSambaSchoolModal";
+import CreateMusicModal from "@/app/components/admin/samba-schools/CreateMusicModal";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import AddIcon from "@mui/icons-material/Add";
 
 export default function SambaSchoolDetailsPage() {
   const params = useParams();
@@ -31,17 +39,32 @@ export default function SambaSchoolDetailsPage() {
   const { showToast } = useToast();
 
   const [school, setSchool] = useState<SambaSchoolResponse | null>(null);
+  const [music, setMusic] = useState<MusicLyricsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMusic, setLoadingMusic] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [musicModalOpen, setMusicModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!eventId || !schoolId) return;
 
-    const fetchSchool = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getSambaSchoolById(eventId, schoolId);
-        setSchool(data);
+        const schoolData = await getSambaSchoolById(eventId, schoolId);
+        setSchool(schoolData);
+        
+        // Buscar música da escola
+        setLoadingMusic(true);
+        try {
+          const musicData = await getMusicLyricsBySambaSchool(schoolId);
+          setMusic(musicData);
+        } catch (err) {
+          // Não há música ainda, tudo bem
+          setMusic(null);
+        } finally {
+          setLoadingMusic(false);
+        }
       } catch (err: any) {
         // Se for 404, redireciona imediatamente para a página do evento
         if (err?.response?.status === 404 || err?.response?.statusCode === 404) {
@@ -56,8 +79,21 @@ export default function SambaSchoolDetailsPage() {
       }
     };
 
-    fetchSchool();
+    fetchData();
   }, [eventId, schoolId, showToast, router]);
+
+  const handleMusicSuccess = async () => {
+    // Recarregar música após criar/atualizar
+    setLoadingMusic(true);
+    try {
+      const musicData = await getMusicLyricsBySambaSchool(schoolId);
+      setMusic(musicData);
+    } catch (err) {
+      setMusic(null);
+    } finally {
+      setLoadingMusic(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!school) return;
@@ -267,6 +303,171 @@ export default function SambaSchoolDetailsPage() {
             </Typography>
           </Box>
         </Paper>
+
+        {/* SEÇÃO DE MÚSICA/LETRA */}
+        <Paper
+          elevation={0}
+          sx={{
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(10px)",
+            borderRadius: 3,
+            p: 3,
+            maxWidth: 900,
+            mx: "auto",
+            mt: 3,
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 2,
+            }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              sx={{
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <MusicNoteIcon sx={{ color: "#ffc91f" }} />
+              Música/Letra da Escola
+            </Typography>
+            {isAdmin && music && (
+              <IconButton
+                onClick={() => setMusicModalOpen(true)}
+                sx={{
+                  color: "#ffc91f",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 201, 31, 0.1)",
+                  },
+                }}
+                size="small"
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+          </Box>
+
+          <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,0.1)" }} />
+
+          {loadingMusic ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress sx={{ color: "#ffc91f" }} />
+            </Box>
+          ) : music ? (
+            <Box>
+              <Box mb={2}>
+                <Typography
+                  fontWeight={600}
+                  mb={1.5}
+                  sx={{
+                    color: "#ffc91f",
+                    fontSize: "0.875rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Nome da Música
+                </Typography>
+                <Typography sx={{ color: "rgba(255,255,255,0.9)", fontSize: "1.1rem", fontWeight: 500 }}>
+                  {music.song_name}
+                </Typography>
+              </Box>
+
+              {music.singer && (
+                <Box mb={2}>
+                  <Typography
+                    fontWeight={600}
+                    mb={1.5}
+                    sx={{
+                      color: "#ffc91f",
+                      fontSize: "0.875rem",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    Cantor/Intérprete
+                  </Typography>
+                  <Typography sx={{ color: "rgba(255,255,255,0.9)" }}>
+                    {music.singer}
+                  </Typography>
+                </Box>
+              )}
+
+              {music.image_url && (
+                <Box mb={2} display="flex" justifyContent="center">
+                  <Box
+                    component="img"
+                    src={music.image_url}
+                    alt={music.song_name}
+                    sx={{
+                      maxWidth: "100%",
+                      maxHeight: 300,
+                      objectFit: "contain",
+                      borderRadius: 2,
+                    }}
+                  />
+                </Box>
+              )}
+
+              <Box>
+                <Typography
+                  fontWeight={600}
+                  mb={1.5}
+                  sx={{
+                    color: "#ffc91f",
+                    fontSize: "0.875rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Letra
+                </Typography>
+                <Typography
+                  sx={{
+                    color: "rgba(255,255,255,0.9)",
+                    lineHeight: 1.8,
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {music.lyrics}
+                </Typography>
+              </Box>
+            </Box>
+          ) : (
+            <Box textAlign="center" py={3}>
+              <Typography sx={{ color: "rgba(255,255,255,0.6)" }}>
+                Nenhuma música cadastrada para esta escola de samba.
+              </Typography>
+              {isAdmin && (
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={() => setMusicModalOpen(true)}
+                  sx={{
+                    mt: 2,
+                    borderColor: "rgba(255,255,255,0.2)",
+                    color: "#fff",
+                    textTransform: "none",
+                    "&:hover": {
+                      borderColor: "#ffc91f",
+                      backgroundColor: "rgba(255,201,31,0.1)",
+                    },
+                  }}
+                >
+                  Adicionar Música
+                </Button>
+              )}
+            </Box>
+          )}
+        </Paper>
       </Box>
 
       {/* Modal de Exclusão */}
@@ -279,6 +480,15 @@ export default function SambaSchoolDetailsPage() {
           loading={deleting}
         />
       )}
+
+      {/* Modal de Música/Letra */}
+      <CreateMusicModal
+        open={musicModalOpen}
+        onClose={() => setMusicModalOpen(false)}
+        sambaSchoolId={schoolId}
+        onSuccess={handleMusicSuccess}
+        existingMusic={music}
+      />
     </Box>
   );
 }

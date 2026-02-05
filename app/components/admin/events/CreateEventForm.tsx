@@ -8,7 +8,10 @@ import {
   CircularProgress,
   IconButton,
   Paper,
+  Chip,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageCarousel from "@/app/components/news/ImageCarousel";
@@ -36,6 +39,13 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
   const [vanArrivalTimeEnd, setVanArrivalTimeEnd] = useState("");
   const [vanDepartureTimeStart, setVanDepartureTimeStart] = useState("");
   const [vanDepartureTimeEnd, setVanDepartureTimeEnd] = useState("");
+  const [meetingPointLocation, setMeetingPointLocation] = useState("");
+  const [meetingPointSchedule, setMeetingPointSchedule] = useState<Array<{
+    days: number[];
+    start_time: string;
+    end_time: string;
+  }>>([]);
+  const [daysInputValues, setDaysInputValues] = useState<{ [key: number]: string }>({});
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
@@ -154,6 +164,8 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
         van_arrival_time_end: vanArrivalTimeEnd || undefined,
         van_departure_time_start: vanDepartureTimeStart || undefined,
         van_departure_time_end: vanDepartureTimeEnd || undefined,
+        meeting_point_location: meetingPointLocation.trim() || undefined,
+        meeting_point_schedule: meetingPointSchedule.length > 0 ? meetingPointSchedule : undefined,
         banner_image: bannerImage || undefined,
         map_images: mapImages.length > 0 ? mapImages : undefined,
         spotify_playlist_url: spotifyPlaylistUrl.trim() || undefined,
@@ -757,6 +769,282 @@ export default function CreateEventForm({ onSuccess }: CreateEventFormProps) {
                 },
               }}
             />
+          </Box>
+
+          <Box>
+            <Typography variant="body1" sx={{ mb: 2, color: "rgba(255,255,255,0.9)", fontSize: "1.1rem", fontWeight: 500 }}>
+              Meeting Point
+            </Typography>
+            
+            <TextField
+              fullWidth
+              label="Local do Meeting Point"
+              value={meetingPointLocation}
+              onChange={(e) => {
+                if (e.target.value.length <= 255) {
+                  setMeetingPointLocation(e.target.value);
+                }
+              }}
+              disabled={loading}
+              inputProps={{ maxLength: 255 }}
+              helperText={`${meetingPointLocation.length}/255 caracteres`}
+              sx={{
+                mb: 2,
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  color: "#fff",
+                  fontSize: "1.1rem",
+                  padding: "4px 0",
+                  "& input": {
+                    padding: "14px 16px",
+                    fontSize: "1.1rem",
+                  },
+                  "& fieldset": {
+                    borderColor: "rgba(255,255,255,0.1)",
+                    borderWidth: "2px",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255,255,255,0.3)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#ffc91f",
+                    borderWidth: "2px",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(255,255,255,0.7)",
+                  fontSize: "1.1rem",
+                  "&.Mui-focused": {
+                    color: "#ffc91f",
+                  },
+                },
+                "& .MuiFormHelperText-root": {
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: "0.95rem",
+                  marginTop: "6px",
+                },
+              }}
+            />
+
+            <Typography variant="body2" sx={{ mb: 2, color: "rgba(255,255,255,0.7)", fontSize: "0.95rem" }}>
+              Horários de Funcionamento
+            </Typography>
+
+            {meetingPointSchedule.map((schedule, index) => (
+              <Paper
+                key={index}
+                elevation={0}
+                sx={{
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  borderRadius: 2,
+                  p: 2,
+                  mb: 2,
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                  <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
+                    Grupo {index + 1}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      const newSchedule = meetingPointSchedule.filter((_, i) => i !== index);
+                      setMeetingPointSchedule(newSchedule);
+                      // Limpa o valor do input removido e reindexa os demais
+                      setDaysInputValues(prev => {
+                        const newValues: { [key: number]: string } = {};
+                        Object.keys(prev).forEach(key => {
+                          const keyNum = parseInt(key);
+                          if (keyNum < index) {
+                            newValues[keyNum] = prev[keyNum];
+                          } else if (keyNum > index) {
+                            newValues[keyNum - 1] = prev[keyNum];
+                          }
+                        });
+                        return newValues;
+                      });
+                    }}
+                    sx={{ color: "#ff6b6b" }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+
+                <TextField
+                  fullWidth
+                  label="Dias (separados por vírgula, ex: 13,14,20)"
+                  value={daysInputValues[index] !== undefined ? daysInputValues[index] : schedule.days.join(",")}
+                  onChange={(e) => {
+                    const daysStr = e.target.value;
+                    // Permite apenas números e vírgulas
+                    const sanitized = daysStr.replace(/[^0-9,]/g, '');
+                    
+                    // Atualiza o valor do input imediatamente
+                    setDaysInputValues(prev => ({
+                      ...prev,
+                      [index]: sanitized
+                    }));
+                    
+                    // Processa os números válidos
+                    const parts = sanitized.split(",");
+                    const days = parts
+                      .map(d => d.trim())
+                      .filter(d => d !== "") // Remove strings vazias
+                      .map(d => parseInt(d))
+                      .filter(d => !isNaN(d) && d >= 1 && d <= 31);
+                    
+                    // Atualiza o schedule apenas com números válidos
+                    const newSchedule = [...meetingPointSchedule];
+                    newSchedule[index].days = days;
+                    setMeetingPointSchedule(newSchedule);
+                  }}
+                  onBlur={() => {
+                    // Limpa o valor do input quando perde o foco, usando apenas os dias válidos
+                    setDaysInputValues(prev => {
+                      const newValues = { ...prev };
+                      delete newValues[index];
+                      return newValues;
+                    });
+                  }}
+                  disabled={loading}
+                  placeholder="13,14,20"
+                  inputProps={{
+                    inputMode: "numeric",
+                    pattern: "[0-9,]*"
+                  }}
+                  sx={{
+                    mb: 2,
+                    "& .MuiOutlinedInput-root": {
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                      color: "#fff",
+                      "& fieldset": {
+                        borderColor: "rgba(255,255,255,0.1)",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "rgba(255,255,255,0.3)",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#ffc91f",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "rgba(255,255,255,0.7)",
+                      "&.Mui-focused": {
+                        color: "#ffc91f",
+                      },
+                    },
+                  }}
+                />
+
+                <Box sx={{ display: "flex", gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="Horário de Início"
+                    type="time"
+                    value={schedule.start_time}
+                    onChange={(e) => {
+                      const newSchedule = [...meetingPointSchedule];
+                      newSchedule[index].start_time = e.target.value;
+                      setMeetingPointSchedule(newSchedule);
+                    }}
+                    disabled={loading}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "rgba(255,255,255,0.05)",
+                        color: "#fff",
+                        "& fieldset": {
+                          borderColor: "rgba(255,255,255,0.1)",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "rgba(255,255,255,0.3)",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#ffc91f",
+                        },
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "rgba(255,255,255,0.7)",
+                        "&.Mui-focused": {
+                          color: "#ffc91f",
+                        },
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Horário de Fim"
+                    type="time"
+                    value={schedule.end_time}
+                    onChange={(e) => {
+                      const newSchedule = [...meetingPointSchedule];
+                      newSchedule[index].end_time = e.target.value;
+                      setMeetingPointSchedule(newSchedule);
+                    }}
+                    disabled={loading}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "rgba(255,255,255,0.05)",
+                        color: "#fff",
+                        "& fieldset": {
+                          borderColor: "rgba(255,255,255,0.1)",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "rgba(255,255,255,0.3)",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#ffc91f",
+                        },
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "rgba(255,255,255,0.7)",
+                        "&.Mui-focused": {
+                          color: "#ffc91f",
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              </Paper>
+            ))}
+
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                const newIndex = meetingPointSchedule.length;
+                setMeetingPointSchedule([
+                  ...meetingPointSchedule,
+                  { days: [], start_time: "", end_time: "" }
+                ]);
+                // Inicializa o valor do input para o novo grupo
+                setDaysInputValues(prev => ({
+                  ...prev,
+                  [newIndex]: ""
+                }));
+              }}
+              disabled={loading}
+              fullWidth
+              sx={{
+                borderColor: "rgba(255,255,255,0.2)",
+                borderWidth: "2px",
+                color: "#fff",
+                py: 1.5,
+                fontSize: "1.05rem",
+                fontWeight: 500,
+                textTransform: "none",
+                mb: 2,
+                "&:hover": {
+                  borderColor: "#ffc91f",
+                  borderWidth: "2px",
+                  backgroundColor: "rgba(255,201,31,0.1)",
+                },
+              }}
+            >
+              Adicionar Grupo de Horários
+            </Button>
           </Box>
 
           <Box>

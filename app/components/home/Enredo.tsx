@@ -20,6 +20,7 @@ import {
 import {
   MusicLyricsResponse,
   getMusicLyricsByEvent,
+  getMusicLyricsBySambaSchool,
 } from "@/app/services/musicLyrics/musicLyricsService";
 
 interface Props {
@@ -39,6 +40,8 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
   const [musics, setMusics] = useState<MusicLyricsResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
+  const [selectedSchoolMusic, setSelectedSchoolMusic] = useState<MusicLyricsResponse | null>(null);
+  const [loadingMusic, setLoadingMusic] = useState(false);
   const [playlistOpened, setPlaylistOpened] = useState(false);
   const enredoSectionRef = useRef<HTMLDivElement>(null);
 
@@ -304,6 +307,26 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
       }
     };
   }, [schools, musics, cacheKey, setCache]);
+
+  // Buscar música da escola quando uma escola é selecionada
+  useEffect(() => {
+    if (selectedSchoolId) {
+      setLoadingMusic(true);
+      getMusicLyricsBySambaSchool(selectedSchoolId)
+        .then((music) => {
+          setSelectedSchoolMusic(music);
+        })
+        .catch(() => {
+          // Não há música cadastrada para esta escola
+          setSelectedSchoolMusic(null);
+        })
+        .finally(() => {
+          setLoadingMusic(false);
+        });
+    } else {
+      setSelectedSchoolMusic(null);
+    }
+  }, [selectedSchoolId]);
 
   // Scroll automático para a seção do enredo quando uma escola é selecionada
   useEffect(() => {
@@ -767,10 +790,84 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                       fontSize: { xs: "0.95rem", md: "1.05rem", lg: "1.1rem" },
                       lineHeight: 1.8,
                       whiteSpace: "pre-line",
+                      mb: 2,
                     }}
                   >
                     {selectedSchool.description}
                   </Typography>
+                )}
+
+                {/* Letra da Música */}
+                {loadingMusic ? (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      py: 4,
+                    }}
+                  >
+                    <Skeleton
+                      variant="text"
+                      width="80%"
+                      height={24}
+                      sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+                    />
+                  </Box>
+                ) : selectedSchoolMusic ? (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      mt: 2,
+                      pt: 2,
+                      borderTop: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      fontWeight={700}
+                      mb={2}
+                      sx={{
+                        color: "#fff",
+                        textAlign: "left",
+                        fontSize: { xs: "1.1rem", md: "1.3rem" },
+                      }}
+                    >
+                      🎵 Letra da Música
+                    </Typography>
+
+                    {/* Letra */}
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: "#fff",
+                        textAlign: "left",
+                        fontSize: { xs: "0.95rem", md: "1.05rem", lg: "1.1rem" },
+                        lineHeight: 1.8,
+                        whiteSpace: "pre-line",
+                      }}
+                    >
+                      {selectedSchoolMusic.lyrics}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      mt: 4,
+                      pt: 4,
+                      borderTop: "1px solid rgba(255,255,255,0.1)",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        color: "rgba(255,255,255,0.6)",
+                        fontSize: { xs: "0.9rem", md: "1rem" },
+                      }}
+                    >
+                      Nenhuma música cadastrada para esta escola de samba.
+                    </Typography>
+                  </Box>
                 )}
               </CardContent>
             </Card>

@@ -29,6 +29,10 @@ import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import StoreIcon from '@mui/icons-material/Store';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import EventIcon from '@mui/icons-material/Event';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { 
   getEventById, 
@@ -834,6 +838,57 @@ export default function EventDetailsPage() {
                 {event.van_departure_time_start && event.van_departure_time_end ? " às " : ""}
                 {event.van_departure_time_end ? event.van_departure_time_end.substring(0, 5) : ""}
               </Typography>
+            </Box>
+          )}
+
+          {/* MEETING POINT */}
+          {(event.meeting_point_location || (event.meeting_point_schedule && event.meeting_point_schedule.length > 0)) && (
+            <Box sx={{ mb: 3 }}>
+              <Typography fontWeight={600} mb={1.5} sx={{ color: "#ffc91f", fontSize: "0.875rem", textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: 1 }}>
+                <MeetingRoomIcon sx={{ fontSize: "1rem" }} />
+                Meeting Point
+              </Typography>
+              
+              {event.meeting_point_location && (
+                <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+                  <LocationOnIcon sx={{ fontSize: "1rem", color: "rgba(255,255,255,0.7)" }} />
+                  <Typography sx={{ color: "rgba(255,255,255,0.9)", lineHeight: 1.6 }}>
+                    {event.meeting_point_location}
+                  </Typography>
+                </Box>
+              )}
+
+              {event.meeting_point_schedule && event.meeting_point_schedule.length > 0 && (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  <Typography sx={{ color: "rgba(255,255,255,0.9)", fontSize: "0.875rem", fontWeight: 500, mb: 1 }}>
+                    Dias de Funcionamento:
+                  </Typography>
+                  {event.meeting_point_schedule.map((schedule, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        padding: "12px",
+                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                        borderRadius: 1,
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                        <EventIcon sx={{ fontSize: "1rem", color: "rgba(255,255,255,0.7)" }} />
+                        <Typography sx={{ color: "rgba(255,255,255,0.9)", fontSize: "0.875rem", fontWeight: 500 }}>
+                          Dias {schedule.days.join(", ")} de fevereiro
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <AccessTimeIcon sx={{ fontSize: "1rem", color: "rgba(255,255,255,0.7)" }} />
+                        <Typography sx={{ color: "rgba(255,255,255,0.9)", fontSize: "0.875rem" }}>
+                          Das {schedule.start_time} às {schedule.end_time}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              )}
             </Box>
           )}
 
