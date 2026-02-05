@@ -657,15 +657,22 @@ export default function EventPage() {
             <Box
               className={shouldAnimate ? "slide-up-delay-3" : ""}
               sx={{
-                maxWidth: 700,
                 width: "100%",
-                padding: "20px",
+                display: "flex",
+                justifyContent: "center",
                 marginTop: 2,
-               
-                border: "1px solid rgba(255, 255, 255, 0.1)",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+              <Box
+                sx={{
+                  maxWidth: 700,
+                  width: "100%",
+                  padding: "20px",
+                  borderRadius: 2,
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              >
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, marginBottom: 2 }}>
                 <MeetingRoomIcon style={{ color: "yellow" }} />
                 <h3 style={{ margin: 0, color: "white", fontSize: 20, fontWeight: 600 }}>
                   Meeting Point
@@ -673,43 +680,44 @@ export default function EventPage() {
               </Box>
 
               {event.meeting_point_location && (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, marginBottom: 2 }}>
                   <LocationOnIcon style={{ color: "yellow" }} />
-                  <p style={{ margin: 0, fontSize: 15, color: "white" }}>{event.meeting_point_location}</p>
+                  <Box component="p" sx={{ margin: 0, fontSize: 15, color: "white", textAlign: { xs: "left", md: "center" } }}>{event.meeting_point_location}</Box>
                 </Box>
               )}
 
               {event.meeting_point_schedule && event.meeting_point_schedule.length > 0 && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, alignItems: "flex-start" }}>
-                  <p style={{ margin: 0, color: "white", fontSize: 15, fontWeight: 600, textAlign: "left" }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, alignItems: { xs: "flex-start", md: "center" } }}>
+                  <Box component="p" sx={{ margin: 0, color: "white", fontSize: 15, fontWeight: 600, textAlign: { xs: "left", md: "center" } }}>
                     Dias de Funcionamento:
-                  </p>
+                  </Box>
                   {event.meeting_point_schedule.map((schedule, index) => (
                     <Box
                       key={index}
                       sx={{
                         padding: "12px",
-                        backgroundColor: "rgba(0, 0, 0, 0.2)",
+                       
                         borderRadius: 1,
                         // border: "1px solid rgba(255, 255, 255, 0.1)",
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 1 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, marginBottom: 1 }}>
                         <EventIcon style={{ color: "yellow", fontSize: 18 }} />
-                        <p style={{ margin: 0, color: "white", fontSize: 14, fontWeight: 600 }}>
+                        <Box component="p" sx={{ margin: 0, color: "white", fontSize: 14, fontWeight: 600, textAlign: { xs: "left", md: "center" } }}>
                           Dias {schedule.days.join(", ")} de fevereiro
-                        </p>
+                        </Box>
                       </Box>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1 }}>
                         <AccessTimeIcon style={{ color: "yellow", fontSize: 18 }} />
-                        <p style={{ margin: 0, color: "white", fontSize: 14 }}>
+                        <Box component="p" sx={{ margin: 0, color: "white", fontSize: 14, textAlign: { xs: "left", md: "center" } }}>
                           Das {schedule.start_time} às {schedule.end_time}
-                        </p>
+                        </Box>
                       </Box>
                     </Box>
                   ))}
                 </Box>
               )}
+              </Box>
             </Box>
           )}
 

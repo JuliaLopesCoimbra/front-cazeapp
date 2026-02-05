@@ -1,4 +1,5 @@
 import { Box, Button } from "@mui/material";
+import { useRef, useEffect } from "react";
 
 type Tab = "home" | "eventos" | "mapa" | "lineup" | "foto" | "enredo";
 
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export default function HomeTabs({ active, onChange }: Props) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const tabs: { label: string; value: Tab }[] = [
     { label: "Home", value: "home" },
     { label: "Eventos", value: "eventos" },
@@ -24,6 +27,44 @@ export default function HomeTabs({ active, onChange }: Props) {
   // lg: 3*140 + 2*16 + 125 = 577px
   const containerWidth = { xs: "401px", md: "489px", lg: "577px" };
 
+  // Adiciona suporte para scroll horizontal com a roda do mouse
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Verifica se há scroll horizontal disponível
+      const hasHorizontalScroll = container.scrollWidth > container.clientWidth;
+      
+      if (!hasHorizontalScroll) return;
+
+      // Verifica se o mouse está sobre o container
+      const rect = container.getBoundingClientRect();
+      const isOverContainer = 
+        e.clientX >= rect.left - 50 && // Margem de 50px para facilitar
+        e.clientX <= rect.right + 50 &&
+        e.clientY >= rect.top - 50 &&
+        e.clientY <= rect.bottom + 50;
+
+      if (isOverContainer) {
+        // Previne o scroll vertical padrão apenas se houver scroll horizontal
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Usa deltaX se disponível (scroll horizontal nativo), senão converte deltaY
+        const scrollAmount = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        container.scrollLeft += scrollAmount;
+      }
+    };
+
+    // Adiciona o listener no container com capture para garantir que seja capturado
+    container.addEventListener("wheel", handleWheel, { passive: false, capture: true });
+
+    return () => {
+      container.removeEventListener("wheel", handleWheel, { capture: true } as EventListenerOptions);
+    };
+  }, []);
+
   return (
     <Box 
       sx={{ 
@@ -35,6 +76,7 @@ export default function HomeTabs({ active, onChange }: Props) {
       }}
     >
       <Box
+        ref={scrollContainerRef}
         sx={{
           display: "flex",
           gap: { xs: 1, md: 1.5, lg: 2 },
@@ -48,6 +90,12 @@ export default function HomeTabs({ active, onChange }: Props) {
           WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
           // Garante que o scroll funcione
           scrollBehavior: "smooth",
+          cursor: "grab", // Indica que é scrollável
+          "&:active": {
+            cursor: "grabbing", // Muda o cursor quando está arrastando
+          },
+          // Permite scroll com mouse mesmo quando não está diretamente sobre o elemento
+          userSelect: "none",
         }}
       >
         {tabs.map((tab) => {

@@ -475,16 +475,22 @@ const formatTime = (timeStr: string | undefined): string => {
             {(event.meeting_point_location || (event.meeting_point_schedule && event.meeting_point_schedule.length > 0)) && (
               <Box
                 sx={{
-                  maxWidth: 700,
                   width: "100%",
-                  padding: "20px",
+                  display: "flex",
+                  justifyContent: "center",
                   marginTop: 2,
-                 
-                  borderRadius: 2,
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                <Box
+                  sx={{
+                    maxWidth: 700,
+                    width: "100%",
+                    padding: "20px",
+                    borderRadius: 2,
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                  }}
+                >
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, marginBottom: 2 }}>
                   <MeetingRoomIcon style={{ color: "yellow" }} />
                   <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
                     Meeting Point
@@ -492,15 +498,15 @@ const formatTime = (timeStr: string | undefined): string => {
                 </Box>
 
                 {event.meeting_point_location && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, marginBottom: 2 }}>
                     <LocationOnIcon style={{ color: "yellow" }} />
-                    <p style={{ margin: 0, fontSize: 15, color: "white" }}>{event.meeting_point_location}</p>
+                    <Box component="p" sx={{ margin: 0, fontSize: 15, color: "white", textAlign: { xs: "left", md: "center" } }}>{event.meeting_point_location}</Box>
                   </Box>
                 )}
 
                 {event.meeting_point_schedule && event.meeting_point_schedule.length > 0 && (
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, alignItems: "flex-start" }}>
-                    <Typography sx={{ color: "white", fontSize: 15, fontWeight: 600, textAlign: "left" }}>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, alignItems: { xs: "flex-start", md: "center" } }}>
+                    <Typography sx={{ color: "white", fontSize: 15, fontWeight: 600, textAlign: { xs: "left", md: "center" } }}>
                       Dias de Funcionamento:
                     </Typography>
                     {event.meeting_point_schedule.map((schedule, index) => (
@@ -511,24 +517,25 @@ const formatTime = (timeStr: string | undefined): string => {
                         
                         }}
                       >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, mb: 1 }}>
                           <EventIcon style={{ color: "yellow", fontSize: 18 }} />
-                          <Typography sx={{ color: "white", fontSize: 14, fontWeight: 600 }}>
+                          <Typography sx={{ color: "white", fontSize: 14, fontWeight: 600, textAlign: { xs: "left", md: "center" } }}>
                             Dias {schedule.days.join(", ")} de fevereiro
                           </Typography>
                         </Box>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1 }}>
                           <AccessTimeIcon style={{ color: "yellow", fontSize: 18 }} />
-                          <Typography sx={{ color: "white", fontSize: 14 }}>
+                          <Typography sx={{ color: "white", fontSize: 14, textAlign: { xs: "left", md: "center" } }}>
                             Das {schedule.start_time} às {schedule.end_time}
                           </Typography>
                         </Box>
-                      </Box>
-                    ))}
                   </Box>
-                )}
+                ))}
               </Box>
             )}
+              </Box>
+            </Box>
+          )}
 
             {/* BOTÃO COMPRAR INGRESSOS */}
             <Box

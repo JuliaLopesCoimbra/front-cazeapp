@@ -110,10 +110,19 @@ export default function NewsDetailPage() {
           if (data.event_id) {
             const urlParams = new URLSearchParams(window.location.search);
             const commentId = urlParams.get("commentId");
+            // Atualiza a URL preservando o commentId se existir
+            // Usa window.history.replaceState para não causar re-render desnecessário
             const newUrl = commentId 
               ? `/pages/news/${newsId}?eventId=${data.event_id}&commentId=${commentId}`
               : `/pages/news/${newsId}?eventId=${data.event_id}`;
             window.history.replaceState({}, '', newUrl);
+            // Força atualização do searchParams usando router.replace sem scroll
+            // Isso garante que o Next.js detecte a mudança
+            if (commentId) {
+              router.replace(newUrl, { scroll: false });
+            } else {
+              router.replace(newUrl, { scroll: false });
+            }
           }
         } catch (error: any) {
           // Se falhar, pode ser um post pendente que precisa do eventId ou post deletado
@@ -201,6 +210,8 @@ export default function NewsDetailPage() {
   }, [newsId]);
 
   // Hook para scroll automático para comentários
+  // Passa searchParams como dependência para garantir que o hook seja executado quando a URL mudar
+  const commentIdFromUrl = searchParams.get("commentId");
   useCommentScroll({
     news,
     loading,
@@ -213,6 +224,7 @@ export default function NewsDetailPage() {
     setRepliesOffset,
     setHasMoreReplies,
     REPLIES_PER_PAGE,
+    commentIdFromUrl, // Força reexecução quando commentId mudar na URL
   });
 
   const handleLike = async () => {
@@ -924,7 +936,15 @@ export default function NewsDetailPage() {
 
       <Box sx={{ pb: 2, flex: 1, overflowY: "auto" }}>
         {news.images && news.images.length > 0 && (
-          <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
+          <Box 
+            className={shouldAnimate ? "slide-up-delay-2" : ""}
+            sx={{ 
+              px: 2, 
+              maxWidth: { xs: "100%", sm: "600px", md: "700px" }, 
+              margin: "0 auto", 
+              width: "100%" 
+            }}
+          >
             <NewsImageCarousel images={news.images} alt={news.title} />
           </Box>
         )}
