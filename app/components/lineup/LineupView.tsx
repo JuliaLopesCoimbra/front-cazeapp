@@ -55,6 +55,11 @@ export default function LineupView({ eventId }: LineupViewProps) {
     return timeString;
   };
 
+  // Formata YYYY-MM-DD como data local sem virada de dia por timezone (evita new Date("YYYY-MM-DD") em UTC)
+  const formatDateOnly = (dateStr: string, options: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }) => {
+    return new Date(dateStr + "T12:00:00").toLocaleDateString("pt-BR", options);
+  };
+
   // Agrupa itens por data e cria lista de datas únicas
   const { dates, filteredItems } = useMemo(() => {
     const datesSet = new Set<string>();
@@ -104,11 +109,13 @@ export default function LineupView({ eventId }: LineupViewProps) {
     <Box
       sx={{
         pt: 3,
+        pb: { xs: 4, sm: 2 },
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         maxWidth: 800,
         mx: "auto",
+        width: "100%",
       }}
     >
       {error ? (
@@ -151,7 +158,7 @@ export default function LineupView({ eventId }: LineupViewProps) {
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 3,
+            gap: { xs: 2, sm: 3 },
             width: "100%",
             px: { xs: 1, sm: 2 },
           }}
@@ -195,7 +202,7 @@ export default function LineupView({ eventId }: LineupViewProps) {
                 {dates.map((date) => (
                   <Tab
                     key={date}
-                    label={new Date(date).toLocaleDateString('pt-BR', {
+                    label={formatDateOnly(date, {
                       day: '2-digit',
                       month: 'short',
                       year: 'numeric'
@@ -231,10 +238,11 @@ export default function LineupView({ eventId }: LineupViewProps) {
               elevation={0}
               sx={{
                 backgroundColor: "rgba(255,255,255,0.05)",
-                borderRadius: 3,
+                borderRadius: { xs: 2, sm: 3 },
                 display: "flex",
                 alignItems: "stretch",
-                gap: { xs: 2, md: 3 },
+                gap: { xs: 1.5, md: 3 },
+                p: { xs: 1.5, sm: 0 },
                 border: "1px solid rgba(255,255,255,0.1)",
                 transition: "all 0.3s ease",
                 width: "100%",
@@ -245,13 +253,13 @@ export default function LineupView({ eventId }: LineupViewProps) {
                 },
               }}
             >
-              {/* Container da Foto - Ultra Padronizado */}
+              {/* Container da Foto - compacto no mobile para caber na tela */}
               <Box
                 sx={{
-                  width: { xs: 150, sm: 180, md: 200 },
-                  minWidth: { xs: 150, sm: 180, md: 200 },
-                  maxWidth: { xs: 150, sm: 180, md: 200 },
-                  height: { xs: 150, sm: 180, md: 200 },
+                  width: { xs: 100, sm: 180, md: 200 },
+                  minWidth: { xs: 100, sm: 180, md: 200 },
+                  maxWidth: { xs: 100, sm: 180, md: 200 },
+                  height: { xs: 100, sm: 180, md: 200 },
                   flexShrink: 0,
                   aspectRatio: "1 / 1",
                   overflow: "hidden",
@@ -301,12 +309,12 @@ export default function LineupView({ eventId }: LineupViewProps) {
                   <Typography
                     sx={{
                       color: "#fff",
-                      pt: 2,
-                      fontSize: { xs: "1.1rem", md: "1.4rem" },
+                      pt: { xs: 0.5, sm: 2 },
+                      fontSize: { xs: "0.95rem", md: "1.4rem" },
                       fontWeight: 800,
                       textTransform: "uppercase",
                       lineHeight: 1.2,
-                      mb: 1,
+                      mb: 0.5,
                     }}
                   >
                     {item.artist_name}
@@ -334,20 +342,16 @@ export default function LineupView({ eventId }: LineupViewProps) {
                         mb: 1,
                       }}
                     >
-                      {new Date(item.event_date).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                      })}
+                      {formatDateOnly(item.event_date)}
                     </Typography>
                   )}
                 </Box>
 
-                <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
+                <Box sx={{ mt: { xs: 0.5, sm: 1 }, display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography
                     sx={{
                       color: "#fff",
-                      fontSize: { xs: "1.8rem", md: "1.9rem" },
+                      fontSize: { xs: "1.25rem", md: "1.9rem" },
                       fontWeight: 700,
                       fontFamily: "monospace",
                     }}
@@ -359,7 +363,7 @@ export default function LineupView({ eventId }: LineupViewProps) {
                       <Typography
                         sx={{
                           color: "rgba(255,255,255,0.7)",
-                          fontSize: { xs: "1.2rem", md: "1.3rem" },
+                          fontSize: { xs: "0.95rem", md: "1.3rem" },
                           fontWeight: 500,
                           fontFamily: "monospace",
                         }}
@@ -369,7 +373,7 @@ export default function LineupView({ eventId }: LineupViewProps) {
                       <Typography
                         sx={{
                           color: "rgba(255,255,255,0.7)",
-                          fontSize: { xs: "1.2rem", md: "1.3rem" },
+                          fontSize: { xs: "0.95rem", md: "1.3rem" },
                           fontWeight: 500,
                           fontFamily: "monospace",
                         }}
