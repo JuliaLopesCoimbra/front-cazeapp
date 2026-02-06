@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import { useToast } from "@/app/context/ToastContext";
@@ -17,9 +17,14 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const { showToast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const startCooldown = () => {
     setCooldown(60);
@@ -87,10 +92,26 @@ export default function ForgotPasswordPage() {
           textAlign: "left",
         }}
       >
-        <Typography variant="h5" sx={{ marginBottom: "20px" }}>
+        <Typography
+          variant="h5"
+          sx={{
+            marginBottom: "20px",
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(-20px)",
+            transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
+          }}
+        >
           Recuperar senha
         </Typography>
-        <Typography variant="body2" sx={{ marginBottom: "20px" }}>
+        <Typography
+          variant="body2"
+          sx={{
+            marginBottom: "20px",
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(-20px)",
+            transition: "opacity 0.6s ease-out 0.1s, transform 0.6s ease-out 0.1s",
+          }}
+        >
           Informe seu e-mail para receber o link de redefinição.
         </Typography>
 
@@ -121,6 +142,9 @@ export default function ForgotPasswordPage() {
             sx: { color: "#ff6b6b", fontSize: 12 },
           }}
           sx={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(-20px)",
+            transition: "opacity 0.6s ease-out 0.2s, transform 0.6s ease-out 0.2s",
             "& .MuiOutlinedInput-root": {
               backgroundColor: "transparent",
               color: "#fff",
@@ -160,6 +184,9 @@ export default function ForgotPasswordPage() {
             fontWeight: 600,
             borderRadius: "14px",
             textTransform: "none",
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(-20px)",
+            transition: "opacity 0.6s ease-out 0.3s, transform 0.6s ease-out 0.3s",
             "&:hover": {
               backgroundColor: "#e6b800",
             },
@@ -178,7 +205,16 @@ export default function ForgotPasswordPage() {
             : "Enviar link"}
         </Button>
 
-        <Typography variant="body2" sx={{ marginTop: "20px", textAlign: "center" }}>
+        <Typography
+          variant="body2"
+          sx={{
+            marginTop: "20px",
+            textAlign: "center",
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(-20px)",
+            transition: "opacity 0.6s ease-out 0.4s, transform 0.6s ease-out 0.4s",
+          }}
+        >
           Lembrou sua senha?{" "}
           <a
             href="/pages/auth/login"

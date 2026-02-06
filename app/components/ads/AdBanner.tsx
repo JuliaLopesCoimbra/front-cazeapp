@@ -14,13 +14,13 @@ interface AdPlacement {
 const MOCK_ADS: AdPlacement[] = [
   {
     image_url: "/ads/1.png",
-    redirect_url: "https://www.ambev.com.br/marcas/brahma",
-    alt_text: "Brahma - Oferta Exclusiva N1",
+    redirect_url: "https://www.pernod-ricard.com/pt/locations/brasil",
+    alt_text: "Beefeater",
   },
   
   {
     image_url: "/ads/2.png",
-    redirect_url: "https://www.maturatta.com.br",
+    redirect_url: "https://www.friboi.com.br/marcas/maturatta-friboi/",
     alt_text: "Maturatta - Oferta Exclusiva N1",
   },
   {
@@ -28,14 +28,10 @@ const MOCK_ADS: AdPlacement[] = [
     redirect_url: "https://www.pernod-ricard.com",
     alt_text: "Pernod - Oferta Exclusiva N1",
   },
-  {
-    image_url: "/ads/4.png",
-    redirect_url: "https://www.uol.com.br",
-    alt_text: "UOL - Oferta Exclusiva N1",
-  },
+
   {
     image_url: "/ads/5.png",
-    redirect_url: "https://www.uol.com.br",
+    redirect_url: "https://www.pernod-ricard.com/pt/locations/brasil",
     alt_text: "UOL - Oferta Exclusiva N1",
   },
 ];

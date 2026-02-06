@@ -71,14 +71,14 @@ export default function EventMap({ event }: EventMapProps) {
       {event.map_images && event.map_images.length > 0 ? (
         <ZoomableImageCarousel
           images={event.map_images.map(img => img.image_url)}
-          maxHeight={400}
+          maxHeight={600}
           borderRadius={2}
         />
       ) : event.image_map ? (
         <ZoomableImage
           src={event.image_map}
           alt="Mapa do Evento"
-          maxHeight={400}
+          maxHeight={600}
           borderRadius={2}
         />
       ) : null}
