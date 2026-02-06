@@ -21,7 +21,7 @@ export default function HomeTabs({ active, onChange }: Props) {
   const tabs: { label: string; value: Tab }[] = [
     { label: "Home", value: "home" },
     { label: "Eventos", value: "eventos" },
-    { label: "Mapa do Evento", value: "mapa" },
+    { label: "Mapa", value: "mapa" },
     { label: "Line Up", value: "lineup" },
     { label: "Photo Finder", value: "foto" },
     { label: "Enredo", value: "enredo" },
@@ -153,6 +153,7 @@ export default function HomeTabs({ active, onChange }: Props) {
                 borderRadius: "999px",
                 textTransform: "none",
                 fontWeight: 600,
+                lineHeight: 1.2,
                 px: { xs: 1.5, md: 2, lg: 2.5 },
                 minHeight: { xs: 40, md: 44, lg: 48 },
                 height: { xs: 40, md: 44, lg: 48 },
