@@ -8,6 +8,11 @@ import { getApiUrl } from "@/app/utils/apiUrlHelper";
 import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 
 const API_URL = getApiUrl();
+
+interface ForgotPasswordResponse {
+  message?: string;
+}
+
 const isValidEmail = (email: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
@@ -53,7 +58,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/auth/forgot-password`, { email });
+      const response = await axios.post<ForgotPasswordResponse>(`${API_URL}/auth/forgot-password`, { email });
 
       showToast(
         response.data.message || "Email de recuperação enviado com sucesso! Verifique sua caixa de entrada.",
