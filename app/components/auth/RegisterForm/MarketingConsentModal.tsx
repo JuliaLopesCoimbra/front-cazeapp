@@ -9,12 +9,12 @@ import {
   Typography,
 } from "@mui/material";
 
-interface LgpdModalProps {
+interface MarketingConsentModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
+const MarketingConsentModal: React.FC<MarketingConsentModalProps> = ({ open, onClose }) => {
   return (
     <Dialog
       open={open}
@@ -32,9 +32,7 @@ const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
         },
       }}
     >
-      <DialogTitle sx={{ color: "#fff", fontWeight: 600, fontSize: "1.5rem", textAlign: "center" }}>
-        TERMO DE CONSENTIMENTO PARA TRATAMENTO DE DADOS PESSOAIS
-      </DialogTitle>
+ 
       <DialogContent>
         <Box
           sx={{
@@ -60,21 +58,7 @@ const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
             },
           }}
         >
-          <Typography variant="body1" paragraph sx={{ fontWeight: 500, mb: 2 }}>
-            A HOLDING CLUBE, Inscrita no CNPJ: 07.900.154/0001-89 com endereço profissional a Rua Purpurina, 400 – Vila Madalena - Centro, CEP 05433-000, cidade de SÃO PAULO, estado de SÃO PAULO doravante denominado(a) CONTROLADORA.
-          </Typography>
-
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: "#ffcc01" }}>
-            1. Aceite para Tratamento de Dados Pessoais
-          </Typography>
-          <Typography variant="body1" paragraph sx={{ mb: 2 }}>
-            Ao realizar o cadastro no aplicativo, você declara que leu e concorda com o tratamento dos seus dados pessoais fornecidos, incluindo: nome, sexo, CPF, e-mail, data de nascimento e Reconhecimento Facial para a finalidade específica de realização de cadastro e gestão da sua conta, conforme a Lei nº 13.709/2018 (Lei Geral de Proteção de Dados – LGPD).
-          </Typography>
-          <Typography variant="body1" paragraph sx={{ mb: 2 }}>
-            O tratamento poderá envolver coleta, armazenamento, utilização, acesso e demais operações necessárias à execução das funcionalidades do aplicativo, sendo adotadas medidas técnicas e administrativas adequadas para garantir a segurança e proteção das informações.
-          </Typography>
-
-          <Typography variant="h6" sx={{ fontWeight: 600, mt: 4, mb: 2, color: "#ffcc01" }}>
             2. Aceite para Envio de Comunicações, Promoções e Conteúdos de Marketing
           </Typography>
           <Typography variant="body1" paragraph sx={{ mb: 2 }}>
@@ -107,5 +91,5 @@ const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
   );
 };
 
-export default LgpdModal;
+export default MarketingConsentModal;
 

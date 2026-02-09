@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   TextField,
@@ -16,6 +16,8 @@ import {
 import { Visibility, VisibilityOff, CheckCircle } from "@mui/icons-material";
 import { formatCPF } from "@/app/utils/registerValidators";
 import { validatePassword } from "@/app/utils/passwordValidator";
+import LgpdDataProtectionModal from "./LgpdDataProtectionModal";
+import MarketingConsentModal from "./MarketingConsentModal";
 
 interface RegisterFormFieldsProps {
   name: string;
@@ -36,6 +38,8 @@ interface RegisterFormFieldsProps {
   onLgpdAcceptedChange: (value: boolean) => void;
   ageTermsAccepted: boolean;
   onAgeTermsAcceptedChange: (value: boolean) => void;
+  marketingEmailAccepted: boolean;
+  onMarketingEmailAcceptedChange: (value: boolean) => void;
   showPassword: boolean;
   onToggleShowPassword: () => void;
   passwordErrors: string[];
@@ -62,12 +66,17 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
   onLgpdAcceptedChange,
   ageTermsAccepted,
   onAgeTermsAcceptedChange,
+  marketingEmailAccepted,
+  onMarketingEmailAcceptedChange,
   showPassword,
   onToggleShowPassword,
   passwordErrors,
   onShowLgpdModal,
   shouldAnimate = false,
 }) => {
+  const [showLgpdDataProtectionModal, setShowLgpdDataProtectionModal] = useState(false);
+  const [showMarketingConsentModal, setShowMarketingConsentModal] = useState(false);
+
   const passwordsMatch = password === confirmPassword;
   const isPasswordValid = password.length > 0 && passwordErrors.length === 0;
   const isPasswordError = password.length > 0 && passwordErrors.length > 0;
@@ -518,11 +527,30 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
           }
           label={
             <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "0.875rem" }}>
-              Aceito os termos de proteção de dados pessoais (LGPD)
+           Declaro que li e concordo com o tratamento dos meus dados pessoais para fins de cadastro no aplicativo.
             </Typography>
           }
           sx={{ mt: 3 }}
         />
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+          <Button
+            onClick={() => setShowLgpdDataProtectionModal(true)}
+            sx={{
+              textTransform: "none",
+              color: "#ffcc01",
+              fontSize: "0.7rem",
+              textDecoration: "underline",
+              padding: 0,
+              minWidth: "auto",
+              "&:hover": {
+                textDecoration: "underline",
+                backgroundColor: "transparent",
+              },
+            }}
+          >
+            Ler mais
+          </Button>
+        </Box>
       </Box>
 
       {/* Age Terms Checkbox */}
@@ -547,9 +575,33 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
           }
           sx={{ mt: 1 }}
         />
+      </Box>
+
+      {/* Marketing Email Checkbox */}
+      <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={marketingEmailAccepted}
+              onChange={(e) => onMarketingEmailAcceptedChange(e.target.checked)}
+              sx={{
+                color: "rgba(255, 255, 255, 0.7)",
+                "&.Mui-checked": {
+                  color: "#ffcc01",
+                },
+              }}
+            />
+          }
+          label={
+            <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "0.875rem" }}>
+          Autorizo o envio de promoções, ofertas e conteúdo de marketing.
+            </Typography>
+          }
+          sx={{ mt: 1 }}
+        />
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
           <Button
-            onClick={onShowLgpdModal}
+            onClick={() => setShowMarketingConsentModal(true)}
             sx={{
               textTransform: "none",
               color: "#ffcc01",
@@ -563,10 +615,41 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
               },
             }}
           >
-            Ler termos completos
+            Ler mais
           </Button>
         </Box>
       </Box>
+
+      {/* Ler termos completos - após todos os checkboxes */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+        <Button
+          onClick={onShowLgpdModal}
+          sx={{
+            textTransform: "none",
+            color: "#ffcc01",
+            fontSize: "0.7rem",
+            textDecoration: "underline",
+            padding: 0,
+            minWidth: "auto",
+            "&:hover": {
+              textDecoration: "underline",
+              backgroundColor: "transparent",
+            },
+          }}
+        >
+          Ler termos completos
+        </Button>
+      </Box>
+
+      {/* Modals */}
+      <LgpdDataProtectionModal
+        open={showLgpdDataProtectionModal}
+        onClose={() => setShowLgpdDataProtectionModal(false)}
+      />
+      <MarketingConsentModal
+        open={showMarketingConsentModal}
+        onClose={() => setShowMarketingConsentModal(false)}
+      />
     </>
   );
 };

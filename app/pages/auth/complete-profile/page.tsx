@@ -21,6 +21,8 @@ import axios from "axios";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
 import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import LgpdModal from "@/app/components/auth/RegisterForm/LgpdModal";
+import LgpdDataProtectionModal from "@/app/components/auth/RegisterForm/LgpdDataProtectionModal";
+import MarketingConsentModal from "@/app/components/auth/RegisterForm/MarketingConsentModal";
 
 const API_URL = getApiUrl();
 
@@ -38,8 +40,11 @@ function CompleteProfileContent() {
   const [gender, setGender] = useState<"male" | "female" | "other" | "prefer_not_to_say" | "">("");
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const [ageTermsAccepted, setAgeTermsAccepted] = useState(false);
+  const [marketingEmailAccepted, setMarketingEmailAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showLgpdModal, setShowLgpdModal] = useState(false);
+  const [showLgpdDataProtectionModal, setShowLgpdDataProtectionModal] = useState(false);
+  const [showMarketingConsentModal, setShowMarketingConsentModal] = useState(false);
   const router = useRouter();
   const params = useSearchParams();
   const { showToast } = useToast();
@@ -89,6 +94,7 @@ function CompleteProfileContent() {
           gender: gender as "male" | "female" | "other" | "prefer_not_to_say",
           lgpd_accepted: lgpdAccepted,
           age_terms_accepted: ageTermsAccepted,
+          marketing_email_accepted: marketingEmailAccepted,
         },
         {
           headers: {
@@ -289,11 +295,30 @@ function CompleteProfileContent() {
                   lineHeight: 1.4,
                 }}
               >
-                Aceito os termos de proteção de dados pessoais (LGPD)
+                Declaro que li e concordo com o tratamento dos meus dados pessoais para fins de cadastro no aplicativo.
               </Typography>
             }
             sx={{ mb: 1, width: "100%", maxWidth: "100%" }}
           />
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+            <Button
+              onClick={() => setShowLgpdDataProtectionModal(true)}
+              sx={{
+                textTransform: "none",
+                color: "#ffcc01",
+                fontSize: "0.7rem",
+                textDecoration: "underline",
+                padding: 0,
+                minWidth: "auto",
+                "&:hover": {
+                  textDecoration: "underline",
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
+              Ler mais
+            </Button>
+          </Box>
 
           <FormControlLabel
             control={
@@ -326,6 +351,58 @@ function CompleteProfileContent() {
             }
             sx={{ mb: 1, width: "100%", maxWidth: "100%" }}
           />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={marketingEmailAccepted}
+                onChange={(e) => setMarketingEmailAccepted(e.target.checked)}
+                sx={{
+                  color: "rgba(255, 255, 255, 0.7)",
+                  "&.Mui-checked": {
+                    color: "#ffcc01",
+                  },
+                }}
+              />
+            }
+            label={
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: "rgba(255, 255, 255, 0.9)", 
+                  fontSize: "0.875rem",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "normal",
+                  maxWidth: "100%",
+                  lineHeight: 1.4,
+                }}
+              >
+             Autorizo o envio de promoções, ofertas e conteúdo de marketing.
+              </Typography>
+            }
+            sx={{ mb: 1, width: "100%", maxWidth: "100%" }}
+          />
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+            <Button
+              onClick={() => setShowMarketingConsentModal(true)}
+              sx={{
+                textTransform: "none",
+                color: "#ffcc01",
+                fontSize: "0.7rem",
+                textDecoration: "underline",
+                padding: 0,
+                minWidth: "auto",
+                "&:hover": {
+                  textDecoration: "underline",
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
+              Ler mais
+            </Button>
+          </Box>
+
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
             <Button
               onClick={() => setShowLgpdModal(true)}
@@ -373,6 +450,14 @@ function CompleteProfileContent() {
       <LgpdModal
         open={showLgpdModal}
         onClose={() => setShowLgpdModal(false)}
+      />
+      <LgpdDataProtectionModal
+        open={showLgpdDataProtectionModal}
+        onClose={() => setShowLgpdDataProtectionModal(false)}
+      />
+      <MarketingConsentModal
+        open={showMarketingConsentModal}
+        onClose={() => setShowMarketingConsentModal(false)}
       />
     </Box>
   );

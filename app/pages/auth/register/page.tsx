@@ -26,6 +26,7 @@ const RegisterForm: React.FC = () => {
   const [gender, setGender] = useState<"male" | "female" | "other" | "prefer_not_to_say" | "">("");
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const [ageTermsAccepted, setAgeTermsAccepted] = useState(false);
+  const [marketingEmailAccepted, setMarketingEmailAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [registered, setRegistered] = useState(false);
@@ -161,7 +162,8 @@ const RegisterForm: React.FC = () => {
         cpf: cpfClean,
         gender: gender as "male" | "female" | "other" | "prefer_not_to_say",
         lgpd_accepted: lgpdAccepted,
-        age_terms_accepted: ageTermsAccepted
+        age_terms_accepted: ageTermsAccepted,
+        marketing_email_accepted: marketingEmailAccepted
       });
 
       showToast(
@@ -278,6 +280,8 @@ const RegisterForm: React.FC = () => {
               onLgpdAcceptedChange={setLgpdAccepted}
               ageTermsAccepted={ageTermsAccepted}
               onAgeTermsAcceptedChange={setAgeTermsAccepted}
+              marketingEmailAccepted={marketingEmailAccepted}
+              onMarketingEmailAcceptedChange={setMarketingEmailAccepted}
               showPassword={showPassword}
               onToggleShowPassword={() => setShowPassword((prev) => !prev)}
               passwordErrors={passwordErrors}

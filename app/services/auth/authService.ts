@@ -27,6 +27,7 @@ interface RegisterData {
   gender: "male" | "female" | "other" | "prefer_not_to_say";
   lgpd_accepted: boolean;
   age_terms_accepted: boolean;
+  marketing_email_accepted: boolean;
 }
 export interface MeResponse {
   id: number;

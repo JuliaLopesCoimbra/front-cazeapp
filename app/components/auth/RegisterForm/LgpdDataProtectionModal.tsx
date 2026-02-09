@@ -9,12 +9,12 @@ import {
   Typography,
 } from "@mui/material";
 
-interface LgpdModalProps {
+interface LgpdDataProtectionModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
+const LgpdDataProtectionModal: React.FC<LgpdDataProtectionModalProps> = ({ open, onClose }) => {
   return (
     <Dialog
       open={open}
@@ -32,9 +32,7 @@ const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
         },
       }}
     >
-      <DialogTitle sx={{ color: "#fff", fontWeight: 600, fontSize: "1.5rem", textAlign: "center" }}>
-        TERMO DE CONSENTIMENTO PARA TRATAMENTO DE DADOS PESSOAIS
-      </DialogTitle>
+   
       <DialogContent>
         <Box
           sx={{
@@ -60,10 +58,6 @@ const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
             },
           }}
         >
-          <Typography variant="body1" paragraph sx={{ fontWeight: 500, mb: 2 }}>
-            A HOLDING CLUBE, Inscrita no CNPJ: 07.900.154/0001-89 com endereço profissional a Rua Purpurina, 400 – Vila Madalena - Centro, CEP 05433-000, cidade de SÃO PAULO, estado de SÃO PAULO doravante denominado(a) CONTROLADORA.
-          </Typography>
-
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: "#ffcc01" }}>
             1. Aceite para Tratamento de Dados Pessoais
           </Typography>
@@ -72,16 +66,6 @@ const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
           </Typography>
           <Typography variant="body1" paragraph sx={{ mb: 2 }}>
             O tratamento poderá envolver coleta, armazenamento, utilização, acesso e demais operações necessárias à execução das funcionalidades do aplicativo, sendo adotadas medidas técnicas e administrativas adequadas para garantir a segurança e proteção das informações.
-          </Typography>
-
-          <Typography variant="h6" sx={{ fontWeight: 600, mt: 4, mb: 2, color: "#ffcc01" }}>
-            2. Aceite para Envio de Comunicações, Promoções e Conteúdos de Marketing
-          </Typography>
-          <Typography variant="body1" paragraph sx={{ mb: 2 }}>
-            Ao marcar esta opção, você autoriza o envio de comunicações relacionadas a campanhas promocionais, ofertas, novidades e conteúdos informativos por e-mail, SMS, notificações push ou outros meios eletrônicos.
-          </Typography>
-          <Typography variant="body1" paragraph sx={{ mb: 2 }}>
-            A autorização poderá ser revogada a qualquer momento por meio das configurações do aplicativo ou pelo canal indicado nas comunicações recebidas.
           </Typography>
         </Box>
       </DialogContent>
@@ -107,5 +91,5 @@ const LgpdModal: React.FC<LgpdModalProps> = ({ open, onClose }) => {
   );
 };
 
-export default LgpdModal;
+export default LgpdDataProtectionModal;
 
