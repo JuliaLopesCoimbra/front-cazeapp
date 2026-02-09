@@ -22,8 +22,16 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "N1 - Application Event",
+  manifest: "/manifest.json",
   icons: {
     icon: "/logo/logo-n1.png", // Caminho do ícone
+    apple: "/logo/logo-apple.png",
+  },
+  // define o nome curto que aparece abaixo do ícone na Home do iOS
+  appleWebApp: {
+    title: "N1 App",
+    statusBarStyle: "default",
+    capable: true,
   },
   viewport: {
     width: "device-width",
