@@ -12,6 +12,10 @@ import {
   Skeleton,
   Chip,
 } from "@mui/material";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import EventIcon from "@mui/icons-material/Event";
 import { useAuth } from "@/app/context/AuthContext";
 import BottomNav from "@/app/components/layout/BottomNav";
 import HomeHeader from "@/app/components/home/HeaderHome";
@@ -358,7 +362,7 @@ export default function StorePage() {
                     mb: 1,
                   }}
                 >
-                  Lojinha do Evento
+                  Loja N1
                 </Typography>
                 <Typography
                   variant="body2"
@@ -369,9 +373,114 @@ export default function StorePage() {
                     mx: "auto",
                   }}
                 >
-                  Estes produtos estão sendo vendidos na lojinha do evento. Clique em qualquer produto para ver mais detalhes.
+                  {currentEvent?.meeting_point_location 
+                    ? `A loja N1 está localizada no endereço do Meeting Point: ${currentEvent.meeting_point_location}. Estes produtos estão sendo vendidos na loja N1 do evento. Clique em qualquer produto para ver mais detalhes.`
+                    : "Estes produtos estão sendo vendidos na loja N1 do evento. Clique em qualquer produto para ver mais detalhes."}
                 </Typography>
               </Box>
+
+              {/* MEETING POINT */}
+              {currentEvent && (currentEvent.meeting_point_location || (currentEvent.meeting_point_schedule && currentEvent.meeting_point_schedule.length > 0)) && (
+                <Box
+                  className={shouldAnimate ? "slide-up-delay-2" : ""}
+                  sx={{
+                    mb: 3,
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      maxWidth: 700,
+                      width: "100%",
+                      padding: "12px 16px",
+                      borderRadius: 2,
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      backgroundColor: "rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75, marginBottom: 1.5 }}>
+                      <MeetingRoomIcon style={{ color: "#ffc91f", fontSize: 18 }} />
+                      <Typography
+                        sx={{
+                          margin: 0,
+                          color: "white",
+                          fontSize: { xs: 14, md: 15 },
+                          fontWeight: 600,
+                        }}
+                      >
+                        Meeting Point
+                      </Typography>
+                    </Box>
+
+                    {currentEvent.meeting_point_location && (
+                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75, marginBottom: 1.5 }}>
+                        <LocationOnIcon style={{ color: "#ffc91f", fontSize: 16 }} />
+                        <Typography
+                          sx={{
+                            margin: 0,
+                            fontSize: { xs: 12, md: 13 },
+                            color: "white",
+                            textAlign: "center",
+                          }}
+                        >
+                          {currentEvent.meeting_point_location}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {currentEvent.meeting_point_schedule && currentEvent.meeting_point_schedule.length > 0 && (
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "center" }}>
+                        <Typography
+                          sx={{
+                            color: "white",
+                            fontSize: { xs: 12, md: 13 },
+                            fontWeight: 600,
+                            textAlign: "center",
+                          }}
+                        >
+                          Dias de Funcionamento:
+                        </Typography>
+                        {currentEvent.meeting_point_schedule.map((schedule, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              padding: "8px",
+                            }}
+                          >
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75, mb: 0.5 }}>
+                              <EventIcon style={{ color: "#ffc91f", fontSize: 16 }} />
+                              <Typography
+                                sx={{
+                                  color: "white",
+                                  fontSize: { xs: 12, md: 13 },
+                                  fontWeight: 600,
+                                  textAlign: "center",
+                                }}
+                              >
+                                Dias {schedule.days.join(", ")} de {currentEvent.starts_at ? new Date(currentEvent.starts_at).toLocaleDateString("pt-BR", { month: "long" }) : "fevereiro"}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75 }}>
+                              <AccessTimeIcon style={{ color: "#ffc91f", fontSize: 16 }} />
+                              <Typography
+                                sx={{
+                                  color: "white",
+                                  fontSize: { xs: 12, md: 13 },
+                                  textAlign: "center",
+                                }}
+                              >
+                                Das {schedule.start_time} às {schedule.end_time}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              )}
 
               <Box
                 className={shouldAnimate ? "slide-up-delay-3" : ""}
