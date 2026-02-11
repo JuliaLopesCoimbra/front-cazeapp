@@ -16,6 +16,8 @@ export interface Notification {
   related_news_id?: number;
   related_comment_id?: number;
   related_event_id?: number;
+  broadcast_sender_id?: number;
+  broadcast_sender?: RelatedUser;
   is_read: boolean;
   read_at?: string;
   created_at: string;

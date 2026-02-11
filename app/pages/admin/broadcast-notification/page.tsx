@@ -39,6 +39,14 @@ export default function BroadcastNotificationPage() {
   const [loading, setLoading] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
+  // Hooks devem ser chamados antes de qualquer return condicional
+  useEffect(() => {
+    if (!isAdminMaster && !isSubadmin) {
+      router.push("/pages/user/home");
+      return;
+    }
+  }, [isAdminMaster, isSubadmin, router]);
+
   // Aguardar o contexto estar pronto antes de renderizar
   if (!authReady) {
     return (
@@ -55,13 +63,6 @@ export default function BroadcastNotificationPage() {
       </Box>
     );
   }
-
-  useEffect(() => {
-    if (!isAdminMaster && !isSubadmin) {
-      router.push("/pages/user/home");
-      return;
-    }
-  }, [isAdminMaster, isSubadmin, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

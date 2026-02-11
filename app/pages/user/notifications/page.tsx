@@ -515,6 +515,21 @@ const NotificationsPage: React.FC = () => {
                                   (notification.related_user.name?.[0] || "U").toUpperCase()}
                               </Avatar>
                             )}
+                            {/* Avatar do admin/subadmin que enviou o broadcast (se houver) */}
+                            {notification.broadcast_sender && (
+                              <Avatar
+                                src={notification.broadcast_sender.profile_photo || undefined}
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor: "rgba(255, 204, 1, 0.2)",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {!notification.broadcast_sender.profile_photo &&
+                                  (notification.broadcast_sender.name?.[0] || "A").toUpperCase()}
+                              </Avatar>
+                            )}
 
                             <Box sx={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
                               <Box

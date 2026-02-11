@@ -51,6 +51,23 @@ export default function PermissionsPage() {
   } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
+  // Hooks devem ser chamados antes de qualquer return condicional
+  useEffect(() => {
+    if (!isAdminMaster && !isSubadmin) {
+      router.push("/pages/user/home");
+      return;
+    }
+  }, [isAdminMaster, isSubadmin, router]);
+
+  // Controla animações quando a página carrega ou tab muda
+  useEffect(() => {
+    setShouldAnimate(true);
+    const timer = setTimeout(() => {
+      setShouldAnimate(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [tabValue]);
+
   // Aguardar o contexto estar pronto antes de renderizar
   if (!authReady) {
     return (
@@ -67,22 +84,6 @@ export default function PermissionsPage() {
       </Box>
     );
   }
-
-  useEffect(() => {
-    if (!isAdminMaster && !isSubadmin) {
-      router.push("/pages/user/home");
-      return;
-    }
-  }, [isAdminMaster, isSubadmin, router]);
-
-  // Controla animações quando a página carrega ou tab muda
-  useEffect(() => {
-    setShouldAnimate(true);
-    const timer = setTimeout(() => {
-      setShouldAnimate(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [tabValue]);
 
   const handleInvite = async () => {
     if (!inviteName.trim() || !inviteEmail.trim()) {
