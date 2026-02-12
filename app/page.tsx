@@ -885,7 +885,7 @@ const LoginForm: React.FC = () => {
               e.currentTarget.style.textDecoration = "none";
             }}
           >
-            Cadastre-se aqui
+            Cadastre-se aqui tirar
           </a>
         </Typography> */}
       </Box>
