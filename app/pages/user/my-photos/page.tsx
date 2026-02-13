@@ -202,7 +202,7 @@ export default function MyPhotosPage() {
 
   const renderContent = () => {
     if (isRegularUser) {
-      // Usuários comuns veem apenas fotos compradas
+      // Usuários comuns veem apenas fotos baixadas
       return (
         <Box className={shouldAnimate ? "slide-up-delay-1" : ""}>
           <MyPhotos />
@@ -317,7 +317,7 @@ export default function MyPhotosPage() {
                 <ArrowBackIosIcon sx={{ fontSize: 20 }} />
               </IconButton>
               <Typography variant="h6" fontWeight={500} sx={{ color: "#fff", fontSize: "1rem" }}>
-                Fotos Compradas
+                Fotos Baixadas
               </Typography>
             </Box>
             <MyPhotos hideTitle />

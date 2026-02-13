@@ -33,7 +33,7 @@ export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
     },
     {
       id: "photos",
-      title: "Fotos Compradas",
+      title: "Fotos Baixadas",
       icon: <PhotoLibrary sx={{ fontSize: 32 }} />,
       onClick: () => onSelectOption("photos"),
     },

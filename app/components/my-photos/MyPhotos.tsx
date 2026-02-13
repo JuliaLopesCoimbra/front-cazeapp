@@ -10,8 +10,8 @@ import {
 } from "@mui/material";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import {
-  getMyPurchasedPhotos,
-  PurchasedPhoto,
+  getMyDownloadedPhotos,
+  DownloadedPhoto,
 } from "@/app/services/myPhotos/myPhotosService";
 
 interface MyPhotosProps {
@@ -25,15 +25,15 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
   const [initialized, setInitialized] = useState(false);
   // =========================================
   
-  const [photos, setPhotos] = useState<PurchasedPhoto[]>([]);
+  const [photos, setPhotos] = useState<DownloadedPhoto[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadPhotos = async () => {
     try {
-      const data = await getMyPurchasedPhotos();
+      const data = await getMyDownloadedPhotos();
       setPhotos(data);
     } catch (err) {
-      console.error("Erro ao carregar fotos compradas", err);
+      console.error("Erro ao carregar fotos baixadas", err);
     } finally {
       setLoading(false);
     }
@@ -89,10 +89,10 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
       
       (async () => {
         try {
-          const freshData = await getMyPurchasedPhotos();
+          const freshData = await getMyDownloadedPhotos();
           
-          const cachedIds = cached.data.map((p: PurchasedPhoto) => p.id).sort().join(',');
-          const freshIds = freshData.map((p: PurchasedPhoto) => p.id).sort().join(',');
+          const cachedIds = cached.data.map((p: DownloadedPhoto) => p.id).sort().join(',');
+          const freshIds = freshData.map((p: DownloadedPhoto) => p.id).sort().join(',');
           
           if (cachedIds !== freshIds || cached.data.length !== freshData.length) {
             setPhotos([...freshData]);
@@ -261,10 +261,10 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
           }}
         >
           <Typography variant="body1" fontWeight={500} sx={{ color: "#fff", marginBottom: 1, fontSize: "0.9375rem" }}>
-            Nenhuma foto comprada
+            Nenhuma foto baixada
           </Typography>
           <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" }}>
-            Você ainda não comprou nenhuma foto.
+            Você ainda não baixou nenhuma foto.
           </Typography>
         </Box>
       </Box>
@@ -293,7 +293,7 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
             fontWeight={500}
             sx={{ color: "#fff", marginBottom: 2, fontSize: "1rem" }}
           >
-            Minhas Fotos Compradas
+            Minhas Fotos Baixadas
           </Typography>
         )}
 
@@ -347,7 +347,7 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
                   display: "block",
                 }}
               >
-                {new Date(photo.purchased_at).toLocaleDateString("pt-BR")}
+                {new Date(photo.downloaded_at).toLocaleDateString("pt-BR")}
               </Typography>
             </Card>
           ))}

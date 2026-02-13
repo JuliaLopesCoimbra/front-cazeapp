@@ -1,16 +1,16 @@
-// Service mockado para histórico de compras de fotos
-// TODO: Implementar quando a funcionalidade de pagamento/compras estiver pronta
+// Service mockado para histórico de downloads de fotos
+// TODO: Implementar quando a funcionalidade de download estiver pronta
 
-export interface PurchasedPhoto {
+export interface DownloadedPhoto {
   id: number;
   image_url: string;
-  purchased_at: string;
+  downloaded_at: string;
   price: number;
   event_id?: number;
   event_name?: string;
 }
 
-export const getMyPurchasedPhotos = async (): Promise<PurchasedPhoto[]> => {
+export const getMyDownloadedPhotos = async (): Promise<DownloadedPhoto[]> => {
   // Mock data - remover quando implementar o backend
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -19,7 +19,7 @@ export const getMyPurchasedPhotos = async (): Promise<PurchasedPhoto[]> => {
         // {
         //   id: 1,
         //   image_url: "https://example.com/photo1.jpg",
-        //   purchased_at: "2024-01-15T10:30:00Z",
+        //   downloaded_at: "2024-01-15T10:30:00Z",
         //   price: 9.99,
         //   event_id: 1,
         //   event_name: "Carnaval 2024",
