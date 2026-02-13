@@ -42,6 +42,10 @@ import {
   NotificationPreferences,
 } from "@/app/services/notifications/notificationPreferenceService";
 import {
+  subscribeForPush,
+  unsubscribeFromPush,
+} from "@/app/services/notifications/pushService";
+import {
   getNotifications,
   markAsRead,
   markAllAsRead,
@@ -64,7 +68,9 @@ const NotificationsPage: React.FC = () => {
     news_feed: true,
     interactions: true,
     new_events: true,
+    push_enabled: false,
   });
+  const [pushLoading, setPushLoading] = useState(false);
 
   useEffect(() => {
     const fetchPreferences = async () => {
@@ -76,6 +82,7 @@ const NotificationsPage: React.FC = () => {
           news_feed: data.news_feed,
           interactions: data.interactions,
           new_events: data.new_events,
+          push_enabled: data.push_enabled ?? false,
         });
       } catch (error) {
         console.error("Erro ao buscar preferências:", error);
@@ -206,10 +213,40 @@ const NotificationsPage: React.FC = () => {
   };
 
   const handleToggle = (key: keyof typeof localPreferences) => {
+    if (key === "push_enabled") {
+      handlePushToggle();
+      return;
+    }
     setLocalPreferences((prev) => ({
       ...prev,
       [key]: !prev[key],
     }));
+  };
+
+  const handlePushToggle = async () => {
+    setPushLoading(true);
+    try {
+      if (localPreferences.push_enabled) {
+        await unsubscribeFromPush();
+        await updateNotificationPreferences({ push_enabled: false });
+        setLocalPreferences((prev) => ({ ...prev, push_enabled: false }));
+        showToast("Notificações push desativadas.", "success");
+      } else {
+        await subscribeForPush();
+        await updateNotificationPreferences({ push_enabled: true });
+        setLocalPreferences((prev) => ({ ...prev, push_enabled: true }));
+        showToast("Notificações push ativadas com sucesso.", "success");
+      }
+    } catch (e: any) {
+      const msg =
+        e?.message ||
+        (localPreferences.push_enabled
+          ? "Erro ao desativar notificações no dispositivo"
+          : "Não foi possível ativar. Verifique as permissões do navegador ou tente novamente mais tarde.");
+      showToast(msg, "error");
+    } finally {
+      setPushLoading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -846,6 +883,67 @@ const NotificationsPage: React.FC = () => {
                   >
                     Receba notificações quando novos eventos forem criados
                   </Typography>
+                </Box>
+              </Box>
+            </Paper>
+
+            <Paper
+              sx={{
+                padding: { xs: 2, sm: 3 },
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderRadius: 2,
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                width: "100%",
+                overflow: "hidden",
+              }}
+            >
+              <Box sx={{ display: "flex", width: "100%", gap: 1 }}>
+                <Checkbox
+                  checked={localPreferences.push_enabled}
+                  onChange={() => handleToggle("push_enabled")}
+                  disabled={pushLoading}
+                  sx={{
+                    color: "#ffcc01",
+                    "&.Mui-checked": {
+                      color: "#ffcc01",
+                    },
+                    flexShrink: 0,
+                    alignSelf: "flex-start",
+                    mt: 0.5,
+                  }}
+                />
+                <Box sx={{ flex: 1, minWidth: 0, overflow: "hidden", width: "100%" }}>
+                  <Typography
+                    sx={{
+                      color: "#fff",
+                      fontWeight: 600,
+                      fontSize: { xs: "1rem", sm: "1.1rem" },
+                      mb: 0.5,
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                      width: "100%",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    Notificações push
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: "rgba(255, 255, 255, 0.7)",
+                      fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                      width: "100%",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    Receba avisos diretamente no navegador, inclusive com a página em segundo plano. Pode ser desativado a qualquer momento nas preferências.
+                  </Typography>
+                  {pushLoading && (
+                    <Box sx={{ mt: 1 }}>
+                      <CircularProgress size={20} sx={{ color: "#ffcc01" }} />
+                    </Box>
+                  )}
                 </Box>
               </Box>
             </Paper>

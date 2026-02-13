@@ -6,6 +6,7 @@ export interface NotificationPreferences {
   news_feed: boolean;
   interactions: boolean;
   new_events: boolean;
+  push_enabled?: boolean;
 }
 
 export interface UpdateNotificationPreferences {
@@ -13,6 +14,7 @@ export interface UpdateNotificationPreferences {
   news_feed?: boolean;
   interactions?: boolean;
   new_events?: boolean;
+  push_enabled?: boolean;
 }
 
 export const getNotificationPreferences = async (): Promise<NotificationPreferences> => {

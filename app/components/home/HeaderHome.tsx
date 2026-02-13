@@ -37,7 +37,7 @@ export default function HomeHeader({
   profile: profileProp,
 }: Props) {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const [profile, setProfile] = useState<ProfileResponse | null>(profileProp || null);
   const [loadingProfile, setLoadingProfile] = useState(!profileProp);
@@ -73,8 +73,12 @@ export default function HomeHeader({
       });
   }, [profileProp]);
 
-  // Buscar contador de notificações não lidas
+  // Buscar contador de notificações não lidas (apenas se autenticado)
   useEffect(() => {
+    if (!isAuthenticated) {
+      setUnreadCount(0);
+      return;
+    }
     const fetchUnreadCount = async () => {
       try {
         const count = await getUnreadCount();
@@ -167,7 +171,7 @@ export default function HomeHeader({
       clearInterval(interval);
       window.removeEventListener('notificationRemoved', handleNotificationRemoved as EventListener);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   // Buscar notificações quando o menu abrir
   useEffect(() => {
