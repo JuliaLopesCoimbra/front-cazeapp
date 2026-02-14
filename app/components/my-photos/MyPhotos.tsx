@@ -7,12 +7,22 @@ import {
   Card,
   CardMedia,
   Skeleton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  CircularProgress,
 } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import {
   getMyDownloadedPhotos,
   DownloadedPhoto,
 } from "@/app/services/myPhotos/myPhotosService";
+import api from "@/app/services/auth/axiosConfig";
+import { useToast } from "@/app/context/ToastContext";
 
 interface MyPhotosProps {
   hideTitle?: boolean;
@@ -25,17 +35,52 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
   const [initialized, setInitialized] = useState(false);
   // =========================================
   
+  const PHOTOS_PER_LOAD = 5;
   const [photos, setPhotos] = useState<DownloadedPhoto[]>([]);
+  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<DownloadedPhoto | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const { showToast } = useToast();
+  const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  const loadPhotos = async () => {
+  const loadPhotos = async (reset = false) => {
+    if (loading || loadingMore) return;
+
+    if (reset) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+
+    const nextOffset = reset ? 0 : offset;
+
     try {
-      const data = await getMyDownloadedPhotos();
-      setPhotos(data);
+      const data = await getMyDownloadedPhotos(PHOTOS_PER_LOAD, nextOffset);
+      
+      if (reset) {
+        setPhotos(data);
+      } else {
+        setPhotos(prev => {
+          const merged = [...prev, ...data];
+          // Remove duplicatas baseado no ID
+          const unique = Array.from(
+            new Map(merged.map((item) => [item.id, item])).values()
+          );
+          return unique;
+        });
+      }
+      
+      setOffset(nextOffset + data.length);
+      setHasMore(data.length >= PHOTOS_PER_LOAD);
     } catch (err) {
       console.error("Erro ao carregar fotos baixadas", err);
+      setHasMore(false);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -48,6 +93,8 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
     
     if (cached && cached.data.length > 0) {
       setPhotos(cached.data);
+      setOffset(cached.data.length);
+      setHasMore(cached.data.length >= PHOTOS_PER_LOAD);
       setLoading(false);
       setInitialized(true);
       
@@ -89,13 +136,15 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
       
       (async () => {
         try {
-          const freshData = await getMyDownloadedPhotos();
+          const freshData = await getMyDownloadedPhotos(100, 0);
           
           const cachedIds = cached.data.map((p: DownloadedPhoto) => p.id).sort().join(',');
           const freshIds = freshData.map((p: DownloadedPhoto) => p.id).sort().join(',');
           
           if (cachedIds !== freshIds || cached.data.length !== freshData.length) {
             setPhotos([...freshData]);
+            setOffset(freshData.length);
+            setHasMore(freshData.length >= PHOTOS_PER_LOAD);
             
             const hasNewItems = freshData.length > cached.data.length;
             const hasRemovedItems = freshData.length < cached.data.length;
@@ -118,6 +167,8 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
             const contentChanged = JSON.stringify(cached.data) !== JSON.stringify(freshData);
             if (contentChanged) {
               setPhotos([...freshData]);
+              setOffset(freshData.length);
+              setHasMore(freshData.length >= PHOTOS_PER_LOAD);
             }
             setCache(cacheKey, freshData, targetPosition);
           }
@@ -126,7 +177,7 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
         }
       })();
     } else {
-      loadPhotos();
+      loadPhotos(true);
       setInitialized(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -206,6 +257,71 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
     };
   }, [photos, cacheKey, setCache]);
 
+  // Infinite scroll - carregar mais fotos quando chegar no final
+  useEffect(() => {
+    if (!loaderRef.current || !hasMore || loading || loadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadPhotos(false);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMore, offset, loading, loadingMore]);
+
+  const handlePhotoClick = (photo: DownloadedPhoto) => {
+    setSelectedPhoto(photo);
+    setModalOpen(true);
+  };
+
+  const handleDownloadPhoto = async () => {
+    if (!selectedPhoto) return;
+    try {
+      // Preparar parâmetros para o download
+      const params: any = { url: selectedPhoto.image_url };
+      
+      // Adicionar event_id se disponível
+      if (selectedPhoto.event_id) {
+        params.event_id = selectedPhoto.event_id;
+      }
+      
+      // Adicionar event_name se disponível
+      if (selectedPhoto.event_name) {
+        params.event_name = selectedPhoto.event_name;
+      }
+      
+      // Adicionar similaridade se disponível
+      if (selectedPhoto.similarity) {
+        params.similarity = selectedPhoto.similarity;
+      }
+
+      const res = await api.get("/photo-ai/download-image", {
+        params,
+        responseType: "blob",
+      });
+      const blob = res.data as Blob;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `foto-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Foto baixada com sucesso!", "success");
+      setModalOpen(false);
+      setSelectedPhoto(null);
+    } catch {
+      showToast("Não foi possível baixar a foto. Tente novamente.", "error");
+    }
+  };
+
   if (loading) {
     return (
       <Box 
@@ -243,7 +359,7 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
     );
   }
 
-  if (photos.length === 0) {
+  if (photos.length === 0 && !loading) {
     return (
       <Box 
         padding={2} 
@@ -310,11 +426,17 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
           {photos.map((photo) => (
             <Card
               key={photo.id}
+              onClick={() => handlePhotoClick(photo)}
               sx={{
                 backgroundColor: "transparent",
                 boxShadow: "none",
                 borderRadius: 2,
                 overflow: "hidden",
+                cursor: "pointer",
+                transition: "transform 0.2s",
+                "&:hover": {
+                  transform: "scale(1.02)",
+                },
               }}
             >
               <CardMedia
@@ -340,19 +462,177 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
                   {photo.event_name}
                 </Typography>
               )}
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "rgba(255,255,255,0.5)",
-                  display: "block",
-                }}
-              >
-                {new Date(photo.downloaded_at).toLocaleDateString("pt-BR")}
-              </Typography>
             </Card>
           ))}
         </Box>
+
+        {/* Loader para infinite scroll */}
+        {hasMore && (
+          <Box
+            ref={loaderRef}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 3,
+              minHeight: 100,
+            }}
+          >
+            {loadingMore && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: "#5a3cf1",
+                }}
+              />
+            )}
+          </Box>
+        )}
       </Box>
+
+      {/* Modal de confirmação de download */}
+      <Dialog
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedPhoto(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+        sx={{
+          "& .MuiDialog-container": {
+            alignItems: "center",
+          },
+        }}
+        PaperProps={{
+          sx: {
+            backgroundColor: "#1a1a1a",
+            color: "#fff",
+            borderRadius: 2,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            pb: 2,
+            fontWeight: 600,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              backgroundColor: "rgba(90, 60, 241, 0.1)",
+            }}
+          >
+            <ImageOutlinedIcon sx={{ color: "#5a3cf1", fontSize: 28 }} />
+          </Box>
+          Deseja baixar novamente?
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 3, pb: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              alignItems: "center",
+            }}
+          >
+            {selectedPhoto && (
+              <>
+                <Box
+                  sx={{
+                    width: "100%",
+                    maxWidth: 300,
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  <img
+                    src={selectedPhoto.image_url}
+                    alt={selectedPhoto.event_name || "Foto selecionada"}
+                    style={{
+                      width: "100%",
+                      display: "block",
+                      aspectRatio: "1 / 1",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+                {selectedPhoto.event_name && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "rgba(255,255,255,0.7)",
+                      textAlign: "center",
+                    }}
+                  >
+                    {selectedPhoto.event_name}
+                  </Typography>
+                )}
+                {selectedPhoto.similarity && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "rgba(255,255,255,0.5)",
+                      textAlign: "center",
+                    }}
+                  >
+                    Similaridade: {selectedPhoto.similarity}
+                  </Typography>
+                )}
+              </>
+            )}
+          </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+            p: 2,
+            gap: 1,
+          }}
+        >
+          <Button
+            onClick={() => {
+              setModalOpen(false);
+              setSelectedPhoto(null);
+            }}
+            sx={{
+              color: "rgba(255,255,255,0.7)",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.05)",
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleDownloadPhoto}
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            sx={{
+              backgroundColor: "#5a3cf1",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: "#4a2cd1",
+              },
+            }}
+          >
+            Baixar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -678,8 +678,21 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
   const handleDownloadPhoto = async () => {
     if (!selectedPhoto) return;
     try {
+      // Preparar parâmetros para o download
+      const params: any = { url: selectedPhoto.url };
+      
+      // Adicionar event_id se disponível
+      if (eventId) {
+        params.event_id = Number(eventId);
+      }
+      
+      // Adicionar similaridade se disponível
+      if (selectedPhoto.similarity !== undefined) {
+        params.similarity = `${selectedPhoto.similarity.toFixed(1)}%`;
+      }
+
       const res = await api.get("/photo-ai/download-image", {
-        params: { url: selectedPhoto.url },
+        params,
         responseType: "blob",
       });
       const blob = res.data as Blob;
