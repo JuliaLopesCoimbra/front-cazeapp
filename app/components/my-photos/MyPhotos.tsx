@@ -38,7 +38,7 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
   const PHOTOS_PER_LOAD = 5;
   const [photos, setPhotos] = useState<DownloadedPhoto[]>([]);
   const [offset, setOffset] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Mantém true para mostrar skeleton inicialmente
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<DownloadedPhoto | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -67,7 +67,9 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
       photosLength: photos.length 
     });
     
-    if (loading || loadingMore) {
+    // Se for reset, sempre permite executar (ignora o estado de loading atual)
+    // Se não for reset, verifica se já está carregando
+    if (!reset && (loading || loadingMore)) {
       console.log("⚠️ [MyPhotos] loadPhotos BLOQUEADO - já está carregando");
       return;
     }
