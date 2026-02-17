@@ -427,18 +427,7 @@ export default function LineupPage() {
           </Typography>
         )}
 
-        {item.event_date && (
-          <Typography
-            sx={{
-              color: "rgba(255,255,255,0.8)",
-              fontSize: { xs: "0.85rem", md: "0.95rem" },
-              fontWeight: 500,
-              mb: 1,
-            }}
-          >
-            {formatDateOnly(item.event_date)}
-          </Typography>
-        )}
+       
       </Box>
 
       <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
