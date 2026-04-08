@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build: .
+    container_name: n1-front-prod
+    restart: always
+    ports:
+      - "3000:3000" # Ajuste se o seu front rodar em outra porta
+    env_file:
+      - .env
