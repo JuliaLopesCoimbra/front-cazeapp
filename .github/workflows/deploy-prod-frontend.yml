@@ -25,3 +25,5 @@ jobs:
             
             # Build e Restart automático
             docker-compose up --build -d
+            # O comando abaixo limpa imagens antigas e paradas automaticamente
+            docker image prune -f
