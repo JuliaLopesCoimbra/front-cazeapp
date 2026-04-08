@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy na AWS Produção (Front)
+      - name: Deploy na AWS via Docker (Front)
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.PROD_FRONTEND_HOST }}
@@ -19,6 +19,9 @@ jobs:
             cd /home/ec2-user/front-n1
             git checkout main
             git pull origin main
-            npm install
-            npm run build
-            pm2 restart front-prod # Ou o nome do processo PM2 na máquina de prod
+            
+            # Limpeza preventiva para não lotar o disco da EC2
+            docker image prune -f
+            
+            # Build e Restart automático
+            docker-compose up --build -d
