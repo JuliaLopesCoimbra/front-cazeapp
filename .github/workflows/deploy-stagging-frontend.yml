@@ -1,10 +1,10 @@
-name: Deploy Staging Frontend # Nome Único
+name: Deploy Staging Frontend
+
 on:
   push:
     branches:
       - develop
-    paths:
-      - 'frontend/**' # Opcional: só dispara se mudar algo na pasta do front
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,10 +12,20 @@ jobs:
       - name: Deploy Staging
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.STAGING_HOST_FRONT }}
+          host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
-            cd /home/ec2-user/staging-front
-            git pull origin develop
+            # 1. Entra na pasta
+            cd /home/ec2-user/front-n1
+            
+            # 2. Atualiza o código do Git
+            git fetch origin
+            git checkout develop
+            git reset --hard origin/develop
+            
+            # 3. Roda APENAS o Docker (remova comandos de npm ou pm2 daqui)
             docker compose up --build -d
+            
+            # 4. Limpeza de segurança
+            docker image prune -f
