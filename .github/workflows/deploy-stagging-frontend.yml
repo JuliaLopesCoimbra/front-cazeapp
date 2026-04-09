@@ -1,8 +1,10 @@
-name: Deploy Staging Frontend
+name: Deploy Staging Frontend # Nome Único
 on:
   push:
     branches:
       - develop
+    paths:
+      - 'frontend/**' # Opcional: só dispara se mudar algo na pasta do front
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -10,11 +12,10 @@ jobs:
       - name: Deploy Staging
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.STAGING_HOST }}
+          host: ${{ secrets.STAGING_HOST_FRONT }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
             cd /home/ec2-user/staging-front
             git pull origin develop
-            docker-compose up --build -d
-            docker image prune -f
+            docker compose up --build -d
