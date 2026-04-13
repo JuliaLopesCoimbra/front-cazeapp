@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Roboto, Inter } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
@@ -7,6 +8,8 @@ import { FeedCacheProvider } from './context/FeedCacheContext';
 import EmotionCacheProvider from './lib/emotion-cache';
 import ThemeProvider from './lib/theme-provider';
 import ScrollRestorer from './components/layout/ScrollRestorer';
+
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -67,6 +70,7 @@ export default function RootLayout({
             </AuthProvider>
           </ThemeProvider>
         </EmotionCacheProvider>
+        {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>
     </html>
   );
