@@ -6,12 +6,14 @@ import { Button, Box, Skeleton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { getPublicEvents, EventResponse } from "@/app/services/events/eventAppService";
 import EventIndisponivelPublic from "@/app/components/event/EventIndisponivelPublic";
+import { getEventBackgroundSx, getEventTheme } from "@/app/utils/eventBranding";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [shouldAnimate, setShouldAnimate] = useState(true);
   const router = useRouter();
+  const pageThemeEvent = events.length === 1 ? events[0] : null;
 
   // Função para normalizar título para URL
   const normalizeForUrl = (str: string): string => {
@@ -54,7 +56,7 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <div className="dashboard-page-background" style={{ minHeight: "100vh" }}>
+      <div style={{ ...getEventBackgroundSx(pageThemeEvent), minHeight: "100vh" }}>
         {/* Header Skeleton */}
         <div
           style={{
@@ -171,7 +173,7 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="dashboard-page-background" style={{ minHeight: "100vh" }}>
+    <div style={{ ...getEventBackgroundSx(pageThemeEvent), minHeight: "100vh" }}>
       <Box
         className={shouldAnimate ? "slide-up-animation" : ""}
         sx={{
@@ -236,7 +238,9 @@ export default function EventsPage() {
             justifyItems: events.length === 1 ? "center" : "stretch",
           }}
         >
-          {events.map((event) => (
+          {events.map((event) => {
+            const eventTheme = getEventTheme(event);
+            return (
             <Box
               key={event.id}
               className={shouldAnimate ? "slide-up-delay-2" : ""}
@@ -327,8 +331,8 @@ export default function EventsPage() {
               <Button
                 sx={{
                   marginTop: 1,
-                  backgroundColor: "#FFD600",
-                  color: "#000",
+                  backgroundColor: eventTheme.primaryButtonBg,
+                  color: eventTheme.primaryButtonText,
                   fontWeight: 700,
                   padding: { xs: "10px 24px", md: "10px 28px" },
                   borderRadius: "30px",
@@ -337,16 +341,16 @@ export default function EventsPage() {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    backgroundColor: "#FFC400",
+                    backgroundColor: eventTheme.primaryButtonHover,
                     transform: "scale(1.05)",
-                    boxShadow: "0 6px 16px rgba(255, 214, 0, 0.4)",
+                    boxShadow: "0 6px 16px rgba(0, 0, 0, 0.4)",
                   },
                 }}
               >
                 Ver Evento
               </Button>
             </Box>
-          ))}
+          )})}
         </Box>
       </main>
     </div>

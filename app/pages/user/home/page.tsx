@@ -14,6 +14,7 @@ import EventDetails from "@/app/components/home/EventDetails";
 import { useAuth } from "@/app/context/AuthContext";
 import PhotoAI from "@/app/components/home/PhotoAI";
 import Enredo from "@/app/components/home/Enredo";
+import WorldCupGames from "@/app/components/home/WorldCupGames";
 import EventMap from "@/app/components/home/EventMap";
 import LineUp from "@/app/components/home/LineUp";
 import EventIndisponivel from "@/app/components/event/EventIndisponivel";
@@ -26,6 +27,7 @@ import {
 import { subscribeForPush } from "@/app/services/notifications/pushService";
 import { useToast } from "@/app/context/ToastContext";
 import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSx } from "@/app/utils/eventBranding";
 
 const NOTIFICATION_POPUP_DISMISSED_KEY = "n1_notification_popup_dismissed_at";
 const NOTIFICATION_POPUP_DISMISS_DAYS = 7;
@@ -485,8 +487,8 @@ const HomeContent: React.FC = () => {
     }
   }
 
-  // Todas as abas usam o fundo responsivo (prizebackgroundpc no PC, dashboard no mobile)
-  const pageBackgroundSx = dashboardBackgroundSx;
+  // Todas as abas usam fundo por tema de evento.
+  const pageBackgroundSx = getEventBackgroundSx(currentEvent);
 
   // Mostra skeleton até que tanto o evento quanto o perfil estejam carregados
   if (!currentEvent || !profileLoaded) {
@@ -613,15 +615,16 @@ const HomeContent: React.FC = () => {
 
         {/* Tabs */}
         <Box className={shouldAnimate ? "slide-up-delay-1" : ""}>
-          <HomeTabs 
-            active={activeTab} 
+          <HomeTabs
+            active={activeTab}
             onChange={(newTab) => {
               setActiveTab(newTab);
               // Atualiza a URL para refletir a aba selecionada, mas não força navegação
               const url = new URL(window.location.href);
               url.searchParams.set("tab", newTab);
               window.history.replaceState({}, "", url.toString());
-            }} 
+            }}
+            eventType={currentEvent?.event_type}
           />
         </Box>
 
@@ -662,7 +665,11 @@ const HomeContent: React.FC = () => {
 
         {activeTab === "enredo" && currentEvent && (
           <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} />
+            {currentEvent.event_type === "world_cup" ? (
+              <WorldCupGames eventId={currentEvent.id} />
+            ) : (
+              <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} />
+            )}
           </Box>
         )}
       </Box>

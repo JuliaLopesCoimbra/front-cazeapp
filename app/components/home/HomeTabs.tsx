@@ -6,11 +6,13 @@ type Tab = "home" | "eventos" | "mapa" | "lineup" | "foto" | "enredo";
 interface Props {
   active: Tab;
   onChange: (tab: Tab) => void;
+  /** Tipo do evento atual — altera o label da aba "enredo" para "Jogos" quando world_cup */
+  eventType?: string;
 }
 
 const DRAG_THRESHOLD_PX = 5;
 
-export default function HomeTabs({ active, onChange }: Props) {
+export default function HomeTabs({ active, onChange, eventType }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragStartXRef = useRef<number | null>(null);
   const dragStartScrollLeftRef = useRef<number>(0);
@@ -24,7 +26,7 @@ export default function HomeTabs({ active, onChange }: Props) {
     { label: "Mapa", value: "mapa" },
     { label: "Line Up", value: "lineup" },
     { label: "Photo Finder", value: "foto" },
-    { label: "Enredo", value: "enredo" },
+    { label: eventType === "world_cup" ? "Jogos" : "Enredo", value: "enredo" },
   ];
 
   // Mesma largura e padding do conteúdo abaixo (ex.: lineup/datas) para alinhar início e fim

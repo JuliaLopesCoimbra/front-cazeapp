@@ -15,6 +15,7 @@ import { getEvents, EventResponse } from "../../services/events/eventAppService"
 import { formatEventDates } from "../../utils/eventDateFormatter";
 import { useAuth } from "../../context/AuthContext";
 import EventIndisponivelPublic from "@/app/components/event/EventIndisponivelPublic";
+import { getEventBackgroundSx, getEventTheme } from "@/app/utils/eventBranding";
 
 export default function EventPage() {
   const router = useRouter();
@@ -386,6 +387,7 @@ export default function EventPage() {
   if (!event) return <EventIndisponivelPublic />; // Se não houver evento ou se não for ativo, exibe o componente de evento indisponível
 
   // Formatação do horário
+  const eventTheme = getEventTheme(event);
   const startDate = new Date(event.starts_at);
   const endDate = new Date(event.ends_at);
 
@@ -398,8 +400,8 @@ export default function EventPage() {
 
   return (
     <div
-      className="dashboard-page-background"
       style={{
+        ...getEventBackgroundSx(event),
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -635,8 +637,8 @@ export default function EventPage() {
               onClick={() => router.push(`/pages/events/${event.id}/lineup`)}
               startIcon={<MusicNoteIcon />}
               sx={{
-                backgroundColor: "#FFD600",
-                color: "#000",
+                backgroundColor: eventTheme.primaryButtonBg,
+                color: eventTheme.primaryButtonText,
                 fontWeight: 700,
                 padding: "12px 32px",
                 borderRadius: "30px",
@@ -644,7 +646,7 @@ export default function EventPage() {
                 fontSize: 16,
                 boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                 "&:hover": {
-                  backgroundColor: "#FFC400",
+                  backgroundColor: eventTheme.primaryButtonHover,
                 },
               }}
             >
@@ -721,25 +723,26 @@ export default function EventPage() {
             </Box>
           )}
 
-          {/* BOTÃO COMPRAR INGRESSOS */}
-          <Box
-            className={shouldAnimate ? "slide-up-delay-3" : ""}
-            sx={{
-              maxWidth: 700,
-              width: "100%",
-              padding: "20px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
+          {/* BOTÃO COMPRAR INGRESSOS — só exibe se o evento tiver ticket_url */}
+          {event.ticket_url && (
+            <Box
+              className={shouldAnimate ? "slide-up-delay-3" : ""}
+              sx={{
+                maxWidth: 700,
+                width: "100%",
+                padding: "20px",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
               <Button
                 component="a"
-                href="https://www.ticketmaster.com.br/event/camaroten1"
+                href={event.ticket_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{
-                  backgroundColor: "#FFD600",
-                  color: "#000",
+                  backgroundColor: eventTheme.primaryButtonBg,
+                  color: eventTheme.primaryButtonText,
                   fontWeight: 700,
                   padding: "12px 32px",
                   borderRadius: "30px",
@@ -747,13 +750,14 @@ export default function EventPage() {
                   fontSize: 16,
                   boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                   "&:hover": {
-                    backgroundColor: "#FFC400",
+                    backgroundColor: eventTheme.primaryButtonHover,
                   },
                 }}
               >
                 Comprar ingressos
               </Button>
-          </Box>
+            </Box>
+          )}
 
           {/* <Button
             onClick={() => router.push("/comprar")}
