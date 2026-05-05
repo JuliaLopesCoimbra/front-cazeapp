@@ -28,6 +28,7 @@ import { subscribeForPush } from "@/app/services/notifications/pushService";
 import { useToast } from "@/app/context/ToastContext";
 import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
 import { getEventBackgroundSx } from "@/app/utils/eventBranding";
+import { getEventTheme } from "@/app/utils/eventBranding";
 
 const NOTIFICATION_POPUP_DISMISSED_KEY = "n1_notification_popup_dismissed_at";
 const NOTIFICATION_POPUP_DISMISS_DAYS = 7;
@@ -489,6 +490,7 @@ const HomeContent: React.FC = () => {
 
   // Todas as abas usam fundo por tema de evento.
   const pageBackgroundSx = getEventBackgroundSx(currentEvent);
+  const currentTheme = getEventTheme(currentEvent);
 
   // Mostra skeleton até que tanto o evento quanto o perfil estejam carregados
   if (!currentEvent || !profileLoaded) {
@@ -625,6 +627,7 @@ const HomeContent: React.FC = () => {
               window.history.replaceState({}, "", url.toString());
             }}
             eventType={currentEvent?.event_type}
+            activeColor={currentTheme.tabActiveColor}
           />
         </Box>
 
@@ -673,7 +676,7 @@ const HomeContent: React.FC = () => {
           </Box>
         )}
       </Box>
-      <BottomNav />
+      <BottomNav activeColor={currentTheme.footerActiveColor} />
       <NotificationPermissionPopup
         open={showNotificationPopup}
         onClose={handleNotificationPopupDismiss}

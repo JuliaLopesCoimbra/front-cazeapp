@@ -6,6 +6,8 @@ export interface EventBrandTheme {
   key: EventBrandKey;
   backgroundMobile: string;
   backgroundDesktop: string;
+  tabActiveColor: string;
+  footerActiveColor: string;
   primaryButtonBg: string;
   primaryButtonText: string;
   primaryButtonHover: string;
@@ -23,14 +25,18 @@ export const EVENT_BRAND_THEMES: Record<EventBrandKey, EventBrandTheme> = {
     key: "default",
     backgroundMobile: "/background/dashboard.png",
     backgroundDesktop: "/background/prizebackgroundpc.png",
+    tabActiveColor: "#ffc91f",
+    footerActiveColor: "#ffc91f",
     primaryButtonBg: "#FFD600",
     primaryButtonText: "#000000",
     primaryButtonHover: "#FFC400",
   },
   n1_torcida: {
     key: "n1_torcida",
-    backgroundMobile: "/background/prizebackgroundpc.png",
-    backgroundDesktop: "/background/prizebackgroundpc.png",
+    backgroundMobile: "/background/fundo-copa.png",
+    backgroundDesktop: "/background/fundo-copa.png",
+    tabActiveColor: "#0f935d",
+    footerActiveColor: "#0f935d",
     primaryButtonBg: "#00C853",
     primaryButtonText: "#FFFFFF",
     primaryButtonHover: "#009624",

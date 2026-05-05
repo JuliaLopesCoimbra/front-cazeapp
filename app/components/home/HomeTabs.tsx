@@ -8,11 +8,12 @@ interface Props {
   onChange: (tab: Tab) => void;
   /** Tipo do evento atual — altera o label da aba "enredo" para "Jogos" quando world_cup */
   eventType?: string;
+  activeColor?: string;
 }
 
 const DRAG_THRESHOLD_PX = 5;
 
-export default function HomeTabs({ active, onChange, eventType }: Props) {
+export default function HomeTabs({ active, onChange, eventType, activeColor = "#ffc91f" }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragStartXRef = useRef<number | null>(null);
   const dragStartScrollLeftRef = useRef<number>(0);
@@ -166,17 +167,17 @@ export default function HomeTabs({ active, onChange, eventType }: Props) {
                   ? { xs: "0.75rem", md: "0.875rem", lg: "0.9375rem" }
                   : { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
                 // Ativo
-                backgroundColor: isActive ? "#ffc91f" : "transparent",
+                backgroundColor: isActive ? activeColor : "transparent",
                 color: isActive ? "#000" : "#fff",
                 border: `1px solid ${
-                  isActive ? "#ffc91f" : "#fff"
+                  isActive ? activeColor : "#fff"
                 }`,
 
                 "&:hover": {
                   backgroundColor: isActive
-                    ? "#f5bf12"
+                    ? activeColor
                     : "rgba(255,255,255,0.1)",
-                  borderColor: isActive ? "#f5bf12" : "#fff",
+                  borderColor: isActive ? activeColor : "#fff",
                   fontWeight: 900,
                 },
               }}

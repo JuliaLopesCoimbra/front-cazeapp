@@ -8,7 +8,11 @@ import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function BottomNav() {
+interface BottomNavProps {
+  activeColor?: string;
+}
+
+export default function BottomNav({ activeColor = "#ffc91f" }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
   const LAST_PATH_KEY = "bottomNavLastPath";
@@ -74,7 +78,7 @@ export default function BottomNav() {
               router.push(item.path);
             }}
             sx={{
-              color: isActive ? "#ffc91f" : "#fff",
+              color: isActive ? activeColor : "#fff",
               "& svg": {
                 fontSize: isActive ? 28 : 24,
               },
