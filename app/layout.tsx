@@ -79,7 +79,22 @@ export default function RootLayout({
         <Script id="onesignal-init" strategy="afterInteractive">{`
           window.OneSignalDeferred = window.OneSignalDeferred || [];
           OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.init({ appId: "a5de4e1c-4080-42aa-b221-4b842db43645" });
+            await OneSignal.init({
+              appId: "a5de4e1c-4080-42aa-b221-4b842db43645",
+              promptOptions: {
+                slidedown: {
+                  prompts: [{
+                    type: "push",
+                    autoPrompt: true,
+                    text: {
+                      actionMessage: "Ative as notificações para receber atualizações do N1",
+                      acceptButton: "Ativar",
+                      cancelButton: "Agora não"
+                    }
+                  }]
+                }
+              }
+            });
           });
         `}</Script>
       </body>
