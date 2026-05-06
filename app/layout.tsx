@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto, Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import Script from "next/script";
 import "./globals.css";
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
@@ -71,6 +72,16 @@ export default function RootLayout({
           </ThemeProvider>
         </EmotionCacheProvider>
         {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+        <Script
+          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+          strategy="afterInteractive"
+        />
+        <Script id="onesignal-init" strategy="afterInteractive">{`
+          window.OneSignalDeferred = window.OneSignalDeferred || [];
+          OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({ appId: "a5de4e1c-4080-42aa-b221-4b842db43645" });
+          });
+        `}</Script>
       </body>
     </html>
   );

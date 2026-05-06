@@ -98,17 +98,20 @@ const login = useCallback(
     try {
       const decoded = jwtDecode<TokenPayload>(accessToken);
 
-      // Salva tokens no localStorage e cookie
       localStorage.setItem("access_token", accessToken);
       document.cookie = `refresh_token=${refreshToken}; path=/; secure`;
 
-      // Garante que o role seja definido (pode ser undefined em tokens antigos)
       const userRole = decoded.role || null;
       setRole(userRole);
       setIsAuthenticated(true);
-      
-      // Força atualização do contexto
       setAuthVersion((v) => v + 1);
+
+      // Vincula o usuário ao OneSignal para notificações personalizadas
+      if (typeof window !== "undefined" && (window as any).OneSignalDeferred) {
+        (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+          await OneSignal.login(decoded.sub);
+        });
+      }
     } catch (error) {
       console.error("Erro ao decodificar token:", error);
       setIsAuthenticated(false);
@@ -125,8 +128,14 @@ const login = useCallback(
 
     setIsAuthenticated(false);
     setRole(null);
-
     setAuthVersion((v) => v + 1);
+
+    // Desvincula o usuário do OneSignal
+    if (typeof window !== "undefined" && (window as any).OneSignalDeferred) {
+      (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+        await OneSignal.logout();
+      });
+    }
   };
 
   useEffect(() => {
@@ -143,6 +152,13 @@ const login = useCallback(
       const decoded = jwtDecode<TokenPayload>(token);
       setRole(decoded.role || null);
       setIsAuthenticated(true);
+
+      // Restaura vínculo OneSignal para sessões existentes
+      if (typeof window !== "undefined" && (window as any).OneSignalDeferred) {
+        (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+          await OneSignal.login(decoded.sub);
+        });
+      }
     } catch {
       setIsAuthenticated(false);
       setRole(null);
