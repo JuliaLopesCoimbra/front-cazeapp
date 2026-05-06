@@ -17,9 +17,10 @@ import { getParadeLineupItemsByEvent, ParadeLineupItemResponse } from "@/app/ser
 interface LineupViewProps {
   eventId: number;
   accentColor?: string;
+  onlyShows?: boolean;
 }
 
-export default function LineupView({ eventId, accentColor = "#ffc91f" }: LineupViewProps) {
+export default function LineupView({ eventId, accentColor = "#ffc91f", onlyShows = false }: LineupViewProps) {
   const [lineupType, setLineupType] = useState<'shows' | 'parade'>('shows');
   const [lineupItems, setLineupItems] = useState<LineupItemResponse[]>([]);
   const [paradeLineupItems, setParadeLineupItems] = useState<ParadeLineupItemResponse[]>([]);
@@ -28,6 +29,11 @@ export default function LineupView({ eventId, accentColor = "#ffc91f" }: LineupV
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
+    if (onlyShows && lineupType !== "shows") {
+      setLineupType("shows");
+      return;
+    }
+
     const fetchLineup = async () => {
       try {
         setLoading(true);
@@ -59,7 +65,7 @@ export default function LineupView({ eventId, accentColor = "#ffc91f" }: LineupV
     if (eventId) {
       fetchLineup();
     }
-  }, [eventId, lineupType]);
+  }, [eventId, lineupType, onlyShows]);
 
   const formatTime = (timeString: string): string => {
     const parts = timeString.split(":");
@@ -191,36 +197,38 @@ export default function LineupView({ eventId, accentColor = "#ffc91f" }: LineupV
         >
           Line Up de Shows
         </Button>
-        <Button
-          onClick={() => setLineupType('parade')}
-          sx={{
-            borderRadius: "999px",
-            textTransform: "none",
-            fontWeight: 600,
-            lineHeight: 1.2,
-            px: { xs: 1.5, md: 2, lg: 2.5 },
-            minHeight: { xs: 40, md: 44, lg: 48 },
-            height: { xs: 40, md: 44, lg: 48 },
-            flex: 1,
-            maxWidth: { xs: 200, md: 250 },
-            fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
-            // Ativo
-            backgroundColor: lineupType === 'parade' ? accentColor : "transparent",
-            color: lineupType === 'parade' ? "#000" : "#fff",
-            border: `1px solid ${
-              lineupType === 'parade' ? accentColor : "#fff"
-            }`,
-            "&:hover": {
-              backgroundColor: lineupType === 'parade'
-                ? accentColor
-                : "rgba(255,255,255,0.1)",
-              borderColor: lineupType === 'parade' ? accentColor : "#fff",
-              fontWeight: 900,
-            },
-          }}
-        >
-          Line Up de Desfile
-        </Button>
+        {!onlyShows && (
+          <Button
+            onClick={() => setLineupType('parade')}
+            sx={{
+              borderRadius: "999px",
+              textTransform: "none",
+              fontWeight: 600,
+              lineHeight: 1.2,
+              px: { xs: 1.5, md: 2, lg: 2.5 },
+              minHeight: { xs: 40, md: 44, lg: 48 },
+              height: { xs: 40, md: 44, lg: 48 },
+              flex: 1,
+              maxWidth: { xs: 200, md: 250 },
+              fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
+              // Ativo
+              backgroundColor: lineupType === 'parade' ? accentColor : "transparent",
+              color: lineupType === 'parade' ? "#000" : "#fff",
+              border: `1px solid ${
+                lineupType === 'parade' ? accentColor : "#fff"
+              }`,
+              "&:hover": {
+                backgroundColor: lineupType === 'parade'
+                  ? accentColor
+                  : "rgba(255,255,255,0.1)",
+                borderColor: lineupType === 'parade' ? accentColor : "#fff",
+                fontWeight: 900,
+              },
+            }}
+          >
+            Line Up de Desfile
+          </Button>
+        )}
       </Box>
 
       {loading ? (

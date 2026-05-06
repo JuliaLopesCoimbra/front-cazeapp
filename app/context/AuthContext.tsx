@@ -107,7 +107,8 @@ const login = useCallback(
       setAuthVersion((v) => v + 1);
 
       // Vincula o usuário ao OneSignal para notificações personalizadas
-      if (typeof window !== "undefined" && (window as any).OneSignalDeferred) {
+      if (typeof window !== "undefined") {
+        (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
           await OneSignal.login(`n1_${decoded.sub}`);
         });
@@ -131,7 +132,8 @@ const login = useCallback(
     setAuthVersion((v) => v + 1);
 
     // Desvincula o usuário do OneSignal
-    if (typeof window !== "undefined" && (window as any).OneSignalDeferred) {
+    if (typeof window !== "undefined") {
+      (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
       (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
         await OneSignal.logout();
       });
@@ -154,7 +156,8 @@ const login = useCallback(
       setIsAuthenticated(true);
 
       // Restaura vínculo OneSignal para sessões existentes
-      if (typeof window !== "undefined" && (window as any).OneSignalDeferred) {
+      if (typeof window !== "undefined") {
+        (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
           await OneSignal.login(`n1_${decoded.sub}`);
         });

@@ -29,7 +29,7 @@ export default function EventDetails({ event }: Props) {
   const eventTheme = getEventTheme(event);
   const isTorcida = getEventBrandKey(event) === "n1_torcida";
   const highlightColor = isTorcida ? "#0f935d" : "yellow";
-  const textColor = isTorcida ? "#0f935d" : "white";
+  const textColor = "white";
   
   // Restaura scroll ao montar
   useEffect(() => {
@@ -558,17 +558,17 @@ const formatTime = (timeStr: string | undefined): string => {
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{
-                  backgroundColor: isTorcida ? "transparent" : eventTheme.primaryButtonBg,
-                  color: isTorcida ? "#0f935d" : eventTheme.primaryButtonText,
+                  backgroundColor: isTorcida ? "#0f935d" : eventTheme.primaryButtonBg,
+                  color: isTorcida ? "#ffffff" : eventTheme.primaryButtonText,
                   fontWeight: 700,
                   padding: "12px 32px",
                   borderRadius: "30px",
-                  border: isTorcida ? "2px solid #0f935d" : "none",
+                  border: "none",
                   textTransform: "none",
                   fontSize: 16,
                   boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                   "&:hover": {
-                    backgroundColor: isTorcida ? "rgba(15,147,93,0.15)" : eventTheme.primaryButtonHover,
+                    backgroundColor: isTorcida ? "#0b7a4d" : eventTheme.primaryButtonHover,
                   },
                 }}
               >

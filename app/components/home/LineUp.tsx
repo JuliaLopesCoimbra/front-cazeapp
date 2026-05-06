@@ -11,7 +11,8 @@ interface LineUpProps {
 }
 
 export default function LineUp({ eventId, event }: LineUpProps) {
-  const accentColor = getEventBrandKey(event) === "n1_torcida" ? "#0f935d" : "#ffc91f";
+  const isTorcida = getEventBrandKey(event) === "n1_torcida";
+  const accentColor = isTorcida ? "#0f935d" : "#ffc91f";
 
   return (
     <Box
@@ -22,7 +23,7 @@ export default function LineUp({ eventId, event }: LineUpProps) {
         paddingBottom: { xs: "calc(80px + env(safe-area-inset-bottom))", sm: 6 },
       }}
     >
-      <LineupView eventId={eventId} accentColor={accentColor} />
+      <LineupView eventId={eventId} accentColor={accentColor} onlyShows={isTorcida} />
     </Box>
   );
 }
