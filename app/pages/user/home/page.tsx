@@ -656,13 +656,13 @@ const HomeContent: React.FC = () => {
 
         {activeTab === "lineup" && currentEvent && (
           <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <LineUp eventId={currentEvent.id} />
+            <LineUp eventId={currentEvent.id} event={currentEvent} />
           </Box>
         )}
 
         {activeTab === "foto" && currentEvent && (
           <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <PhotoAI eventId={currentEvent.id} />
+            <PhotoAI eventId={currentEvent.id} event={currentEvent} />
           </Box>
         )}
 
@@ -671,7 +671,7 @@ const HomeContent: React.FC = () => {
             {currentEvent.event_type === "world_cup" ? (
               <WorldCupGames eventId={currentEvent.id} />
             ) : (
-              <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} />
+              <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} event={currentEvent} />
             )}
           </Box>
         )}

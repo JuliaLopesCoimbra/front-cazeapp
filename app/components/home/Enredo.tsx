@@ -22,13 +22,21 @@ import {
   getMusicLyricsByEvent,
   getMusicLyricsBySambaSchool,
 } from "@/app/services/musicLyrics/musicLyricsService";
+import { EventResponse } from "@/app/services/events/eventAppService";
+import { getEventBrandKey } from "@/app/utils/eventBranding";
 
 interface Props {
   eventId: number;
   spotifyPlaylistUrl?: string;
+  event?: EventResponse;
 }
 
-const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
+const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl, event }) => {
+  const isTorcida = getEventBrandKey(event) === "n1_torcida";
+  const accentColor = isTorcida ? "#0f935d" : "#fff";
+  const secondaryTextColor = isTorcida ? "#0f935d" : "rgba(255,255,255,0.7)";
+  const softTextColor = isTorcida ? "#0f935d" : "rgba(255,255,255,0.6)";
+  const spotifyColor = isTorcida ? "#0f935d" : "#1DB954";
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `enredo-event-${eventId}`;
   const [initialized, setInitialized] = useState(false);
@@ -351,7 +359,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
         mt={2}
         mb={3}
         sx={{
-          color: "#fff",
+          color: accentColor,
           textAlign: "center",
           fontSize: "1.05rem",
         }}
@@ -363,7 +371,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
       {schools.length === 0 ? (
         <Typography 
           sx={{ 
-            color: "rgba(255,255,255,0.6)",
+            color: softTextColor,
             textAlign: "center",
             mb: 3 
           }}
@@ -458,7 +466,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                     variant="h6"
                     fontWeight={700}
                     sx={{
-                      color: "#fff",
+                      color: accentColor,
                       mb: 1,
                       textAlign: "center",
                       fontSize: { xs: "1rem", md: "1.2rem", lg: "1.3rem" },
@@ -471,7 +479,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                     <Typography
                       variant="body2"
                       sx={{
-                        color: "rgba(255,255,255,0.7)",
+                        color: secondaryTextColor,
                         textAlign: "center",
                         fontSize: { xs: "0.85rem", md: "0.95rem", lg: "1rem" },
                         lineHeight: 1.5,
@@ -531,7 +539,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                 backgroundColor: "rgba(30, 215, 96, 0.1)",
                 backdropFilter: "blur(10px)",
                 borderRadius: 3,
-                border: "2px solid rgba(30, 215, 96, 0.3)",
+                border: `2px solid ${isTorcida ? "rgba(15, 147, 93, 0.3)" : "rgba(30, 215, 96, 0.3)"}`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -542,10 +550,10 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                 transition: "all 0.3s ease",
                 cursor: "pointer",
                 "&:hover": {
-                  borderColor: "rgba(30, 215, 96, 0.5)",
-                  backgroundColor: "rgba(30, 215, 96, 0.15)",
+                  borderColor: isTorcida ? "rgba(15, 147, 93, 0.5)" : "rgba(30, 215, 96, 0.5)",
+                  backgroundColor: isTorcida ? "rgba(15, 147, 93, 0.15)" : "rgba(30, 215, 96, 0.15)",
                   transform: "translateY(-2px)",
-                  boxShadow: "0 8px 24px rgba(30, 215, 96, 0.2)",
+                  boxShadow: isTorcida ? "0 8px 24px rgba(15, 147, 93, 0.2)" : "0 8px 24px rgba(30, 215, 96, 0.2)",
                 },
               }}
               onClick={() => setPlaylistOpened(true)}
@@ -577,7 +585,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                     sx={{
                       width: { xs: 50, md: 60 },
                       height: { xs: 50, md: 60 },
-                      fill: "#1DB954",
+                      fill: spotifyColor,
                     }}
                     viewBox="0 0 24 24"
                   >
@@ -587,7 +595,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                 <Typography
                   variant="h6"
                   sx={{
-                    color: "#fff",
+                    color: accentColor,
                     fontSize: { xs: "1.2rem", md: "1.4rem" },
                     fontWeight: 700,
                     mb: 0.5,
@@ -597,7 +605,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                 </Typography>
                 <Typography
                   sx={{
-                    color: "rgba(255, 255, 255, 0.8)",
+                    color: secondaryTextColor,
                     fontSize: { xs: "0.95rem", md: "1.05rem" },
                     mb: 2,
                   }}
@@ -607,7 +615,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                 <Button
                   variant="contained"
                   sx={{
-                    backgroundColor: "#1DB954",
+                    backgroundColor: spotifyColor,
                     color: "#fff",
                     fontWeight: 600,
                     fontSize: { xs: "0.95rem", md: "1.05rem" },
@@ -616,7 +624,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                     borderRadius: "50px",
                     textTransform: "none",
                     "&:hover": {
-                      backgroundColor: "#1ed760",
+                      backgroundColor: spotifyColor,
                       transform: "scale(1.05)",
                     },
                     transition: "all 0.3s ease",
@@ -645,7 +653,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
               px: 3,
               transition: "all 0.3s ease",
               "&:hover": {
-                borderColor: "rgba(255, 201, 31, 0.4)",
+                borderColor: isTorcida ? "rgba(15, 147, 93, 0.4)" : "rgba(255, 201, 31, 0.4)",
                 backgroundColor: "rgba(0, 0, 0, 0.4)",
               },
             }}
@@ -673,7 +681,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
               <Typography
                 variant="h6"
                 sx={{
-                  color: "rgba(255, 255, 255, 0.9)",
+                  color: accentColor,
                   fontSize: { xs: "1.1rem", md: "1.3rem" },
                   fontWeight: 600,
                   mb: 0.5,
@@ -683,7 +691,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
               </Typography>
               <Typography
                 sx={{
-                  color: "rgba(255, 255, 255, 0.6)",
+                  color: softTextColor,
                   fontSize: { xs: "0.9rem", md: "1rem" },
                   maxWidth: "400px",
                 }}
@@ -715,7 +723,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
               fontWeight={700}
               mb={3}
               sx={{
-                color: "#fff",
+                color: accentColor,
                 textAlign: "center",
                 fontSize: "1.2rem",
               }}
@@ -772,7 +780,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                   fontWeight={700}
                   mb={2}
                   sx={{
-                    color: "#fff",
+                    color: accentColor,
                     textAlign: "center",
                     fontSize: { xs: "1.3rem", md: "1.5rem", lg: "1.7rem" },
                   }}
@@ -785,7 +793,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                   <Typography
                     variant="body1"
                     sx={{
-                      color: "rgba(255,255,255,0.9)",
+                      color: isTorcida ? "#0f935d" : "rgba(255,255,255,0.9)",
                       textAlign: "justify",
                       fontSize: { xs: "0.95rem", md: "1.05rem", lg: "1.1rem" },
                       lineHeight: 1.8,
@@ -828,7 +836,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                       fontWeight={700}
                       mb={2}
                       sx={{
-                        color: "#fff",
+                        color: accentColor,
                         textAlign: "left",
                         fontSize: { xs: "1.1rem", md: "1.3rem" },
                       }}
@@ -840,7 +848,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                     <Typography
                       variant="body1"
                       sx={{
-                        color: "#fff",
+                        color: accentColor,
                         textAlign: "left",
                         fontSize: { xs: "0.95rem", md: "1.05rem", lg: "1.1rem" },
                         lineHeight: 1.8,
@@ -861,7 +869,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl }) => {
                   >
                     <Typography
                       sx={{
-                        color: "rgba(255,255,255,0.6)",
+                        color: softTextColor,
                         fontSize: { xs: "0.9rem", md: "1rem" },
                       }}
                     >

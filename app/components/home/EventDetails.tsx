@@ -12,6 +12,7 @@ import FestivalIcon from "@mui/icons-material/Festival";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import { formatEventDates } from "@/app/utils/eventDateFormatter";
+import { getEventBrandKey, getEventTheme } from "@/app/utils/eventBranding";
 
 interface Props {
   event: EventResponse;
@@ -25,6 +26,10 @@ export default function EventDetails({ event }: Props) {
   const searchParams = useSearchParams();
   const scrollExecutedRef = useRef(false);
   const router = useRouter();
+  const eventTheme = getEventTheme(event);
+  const isTorcida = getEventBrandKey(event) === "n1_torcida";
+  const highlightColor = isTorcida ? "#0f935d" : "yellow";
+  const textColor = isTorcida ? "#0f935d" : "white";
   
   // Restaura scroll ao montar
   useEffect(() => {
@@ -345,7 +350,7 @@ const formatTime = (timeStr: string | undefined): string => {
                   margin: 0,
                   fontSize: "clamp(24px, 5vw, 42px)",
                   fontWeight: 800,
-                  color: "#FFD600",
+                  color: isTorcida ? "#0f935d" : "#FFD600",
                   textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 214, 0, 0.3)",
                   letterSpacing: "0.5px",
                   lineHeight: 1.2,
@@ -362,14 +367,14 @@ const formatTime = (timeStr: string | undefined): string => {
                 marginTop: 2,
                 fontSize: 16,
                 padding: "30px",
-                color: "#000",
+                color: textColor,
                 textAlign: "center",
                 lineHeight: 1.6,
               }}
             >
               <span
                 style={{
-                  color: "white",
+                  color: textColor,
                   padding: "6px 10px",
                   fontWeight: 600,
                   display: "inline",
@@ -385,7 +390,7 @@ const formatTime = (timeStr: string | undefined): string => {
                 maxWidth: 700,
                 width: "100%",
                 padding: "30px",
-                color: "white",
+                color: textColor,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: { xs: "flex-start", md: "center" },
@@ -393,13 +398,13 @@ const formatTime = (timeStr: string | undefined): string => {
               }}
             >
                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <FestivalIcon style={{ color: "yellow", fontSize: 28 }} />
-                <strong style={{ fontSize: 22, color: "white" }}>Informações do Evento</strong>
+                <FestivalIcon style={{ color: highlightColor, fontSize: 28 }} />
+                <strong style={{ fontSize: 22, color: textColor }}>Informações do Evento</strong>
               </div>
               {/* DIAS DO EVENTO */}
               {event.event_dates && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <EventIcon style={{ color: "yellow" }} />
+                  <EventIcon style={{ color: highlightColor }} />
                   <p style={{ margin: 0, fontSize: 15 }}>
                     {formatEventDates(event)}
                   </p>
@@ -409,7 +414,7 @@ const formatTime = (timeStr: string | undefined): string => {
               {/* DATA E HORÁRIO DE INÍCIO */}
               {event.starts_at && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <AccessTimeIcon style={{ color: "yellow" }} />
+                  <AccessTimeIcon style={{ color: highlightColor }} />
                   <p style={{ margin: 0, fontSize: 15 }}>
                     Início: {new Date(event.starts_at).toLocaleString("pt-BR", {
                       day: "2-digit",
@@ -425,7 +430,7 @@ const formatTime = (timeStr: string | undefined): string => {
               {/* DATA E HORÁRIO DE TÉRMINO */}
               {event.ends_at && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <AccessTimeIcon style={{ color: "yellow" }} />
+                  <AccessTimeIcon style={{ color: highlightColor }} />
                   <p style={{ margin: 0, fontSize: 15 }}>
                     Término: {new Date(event.ends_at).toLocaleString("pt-BR", {
                       day: "2-digit",
@@ -441,7 +446,7 @@ const formatTime = (timeStr: string | undefined): string => {
               {/* HORÁRIO DE IDA DAS VANS */}
               {(event.van_arrival_time_start || event.van_arrival_time_end) && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <DirectionsBusIcon style={{ color: "yellow" }} />
+                  <DirectionsBusIcon style={{ color: highlightColor }} />
                   <p style={{ margin: 0, fontSize: 15 }}>
                     Ida das Vans: {event.van_arrival_time_start ? formatTime(event.van_arrival_time_start) : "?"} 
                     {event.van_arrival_time_start && event.van_arrival_time_end ? " às " : ""}
@@ -453,7 +458,7 @@ const formatTime = (timeStr: string | undefined): string => {
               {/* HORÁRIO DE VOLTA DAS VANS */}
               {(event.van_departure_time_start || event.van_departure_time_end) && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <DirectionsBusIcon style={{ color: "yellow" }} />
+                  <DirectionsBusIcon style={{ color: highlightColor }} />
                   <p style={{ margin: 0, fontSize: 15 }}>
                     Volta das Vans: {event.van_departure_time_start ? formatTime(event.van_departure_time_start) : "?"} 
                     {event.van_departure_time_start && event.van_departure_time_end ? " às " : ""}
@@ -465,7 +470,7 @@ const formatTime = (timeStr: string | undefined): string => {
               {/* LOCAL */}
               {event.location && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <LocationOnIcon style={{ color: "yellow" }} />
+                  <LocationOnIcon style={{ color: highlightColor }} />
                   <p style={{ margin: 0, fontSize: 15 }}>{event.location}</p>
                 </Box>
               )}
@@ -491,22 +496,22 @@ const formatTime = (timeStr: string | undefined): string => {
                   }}
                 >
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, marginBottom: 2 }}>
-                  <MeetingRoomIcon style={{ color: "yellow" }} />
-                  <h3 style={{ margin: 0, color: "white", fontSize: 18, fontWeight: 600 }}>
+                  <MeetingRoomIcon style={{ color: highlightColor }} />
+                  <h3 style={{ margin: 0, color: textColor, fontSize: 18, fontWeight: 600 }}>
                     Meeting Point
                   </h3>
                 </Box>
 
                 {event.meeting_point_location && (
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, marginBottom: 2 }}>
-                    <LocationOnIcon style={{ color: "yellow" }} />
-                    <Box component="p" sx={{ margin: 0, fontSize: 15, color: "white", textAlign: { xs: "left", md: "center" } }}>{event.meeting_point_location}</Box>
+                    <LocationOnIcon style={{ color: highlightColor }} />
+                    <Box component="p" sx={{ margin: 0, fontSize: 15, color: textColor, textAlign: { xs: "left", md: "center" } }}>{event.meeting_point_location}</Box>
                   </Box>
                 )}
 
                 {event.meeting_point_schedule && event.meeting_point_schedule.length > 0 && (
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, alignItems: { xs: "flex-start", md: "center" } }}>
-                    <Typography sx={{ color: "white", fontSize: 15, fontWeight: 600, textAlign: { xs: "left", md: "center" } }}>
+                    <Typography sx={{ color: textColor, fontSize: 15, fontWeight: 600, textAlign: { xs: "left", md: "center" } }}>
                       Dias de Funcionamento:
                     </Typography>
                     {event.meeting_point_schedule.map((schedule, index) => (
@@ -518,14 +523,14 @@ const formatTime = (timeStr: string | undefined): string => {
                         }}
                       >
                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1, mb: 1 }}>
-                          <EventIcon style={{ color: "yellow", fontSize: 18 }} />
-                          <Typography sx={{ color: "white", fontSize: 14, fontWeight: 600, textAlign: { xs: "left", md: "center" } }}>
+                          <EventIcon style={{ color: highlightColor, fontSize: 18 }} />
+                          <Typography sx={{ color: textColor, fontSize: 14, fontWeight: 600, textAlign: { xs: "left", md: "center" } }}>
                             Dias {schedule.days.join(", ")} de fevereiro
                           </Typography>
                         </Box>
                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "center" }, gap: 1 }}>
-                          <AccessTimeIcon style={{ color: "yellow", fontSize: 18 }} />
-                          <Typography sx={{ color: "white", fontSize: 14, textAlign: { xs: "left", md: "center" } }}>
+                          <AccessTimeIcon style={{ color: highlightColor, fontSize: 18 }} />
+                          <Typography sx={{ color: textColor, fontSize: 14, textAlign: { xs: "left", md: "center" } }}>
                             Das {schedule.start_time} às {schedule.end_time}
                           </Typography>
                         </Box>
@@ -553,16 +558,17 @@ const formatTime = (timeStr: string | undefined): string => {
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{
-                  backgroundColor: "#FFD600",
-                  color: "#000",
+                  backgroundColor: isTorcida ? "transparent" : eventTheme.primaryButtonBg,
+                  color: isTorcida ? "#0f935d" : eventTheme.primaryButtonText,
                   fontWeight: 700,
                   padding: "12px 32px",
                   borderRadius: "30px",
+                  border: isTorcida ? "2px solid #0f935d" : "none",
                   textTransform: "none",
                   fontSize: 16,
                   boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                   "&:hover": {
-                    backgroundColor: "#FFC400",
+                    backgroundColor: isTorcida ? "rgba(15,147,93,0.15)" : eventTheme.primaryButtonHover,
                   },
                 }}
               >

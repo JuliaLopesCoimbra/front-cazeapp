@@ -109,7 +109,7 @@ const login = useCallback(
       // Vincula o usuário ao OneSignal para notificações personalizadas
       if (typeof window !== "undefined" && (window as any).OneSignalDeferred) {
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-          await OneSignal.login(decoded.sub);
+          await OneSignal.login(`n1_${decoded.sub}`);
         });
       }
     } catch (error) {
@@ -156,7 +156,7 @@ const login = useCallback(
       // Restaura vínculo OneSignal para sessões existentes
       if (typeof window !== "undefined" && (window as any).OneSignalDeferred) {
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-          await OneSignal.login(decoded.sub);
+          await OneSignal.login(`n1_${decoded.sub}`);
         });
       }
     } catch {

@@ -16,9 +16,10 @@ import { getParadeLineupItemsByEvent, ParadeLineupItemResponse } from "@/app/ser
 
 interface LineupViewProps {
   eventId: number;
+  accentColor?: string;
 }
 
-export default function LineupView({ eventId }: LineupViewProps) {
+export default function LineupView({ eventId, accentColor = "#ffc91f" }: LineupViewProps) {
   const [lineupType, setLineupType] = useState<'shows' | 'parade'>('shows');
   const [lineupItems, setLineupItems] = useState<LineupItemResponse[]>([]);
   const [paradeLineupItems, setParadeLineupItems] = useState<ParadeLineupItemResponse[]>([]);
@@ -174,16 +175,16 @@ export default function LineupView({ eventId }: LineupViewProps) {
             maxWidth: { xs: 200, md: 250 },
             fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
             // Ativo
-            backgroundColor: lineupType === 'shows' ? "#ffc91f" : "transparent",
+            backgroundColor: lineupType === 'shows' ? accentColor : "transparent",
             color: lineupType === 'shows' ? "#000" : "#fff",
             border: `1px solid ${
-              lineupType === 'shows' ? "#ffc91f" : "#fff"
+              lineupType === 'shows' ? accentColor : "#fff"
             }`,
             "&:hover": {
               backgroundColor: lineupType === 'shows'
-                ? "#f5bf12"
+                ? accentColor
                 : "rgba(255,255,255,0.1)",
-              borderColor: lineupType === 'shows' ? "#f5bf12" : "#fff",
+              borderColor: lineupType === 'shows' ? accentColor : "#fff",
               fontWeight: 900,
             },
           }}
@@ -204,16 +205,16 @@ export default function LineupView({ eventId }: LineupViewProps) {
             maxWidth: { xs: 200, md: 250 },
             fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
             // Ativo
-            backgroundColor: lineupType === 'parade' ? "#ffc91f" : "transparent",
+            backgroundColor: lineupType === 'parade' ? accentColor : "transparent",
             color: lineupType === 'parade' ? "#000" : "#fff",
             border: `1px solid ${
-              lineupType === 'parade' ? "#ffc91f" : "#fff"
+              lineupType === 'parade' ? accentColor : "#fff"
             }`,
             "&:hover": {
               backgroundColor: lineupType === 'parade'
-                ? "#f5bf12"
+                ? accentColor
                 : "rgba(255,255,255,0.1)",
-              borderColor: lineupType === 'parade' ? "#f5bf12" : "#fff",
+              borderColor: lineupType === 'parade' ? accentColor : "#fff",
               fontWeight: 900,
             },
           }}
@@ -232,7 +233,7 @@ export default function LineupView({ eventId }: LineupViewProps) {
             py: 4,
           }}
         >
-          <CircularProgress sx={{ color: "#ffc91f" }} />
+          <CircularProgress sx={{ color: accentColor }} />
         </Box>
       ) : error ? (
         <Paper
@@ -282,7 +283,7 @@ export default function LineupView({ eventId }: LineupViewProps) {
             minHeight: "200px",
           }}
         >
-          <CircularProgress sx={{ color: "#ffc91f" }} />
+          <CircularProgress sx={{ color: accentColor }} />
         </Box>
       ) : (
         <Box
@@ -325,12 +326,12 @@ export default function LineupView({ eventId }: LineupViewProps) {
                     flex: dates.length <= 5 ? "1 1 0" : undefined,
                     minWidth: dates.length <= 5 ? 0 : undefined,
                     "&.Mui-selected": {
-                      color: "#ffc91f",
+                      color: accentColor,
                       fontWeight: 600,
                     },
                   },
                   "& .MuiTabs-indicator": {
-                    backgroundColor: "#ffc91f",
+                    backgroundColor: accentColor,
                     height: 3,
                   },
                 }}
@@ -465,7 +466,7 @@ export default function LineupView({ eventId }: LineupViewProps) {
                   {showItem.stage && (
                     <Typography
                       sx={{
-                        color: "#ffc91f",
+                        color: accentColor,
                         fontSize: { xs: "0.9rem", md: "1rem" },
                         fontWeight: 600,
                         mb: 0.5,

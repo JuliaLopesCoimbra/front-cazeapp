@@ -32,9 +32,10 @@ interface SearchResult {
 
 interface PhotoAIPageProps {
   eventId: number;
+  accentColor?: string;
 }
 
-export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
+export default function PhotoAIPage({ eventId, accentColor = "#5a3cf1" }: PhotoAIPageProps) {
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `photo-ai-results-event-${eventId}`;
   
@@ -422,11 +423,11 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
                 width: 54,
                 height: 54,
                 borderRadius: "50%",
-                border: "2px solid #4c36e0",
+                border: `2px solid ${accentColor}`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#4c36e0",
+                color: accentColor,
                 background: "#fff",
               }}
             >
@@ -453,7 +454,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
             variant="contained"
             size="large"
             fullWidth
-            sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5 }}
+            sx={{ background: accentColor, borderRadius: 2, py: 1.5 }}
             onClick={requestCamera}
             disabled={isRequestingCamera}
           >
@@ -493,7 +494,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
               maxWidth: 320,
               margin: "0 auto",
               aspectRatio: "3 / 4",
-              border: "3px solid #6c54ff",
+              border: `3px solid ${accentColor}`,
               borderRadius: "50%",
               overflow: "hidden",
               background: "#d9d9d9",
@@ -599,7 +600,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
               bottom: 20,
               left: "50%",
               transform: "translateX(-50%)",
-              background: "#6c54ff",
+              background: accentColor,
               borderRadius: 2,
               px: 3,
               py: 1,
@@ -609,7 +610,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
               zIndex: 5,
               boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
               "&:hover": {
-                background: "#5a3cf1",
+                background: accentColor,
               },
             }}
           >
@@ -882,7 +883,7 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
               backgroundColor: "rgba(90, 60, 241, 0.1)",
             }}
           >
-            <ImageOutlinedIcon sx={{ color: "#5a3cf1", fontSize: 28 }} />
+            <ImageOutlinedIcon sx={{ color: accentColor, fontSize: 28 }} />
           </Box>
           Foto
         </DialogTitle>
@@ -947,11 +948,11 @@ export default function PhotoAIPage({ eventId }: PhotoAIPageProps) {
             variant="contained"
             startIcon={<DownloadIcon />}
             sx={{
-              backgroundColor: "#5a3cf1",
+              backgroundColor: accentColor,
               color: "#fff",
               fontWeight: 600,
               "&:hover": {
-                backgroundColor: "#4a2cd0",
+                backgroundColor: accentColor,
               },
             }}
           >
