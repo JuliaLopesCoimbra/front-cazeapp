@@ -6,7 +6,8 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
 interface BottomNavProps {
   activeColor?: string;
@@ -16,12 +17,28 @@ export default function BottomNav({ activeColor = "#ffc91f" }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
   const LAST_PATH_KEY = "bottomNavLastPath";
+  const [storedBrandKey, setStoredBrandKey] = useState<"default" | "n1_torcida">(
+    () => getStoredEventBrandKey() ?? "default"
+  );
+  const isTorcidaTheme =
+    activeColor.toLowerCase() === "#0f935d" || storedBrandKey === "n1_torcida";
+  const resolvedActiveColor =
+    activeColor.toLowerCase() === "#ffc91f" && storedBrandKey === "n1_torcida"
+      ? "#0f935d"
+      : activeColor;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       sessionStorage.setItem(LAST_PATH_KEY, pathname);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    const refreshBrand = () => setStoredBrandKey(getStoredEventBrandKey() ?? "default");
+    refreshBrand();
+    window.addEventListener("storage", refreshBrand);
+    return () => window.removeEventListener("storage", refreshBrand);
+  }, []);
 
   const items = [
     { path: "/pages/user/home", icon: <HomeIcon /> },
@@ -41,12 +58,11 @@ export default function BottomNav({ activeColor = "#ffc91f" }: BottomNavProps) {
         width: "100%",
         height: "calc(64px + env(safe-area-inset-bottom))",
         minHeight: 64,
-        backgroundColor: "rgba(0,0,0,0.85)",
+        backgroundColor: isTorcidaTheme ? "#d4a400" : "rgba(0,0,0,0.85)",
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
-        borderTop: "1px solid rgba(255,255,255,0.1)",
-        backdropFilter: "blur(6px)",
+        borderTop: isTorcidaTheme ? "1px solid rgba(0,0,0,0.18)" : "1px solid rgba(255,255,255,0.1)",
         zIndex: 9999,
         transform: "translateZ(0)",
         willChange: "transform",
@@ -78,7 +94,7 @@ export default function BottomNav({ activeColor = "#ffc91f" }: BottomNavProps) {
               router.push(item.path);
             }}
             sx={{
-              color: isActive ? activeColor : "#fff",
+              color: isActive ? resolvedActiveColor : isTorcidaTheme ? "#000" : "#fff",
               "& svg": {
                 fontSize: isActive ? 28 : 24,
               },

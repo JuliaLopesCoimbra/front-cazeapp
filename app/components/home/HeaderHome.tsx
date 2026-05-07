@@ -18,8 +18,9 @@ import { EventResponse } from "@/app/services/events/eventAppService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
 import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
 import { useAuth } from "@/app/context/AuthContext";
-import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, Notification } from "@/app/services/notifications/notificationService";
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, AppNotification } from "@/app/services/notifications/notificationService";
 import { useToast } from "@/app/context/ToastContext";
+import { getEventBrandKey } from "@/app/utils/eventBranding";
 
 interface Props {
   event: EventResponse | null;
@@ -45,12 +46,15 @@ export default function HomeHeader({
   const notificationsOpen = Boolean(notificationsAnchorEl);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [totalNotifications, setTotalNotifications] = useState(0);
+  const brandKey = getEventBrandKey(currentEvent || event);
+  const isTorcida = brandKey === "n1_torcida";
+  const torcidaPopupBg = "#d4a400";
 
   useEffect(() => {
     // Se o perfil foi passado como prop, não precisa buscar
@@ -202,7 +206,7 @@ export default function HomeHeader({
     }
   }, [notificationsOpen, showToast]);
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationClick = (notification: AppNotification) => {
     // Fecha o menu imediatamente para melhor UX
     setNotificationsAnchorEl(null);
 
@@ -279,7 +283,7 @@ export default function HomeHeader({
   const getNotificationIcon = (type: string) => {
     const iconStyle = {
       fontSize: 24,
-      color: "#ffcc01",
+      color: isTorcida ? "#000000" : "#ffcc01",
     };
 
     switch (type) {
@@ -470,9 +474,9 @@ export default function HomeHeader({
           <IconButton
             onClick={(e) => setNotificationsAnchorEl(e.currentTarget)}
             sx={{
-              color: "white",
+              color: "#ffc91f",
               "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                backgroundColor: "rgba(255, 201, 31, 0.14)",
               },
               fontSize: { xs: "1.5rem", md: "1.75rem", lg: "2rem" },
             }}
@@ -560,7 +564,7 @@ export default function HomeHeader({
         onClose={() => setNotificationsAnchorEl(null)}
         PaperProps={{
           sx: {
-            backgroundColor: "#1a1a1a",
+            backgroundColor: isTorcida ? torcidaPopupBg : "#1a1a1a",
             color: "white",
             borderRadius: 2,
             width: { xs: "90vw", sm: 400 },
@@ -568,6 +572,7 @@ export default function HomeHeader({
             maxHeight: "80vh",
             mt: 1,
             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5)",
+            border: isTorcida ? "1px solid rgba(0,0,0,0.15)" : "none",
           },
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
@@ -589,7 +594,7 @@ export default function HomeHeader({
           <Typography
             variant="h6"
             sx={{
-              color: "white",
+              color: isTorcida ? "#000" : "white",
               fontWeight: 700,
               fontSize: "1.1rem",
             }}
@@ -601,13 +606,13 @@ export default function HomeHeader({
               size="small"
               onClick={handleMarkAllAsRead}
               sx={{
-                color: "#ffcc01",
+                color: isTorcida ? "#000" : "#ffcc01",
                 fontSize: "0.75rem",
                 textTransform: "none",
                 minWidth: "auto",
                 px: 1,
                 "&:hover": {
-                  backgroundColor: "rgba(255, 204, 1, 0.1)",
+                  backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255, 204, 1, 0.1)",
                 },
               }}
             >
@@ -647,7 +652,7 @@ export default function HomeHeader({
                 py: 4,
               }}
             >
-              <CircularProgress sx={{ color: "#ffcc01" }} />
+              <CircularProgress sx={{ color: isTorcida ? "#000" : "#ffcc01" }} />
             </Box>
           ) : notifications.length === 0 ? (
             <Box
@@ -661,11 +666,11 @@ export default function HomeHeader({
               }}
             >
               <NotificationsIcon
-                sx={{ fontSize: 48, color: "rgba(255, 255, 255, 0.3)", mb: 2 }}
+                sx={{ fontSize: 48, color: isTorcida ? "rgba(0,0,0,0.5)" : "rgba(255, 255, 255, 0.3)", mb: 2 }}
               />
               <Typography
                 sx={{
-                  color: "rgba(255, 255, 255, 0.7)",
+                  color: isTorcida ? "rgba(0,0,0,0.8)" : "rgba(255, 255, 255, 0.7)",
                   textAlign: "center",
                 }}
               >
@@ -681,7 +686,7 @@ export default function HomeHeader({
                     sx={{
                       backgroundColor: notification.is_read
                         ? "transparent"
-                        : "rgba(255, 204, 1, 0.1)",
+                        : isTorcida ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 204, 1, 0.1)",
                     }}
                   >
                     <ListItemButton
@@ -690,7 +695,7 @@ export default function HomeHeader({
                         py: 1.5,
                         px: 2,
                         "&:hover": {
-                          backgroundColor: "rgba(255, 255, 255, 0.05)",
+                          backgroundColor: isTorcida ? "rgba(0,0,0,0.06)" : "rgba(255, 255, 255, 0.05)",
                         },
                       }}
                     >
@@ -703,7 +708,7 @@ export default function HomeHeader({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            bgcolor: "rgba(255, 204, 1, 0.15)",
+                            bgcolor: isTorcida ? "rgba(0,0,0,0.12)" : "rgba(255, 204, 1, 0.15)",
                             borderRadius: "50%",
                             flexShrink: 0,
                           }}
@@ -718,7 +723,7 @@ export default function HomeHeader({
                             sx={{
                               width: 40,
                               height: 40,
-                              bgcolor: "rgba(255, 204, 1, 0.2)",
+                              bgcolor: isTorcida ? "rgba(0,0,0,0.14)" : "rgba(255, 204, 1, 0.2)",
                               flexShrink: 0,
                             }}
                           >
@@ -733,7 +738,7 @@ export default function HomeHeader({
                             sx={{
                               width: 40,
                               height: 40,
-                              bgcolor: "rgba(255, 204, 1, 0.2)",
+                              bgcolor: isTorcida ? "rgba(0,0,0,0.14)" : "rgba(255, 204, 1, 0.2)",
                               flexShrink: 0,
                             }}
                           >
@@ -754,7 +759,7 @@ export default function HomeHeader({
                             <Typography
                               variant="subtitle2"
                               sx={{
-                                color: "white",
+                                color: isTorcida ? "#000" : "white",
                                 fontWeight: notification.is_read ? 400 : 700,
                                 fontSize: "0.9rem",
                               }}
@@ -767,7 +772,7 @@ export default function HomeHeader({
                                   width: 8,
                                   height: 8,
                                   borderRadius: "50%",
-                                  backgroundColor: "#ffcc01",
+                                  backgroundColor: isTorcida ? "#000" : "#ffcc01",
                                   ml: 1,
                                   flexShrink: 0,
                                 }}
@@ -777,7 +782,7 @@ export default function HomeHeader({
                           <Typography
                             variant="body2"
                             sx={{
-                              color: "rgba(255, 255, 255, 0.7)",
+                              color: isTorcida ? "rgba(0,0,0,0.82)" : "rgba(255, 255, 255, 0.7)",
                               fontSize: "0.85rem",
                               mb: 0.5,
                             }}
@@ -787,7 +792,7 @@ export default function HomeHeader({
                           <Typography
                             variant="caption"
                             sx={{
-                              color: "rgba(255, 255, 255, 0.5)",
+                              color: isTorcida ? "rgba(0,0,0,0.65)" : "rgba(255, 255, 255, 0.5)",
                               fontSize: "0.75rem",
                             }}
                           >
@@ -798,7 +803,7 @@ export default function HomeHeader({
                     </ListItemButton>
                   </ListItem>
                   {index < notifications.length - 1 && (
-                    <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.1)" }} />
+                    <Divider sx={{ borderColor: isTorcida ? "rgba(0,0,0,0.12)" : "rgba(255, 255, 255, 0.1)" }} />
                   )}
                 </Box>
               ))}
@@ -815,7 +820,7 @@ export default function HomeHeader({
                 py: 2,
               }}
             >
-              <CircularProgress size={20} sx={{ color: "#ffcc01" }} />
+              <CircularProgress size={20} sx={{ color: isTorcida ? "#000" : "#ffcc01" }} />
             </Box>
           )}
           
@@ -832,7 +837,7 @@ export default function HomeHeader({
               <Typography
                 variant="caption"
                 sx={{
-                  color: "rgba(255, 255, 255, 0.5)",
+                  color: isTorcida ? "rgba(0,0,0,0.65)" : "rgba(255, 255, 255, 0.5)",
                   fontSize: "0.75rem",
                 }}
               >
@@ -850,11 +855,12 @@ export default function HomeHeader({
         onClose={() => setAnchorEl(null)}
         PaperProps={{
           sx: {
-            backgroundColor: "#1a1a1a",
+            backgroundColor: isTorcida ? torcidaPopupBg : "#1a1a1a",
             color: "white",
             borderRadius: 2,
             minWidth: 200,
             mt: 1,
+            border: isTorcida ? "1px solid rgba(0,0,0,0.15)" : "none",
           },
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
@@ -866,17 +872,23 @@ export default function HomeHeader({
             router.push("/pages/user/profile");
           }}
           sx={{
-            color: "white",
+            color: isTorcida ? "#000" : "white",
             "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
+              backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255, 255, 255, 0.1)",
             },
           }}
         >
           <ListItemIcon>
-            <PersonIcon sx={{ color: "white" }} fontSize="small" />
+            <PersonIcon sx={{ color: isTorcida ? "#000" : "white" }} fontSize="small" />
           </ListItemIcon>
           <ListItemText>Ver Perfil</ListItemText>
         </MenuItem>
+        <Divider
+          sx={{
+            borderColor: isTorcida ? "rgba(0,0,0,0.18)" : "rgba(255, 255, 255, 0.12)",
+            my: 0.5,
+          }}
+        />
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
@@ -884,14 +896,14 @@ export default function HomeHeader({
             router.replace("/pages/auth/login");
           }}
           sx={{
-            color: "#ffc91f",
+            color: isTorcida ? "#000" : "#ffc91f",
             "&:hover": {
-              backgroundColor: "rgba(255, 201, 31, 0.1)",
+              backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255, 201, 31, 0.1)",
             },
           }}
         >
           <ListItemIcon>
-            <LogoutIcon sx={{ color: "#ffc91f" }} fontSize="small" />
+            <LogoutIcon sx={{ color: isTorcida ? "#000" : "#ffc91f" }} fontSize="small" />
           </ListItemIcon>
           <ListItemText>Sair</ListItemText>
         </MenuItem>

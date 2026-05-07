@@ -12,6 +12,7 @@ import {
   Alert,
   Tooltip,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 import {
   Block,
   CheckCircle,
@@ -23,6 +24,8 @@ import {
   People,
   Warning,
   Info,
+  Login,
+  Send,
 } from "@mui/icons-material";
 import { UserResponse } from "@/app/services/auth/authAdminService";
 import { formatDate } from "./utils";
@@ -32,27 +35,27 @@ interface UserCardProps {
   userType: "subadmin" | "colunista" | "user";
   onRevoke: (userType: "subadmin" | "colunista" | "user", userId: number, userName: string) => void;
   onReactivate: (userType: "subadmin" | "colunista" | "user", userId: number, userName: string) => void;
+  onResendInvite?: (userId: number, userName: string) => void;
 }
 
-export default function UserCard({ user, userType, onRevoke, onReactivate }: UserCardProps) {
+export default function UserCard({ user, userType, onRevoke, onReactivate, onResendInvite }: UserCardProps) {
+  const router = useRouter();
   const isActive = user.status === "active";
   const isEmailVerified = user.is_email_verified;
+  const canResend = isActive && !isEmailVerified && onResendInvite && userType !== "user";
 
-  // Determinar status e cor do chip
   let statusLabel = "Inativo";
   let statusColor: "success" | "error" | "warning" = "error";
-
   if (isActive) {
     if (isEmailVerified) {
       statusLabel = "Ativo";
       statusColor = "success";
     } else {
-      statusLabel = "Aguardando confirmação de email";
+      statusLabel = "Aguardando confirmação";
       statusColor = "warning";
     }
   }
 
-  // Ícone baseado no tipo de usuário
   const getRoleIcon = () => {
     switch (userType) {
       case "subadmin":
@@ -66,8 +69,10 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
 
   return (
     <Card
+      onClick={() => router.push(`/pages/admin/user-profile/${user.id}`)}
       sx={{
         mb: 2,
+        cursor: "pointer",
         backgroundColor: "rgba(255, 255, 255, 0.08)",
         backdropFilter: "blur(20px)",
         border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -84,37 +89,20 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            {/* Header com nome e status */}
+            {/* Header */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2, flexWrap: "wrap" }}>
               {getRoleIcon()}
               <Typography
                 variant="h6"
-                sx={{
-                  color: "white",
-                  fontWeight: 600,
-                  flex: 1,
-                  minWidth: 0,
-                  wordBreak: "break-word",
-                  overflowWrap: "break-word",
-                }}
+                sx={{ color: "white", fontWeight: 600, flex: 1, minWidth: 0, wordBreak: "break-word" }}
               >
                 {user.name || "Sem nome"}
               </Typography>
-              <Chip
-                label={statusLabel}
-                color={statusColor}
-                size="small"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.75rem",
-                  flexShrink: 0,
-                }}
-              />
+              <Chip label={statusLabel} color={statusColor} size="small" sx={{ fontWeight: 600, fontSize: "0.75rem", flexShrink: 0 }} />
             </Box>
 
             <Divider sx={{ mb: 2, borderColor: "rgba(255, 255, 255, 0.1)" }} />
 
-            {/* Informações do usuário */}
             <Stack spacing={1.5}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <Email sx={{ fontSize: 18, color: "#ffcc01", opacity: 0.9 }} />
@@ -129,6 +117,15 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
                   Entrou em {formatDate(user.created_at)}
                 </Typography>
               </Box>
+
+              {user.last_login && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Login sx={{ fontSize: 18, color: "#ffcc01", opacity: 0.9 }} />
+                  <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.85)" }}>
+                    Último acesso: {formatDate(user.last_login)}
+                  </Typography>
+                </Box>
+              )}
 
               {userType === "colunista" && user.invited_by && (
                 <Box
@@ -162,9 +159,7 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
                     mt: 1,
                     backgroundColor: "rgba(255, 152, 0, 0.15)",
                     border: "1px solid rgba(255, 152, 0, 0.3)",
-                    "& .MuiAlert-icon": {
-                      color: "#ff9800",
-                    },
+                    "& .MuiAlert-icon": { color: "#ff9800" },
                   }}
                 >
                   <Box>
@@ -188,9 +183,7 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
                     mt: 1,
                     backgroundColor: "rgba(33, 150, 243, 0.15)",
                     border: "1px solid rgba(33, 150, 243, 0.3)",
-                    "& .MuiAlert-icon": {
-                      color: "#2196f3",
-                    },
+                    "& .MuiAlert-icon": { color: "#2196f3" },
                   }}
                 >
                   <Box>
@@ -208,8 +201,8 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
             </Stack>
           </Box>
 
-          {/* Botões de ação */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
+          {/* Actions */}
+          <Box onClick={(e) => e.stopPropagation()} sx={{ display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
             {isActive ? (
               <Tooltip title="Desativar acesso" arrow>
                 <IconButton
@@ -217,10 +210,7 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
                   sx={{
                     color: "#ff4444",
                     backgroundColor: "rgba(255, 68, 68, 0.1)",
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 68, 68, 0.2)",
-                      transform: "scale(1.1)",
-                    },
+                    "&:hover": { backgroundColor: "rgba(255, 68, 68, 0.2)", transform: "scale(1.1)" },
                     transition: "all 0.2s ease",
                   }}
                 >
@@ -234,14 +224,27 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
                   sx={{
                     color: "#4caf50",
                     backgroundColor: "rgba(76, 175, 80, 0.1)",
-                    "&:hover": {
-                      backgroundColor: "rgba(76, 175, 80, 0.2)",
-                      transform: "scale(1.1)",
-                    },
+                    "&:hover": { backgroundColor: "rgba(76, 175, 80, 0.2)", transform: "scale(1.1)" },
                     transition: "all 0.2s ease",
                   }}
                 >
                   <CheckCircle />
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {canResend && (
+              <Tooltip title="Reenviar convite" arrow>
+                <IconButton
+                  onClick={() => onResendInvite!(user.id, user.name || user.email)}
+                  sx={{
+                    color: "#ffcc01",
+                    backgroundColor: "rgba(255, 204, 1, 0.1)",
+                    "&:hover": { backgroundColor: "rgba(255, 204, 1, 0.2)", transform: "scale(1.1)" },
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <Send sx={{ fontSize: 20 }} />
                 </IconButton>
               </Tooltip>
             )}
@@ -251,7 +254,3 @@ export default function UserCard({ user, userType, onRevoke, onReactivate }: Use
     </Card>
   );
 }
-
-
-
-

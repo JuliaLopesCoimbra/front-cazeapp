@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useToast } from "@/app/context/ToastContext";
+import { getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
 interface Props {
   open: boolean;
@@ -29,6 +30,7 @@ export default function DeleteCommentModal({
   loading = false,
 }: Props) {
   const { showToast } = useToast();
+  const isTorcida = getStoredEventBrandKey() === "n1_torcida";
 
   const handleConfirm = async () => {
     try {
@@ -56,7 +58,7 @@ export default function DeleteCommentModal({
       }}
       PaperProps={{
         sx: {
-          backgroundColor: "#1a1a1a",
+          backgroundColor: isTorcida ? "#d4a400" : "#1a1a1a",
           color: "#fff",
           borderRadius: 2,
         },
@@ -67,7 +69,7 @@ export default function DeleteCommentModal({
           display: "flex",
           alignItems: "center",
           gap: 2,
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          borderBottom: isTorcida ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(255,255,255,0.1)",
           pb: 2,
           fontWeight: 600,
         }}
@@ -80,10 +82,10 @@ export default function DeleteCommentModal({
             width: 48,
             height: 48,
             borderRadius: "50%",
-            backgroundColor: "rgba(255, 48, 64, 0.1)",
+            backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255, 48, 64, 0.1)",
           }}
         >
-          <WarningAmberIcon sx={{ color: "#ff3040", fontSize: 28 }} />
+          <WarningAmberIcon sx={{ color: "#fff", fontSize: 28 }} />
         </Box>
         Excluir Comentário
       </DialogTitle>
@@ -91,21 +93,21 @@ export default function DeleteCommentModal({
       <DialogContent sx={{ pt: 3, pb: 2 }}>
         <Typography
           variant="body1"
-          sx={{ color: "rgba(255,255,255,0.9)", mb: 2 }}
+          sx={{ color: "rgba(255,255,255,0.95)", mb: 2 }}
         >
           Tem certeza que deseja excluir este comentário?
         </Typography>
         <Box
           sx={{
-            backgroundColor: "rgba(255,255,255,0.05)",
+            backgroundColor: isTorcida ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)",
             borderRadius: 1,
             p: 2,
-            borderLeft: "3px solid #ff3040",
+            borderLeft: isTorcida ? "3px solid #000" : "3px solid #ff3040",
           }}
         >
           <Typography
             variant="body2"
-            sx={{ color: "rgba(255,255,255,0.9)", mb: 0.5, wordBreak: "break-word" }}
+            sx={{ color: "rgba(255,255,255,0.95)", mb: 0.5, wordBreak: "break-word" }}
           >
             {commentContent.length > 100
               ? `${commentContent.substring(0, 100)}...`
@@ -113,7 +115,7 @@ export default function DeleteCommentModal({
           </Typography>
           <Typography
             variant="caption"
-            sx={{ color: "rgba(255,255,255,0.6)" }}
+            sx={{ color: "rgba(255,255,255,0.8)" }}
           >
             Esta ação não pode ser desfeita. Todas as respostas também serão excluídas.
           </Typography>
@@ -122,7 +124,7 @@ export default function DeleteCommentModal({
 
       <DialogActions
         sx={{
-          borderTop: "1px solid rgba(255,255,255,0.1)",
+          borderTop: isTorcida ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(255,255,255,0.1)",
           p: 2,
           gap: 1,
         }}
@@ -131,9 +133,9 @@ export default function DeleteCommentModal({
           onClick={onClose}
           disabled={loading}
           sx={{
-            color: "rgba(255,255,255,0.7)",
+            color: "rgba(255,255,255,0.9)",
             "&:hover": {
-              backgroundColor: "rgba(255,255,255,0.05)",
+              backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.05)",
             },
           }}
         >
@@ -144,15 +146,15 @@ export default function DeleteCommentModal({
           disabled={loading}
           variant="contained"
           sx={{
-            backgroundColor: "#ff3040",
+            backgroundColor: isTorcida ? "#000" : "#ff3040",
             color: "#fff",
             fontWeight: 600,
             "&:hover": {
-              backgroundColor: "#e02e3a",
+              backgroundColor: isTorcida ? "#222" : "#e02e3a",
             },
             "&:disabled": {
-              backgroundColor: "rgba(255, 48, 64, 0.3)",
-              color: "rgba(255,255,255,0.3)",
+              backgroundColor: isTorcida ? "rgba(0,0,0,0.3)" : "rgba(255, 48, 64, 0.3)",
+              color: "rgba(255,255,255,0.4)",
             },
           }}
         >

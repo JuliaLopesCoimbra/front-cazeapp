@@ -13,6 +13,7 @@ import {
   reactivateSubadminAccess,
   reactivateColunistaAccess,
   reactivateUserAccess,
+  resendInvite,
 } from "@/app/services/auth/authAdminService";
 import PermissionsHeader from "@/app/components/admin/permissions/PermissionsHeader";
 import PermissionsTabs from "@/app/components/admin/permissions/PermissionsTabs";
@@ -23,7 +24,7 @@ import UsersTab from "@/app/components/admin/permissions/UsersTab";
 import InviteModal from "@/app/components/admin/permissions/InviteModal";
 import ConfirmModal from "@/app/components/admin/permissions/ConfirmModal";
 import SearchBar from "@/app/components/admin/permissions/SearchBar";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey, getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
 export default function PermissionsPage() {
   const { isAdminMaster, isSubadmin, authReady } = useAuth();
@@ -33,7 +34,11 @@ export default function PermissionsPage() {
   const [tabValue, setTabValue] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [shouldAnimate, setShouldAnimate] = useState(true);
+  const [storedBrandKey, setStoredBrandKey] = useState<"default" | "n1_torcida">(
+    () => getStoredEventBrandKey() ?? "default"
+  );
 
   // Modais
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -59,6 +64,12 @@ export default function PermissionsPage() {
     }
   }, [isAdminMaster, isSubadmin, router]);
 
+  // Debounce search for server-side filtering
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Controla animações quando a página carrega ou tab muda
   useEffect(() => {
     setShouldAnimate(true);
@@ -68,13 +79,22 @@ export default function PermissionsPage() {
     return () => clearTimeout(timer);
   }, [tabValue]);
 
+  useEffect(() => {
+    const refreshBrand = () => setStoredBrandKey(getStoredEventBrandKey() ?? "default");
+    refreshBrand();
+    window.addEventListener("storage", refreshBrand);
+    return () => window.removeEventListener("storage", refreshBrand);
+  }, []);
+
+  const pageBackgroundSx = getEventBackgroundSxByKey(storedBrandKey);
+
   // Aguardar o contexto estar pronto antes de renderizar
   if (!authReady) {
     return (
       <Box
         sx={{
           minHeight: "100vh",
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -176,11 +196,22 @@ export default function PermissionsPage() {
     setConfirmAction(null);
   };
 
+  const handleResendInvite = async (userId: number, userName: string) => {
+    try {
+      await resendInvite(userId);
+      showToast(`Convite reenviado para ${userName}!`, "success");
+    } catch (error) {
+      if (error instanceof Error) {
+        showToast(error.message, "error");
+      }
+    }
+  };
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         position: "relative",
       }}
     >
@@ -199,7 +230,7 @@ export default function PermissionsPage() {
         }}
       >
         <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-          <PermissionsTabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} isAdminMaster={!!isAdminMaster} />
+          <PermissionsTabs value={tabValue} onChange={setTabValue} isAdminMaster={!!isAdminMaster} />
         </Box>
 
         {/* Barra de Pesquisa */}
@@ -218,8 +249,9 @@ export default function PermissionsPage() {
                 }}
                 onRevoke={handleRevoke}
                 onReactivate={handleReactivate}
+                onResendInvite={handleResendInvite}
                 refreshTrigger={refreshTrigger}
-                searchTerm={searchTerm}
+                searchTerm={debouncedSearch}
               />
             </TabPanel>
           </Box>
@@ -235,8 +267,9 @@ export default function PermissionsPage() {
               }}
               onRevoke={handleRevoke}
               onReactivate={handleReactivate}
+              onResendInvite={handleResendInvite}
               refreshTrigger={refreshTrigger}
-              searchTerm={searchTerm}
+              searchTerm={debouncedSearch}
             />
           </TabPanel>
         </Box>
@@ -244,7 +277,7 @@ export default function PermissionsPage() {
         {/* Users Tab */}
         <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
           <TabPanel value={tabValue} index={isAdminMaster ? 2 : 1}>
-            <UsersTab onRevoke={handleRevoke} onReactivate={handleReactivate} refreshTrigger={refreshTrigger} searchTerm={searchTerm} />
+            <UsersTab onRevoke={handleRevoke} onReactivate={handleReactivate} refreshTrigger={refreshTrigger} searchTerm={debouncedSearch} />
           </TabPanel>
         </Box>
       </Box>

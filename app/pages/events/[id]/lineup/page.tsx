@@ -16,7 +16,10 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { getLineupItemsByEvent, LineupItemResponse } from "@/app/services/lineup/lineupService";
 import { getPublicEventById } from "@/app/services/events/eventAppService";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import {
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+} from "@/app/utils/eventBranding";
 
 export default function LineupPage() {
   const params = useParams();
@@ -33,16 +36,15 @@ export default function LineupPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Busca lineup e evento em paralelo, mas não falha se o evento não for encontrado
-        const [items, eventData] = await Promise.all([
-          getLineupItemsByEvent(eventId).catch(() => []), // Retorna lista vazia se der erro
-          getPublicEventById(eventId).catch(() => {
-            // Silenciosamente ignora erro ao buscar evento (não é crítico para exibir o lineup)
-            return null;
-          }),
-        ]);
-        setLineupItems(items || []);
+        const eventPromise = getPublicEventById(eventId).catch(() => null);
+        const itemsPromise = getLineupItemsByEvent(eventId).catch(() => []);
+
+        // Resolve o evento primeiro para aplicar o tema correto no skeleton o quanto antes.
+        const eventData = await eventPromise;
         setEvent(eventData);
+
+        const items = await itemsPromise;
+        setLineupItems(items || []);
         setError(null);
       } catch (err: any) {
         console.error("Erro ao buscar lineup:", err);
@@ -104,12 +106,16 @@ export default function LineupPage() {
     }
   }, [dates]);
 
+  const pageBackgroundSx = event
+    ? getEventBackgroundSx(event)
+    : getEventBackgroundSxByKey("default");
+
   if (loading) {
     return (
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -124,8 +130,7 @@ export default function LineupPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundColor: "#000",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         backgroundAttachment: "fixed",
         color: "#fff",
       }}

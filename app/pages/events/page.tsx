@@ -6,14 +6,14 @@ import { Button, Box, Skeleton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { getPublicEvents, EventResponse } from "@/app/services/events/eventAppService";
 import EventIndisponivelPublic from "@/app/components/event/EventIndisponivelPublic";
-import { getEventBackgroundSx, getEventTheme } from "@/app/utils/eventBranding";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [shouldAnimate, setShouldAnimate] = useState(true);
   const router = useRouter();
-  const pageThemeEvent = events.length === 1 ? events[0] : null;
+  const pageBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
   // Função para normalizar título para URL
   const normalizeForUrl = (str: string): string => {
@@ -56,7 +56,7 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <div style={{ ...getEventBackgroundSx(pageThemeEvent), minHeight: "100vh" }}>
+      <div style={{ ...pageBackgroundSx, minHeight: "100vh" }}>
         {/* Header Skeleton */}
         <div
           style={{
@@ -173,7 +173,7 @@ export default function EventsPage() {
   }
 
   return (
-    <div style={{ ...getEventBackgroundSx(pageThemeEvent), minHeight: "100vh" }}>
+    <div style={{ ...pageBackgroundSx, minHeight: "100vh" }}>
       <Box
         className={shouldAnimate ? "slide-up-animation" : ""}
         sx={{
@@ -191,7 +191,6 @@ export default function EventsPage() {
             width={60}
             height={60}
           />
-          <strong style={{ fontSize: 22, color: "white" }}>Camarote N1</strong>
         </div>
         <Button
           onClick={() => router.push("/")}
@@ -221,6 +220,35 @@ export default function EventsPage() {
       >
         <Box
           sx={{
+            width: "100%",
+            maxWidth: { xs: "100%", md: 1200 },
+            mb: { xs: 3, md: 4 },
+            textAlign: "center",
+          }}
+        >
+          <strong
+            style={{
+              color: "white",
+              fontSize: 22,
+              fontWeight: 700,
+              textTransform: "uppercase",
+            }}
+          >
+            Estes são os eventos exclusivos da N1
+          </strong>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.9)",
+              fontSize: 14,
+              marginTop: 8,
+              marginBottom: 0,
+            }}
+          >
+            Clique em um evento para visualizar todas as informações.
+          </p>
+        </Box>
+        <Box
+          sx={{
             display: "grid",
             gridTemplateColumns: {
               xs: "1fr",
@@ -239,7 +267,6 @@ export default function EventsPage() {
           }}
         >
           {events.map((event) => {
-            const eventTheme = getEventTheme(event);
             return (
             <Box
               key={event.id}
@@ -331,8 +358,8 @@ export default function EventsPage() {
               <Button
                 sx={{
                   marginTop: 1,
-                  backgroundColor: eventTheme.primaryButtonBg,
-                  color: eventTheme.primaryButtonText,
+                  backgroundColor: "#ffc91f",
+                  color: "#000",
                   fontWeight: 700,
                   padding: { xs: "10px 24px", md: "10px 28px" },
                   borderRadius: "30px",
@@ -341,7 +368,7 @@ export default function EventsPage() {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    backgroundColor: eventTheme.primaryButtonHover,
+                    backgroundColor: "#e6b800",
                     transform: "scale(1.05)",
                     boxShadow: "0 6px 16px rgba(0, 0, 0, 0.4)",
                   },

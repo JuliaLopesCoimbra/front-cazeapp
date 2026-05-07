@@ -37,6 +37,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import { activateEvent } from "@/app/services/events/eventAppService";
 import { deactivateEvent } from "@/app/services/events/eventAppService";
+import { getEventBrandKey, getEventTheme } from "@/app/utils/eventBranding";
 import ActivateEventModal from "@/app/components/admin/events/ActivateEventModal";
 import DeactivateEventModal from "@/app/components/admin/events/DeactivateEventModal";
 
@@ -65,6 +66,8 @@ export default function HamburgerMenu({
   const [deactivating, setDeactivating] = useState(false);
 
   const openMenu = Boolean(menuAnchorEl);
+  const isTorcida = getEventBrandKey(currentEvent) === "n1_torcida";
+  const eventTheme = getEventTheme(currentEvent);
 
   const router = useRouter();
 
@@ -137,11 +140,19 @@ export default function HamburgerMenu({
         PaperProps={{
           sx: {
             minHeight: "100vh",
-            backgroundImage: "url(/background/settings.png)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundImage: isTorcida
+              ? `url(${eventTheme.backgroundMobile})`
+              : "url(/background/settings.png)",
+            backgroundSize: isTorcida ? "100% 100vh" : "cover",
+            backgroundPosition: isTorcida ? "0 0" : "center",
             backgroundRepeat: "no-repeat",
             backgroundColor: "#000",
+            ...(isTorcida && {
+              "@media (min-width: 1024px)": {
+                backgroundImage: `url(${eventTheme.backgroundDesktop})`,
+                backgroundSize: "100% 100svh",
+              },
+            }),
           },
         }}
       >
@@ -164,7 +175,7 @@ export default function HamburgerMenu({
             <Box
               sx={{
                 width: "100%",
-                backgroundColor: "#6b4eff",
+                backgroundColor: "#d4a400",
                 borderRadius: 2,
                 padding: 2,
                 display: "flex",

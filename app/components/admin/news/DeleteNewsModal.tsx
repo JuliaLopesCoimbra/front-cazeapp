@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useToast } from "@/app/context/ToastContext";
+import { getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
 interface Props {
   open: boolean;
@@ -29,6 +30,7 @@ export default function DeleteNewsModal({
   loading = false,
 }: Props) {
   const { showToast } = useToast();
+  const isTorcida = getStoredEventBrandKey() === "n1_torcida";
 
   const handleConfirm = async () => {
     try {
@@ -56,7 +58,7 @@ export default function DeleteNewsModal({
       }}
       PaperProps={{
         sx: {
-          backgroundColor: "#1a1a1a",
+          backgroundColor: isTorcida ? "#d4a400" : "#1a1a1a",
           color: "#fff",
           borderRadius: 2,
         },
@@ -67,7 +69,7 @@ export default function DeleteNewsModal({
           display: "flex",
           alignItems: "center",
           gap: 2,
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          borderBottom: isTorcida ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.1)",
           pb: 2,
           fontWeight: 600,
         }}
@@ -80,10 +82,10 @@ export default function DeleteNewsModal({
             width: 48,
             height: 48,
             borderRadius: "50%",
-            backgroundColor: "rgba(255, 48, 64, 0.1)",
+            backgroundColor: isTorcida ? "rgba(255,255,255,0.18)" : "rgba(255, 48, 64, 0.1)",
           }}
         >
-          <WarningAmberIcon sx={{ color: "#ff3040", fontSize: 28 }} />
+          <WarningAmberIcon sx={{ color: "#fff", fontSize: 28 }} />
         </Box>
         Excluir Notícia
       </DialogTitle>
@@ -97,10 +99,10 @@ export default function DeleteNewsModal({
         </Typography>
         <Box
           sx={{
-            backgroundColor: "rgba(255,255,255,0.05)",
+            backgroundColor: isTorcida ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)",
             borderRadius: 1,
             p: 2,
-            borderLeft: "3px solid #ff3040",
+            borderLeft: "3px solid #fff",
           }}
         >
           <Typography
@@ -121,7 +123,7 @@ export default function DeleteNewsModal({
 
       <DialogActions
         sx={{
-          borderTop: "1px solid rgba(255,255,255,0.1)",
+          borderTop: isTorcida ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.1)",
           p: 2,
           gap: 1,
         }}
@@ -130,9 +132,9 @@ export default function DeleteNewsModal({
           onClick={onClose}
           disabled={loading}
           sx={{
-            color: "rgba(255,255,255,0.7)",
+            color: "rgba(255,255,255,0.95)",
             "&:hover": {
-              backgroundColor: "rgba(255,255,255,0.05)",
+              backgroundColor: isTorcida ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.05)",
             },
           }}
         >
@@ -143,20 +145,20 @@ export default function DeleteNewsModal({
           disabled={loading}
           variant="contained"
           sx={{
-            backgroundColor: "#ff3040",
-            color: "#fff",
+            backgroundColor: isTorcida ? "#ffffff" : "#ff3040",
+            color: isTorcida ? "#000" : "#fff",
             fontWeight: 600,
             "&:hover": {
-              backgroundColor: "#e02e3a",
+              backgroundColor: isTorcida ? "rgba(255,255,255,0.85)" : "#e02e3a",
             },
             "&:disabled": {
-              backgroundColor: "rgba(255, 48, 64, 0.3)",
-              color: "rgba(255,255,255,0.3)",
+              backgroundColor: isTorcida ? "rgba(255,255,255,0.35)" : "rgba(255, 48, 64, 0.3)",
+              color: isTorcida ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.3)",
             },
           }}
         >
           {loading ? (
-            <CircularProgress size={20} sx={{ color: "#fff" }} />
+            <CircularProgress size={20} sx={{ color: isTorcida ? "#000" : "#fff" }} />
           ) : (
             "Excluir"
           )}

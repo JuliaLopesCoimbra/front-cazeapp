@@ -15,6 +15,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { getUsersWhoLiked, UserWhoLiked } from "@/app/services/likes/likeService";
 import { getUsersWhoLikedComment, UserWhoLikedComment } from "@/app/services/comments/commentService";
 import UserProfileModal from "@/app/components/user/UserProfileModal";
+import { getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
 interface UsersWhoLikedModalProps {
   open: boolean;
@@ -35,6 +36,7 @@ export default function UsersWhoLikedModal({
   likesCount,
   title,
 }: UsersWhoLikedModalProps) {
+  const isTorcida = getStoredEventBrandKey() === "n1_torcida";
   const [users, setUsers] = useState<(UserWhoLiked | UserWhoLikedComment)[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -152,7 +154,7 @@ export default function UsersWhoLikedModal({
         fullWidth
         PaperProps={{
           sx: {
-            backgroundColor: "#1a1a1a",
+            backgroundColor: isTorcida ? "#d4a400" : "#1a1a1a",
             color: "#fff",
             borderRadius: 2,
           },
@@ -163,7 +165,7 @@ export default function UsersWhoLikedModal({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            borderBottom: isTorcida ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.1)",
             pb: 2,
             fontWeight: 600,
           }}
@@ -214,11 +216,11 @@ export default function UsersWhoLikedModal({
                     alignItems: "center",
                     gap: 2,
                     p: 2,
-                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    borderBottom: isTorcida ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(255,255,255,0.05)",
                     cursor: "pointer",
                     transition: "background-color 0.2s",
                     "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.1)",
+                      backgroundColor: isTorcida ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.1)",
                     },
                   }}
                 >
@@ -228,7 +230,7 @@ export default function UsersWhoLikedModal({
                     sx={{
                       width: 48,
                       height: 48,
-                      bgcolor: "rgba(255,255,255,0.2)",
+                      bgcolor: isTorcida ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.2)",
                     }}
                   >
                     {user.name?.[0]?.toUpperCase() || "?"}

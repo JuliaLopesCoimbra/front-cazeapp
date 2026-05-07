@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Portal } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
@@ -47,20 +47,21 @@ export default function NewsActions({
   const canColunistaEditOrDelete = isColunista && !isPostRejected;
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 16,
-        right: { xs: 8, sm: 16 }, // Menor margem em telas pequenas
-        zIndex: 9999,
-        display: "flex",
-        gap: 1,
-        alignItems: "center",
-        maxWidth: "calc(100vw - 16px)", // Garantir que não ultrapasse
-        flexWrap: "wrap", // Permitir quebra em telas muito pequenas
-        pointerEvents: "auto",
-      }}
-    >
+    <Portal>
+      <Box
+        sx={{
+          position: "fixed",
+          top: "calc(12px + env(safe-area-inset-top))",
+          right: { xs: 8, sm: 16 }, // Menor margem em telas pequenas
+          zIndex: 9999,
+          display: "flex",
+          gap: 1,
+          alignItems: "center",
+          maxWidth: "calc(100vw - 16px)", // Garantir que não ultrapasse
+          flexWrap: "wrap", // Permitir quebra em telas muito pequenas
+          pointerEvents: "auto",
+        }}
+      >
       {isAuthor && (isAdmin || canColunistaEditOrDelete) && (
         <IconButton
           onClick={() => router.push(`/pages/news/edit?newsId=${newsId}&eventId=${eventId || ''}`)}
@@ -123,7 +124,8 @@ export default function NewsActions({
           <CloseIcon />
         </IconButton>
       )}
-    </Box>
+      </Box>
+    </Portal>
   );
 }
 

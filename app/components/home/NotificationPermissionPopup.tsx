@@ -12,12 +12,19 @@ import {
   CircularProgress,
 } from "@mui/material";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import { EventResponse } from "@/app/services/events/eventAppService";
+import {
+  getEventBrandKey,
+  getEventThemeByKey,
+  getStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 interface NotificationPermissionPopupProps {
   open: boolean;
   onClose: () => void;
   onAllow: () => Promise<void>;
   loading: boolean;
+  event?: Pick<EventResponse, "brand_key" | "title"> | null;
 }
 
 const NotificationPermissionPopup: React.FC<NotificationPermissionPopupProps> = ({
@@ -25,10 +32,14 @@ const NotificationPermissionPopup: React.FC<NotificationPermissionPopupProps> = 
   onClose,
   onAllow,
   loading,
+  event,
 }) => {
   const handleAllow = async () => {
     await onAllow();
   };
+  const brandKey = event ? getEventBrandKey(event) : getStoredEventBrandKey() ?? "default";
+  const isTorcida = brandKey === "n1_torcida";
+  const theme = getEventThemeByKey(brandKey);
 
   return (
     <Dialog
@@ -38,17 +49,17 @@ const NotificationPermissionPopup: React.FC<NotificationPermissionPopupProps> = 
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: "rgba(0, 0, 0, 0.95)",
+          backgroundColor: isTorcida ? "#0f935d" : "rgba(0, 0, 0, 0.95)",
           backdropFilter: "blur(20px)",
           borderRadius: "24px",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          border: isTorcida ? "1px solid rgba(255, 255, 255, 0.25)" : "1px solid rgba(255, 255, 255, 0.1)",
           color: "#fff",
         },
       }}
     >
       <DialogTitle component="div" sx={{ textAlign: "center", pt: 3, pb: 0 }}>
         <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-          <NotificationsActiveIcon sx={{ fontSize: 48, color: "#ffcc01" }} />
+          <NotificationsActiveIcon sx={{ fontSize: 48, color: "#fff" }} />
         </Box>
         <Typography variant="h6" component="span" sx={{ fontWeight: 600, color: "#fff" }}>
           Ative as notificações push
@@ -75,23 +86,23 @@ const NotificationPermissionPopup: React.FC<NotificationPermissionPopupProps> = 
           variant="contained"
           fullWidth
           sx={{
-            backgroundColor: "#ffcc01",
-            color: "#000",
+            backgroundColor: isTorcida ? "rgba(255,255,255,0.2)" : theme.primaryButtonBg,
+            color: "#fff",
             fontWeight: 600,
             borderRadius: "14px",
             textTransform: "none",
             py: 1.25,
             "&:hover": {
-              backgroundColor: "#e6b800",
+              backgroundColor: isTorcida ? "rgba(255,255,255,0.28)" : theme.primaryButtonHover,
             },
             "&:disabled": {
-              backgroundColor: "rgba(255, 204, 1, 0.5)",
-              color: "rgba(0,0,0,0.5)",
+              backgroundColor: isTorcida ? "rgba(255,255,255,0.14)" : "rgba(255, 204, 1, 0.5)",
+              color: "rgba(255,255,255,0.7)",
             },
           }}
         >
           {loading ? (
-            <CircularProgress size={24} sx={{ color: "#000" }} />
+            <CircularProgress size={24} sx={{ color: "#fff" }} />
           ) : (
             "Ativar notificações"
           )}
@@ -102,10 +113,10 @@ const NotificationPermissionPopup: React.FC<NotificationPermissionPopupProps> = 
           variant="text"
           fullWidth
           sx={{
-            color: "rgba(255, 255, 255, 0.7)",
+            color: "#fff",
             textTransform: "none",
             "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              backgroundColor: "rgba(255, 255, 255, 0.12)",
             },
           }}
         >

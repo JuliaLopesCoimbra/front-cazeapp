@@ -15,6 +15,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { getUserProfile, ProfileResponse } from "@/app/services/profile/profileService";
 import { useToast } from "@/app/context/ToastContext";
+import { getEventThemeByKey, getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -39,6 +40,9 @@ export default function UserProfileModal({
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
+  const brandKey = getStoredEventBrandKey() ?? "default";
+  const isTorcida = brandKey === "n1_torcida";
+  const theme = getEventThemeByKey(brandKey);
 
   useEffect(() => {
     if (open && userId) {
@@ -78,10 +82,10 @@ export default function UserProfileModal({
       }}
       PaperProps={{
         sx: {
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
+          backgroundColor: isTorcida ? "#d4a400" : "#1a1a1a",
+          color: isTorcida ? "#000" : "#fff",
           borderRadius: 2,
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5)",
+          boxShadow: isTorcida ? "0 8px 32px rgba(212, 164, 0, 0.55)" : "0 8px 32px rgba(0, 0, 0, 0.5)",
         },
       }}
       slotProps={{
@@ -105,7 +109,7 @@ export default function UserProfileModal({
         Perfil do Usuário
         <IconButton
           onClick={onClose}
-          sx={{ color: "#fff" }}
+          sx={{ color: isTorcida ? "#000" : "#fff" }}
           size="small"
         >
           <CloseIcon />
@@ -122,7 +126,7 @@ export default function UserProfileModal({
               py: 4,
             }}
           >
-            <CircularProgress sx={{ color: "#ffcc01" }} />
+            <CircularProgress sx={{ color: isTorcida ? "#000" : theme.footerActiveColor }} />
           </Box>
         ) : profile ? (
           <Box
@@ -151,7 +155,7 @@ export default function UserProfileModal({
             <Typography
               variant="h5"
               fontWeight={600}
-              sx={{ color: "#fff", textAlign: "center" }}
+              sx={{ color: isTorcida ? "#000" : "#fff", textAlign: "center" }}
             >
               {profile.name || "Usuário sem nome"}
             </Typography>
@@ -165,10 +169,10 @@ export default function UserProfileModal({
                 mt: 1,
               }}
             >
-              <CalendarTodayIcon sx={{ color: "#ffcc01", fontSize: 20 }} />
+              <CalendarTodayIcon sx={{ color: isTorcida ? "#000" : theme.footerActiveColor, fontSize: 20 }} />
               <Typography
                 sx={{
-                  color: "rgba(255,255,255,0.7)",
+                  color: isTorcida ? "rgba(0,0,0,0.78)" : "rgba(255,255,255,0.7)",
                   fontSize: 14,
                 }}
               >

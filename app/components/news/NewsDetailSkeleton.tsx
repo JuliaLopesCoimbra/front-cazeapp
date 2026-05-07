@@ -2,14 +2,16 @@
 
 import React from "react";
 import { Box, Skeleton, Divider } from "@mui/material";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { EventBrandKey, getEventBackgroundSxByKey, getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
 export default function NewsDetailSkeleton() {
+  const storedBrandKey = (getStoredEventBrandKey() ?? "default") as EventBrandKey;
+  const pageBackgroundSx = getEventBackgroundSxByKey(storedBrandKey);
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

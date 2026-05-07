@@ -6,7 +6,7 @@ export interface RelatedUser {
   profile_photo?: string;
 }
 
-export interface Notification {
+export interface AppNotification {
   id: number;
   type: "comment_reply" | "comment_like" | "post_like" | "post_approved" | "post_approved_admin" | "post_rejected" | "post_deactivated" | "new_post" | "lineup_updated" | "post_comment" | "new_event" | "admin_broadcast";
   title: string;
@@ -24,7 +24,7 @@ export interface Notification {
 }
 
 export interface NotificationResponse {
-  notifications: Notification[];
+  notifications: AppNotification[];
   total: number;
   unread_count: number;
 }

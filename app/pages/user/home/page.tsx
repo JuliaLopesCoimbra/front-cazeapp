@@ -696,6 +696,7 @@ const HomeContent: React.FC = () => {
         onClose={handleNotificationPopupDismiss}
         onAllow={handleNotificationPopupAllow}
         loading={pushPopupLoading}
+        event={currentEvent}
       />
     </>
   );

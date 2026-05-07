@@ -37,9 +37,9 @@ export const EVENT_BRAND_THEMES: Record<EventBrandKey, EventBrandTheme> = {
     backgroundDesktop: "/background/fundo-copa.png",
     tabActiveColor: "#0f935d",
     footerActiveColor: "#0f935d",
-    primaryButtonBg: "#00C853",
+    primaryButtonBg: "#0f935d",
     primaryButtonText: "#FFFFFF",
-    primaryButtonHover: "#009624",
+    primaryButtonHover: "#0b7a4e",
   },
 };
 

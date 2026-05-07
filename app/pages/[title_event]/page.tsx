@@ -15,7 +15,12 @@ import { getEvents, EventResponse } from "../../services/events/eventAppService"
 import { formatEventDates } from "../../utils/eventDateFormatter";
 import { useAuth } from "../../context/AuthContext";
 import EventIndisponivelPublic from "@/app/components/event/EventIndisponivelPublic";
-import { getEventBackgroundSx, getEventTheme } from "@/app/utils/eventBranding";
+import {
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+  getEventBrandKey,
+  getEventTheme,
+} from "@/app/utils/eventBranding";
 
 export default function EventPage() {
   const router = useRouter();
@@ -27,6 +32,8 @@ export default function EventPage() {
   const [loading, setLoading] = useState(true);
   const [shouldAnimate, setShouldAnimate] = useState(true);
   const scrollExecutedRef = useRef(false);
+  const skeletonTitle = title ? decodeURIComponent(title).replace(/-+/g, " ") : "";
+  const skeletonBrandKey = getEventBrandKey({ title: skeletonTitle } as any);
 
   useEffect(() => {
     if (!title) return; // Se não tiver o título, não faz nada ainda
@@ -214,7 +221,12 @@ export default function EventPage() {
 
   if (loading) {
     return (
-      <div className="dashboard-page-background" style={{ minHeight: "100vh" }}>
+      <div
+        style={{
+          ...getEventBackgroundSxByKey(skeletonBrandKey),
+          minHeight: "100vh",
+        }}
+      >
         {/* Header Skeleton */}
         <div
           style={{
@@ -434,7 +446,6 @@ export default function EventPage() {
               width={60}
               height={60}
             />
-            <strong style={{ fontSize: 22, color: "white" }}>Camarote N1</strong>
           </div>
           <Button
             onClick={() => router.push("/pages/auth/login")}
@@ -650,7 +661,7 @@ export default function EventPage() {
                 },
               }}
             >
-              Ver Line Up Do evento
+              Ver line up do evento
             </Button>
           </Box>
 

@@ -20,6 +20,7 @@ import EmptyNews from "./EmptyNews";
 import { useRouter } from "next/navigation";
 import PendingPostsNotification from "@/app/components/admin/pending-posts/PendingPostsNotification";
 import AdBanner from "../ads/AdBanner";
+import { getEventBrandKey } from "@/app/utils/eventBranding";
 
 interface Props {
   eventId: number;
@@ -75,6 +76,7 @@ export default function NewsFeed({ eventId, event }: Props) {
   
   const canApprovePosts = isAdminMaster || isSubadmin;
   const isEventActive = event ? event.is_active === true : true;
+  const isTorcida = getEventBrandKey(event) === "n1_torcida";
 
   const loadNews = async (reset = false) => {
     if (loading) return;
@@ -376,7 +378,7 @@ export default function NewsFeed({ eventId, event }: Props) {
         </Box>
       )}
 
-      {loading && news.length === 0 && <FeaturedNewsSkeleton />}
+      {loading && news.length === 0 && <FeaturedNewsSkeleton isTorcida={isTorcida} />}
 
       {!loading && news.length === 0 && <EmptyNews />}
 
@@ -585,7 +587,7 @@ export default function NewsFeed({ eventId, event }: Props) {
 
             {loading &&
               Array.from({ length: 2 }).map((_, i) => (
-                <NewsItemSkeleton key={i} />
+                <NewsItemSkeleton key={i} isTorcida={isTorcida} />
               ))}
           </Box>
         </>
@@ -596,12 +598,14 @@ export default function NewsFeed({ eventId, event }: Props) {
   );
 }
 
-function FeaturedNewsSkeleton() {
+function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
+  const cardBg = isTorcida ? "#123b6b" : "#0f0f0f";
+  const skeletonBg = isTorcida ? "#2f5f96" : "#2a2a2a";
   return (
     <Card
       sx={{
         marginBottom: 3,
-        backgroundColor: "#0f0f0f",
+        backgroundColor: cardBg,
         borderRadius: 2,
       }}
     >
@@ -610,31 +614,33 @@ function FeaturedNewsSkeleton() {
         sx={{
           width: "100%",
           aspectRatio: "1 / 1",
-          bgcolor: "#2a2a2a",
+          bgcolor: skeletonBg,
         }}
       />
 
       <CardContent>
-        <Skeleton height={28} width="80%" sx={{ bgcolor: "#2a2a2a" }} />
+        <Skeleton height={28} width="80%" sx={{ bgcolor: skeletonBg }} />
 
         <Skeleton
           height={18}
           width="40%"
-          sx={{ bgcolor: "#2a2a2a", marginTop: 1 }}
+          sx={{ bgcolor: skeletonBg, marginTop: 1 }}
         />
       </CardContent>
     </Card>
   );
 }
 
-function NewsItemSkeleton() {
+function NewsItemSkeleton({ isTorcida }: { isTorcida: boolean }) {
+  const cardBg = isTorcida ? "#123b6b" : "#0f0f0f";
+  const skeletonBg = isTorcida ? "#2f5f96" : "#2a2a2a";
   return (
     <Card
       sx={{
         display: "flex",
         gap: 2,
         padding: 1,
-        backgroundColor: "#0f0f0f",
+        backgroundColor: cardBg,
         borderRadius: 2,
       }}
     >
@@ -642,16 +648,16 @@ function NewsItemSkeleton() {
         variant="rectangular"
         width={100}
         height={100}
-        sx={{ bgcolor: "#2a2a2a", borderRadius: 1 }}
+        sx={{ bgcolor: skeletonBg, borderRadius: 1 }}
       />
 
       <CardContent sx={{ padding: 1, width: "100%" }}>
-        <Skeleton height={20} width="90%" sx={{ bgcolor: "#2a2a2a" }} />
+        <Skeleton height={20} width="90%" sx={{ bgcolor: skeletonBg }} />
 
         <Skeleton
           height={14}
           width="40%"
-          sx={{ bgcolor: "#2a2a2a", marginTop: 1 }}
+          sx={{ bgcolor: skeletonBg, marginTop: 1 }}
         />
       </CardContent>
     </Card>

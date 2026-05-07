@@ -19,7 +19,13 @@ import NewsDetailSkeleton from "@/app/components/news/NewsDetailSkeleton";
 import DeactivatePostModal from "@/app/components/news/DeactivatePostModal";
 import ReactivatePostModal from "@/app/components/news/ReactivatePostModal";
 import { useCommentScroll } from "@/app/hooks/useCommentScroll";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import {
+  EventBrandKey,
+  getEventBackgroundSxByKey,
+  getEventBrandKey,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 import {
   getNewsDetails,
   NewsDetailsResponse,
@@ -49,6 +55,7 @@ import DeleteNewsModal from "@/app/components/admin/news/DeleteNewsModal";
 import DeleteCommentModal from "@/app/components/comments/DeleteCommentModal";
 import { getMe } from "@/app/services/auth/authService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
+import { getEvents, EventResponse } from "@/app/services/events/eventAppService";
 
 export default function NewsDetailPage() {
   const params = useParams();
@@ -89,8 +96,16 @@ export default function NewsDetailPage() {
   const [hasMoreComments, setHasMoreComments] = useState(false);
   const [loadingMoreComments, setLoadingMoreComments] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(true);
+  const [storedBrandKey, setStoredBrandKey] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
+  const [resolvedEvent, setResolvedEvent] = useState<EventResponse | null>(null);
   const COMMENTS_PER_PAGE = 20; // Carrega 20 comentários por vez
   const REPLIES_PER_PAGE = 5; // Carrega 5 respostas por vez
+  const resolvedBrandKey = resolvedEvent
+    ? getEventBrandKey({ brand_key: resolvedEvent.brand_key, title: resolvedEvent.title })
+    : storedBrandKey;
+  const pageBackgroundSx = getEventBackgroundSxByKey(resolvedBrandKey);
 
   const loadNewsDetails = async () => {
     if (!newsId) return;
@@ -199,6 +214,32 @@ export default function NewsDetailPage() {
       loadNewsDetails();
     }
   }, [newsId, isAuthenticated, isAdmin]);
+
+  useEffect(() => {
+    const resolveEventBrand = async () => {
+      try {
+        const allEvents = await getEvents();
+        const targetEventId =
+          eventId ||
+          news?.event_id ||
+          (() => {
+            const saved = localStorage.getItem("selectedEventId");
+            return saved ? parseInt(saved, 10) : null;
+          })();
+
+        if (!targetEventId) return;
+        const matchedEvent = allEvents.find((e) => e.id === targetEventId);
+        if (!matchedEvent) return;
+
+        setResolvedEvent(matchedEvent);
+        setStoredEventBrandKey(matchedEvent);
+        setStoredBrandKey(getEventBrandKey({ brand_key: matchedEvent.brand_key, title: matchedEvent.title }));
+      } catch (error) {
+        console.error("Erro ao resolver evento para tema", error);
+      }
+    };
+    resolveEventBrand();
+  }, [eventId, news?.event_id]);
 
   // Controla animações quando a página carrega
   useEffect(() => {
@@ -874,7 +915,7 @@ export default function NewsDetailPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           color: "#fff",
           display: "flex",
           alignItems: "center",
@@ -896,7 +937,7 @@ export default function NewsDetailPage() {
       id="news-content-scroll-container"
       sx={{
         minHeight: "100vh",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",
