@@ -27,8 +27,11 @@ import {
 import { subscribeForPush } from "@/app/services/notifications/pushService";
 import { useToast } from "@/app/context/ToastContext";
 import {
+  EventBrandKey,
   getEventBackgroundSx,
+  getEventBackgroundSxByKey,
   getEventTheme,
+  getStoredEventBrandKey,
   setStoredEventBrandKey,
 } from "@/app/utils/eventBranding";
 
@@ -47,6 +50,9 @@ const HomeContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -70,6 +76,7 @@ const HomeContent: React.FC = () => {
   useEffect(() => {
     if (currentEvent) {
       setStoredEventBrandKey(currentEvent);
+      setStoredBrandKeyState(currentEvent.brand_key === "n1_torcida" ? "n1_torcida" : "default");
     }
   }, [currentEvent]);
 
@@ -494,7 +501,9 @@ const HomeContent: React.FC = () => {
   }
 
   // Todas as abas usam fundo por tema de evento.
-  const pageBackgroundSx = getEventBackgroundSx(currentEvent);
+  const pageBackgroundSx = currentEvent
+    ? getEventBackgroundSx(currentEvent)
+    : getEventBackgroundSxByKey(storedBrandKey);
   const currentTheme = getEventTheme(currentEvent);
 
   // Mostra skeleton até que tanto o evento quanto o perfil estejam carregados
