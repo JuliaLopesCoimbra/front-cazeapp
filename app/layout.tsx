@@ -90,6 +90,10 @@ export default function RootLayout({
                       actionMessage: "Ative as notificações para receber atualizações do N1",
                       acceptButton: "Ativar",
                       cancelButton: "Agora não"
+                    },
+                    delay: {
+                      pageViews: 1,
+                      timeDelay: 1
                     }
                   }]
                 }

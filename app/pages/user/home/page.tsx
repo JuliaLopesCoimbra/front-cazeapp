@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Box } from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
 import HomeTabs from "@/app/components/home/HomeTabs";
@@ -27,11 +27,8 @@ import {
 import { subscribeForPush } from "@/app/services/notifications/pushService";
 import { useToast } from "@/app/context/ToastContext";
 import {
-  EventBrandKey,
   getEventBackgroundSx,
-  getEventBackgroundSxByKey,
   getEventTheme,
-  getStoredEventBrandKey,
   setStoredEventBrandKey,
 } from "@/app/utils/eventBranding";
 
@@ -45,7 +42,6 @@ const TAB_KEY = "homeActiveTab";
 type Tab = "home" | "eventos" | "mapa" | "lineup" | "foto" | "enredo";
 
 const HomeContent: React.FC = () => {
-  const searchParams = useSearchParams();
   // Inicializa sempre "home" para evitar hydration mismatch (server vs client).
   // A aba é sincronizada da URL/sessionStorage no useEffect.
   const [activeTab, setActiveTab] = useState<Tab>("home");
@@ -91,10 +87,7 @@ const HomeContent: React.FC = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Usa searchParams se disponível, senão lê diretamente da URL
-    const urlParams = searchParams 
-      ? new URLSearchParams(searchParams.toString())
-      : new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(window.location.search);
     
     const urlTab = urlParams.get("tab");
     const urlEventId = urlParams.get("eventId") || urlParams.get("event"); // Suporta ambos "eventId" e "event"
@@ -129,12 +122,13 @@ const HomeContent: React.FC = () => {
         window.history.replaceState({}, "", newUrl.toString());
       }
     }
-  }, [searchParams, events, currentEvent]); // Removido activeTab das dependências para evitar loop
+  }, [events, currentEvent]); // Removido activeTab das dependências para evitar loop
 
   // Scroll para o line up quando houver o parâmetro scrollToLineup na URL
   useEffect(() => {
-    const scrollToLineup = searchParams?.get("scrollToLineup");
-    const eventIdParam = searchParams?.get("eventId");
+    const urlParams = new URLSearchParams(window.location.search);
+    const scrollToLineup = urlParams.get("scrollToLineup");
+    const eventIdParam = urlParams.get("eventId");
     
     if (!scrollToLineup || !currentEvent || !currentEvent.line_up || scrollExecutedRef.current || activeTab !== "eventos") {
       return;
@@ -227,7 +221,7 @@ const HomeContent: React.FC = () => {
 
     // Aguarda um pouco antes de tentar fazer scroll
     setTimeout(tryScrollToLineup, 300);
-  }, [currentEvent, activeTab, searchParams]);
+  }, [currentEvent, activeTab]);
 
   // Função para verificar e atualizar eventos
   const checkAndUpdateEvents = useCallback(async () => {
@@ -698,49 +692,8 @@ const HomeContent: React.FC = () => {
   );
 };
 
-const HomeSuspenseFallback: React.FC = () => {
-  const [storedBrandKey] = useState<EventBrandKey>(() => getStoredEventBrandKey() ?? "default");
-  return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        ...getEventBackgroundSxByKey(storedBrandKey),
-        paddingBottom: "72px",
-      }}
-    >
-      <Box
-        sx={{
-          padding: 2,
-          borderBottom: "solid 1px rgba(255,255,255,0.2)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Box display="flex" alignItems="center" gap={1}>
-            <Skeleton variant="rectangular" width={40} height={40} sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }} />
-            <Skeleton variant="text" width={150} height={32} sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
-          </Box>
-          <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
-        </Box>
-      </Box>
-    </Box>
-  );
-};
-
 const Home: React.FC = () => {
-  return (
-    <Suspense fallback={<HomeSuspenseFallback />}>
-      <HomeContent />
-    </Suspense>
-  );
+  return <HomeContent />;
 };
 
 export default Home;
