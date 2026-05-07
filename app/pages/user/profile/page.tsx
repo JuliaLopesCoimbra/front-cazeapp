@@ -31,6 +31,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { getProfile, updateProfilePhoto, updateProfile, ProfileResponse } from "@/app/services/profile/profileService";
+import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
+import {
+  EventBrandKey,
+  getBrandIconColor,
+  getEventBackgroundSx,
+  getEventThemeByKey,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 import { useToast } from "@/app/context/ToastContext";
 
 export default function ProfilePage() {
@@ -39,6 +48,10 @@ export default function ProfilePage() {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
+  const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(true);
@@ -289,11 +302,44 @@ export default function ProfilePage() {
     return error?.response?.data?.message || error?.message || "Erro ao processar solicitação";
   };
 
+  useEffect(() => {
+    const loadCurrentEvent = async () => {
+      try {
+        const allEvents = await getEvents();
+        const savedEventId = localStorage.getItem("selectedEventId");
+        const savedId = savedEventId ? parseInt(savedEventId, 10) : NaN;
+        const selectedEvent = allEvents.find((event) => event.id === savedId);
+        if (selectedEvent) {
+          setCurrentEvent(selectedEvent);
+          setStoredEventBrandKey(selectedEvent);
+          setStoredBrandKeyState(selectedEvent.brand_key === "n1_torcida" ? "n1_torcida" : "default");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar evento atual", error);
+      }
+    };
+    loadCurrentEvent();
+  }, []);
+
+  const fallbackTheme = getEventThemeByKey(storedBrandKey);
+  const pageBackgroundSx = currentEvent
+    ? getEventBackgroundSx(currentEvent)
+    : {
+        backgroundImage: `url(${fallbackTheme.backgroundMobile})`,
+        backgroundSize: "100% 100vh",
+        backgroundRepeat: "repeat",
+        backgroundPosition: "0 0",
+        backgroundAttachment: "scroll",
+        width: "100%",
+        boxSizing: "border-box",
+      };
+  const iconAccent = currentEvent ? getBrandIconColor(currentEvent) : fallbackTheme.footerActiveColor;
+
   if (loading) {
     return (
-      <div
-        className="dashboard-page-background"
-        style={{
+      <Box
+        sx={{
+          ...pageBackgroundSx,
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -301,16 +347,16 @@ export default function ProfilePage() {
           color: "white",
         }}
       >
-        <CircularProgress sx={{ color: "#ffc91f" }} />
-      </div>
+        <CircularProgress sx={{ color: iconAccent }} />
+      </Box>
     );
   }
 
   if (!profile) {
     return (
-      <div
-        className="dashboard-page-background"
-        style={{
+      <Box
+        sx={{
+          ...pageBackgroundSx,
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -319,14 +365,14 @@ export default function ProfilePage() {
         }}
       >
         <Typography>Erro ao carregar perfil</Typography>
-      </div>
+      </Box>
     );
   }
 
   return (
-    <div
-      className="dashboard-page-background"
-      style={{
+    <Box
+      sx={{
+        ...pageBackgroundSx,
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -836,6 +882,6 @@ export default function ProfilePage() {
           </Box>
         </main>
       </Box>
-    </div>
+    </Box>
   );
 }

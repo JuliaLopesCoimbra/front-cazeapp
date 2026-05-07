@@ -56,6 +56,22 @@ export const getEventBrandKey = (event?: Pick<EventResponse, "brand_key" | "titl
 export const getEventTheme = (event?: Pick<EventResponse, "brand_key" | "title"> | null): EventBrandTheme =>
   EVENT_BRAND_THEMES[getEventBrandKey(event)];
 
+export const getEventThemeByKey = (brandKey: EventBrandKey = "default"): EventBrandTheme =>
+  EVENT_BRAND_THEMES[brandKey] ?? EVENT_BRAND_THEMES.default;
+
+const STORED_EVENT_BRAND_KEY = "selectedEventBrandKey";
+
+export const getStoredEventBrandKey = (): EventBrandKey | null => {
+  if (typeof window === "undefined") return null;
+  const stored = localStorage.getItem(STORED_EVENT_BRAND_KEY);
+  return stored === "n1_torcida" || stored === "default" ? stored : null;
+};
+
+export const setStoredEventBrandKey = (event?: Pick<EventResponse, "brand_key" | "title"> | null): void => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORED_EVENT_BRAND_KEY, getEventBrandKey(event));
+};
+
 export const getEventBackgroundSx = (event?: Pick<EventResponse, "brand_key" | "title"> | null) => {
   const theme = getEventTheme(event);
   return {
@@ -72,3 +88,24 @@ export const getEventBackgroundSx = (event?: Pick<EventResponse, "brand_key" | "
     },
   } as const;
 };
+
+export const getEventBackgroundSxByKey = (brandKey: EventBrandKey = "default") => {
+  const theme = getEventThemeByKey(brandKey);
+  return {
+    backgroundImage: `url(${theme.backgroundMobile})`,
+    backgroundSize: "100% 100vh",
+    backgroundRepeat: "repeat",
+    backgroundPosition: "0 0",
+    backgroundAttachment: "scroll",
+    width: "100%",
+    boxSizing: "border-box",
+    "@media (min-width: 1024px)": {
+      backgroundImage: `url(${theme.backgroundDesktop})`,
+      backgroundSize: "100% 100svh",
+    },
+  } as const;
+};
+
+/** Cor de ícones / destaques na UI (ex.: Torcida = verde #0f935d). */
+export const getBrandIconColor = (event?: Pick<EventResponse, "brand_key" | "title"> | null): string =>
+  getEventTheme(event).footerActiveColor;

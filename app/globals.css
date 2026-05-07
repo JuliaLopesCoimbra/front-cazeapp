@@ -171,3 +171,43 @@ html {
   animation: slideUp 0.6s ease-out 0.3s forwards;
   opacity: 0;
 }
+
+/* ===== OneSignal Slidedown Customization ===== */
+#onesignal-slidedown-dialog {
+  background-color: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+#onesignal-slidedown-body-message {
+  color: #000000 !important;
+  font-family: var(--font-inter), Inter, sans-serif !important;
+  font-size: 14px !important;
+}
+
+#onesignal-slidedown-allow-button {
+  background-color: #0f935d !important;
+  border-color: #0f935d !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+#onesignal-slidedown-allow-button:hover {
+  background-color: #0a7a4d !important;
+  border-color: #0a7a4d !important;
+}
+
+#onesignal-slidedown-cancel-button {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: #0f935d !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+#onesignal-slidedown-cancel-button:hover {
+  background-color: transparent !important;
+  color: #0a7a4d !important;
+}

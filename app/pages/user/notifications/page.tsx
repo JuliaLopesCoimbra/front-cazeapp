@@ -20,7 +20,8 @@ import {
   Avatar,
   Chip,
 } from "@mui/material";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
+import { getBrandIconColor, getEventBackgroundSx } from "@/app/utils/eventBranding";
 import {
   Notifications as NotificationsIcon,
   ArrowBackIos as ArrowBackIosIcon,
@@ -51,11 +52,23 @@ import {
   markAllAsRead,
   Notification,
 } from "@/app/services/notifications/notificationService";
+import {
+  EventBrandKey,
+  getBrandIconColor,
+  getEventBackgroundSx,
+  getEventThemeByKey,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 const NotificationsPage: React.FC = () => {
   const router = useRouter();
   const { showToast } = useToast();
   const [tabValue, setTabValue] = useState(0);
+  const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -94,6 +107,25 @@ const NotificationsPage: React.FC = () => {
 
     fetchPreferences();
   }, [showToast]);
+
+  useEffect(() => {
+    const loadCurrentEvent = async () => {
+      try {
+        const allEvents = await getEvents();
+        const savedEventId = localStorage.getItem("selectedEventId");
+        const savedId = savedEventId ? parseInt(savedEventId, 10) : NaN;
+        const selectedEvent = allEvents.find((event) => event.id === savedId);
+        if (selectedEvent) {
+          setCurrentEvent(selectedEvent);
+          setStoredEventBrandKey(selectedEvent);
+          setStoredBrandKeyState(selectedEvent.brand_key === "n1_torcida" ? "n1_torcida" : "default");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar evento atual", error);
+      }
+    };
+    loadCurrentEvent();
+  }, []);
 
   useEffect(() => {
     if (tabValue === 0) {
@@ -294,6 +326,20 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
+  const fallbackTheme = getEventThemeByKey(storedBrandKey);
+  const pageBackgroundSx = currentEvent
+    ? getEventBackgroundSx(currentEvent)
+    : {
+        backgroundImage: `url(${fallbackTheme.backgroundMobile})`,
+        backgroundSize: "100% 100vh",
+        backgroundRepeat: "repeat",
+        backgroundPosition: "0 0",
+        backgroundAttachment: "scroll",
+        width: "100%",
+        boxSizing: "border-box",
+      };
+  const iconAccent = currentEvent ? getBrandIconColor(currentEvent) : fallbackTheme.footerActiveColor;
+
   if (loading) {
     return (
       <Box
@@ -302,10 +348,10 @@ const NotificationsPage: React.FC = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
         }}
       >
-        <CircularProgress sx={{ color: "#ffcc01" }} />
+        <CircularProgress sx={{ color: iconAccent }} />
       </Box>
     );
   }
@@ -314,7 +360,7 @@ const NotificationsPage: React.FC = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         paddingBottom: "72px",
       }}
     >

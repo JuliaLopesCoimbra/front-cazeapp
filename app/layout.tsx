@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
@@ -80,7 +80,7 @@ export default function RootLayout({
           window.OneSignalDeferred = window.OneSignalDeferred || [];
           OneSignalDeferred.push(async function(OneSignal) {
             await OneSignal.init({
-              appId: "a5de4e1c-4080-42aa-b221-4b842db43645",
+              appId: "${process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID}",
               promptOptions: {
                 slidedown: {
                   prompts: [{

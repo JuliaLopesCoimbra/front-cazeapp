@@ -12,6 +12,16 @@ import MyPosts from "@/app/components/my-posts/MyPosts";
 import MyPhotos from "@/app/components/my-photos/MyPhotos";
 import MenuOptions from "@/app/components/my-photos/MenuOptions";
 import RejectedPosts from "@/app/components/my-posts/RejectedPosts";
+import {
+  EventBrandKey,
+  getBrandIconColor,
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+  getEventThemeByKey,
+  getEventTheme,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 type ViewMode = "menu" | "posts" | "rejected" | "photos";
 const STORAGE_KEY = "selectedEventId";
@@ -21,6 +31,9 @@ export default function MyPhotosPage() {
   const { isAuthenticated, isAdmin, isAdminMaster, isSubadmin, isColunista } = useAuth();
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("menu");
   const [shouldAnimate, setShouldAnimate] = useState(true);
@@ -200,6 +213,17 @@ export default function MyPhotosPage() {
     return () => clearTimeout(timer);
   }, [viewMode]);
 
+  useEffect(() => {
+    if (!currentEvent) return;
+    setStoredEventBrandKey(currentEvent);
+    setStoredBrandKeyState(currentEvent.brand_key === "n1_torcida" ? "n1_torcida" : "default");
+  }, [currentEvent]);
+
+  const fallbackTheme = getEventThemeByKey(storedBrandKey);
+  const pageBgSx = currentEvent ? getEventBackgroundSx(currentEvent) : getEventBackgroundSxByKey(storedBrandKey);
+  const footerActiveColor = currentEvent ? getEventTheme(currentEvent).footerActiveColor : fallbackTheme.footerActiveColor;
+  const iconAccent = currentEvent ? getBrandIconColor(currentEvent) : fallbackTheme.footerActiveColor;
+
   const renderContent = () => {
     if (isRegularUser) {
       // Usuários comuns veem apenas fotos baixadas
@@ -215,7 +239,7 @@ export default function MyPhotosPage() {
       case "menu":
         return (
           <Box className={shouldAnimate ? "slide-up-delay-1" : ""}>
-            <MenuOptions onSelectOption={handleSelectOption} />
+            <MenuOptions onSelectOption={handleSelectOption} accentColor={iconAccent} />
           </Box>
         );
       case "posts":
@@ -242,7 +266,7 @@ export default function MyPhotosPage() {
             >
               <IconButton
                 onClick={handleBackToMenu}
-                sx={{ color: "#fff" }}
+                sx={{ color: iconAccent }}
               >
                 <ArrowBackIosIcon sx={{ fontSize: 20 }} />
               </IconButton>
@@ -277,7 +301,7 @@ export default function MyPhotosPage() {
             >
               <IconButton
                 onClick={handleBackToMenu}
-                sx={{ color: "#fff" }}
+                sx={{ color: iconAccent }}
               >
                 <ArrowBackIosIcon sx={{ fontSize: 20 }} />
               </IconButton>
@@ -312,7 +336,7 @@ export default function MyPhotosPage() {
             >
               <IconButton
                 onClick={handleBackToMenu}
-                sx={{ color: "#fff" }}
+                sx={{ color: iconAccent }}
               >
                 <ArrowBackIosIcon sx={{ fontSize: 20 }} />
               </IconButton>
@@ -326,7 +350,7 @@ export default function MyPhotosPage() {
       default:
         return (
           <Box className={shouldAnimate ? "slide-up-delay-1" : ""}>
-            <MenuOptions onSelectOption={handleSelectOption} />
+            <MenuOptions onSelectOption={handleSelectOption} accentColor={iconAccent} />
           </Box>
         );
     }
@@ -335,8 +359,8 @@ export default function MyPhotosPage() {
   if (!isAuthenticated || loading) {
     return (
       <Box
-        className="dashboard-page-background"
-        style={{
+        sx={{
+          ...pageBgSx,
           minHeight: "100vh",
           paddingBottom: "72px",
         }}
@@ -429,8 +453,8 @@ export default function MyPhotosPage() {
   if (!currentEvent) {
     return (
       <Box
-        className="dashboard-page-background"
-        style={{
+        sx={{
+          ...pageBgSx,
           minHeight: "100vh",
           paddingBottom: "72px",
         }}
@@ -523,8 +547,8 @@ export default function MyPhotosPage() {
   return (
     <>
       <Box
-        className="dashboard-page-background"
-        style={{
+        sx={{
+          ...pageBgSx,
           minHeight: "100vh",
           paddingBottom: "72px",
         }}
@@ -542,7 +566,7 @@ export default function MyPhotosPage() {
         {/* Conteúdo baseado no tipo de usuário */}
         {renderContent()}
       </Box>
-      <BottomNav />
+      <BottomNav activeColor={footerActiveColor} />
     </>
   );
 }

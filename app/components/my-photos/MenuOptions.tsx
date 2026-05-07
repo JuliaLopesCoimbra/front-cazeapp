@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Card, Typography, CardContent } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { Article, PhotoLibrary, Block } from "@mui/icons-material";
 import { useAuth } from "@/app/context/AuthContext";
 
@@ -13,9 +14,11 @@ interface MenuOption {
 
 interface MenuOptionsProps {
   onSelectOption: (option: string) => void;
+  /** Cor de ícone / destaque (ex.: tema do evento Torcida = verde). */
+  accentColor?: string;
 }
 
-export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
+export default function MenuOptions({ onSelectOption, accentColor = "#FFD600" }: MenuOptionsProps) {
   const { isAdminMaster, isSubadmin } = useAuth();
   
   const allOptions: MenuOption[] = [
@@ -78,7 +81,7 @@ export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
               "&:hover": {
                 backgroundColor: "rgba(255, 255, 255, 0.1)",
                 transform: "translateY(-2px)",
-                borderColor: "rgba(255, 214, 0, 0.5)",
+                borderColor: alpha(accentColor, 0.55),
               },
             }}
           >
@@ -95,7 +98,7 @@ export default function MenuOptions({ onSelectOption }: MenuOptionsProps) {
             >
               <Box
                 sx={{
-                  color: "#FFD600",
+                  color: accentColor,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

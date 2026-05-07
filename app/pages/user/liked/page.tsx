@@ -22,7 +22,16 @@ import BottomNav from "@/app/components/layout/BottomNav";
 import { CircularProgress } from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import {
+  EventBrandKey,
+  getBrandIconColor,
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+  getEventBrandKey,
+  getEventTheme,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 const LIMIT = 5;
 const STORAGE_KEY = "selectedEventId";
@@ -46,6 +55,9 @@ export default function LikedPostsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
   const [mounted, setMounted] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(true);
 
@@ -183,6 +195,8 @@ export default function LikedPostsPage() {
   const handleSelectEvent = useCallback((event: EventResponse) => {
     localStorage.setItem(STORAGE_KEY, event.id.toString());
     setCurrentEvent(event);
+    setStoredEventBrandKey(event);
+    setStoredBrandKeyState(getEventBrandKey(event));
     reloadPostsForEvent(event.id);
   }, [reloadPostsForEvent]);
 
@@ -199,6 +213,12 @@ export default function LikedPostsPage() {
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!currentEvent) return;
+    setStoredEventBrandKey(currentEvent);
+    setStoredBrandKeyState(getEventBrandKey(currentEvent));
+  }, [currentEvent]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -525,19 +545,23 @@ export default function LikedPostsPage() {
     });
   };
 
+  const iconAccent = getBrandIconColor(currentEvent);
+  const isTorcida = getEventBrandKey(currentEvent) === "n1_torcida";
+  const pageBackgroundSx = currentEvent ? getEventBackgroundSx(currentEvent) : getEventBackgroundSxByKey(storedBrandKey);
+
   // Evita problemas de hidratação: só renderiza conteúdo específico do cliente após montagem
   if (!mounted) {
     return (
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <CircularProgress sx={{ color: "#ffc91f" }} />
+        <CircularProgress sx={{ color: iconAccent }} />
       </Box>
     );
   }
@@ -549,7 +573,7 @@ export default function LikedPostsPage() {
         <Box
           style={{
             minHeight: "100vh",
-            ...dashboardBackgroundSx,
+            ...pageBackgroundSx,
             paddingBottom: "72px",
           }}
         >
@@ -590,7 +614,7 @@ export default function LikedPostsPage() {
             </Box>
           </Box>
         </Box>
-        <BottomNav />
+        <BottomNav activeColor={getEventTheme(currentEvent).footerActiveColor} />
       </>
     );
   }
@@ -600,7 +624,7 @@ export default function LikedPostsPage() {
       <Box
         style={{
           minHeight: "100vh",
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           paddingBottom: "72px",
         }}
       >
@@ -660,7 +684,7 @@ export default function LikedPostsPage() {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: "rgba(255,255,255,0.6)",
+                      color: isTorcida ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)",
                       fontSize: "0.875rem",
                     }}
                   >
@@ -672,8 +696,8 @@ export default function LikedPostsPage() {
                 <Chip
                   label={posts.length}
                   sx={{
-                    backgroundColor: "#ffc91f",
-                    color: "#000",
+                    backgroundColor: isTorcida ? "#0f935d" : "#ffc91f",
+                    color: "#fff",
                     fontWeight: 700,
                     fontSize: "0.875rem",
                     height: "32px",
@@ -711,7 +735,7 @@ export default function LikedPostsPage() {
                       width: 120,
                       height: 120,
                       borderRadius: "50%",
-                      backgroundColor: "rgba(255,201,31,0.1)",
+                      backgroundColor: isTorcida ? "rgba(15,147,93,0.15)" : "rgba(255,201,31,0.1)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -735,7 +759,7 @@ export default function LikedPostsPage() {
                   <Typography
                     variant="body1"
                     sx={{ 
-                      color: "rgba(255,255,255,0.6)", 
+                      color: isTorcida ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.6)", 
                       textAlign: "center",
                       maxWidth: "400px",
                     }}
@@ -896,7 +920,7 @@ export default function LikedPostsPage() {
           </Box>
         </Box>
       </Box>
-      <BottomNav />
+      <BottomNav activeColor={getEventTheme(currentEvent).footerActiveColor} />
     </>
   );
 }

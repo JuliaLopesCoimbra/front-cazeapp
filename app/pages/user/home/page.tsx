@@ -26,9 +26,14 @@ import {
 } from "@/app/services/notifications/notificationPreferenceService";
 import { subscribeForPush } from "@/app/services/notifications/pushService";
 import { useToast } from "@/app/context/ToastContext";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
-import { getEventBackgroundSx } from "@/app/utils/eventBranding";
-import { getEventTheme } from "@/app/utils/eventBranding";
+import {
+  EventBrandKey,
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+  getEventTheme,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 const NOTIFICATION_POPUP_DISMISSED_KEY = "n1_notification_popup_dismissed_at";
 const NOTIFICATION_POPUP_DISMISS_DAYS = 7;
@@ -65,6 +70,12 @@ const HomeContent: React.FC = () => {
       sessionStorage.setItem(TAB_KEY, activeTab);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (currentEvent) {
+      setStoredEventBrandKey(currentEvent);
+    }
+  }, [currentEvent]);
 
   // Controla animações quando a aba muda
   useEffect(() => {
@@ -687,56 +698,46 @@ const HomeContent: React.FC = () => {
   );
 };
 
-const Home: React.FC = () => {
+const HomeSuspenseFallback: React.FC = () => {
+  const [storedBrandKey] = useState<EventBrandKey>(() => getStoredEventBrandKey() ?? "default");
   return (
-    <Suspense fallback={
+    <Box
+      sx={{
+        minHeight: "100vh",
+        ...getEventBackgroundSxByKey(storedBrandKey),
+        paddingBottom: "72px",
+      }}
+    >
       <Box
         sx={{
-          minHeight: "100vh",
-          ...dashboardBackgroundSx,
-          paddingBottom: "72px",
+          padding: 2,
+          borderBottom: "solid 1px rgba(255,255,255,0.2)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
         }}
       >
         <Box
           sx={{
-            padding: 2,
-            borderBottom: "solid 1px rgba(255,255,255,0.2)",
             display: "flex",
-            flexDirection: "column",
-            gap: 1,
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box display="flex" alignItems="center" gap={1}>
-              <Skeleton
-                variant="rectangular"
-                width={40}
-                height={40}
-                sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
-              />
-              <Skeleton
-                variant="text"
-                width={150}
-                height={32}
-                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-              />
-            </Box>
-            <Skeleton
-              variant="circular"
-              width={40}
-              height={40}
-              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-            />
+          <Box display="flex" alignItems="center" gap={1}>
+            <Skeleton variant="rectangular" width={40} height={40} sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }} />
+            <Skeleton variant="text" width={150} height={32} sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
           </Box>
+          <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
         </Box>
       </Box>
-    }>
+    </Box>
+  );
+};
+
+const Home: React.FC = () => {
+  return (
+    <Suspense fallback={<HomeSuspenseFallback />}>
       <HomeContent />
     </Suspense>
   );

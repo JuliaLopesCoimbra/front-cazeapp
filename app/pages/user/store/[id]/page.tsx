@@ -15,7 +15,16 @@ import { getProductEventById, ProductEventResponse } from "@/app/services/produc
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
 import BottomNav from "@/app/components/layout/BottomNav";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
+import {
+  EventBrandKey,
+  getBrandIconColor,
+  getEventBackgroundSx,
+  getEventTheme,
+  getEventThemeByKey,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 export default function ProductDetailsPage() {
   const params = useParams();
@@ -25,6 +34,10 @@ export default function ProductDetailsPage() {
   const { showToast } = useToast();
 
   const [product, setProduct] = useState<ProductEventResponse | null>(null);
+  const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
@@ -66,18 +79,51 @@ export default function ProductDetailsPage() {
     fetchProduct();
   }, [productId, router, showToast]);
 
+  useEffect(() => {
+    const loadCurrentEvent = async () => {
+      try {
+        const allEvents = await getEvents();
+        const savedEventId = localStorage.getItem("selectedEventId");
+        const savedId = savedEventId ? parseInt(savedEventId, 10) : NaN;
+        const selectedEvent = allEvents.find((event) => event.id === savedId);
+        if (selectedEvent) {
+          setCurrentEvent(selectedEvent);
+          setStoredEventBrandKey(selectedEvent);
+          setStoredBrandKeyState(getEventTheme(selectedEvent).key);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar evento atual", error);
+      }
+    };
+    loadCurrentEvent();
+  }, []);
+
+  const fallbackTheme = getEventThemeByKey(storedBrandKey);
+  const pageBackgroundSx = currentEvent
+    ? getEventBackgroundSx(currentEvent)
+    : {
+        backgroundImage: `url(${fallbackTheme.backgroundMobile})`,
+        backgroundSize: "100% 100vh",
+        backgroundRepeat: "repeat",
+        backgroundPosition: "0 0",
+        backgroundAttachment: "scroll",
+        width: "100%",
+        boxSizing: "border-box",
+      };
+  const iconAccent = currentEvent ? getBrandIconColor(currentEvent) : fallbackTheme.footerActiveColor;
+
   if (!authReady) {
     return (
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <CircularProgress sx={{ color: "#ffc91f" }} />
+        <CircularProgress sx={{ color: iconAccent }} />
       </Box>
     );
   }
@@ -91,13 +137,13 @@ export default function ProductDetailsPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <CircularProgress sx={{ color: "#ffc91f" }} />
+        <CircularProgress sx={{ color: iconAccent }} />
       </Box>
     );
   }
@@ -149,7 +195,7 @@ export default function ProductDetailsPage() {
     <>
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           minHeight: "100vh",
           color: "#fff",
           display: "flex",
@@ -420,7 +466,7 @@ export default function ProductDetailsPage() {
           </Box>
         </Box>
       </Box>
-      <BottomNav />
+      <BottomNav activeColor={getEventTheme(currentEvent).footerActiveColor} />
     </>
   );
 }

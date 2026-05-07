@@ -8,7 +8,15 @@ import {
   spinRoulette,
   RouletteResponse,
 } from "@/app/services/roulette/rouletteService";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { EventResponse, getEventById } from "@/app/services/events/eventAppService";
+import {
+  EventBrandKey,
+  getBrandIconColor,
+  getEventBackgroundSx,
+  getEventThemeByKey,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 const SLICE_COUNT = 12;
 const SLICE_ANGLE = 360 / SLICE_COUNT;
@@ -23,6 +31,10 @@ export default function Roulette() {
   const eventId = Number(params.eventId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
 
   const spinToPosition = (position: number | string) => {
     const pos = Number(position);
@@ -88,6 +100,10 @@ export default function Roulette() {
       setLoading(true);
       setError(null);
       try {
+        const event = await getEventById(eventId);
+        setCurrentEvent(event);
+        setStoredEventBrandKey(event);
+        setStoredBrandKeyState(event.brand_key === "n1_torcida" ? "n1_torcida" : "default");
         const data = await getRouletteByEvent(eventId);
         setRoulette(data);
       } catch (err: any) {
@@ -105,11 +121,25 @@ export default function Roulette() {
     loadRoulette();
   }, [eventId]);
 
+  const fallbackTheme = getEventThemeByKey(storedBrandKey);
+  const pageBackgroundSx = currentEvent
+    ? getEventBackgroundSx(currentEvent)
+    : {
+        backgroundImage: `url(${fallbackTheme.backgroundMobile})`,
+        backgroundSize: "100% 100vh",
+        backgroundRepeat: "repeat",
+        backgroundPosition: "0 0",
+        backgroundAttachment: "scroll",
+        width: "100%",
+        boxSizing: "border-box",
+      };
+  const iconAccent = currentEvent ? getBrandIconColor(currentEvent) : fallbackTheme.footerActiveColor;
+
   if (loading) {
     return (
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
@@ -213,7 +243,7 @@ export default function Roulette() {
     return (
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
@@ -266,7 +296,7 @@ export default function Roulette() {
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
