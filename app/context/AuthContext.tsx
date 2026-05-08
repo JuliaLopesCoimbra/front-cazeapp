@@ -112,17 +112,27 @@ const login = useCallback(
           try {
             await OneSignal.login(`n1_${decoded.sub}`);
           } catch (_) {
-            // Login falhou (AppID mismatch ou SDK quebrado) — limpa subscriptions antigas
-            // Na próxima visita o OneSignal inicializa sem conflito e o login funciona
             try {
-              if (navigator.serviceWorker) {
-                const regs = await navigator.serviceWorker.getRegistrations();
-                for (const reg of regs) {
-                  const sub = await reg.pushManager.getSubscription();
-                  if (sub) await sub.unsubscribe();
-                }
+              // Conflito de alias (409): deleta o external_id antigo no servidor e retenta
+              const token = localStorage.getItem("access_token");
+              if (token) {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/onesignal-identity`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${token}` },
+                });
               }
-            } catch (_2) {}
+              await OneSignal.login(`n1_${decoded.sub}`);
+            } catch (_2) {
+              try {
+                if (navigator.serviceWorker) {
+                  const regs = await navigator.serviceWorker.getRegistrations();
+                  for (const reg of regs) {
+                    const sub = await reg.pushManager.getSubscription();
+                    if (sub) await sub.unsubscribe();
+                  }
+                }
+              } catch (_3) {}
+            }
           }
         });
       }
@@ -174,14 +184,25 @@ const login = useCallback(
             await OneSignal.login(`n1_${decoded.sub}`);
           } catch (_) {
             try {
-              if (navigator.serviceWorker) {
-                const regs = await navigator.serviceWorker.getRegistrations();
-                for (const reg of regs) {
-                  const sub = await reg.pushManager.getSubscription();
-                  if (sub) await sub.unsubscribe();
-                }
+              const t = localStorage.getItem("access_token");
+              if (t) {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/onesignal-identity`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${t}` },
+                });
               }
-            } catch (_2) {}
+              await OneSignal.login(`n1_${decoded.sub}`);
+            } catch (_2) {
+              try {
+                if (navigator.serviceWorker) {
+                  const regs = await navigator.serviceWorker.getRegistrations();
+                  for (const reg of regs) {
+                    const sub = await reg.pushManager.getSubscription();
+                    if (sub) await sub.unsubscribe();
+                  }
+                }
+              } catch (_3) {}
+            }
           }
         });
       }
