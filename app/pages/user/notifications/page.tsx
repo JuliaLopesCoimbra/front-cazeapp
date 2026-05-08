@@ -117,19 +117,21 @@ const NotificationsPage: React.FC = () => {
     if (typeof window === "undefined") return;
 
     const checkStatus = () => {
-      // Verifica permissão nativa do browser — fonte de verdade primária
-      const browserGranted =
-        typeof Notification !== "undefined" && Notification.permission === "granted";
+      const browserPermission = typeof Notification !== "undefined" ? Notification.permission : "unavailable";
+      const OS = (window as any).OneSignal;
+      const optedIn = OS?.User?.PushSubscription?.optedIn;
+      console.log("[PushCheck] Notification.permission:", browserPermission);
+      console.log("[PushCheck] window.OneSignal exists:", !!OS);
+      console.log("[PushCheck] OneSignal.User.PushSubscription.optedIn:", optedIn);
 
+      const browserGranted = browserPermission === "granted";
       if (!browserGranted) {
+        console.log("[PushCheck] resultado: disabled (browser não concedeu)");
         setLocalPreferences((prev) => ({ ...prev, push_enabled: false }));
         return;
       }
-
-      // Se browser concedeu, verifica se OneSignal não foi explicitamente opt-out
-      const OS = (window as any).OneSignal;
-      const optedIn = OS?.User?.PushSubscription?.optedIn;
-      const enabled = optedIn === false ? false : true; // default true se não consegue checar
+      const enabled = optedIn === false ? false : true;
+      console.log("[PushCheck] resultado:", enabled ? "enabled" : "disabled (OneSignal optedOut)");
       setLocalPreferences((prev) => ({ ...prev, push_enabled: enabled }));
     };
 
@@ -315,6 +317,11 @@ const NotificationsPage: React.FC = () => {
   const handlePushToggleConfirm = async () => {
     setConfirmAction(null);
     setPushLoading(true);
+    console.log("[PushToggle] ação:", localPreferences.push_enabled ? "desativar" : "ativar");
+    console.log("[PushToggle] Notification.permission:", typeof Notification !== "undefined" ? Notification.permission : "unavailable");
+    const _OS = (window as any).OneSignal;
+    console.log("[PushToggle] window.OneSignal:", !!_OS);
+    console.log("[PushToggle] optedIn:", _OS?.User?.PushSubscription?.optedIn);
     try {
       if (localPreferences.push_enabled) {
         const OS = (window as any).OneSignal;
