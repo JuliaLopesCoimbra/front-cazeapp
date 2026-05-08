@@ -58,6 +58,8 @@ function CreateProductContent() {
 }
 
 export default function CreateProductPage() {
+  const pageBackgroundSx = getThemedPageBackgroundSx();
+
   return (
     <Suspense
       fallback={
