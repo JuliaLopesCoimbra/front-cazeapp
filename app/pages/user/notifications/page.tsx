@@ -117,30 +117,15 @@ const NotificationsPage: React.FC = () => {
     if (typeof window === "undefined") return;
 
     const checkStatus = () => {
-      const browserPermission = typeof Notification !== "undefined" ? Notification.permission : "unavailable";
-      const OS = (window as any).OneSignal;
-      const optedIn = OS?.User?.PushSubscription?.optedIn;
-      console.log("[PushCheck] Notification.permission:", browserPermission);
-      console.log("[PushCheck] window.OneSignal exists:", !!OS);
-      console.log("[PushCheck] OneSignal.User.PushSubscription.optedIn:", optedIn);
-
-      const browserGranted = browserPermission === "granted";
-      if (!browserGranted) {
-        console.log("[PushCheck] resultado: disabled (browser não concedeu)");
-        setLocalPreferences((prev) => ({ ...prev, push_enabled: false }));
-        return;
-      }
-      const enabled = optedIn === false ? false : true;
-      console.log("[PushCheck] resultado:", enabled ? "enabled" : "disabled (OneSignal optedOut)");
+      const browserGranted =
+        typeof Notification !== "undefined" && Notification.permission === "granted";
+      // Só mostra OFF se browser não concedeu OU usuário explicitamente desativou pelo nosso UI
+      const explicitlyOptedOut = localStorage.getItem("n1_push_opted_out") === "true";
+      const enabled = browserGranted && !explicitlyOptedOut;
       setLocalPreferences((prev) => ({ ...prev, push_enabled: enabled }));
     };
 
-    // Verifica imediatamente (OneSignal pode já estar inicializado)
     checkStatus();
-
-    // Verifica novamente após 1.5s para garantir que OneSignal carregou
-    const timer = setTimeout(checkStatus, 1500);
-    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -317,15 +302,12 @@ const NotificationsPage: React.FC = () => {
   const handlePushToggleConfirm = async () => {
     setConfirmAction(null);
     setPushLoading(true);
-    console.log("[PushToggle] ação:", localPreferences.push_enabled ? "desativar" : "ativar");
-    console.log("[PushToggle] Notification.permission:", typeof Notification !== "undefined" ? Notification.permission : "unavailable");
-    const _OS = (window as any).OneSignal;
-    console.log("[PushToggle] window.OneSignal:", !!_OS);
-    console.log("[PushToggle] optedIn:", _OS?.User?.PushSubscription?.optedIn);
     try {
       if (localPreferences.push_enabled) {
+        // Desativar
+        localStorage.setItem("n1_push_opted_out", "true");
         const OS = (window as any).OneSignal;
-        if (OS?.User?.PushSubscription) await OS.User.PushSubscription.optOut();
+        try { if (OS?.User?.PushSubscription) await OS.User.PushSubscription.optOut(); } catch (_) {}
         const updated = { push_enabled: false, lineup_updated: false, news_feed: false, interactions: false, new_events: false };
         await updateNotificationPreferences(updated);
         setLocalPreferences(updated);
@@ -335,14 +317,18 @@ const NotificationsPage: React.FC = () => {
           showToast("Notificações bloqueadas no navegador. Acesse as configurações do site para reativar.", "error");
           return;
         }
+        // Ativar
+        localStorage.removeItem("n1_push_opted_out");
         const OS = (window as any).OneSignal;
-        if (OS) {
-          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-            await OS.User?.PushSubscription?.optIn?.();
-          } else {
-            await OS.Slidedown?.promptPush?.();
+        try {
+          if (OS) {
+            if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+              await OS.User?.PushSubscription?.optIn?.();
+            } else {
+              await OS.Slidedown?.promptPush?.();
+            }
           }
-        }
+        } catch (_) {}
         const updated = { push_enabled: true, lineup_updated: true, news_feed: true, interactions: true, new_events: true };
         await updateNotificationPreferences(updated);
         setLocalPreferences(updated);
