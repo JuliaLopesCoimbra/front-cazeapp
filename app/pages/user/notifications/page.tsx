@@ -116,23 +116,28 @@ const NotificationsPage: React.FC = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const applyStatus = (OS: any) => {
-      const enabled =
-        OS.Notifications?.permission === true &&
-        OS.User?.PushSubscription?.optedIn === true;
+    const checkStatus = () => {
+      // Verifica permissão nativa do browser — fonte de verdade primária
+      const browserGranted =
+        typeof Notification !== "undefined" && Notification.permission === "granted";
+
+      if (!browserGranted) {
+        setLocalPreferences((prev) => ({ ...prev, push_enabled: false }));
+        return;
+      }
+
+      // Se browser concedeu, verifica se OneSignal não foi explicitamente opt-out
+      const OS = (window as any).OneSignal;
+      const optedIn = OS?.User?.PushSubscription?.optedIn;
+      const enabled = optedIn === false ? false : true; // default true se não consegue checar
       setLocalPreferences((prev) => ({ ...prev, push_enabled: enabled }));
     };
 
-    // Callback via deferred (roda quando OneSignal estiver pronto)
-    (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
-    (window as any).OneSignalDeferred.push(applyStatus);
+    // Verifica imediatamente (OneSignal pode já estar inicializado)
+    checkStatus();
 
-    // Fallback: verifica diretamente após 2s caso OneSignal já esteja inicializado
-    const timer = setTimeout(() => {
-      const OS = (window as any).OneSignal;
-      if (OS?.Notifications) applyStatus(OS);
-    }, 2000);
-
+    // Verifica novamente após 1.5s para garantir que OneSignal carregou
+    const timer = setTimeout(checkStatus, 1500);
     return () => clearTimeout(timer);
   }, []);
 
