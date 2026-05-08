@@ -94,13 +94,14 @@ const NotificationsPage: React.FC = () => {
       try {
         const data = await getNotificationPreferences();
         setPreferences(data);
-        setLocalPreferences({
+        setLocalPreferences((prev) => ({
+          ...prev,
           lineup_updated: data.lineup_updated,
           news_feed: data.news_feed,
           interactions: data.interactions,
           new_events: data.new_events,
-          push_enabled: data.push_enabled ?? false,
-        });
+          // push_enabled não vem do banco — é gerenciado exclusivamente pelo OneSignal
+        }));
       } catch (error) {
         console.error("Erro ao buscar preferências:", error);
         showToast("Erro ao carregar preferências", "error");
@@ -114,13 +115,25 @@ const NotificationsPage: React.FC = () => {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
-    (window as any).OneSignalDeferred.push((OS: any) => {
+
+    const applyStatus = (OS: any) => {
       const enabled =
         OS.Notifications?.permission === true &&
         OS.User?.PushSubscription?.optedIn === true;
       setLocalPreferences((prev) => ({ ...prev, push_enabled: enabled }));
-    });
+    };
+
+    // Callback via deferred (roda quando OneSignal estiver pronto)
+    (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
+    (window as any).OneSignalDeferred.push(applyStatus);
+
+    // Fallback: verifica diretamente após 2s caso OneSignal já esteja inicializado
+    const timer = setTimeout(() => {
+      const OS = (window as any).OneSignal;
+      if (OS?.Notifications) applyStatus(OS);
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

@@ -19,6 +19,9 @@ import { getPublicEventById } from "@/app/services/events/eventAppService";
 import {
   getEventBackgroundSx,
   getEventBackgroundSxByKey,
+  getEventBrandKey,
+  getStoredEventBrandKey,
+  EventBrandKey,
 } from "@/app/utils/eventBranding";
 
 export default function LineupPage() {
@@ -31,6 +34,23 @@ export default function LineupPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [initialBrandKey, setInitialBrandKey] = useState<EventBrandKey>("default");
+
+  useEffect(() => {
+    const torcidaEventIds = new Set([25]);
+    const fallbackByRoute: EventBrandKey = torcidaEventIds.has(eventId) ? "n1_torcida" : "default";
+
+    if (typeof window === "undefined") {
+      setInitialBrandKey(fallbackByRoute);
+      return;
+    }
+
+    const storedBrandKey = getStoredEventBrandKey();
+    const storedEventId = Number(window.localStorage.getItem("selectedEventId"));
+    const canReuseStoredBrand = Number.isFinite(storedEventId) && storedEventId === eventId;
+
+    setInitialBrandKey(canReuseStoredBrand ? storedBrandKey ?? fallbackByRoute : fallbackByRoute);
+  }, [eventId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,9 +126,10 @@ export default function LineupPage() {
     }
   }, [dates]);
 
+  const resolvedBrandKey = event ? getEventBrandKey(event) : initialBrandKey;
   const pageBackgroundSx = event
     ? getEventBackgroundSx(event)
-    : getEventBackgroundSxByKey("default");
+    : getEventBackgroundSxByKey(resolvedBrandKey);
 
   if (loading) {
     return (
