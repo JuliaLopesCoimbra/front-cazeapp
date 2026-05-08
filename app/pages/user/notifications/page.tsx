@@ -304,8 +304,8 @@ const NotificationsPage: React.FC = () => {
     setPushLoading(true);
     try {
       if (localPreferences.push_enabled) {
-        // Desativar — apenas marca no localStorage e salva no DB
-        // NÃO chama optOut() pois cancela a subscription do browser e não tem como restaurar sem novo prompt
+        // Desativar — apenas salva no DB. NÃO chama optOut() para manter a subscription
+        // viva no OneSignal e permitir reativação sem precisar de novo prompt do browser.
         localStorage.setItem("n1_push_opted_out", "true");
         const updated = { push_enabled: false, lineup_updated: false, news_feed: false, interactions: false, new_events: false };
         await updateNotificationPreferences(updated);
@@ -316,8 +316,8 @@ const NotificationsPage: React.FC = () => {
           showToast("Notificações bloqueadas no navegador. Acesse as configurações do site para reativar.", "error");
           return;
         }
-        // Ativar — apenas remove flag e salva no DB
-        // NÃO chama optIn() pois a subscription já está ativa no browser
+        // Ativar — chama optIn() para reativar subscription no OneSignal caso esteja opted-out
+        try { (window as any).OneSignal?.User?.PushSubscription?.optIn?.(); } catch (_) {}
         localStorage.removeItem("n1_push_opted_out");
         const updated = { push_enabled: true, lineup_updated: true, news_feed: true, interactions: true, new_events: true };
         await updateNotificationPreferences(updated);
