@@ -106,11 +106,10 @@ const login = useCallback(
       setIsAuthenticated(true);
       setAuthVersion((v) => v + 1);
 
-      // Vincula o usuário ao OneSignal para notificações personalizadas
       if (typeof window !== "undefined") {
         (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-          await OneSignal.login(`n1_${decoded.sub}`);
+          try { await OneSignal.login(`n1_${decoded.sub}`); } catch (_) {}
         });
       }
     } catch (error) {
@@ -131,11 +130,10 @@ const login = useCallback(
     setRole(null);
     setAuthVersion((v) => v + 1);
 
-    // Desvincula o usuário do OneSignal
     if (typeof window !== "undefined") {
       (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
       (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-        await OneSignal.logout();
+        try { await OneSignal.logout(); } catch (_) {}
       });
     }
   };
@@ -155,11 +153,10 @@ const login = useCallback(
       setRole(decoded.role || null);
       setIsAuthenticated(true);
 
-      // Restaura vínculo OneSignal para sessões existentes
       if (typeof window !== "undefined") {
         (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-          await OneSignal.login(`n1_${decoded.sub}`);
+          try { await OneSignal.login(`n1_${decoded.sub}`); } catch (_) {}
         });
       }
     } catch {

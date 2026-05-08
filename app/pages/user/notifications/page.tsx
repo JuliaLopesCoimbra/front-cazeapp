@@ -306,8 +306,8 @@ const NotificationsPage: React.FC = () => {
       if (localPreferences.push_enabled) {
         // Desativar
         localStorage.setItem("n1_push_opted_out", "true");
-        const OS = (window as any).OneSignal;
-        try { if (OS?.User?.PushSubscription) await OS.User.PushSubscription.optOut(); } catch (_) {}
+        // Fire-and-forget — não await para evitar travar se OneSignal estiver em estado quebrado
+        try { (window as any).OneSignal?.User?.PushSubscription?.optOut?.(); } catch (_) {}
         const updated = { push_enabled: false, lineup_updated: false, news_feed: false, interactions: false, new_events: false };
         await updateNotificationPreferences(updated);
         setLocalPreferences(updated);
@@ -319,14 +319,13 @@ const NotificationsPage: React.FC = () => {
         }
         // Ativar
         localStorage.removeItem("n1_push_opted_out");
-        const OS = (window as any).OneSignal;
+        // Fire-and-forget — não await para evitar travar se OneSignal estiver em estado quebrado
         try {
-          if (OS) {
-            if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-              await OS.User?.PushSubscription?.optIn?.();
-            } else {
-              await OS.Slidedown?.promptPush?.();
-            }
+          const OS = (window as any).OneSignal;
+          if (OS && typeof Notification !== "undefined" && Notification.permission === "granted") {
+            OS.User?.PushSubscription?.optIn?.();
+          } else if (OS) {
+            OS.Slidedown?.promptPush?.();
           }
         } catch (_) {}
         const updated = { push_enabled: true, lineup_updated: true, news_feed: true, interactions: true, new_events: true };
