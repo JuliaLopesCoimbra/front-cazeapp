@@ -4,6 +4,9 @@ import { useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Box, Skeleton } from "@mui/material";
 import { useAuth } from "@/app/context/AuthContext";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
+
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 function AuthCallbackContent() {
   const params = useSearchParams();
@@ -35,8 +38,8 @@ function AuthCallbackContent() {
 
   return (
     <Box
-      className="dashboard-page-background"
-      style={{
+      sx={{
+        ...torcidaBackgroundSx,
         minHeight: "100vh",
         paddingBottom: "72px",
       }}
@@ -139,8 +142,8 @@ export default function AuthCallbackPage() {
     <Suspense
       fallback={
         <Box
-          className="dashboard-page-background"
-          style={{
+          sx={{
+            ...torcidaBackgroundSx,
             minHeight: "100vh",
             paddingBottom: "72px",
           }}

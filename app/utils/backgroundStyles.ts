@@ -1,3 +1,14 @@
+import { getStoredEventBrandKey, getEventBackgroundSxByKey, EventBrandKey } from "./eventBranding";
+
+/**
+ * Retorna o background correto para o tema atual (default ou torcida).
+ * Deve ser chamado dentro de componentes client-side.
+ */
+export const getThemedPageBackgroundSx = () => {
+  const brandKey = (getStoredEventBrandKey() ?? "default") as EventBrandKey;
+  return getEventBackgroundSxByKey(brandKey);
+};
+
 /**
  * Fundo fixo: sempre dashboard.png (Home e Enredo).
  */

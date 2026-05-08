@@ -1,13 +1,14 @@
 "use client";
 
 import { Box, CircularProgress } from "@mui/material";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getThemedPageBackgroundSx } from "@/app/utils/backgroundStyles";
 import CreateLineupItemForm from "@/app/components/admin/lineup/CreateLineupItemForm";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect } from "react";
 
 export default function EditLineupItemPage() {
+  const pageBackgroundSx = getThemedPageBackgroundSx();
   const { isAdmin, authReady } = useAuth();
   const router = useRouter();
   const params = useParams();
@@ -24,7 +25,7 @@ export default function EditLineupItemPage() {
     return (
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -44,7 +45,7 @@ export default function EditLineupItemPage() {
     return (
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           minHeight: "100vh",
           color: "#fff",
           display: "flex",
@@ -60,7 +61,7 @@ export default function EditLineupItemPage() {
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         minHeight: "100vh",
         color: "#fff",
         display: "flex",

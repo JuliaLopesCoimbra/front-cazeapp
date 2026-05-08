@@ -14,7 +14,9 @@ import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { firstAccess } from "@/app/services/auth/authAdminService";
 import { validatePassword } from "@/app/utils/passwordValidator";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
+
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 function FirstAccessContent() {
   const params = useSearchParams();
@@ -77,7 +79,7 @@ function FirstAccessContent() {
         sx={{
           display: "flex",
           justifyContent: "center",
-          ...dashboardBackgroundSx,
+          ...torcidaBackgroundSx,
           height: "100vh",
           padding: "20px",
           alignItems: "center",
@@ -93,7 +95,7 @@ function FirstAccessContent() {
       sx={{
         display: "flex",
         justifyContent: "center",
-        ...dashboardBackgroundSx,
+        ...torcidaBackgroundSx,
         height: "100vh",
         padding: "20px",
       }}
@@ -316,7 +318,7 @@ export default function FirstAccessPage() {
           sx={{
             display: "flex",
             justifyContent: "center",
-            ...dashboardBackgroundSx,
+            ...torcidaBackgroundSx,
             height: "100vh",
             padding: "20px",
             alignItems: "center",

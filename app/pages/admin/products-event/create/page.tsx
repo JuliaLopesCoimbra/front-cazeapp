@@ -5,8 +5,10 @@ import CreateProductForm from "@/app/components/admin/products-event/CreateProdu
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
+import { getThemedPageBackgroundSx } from "@/app/utils/backgroundStyles";
 
 function CreateProductContent() {
+  const pageBackgroundSx = getThemedPageBackgroundSx();
   const { isAdmin, authReady } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,7 +25,7 @@ function CreateProductContent() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -62,7 +64,7 @@ export default function CreateProductPage() {
         <Box
           sx={{
             minHeight: "100vh",
-            backgroundColor: "#000",
+            ...pageBackgroundSx,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

@@ -15,7 +15,9 @@ import { ptBR } from 'date-fns/locale';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/app/context/ToastContext";
 import { verifyAge } from "@/app/services/auth/authService";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
+
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 function AgeVerificationContent() {
   const [birthDate, setBirthDate] = useState<Date | null>(null);
@@ -88,7 +90,7 @@ function AgeVerificationContent() {
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...torcidaBackgroundSx,
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",

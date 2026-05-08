@@ -15,9 +15,10 @@ import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { validatePassword } from "@/app/utils/passwordValidator";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 const API_URL = getApiUrl();
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 function ResetPasswordContent() {
   const params = useSearchParams();
@@ -75,7 +76,7 @@ function ResetPasswordContent() {
         sx={{
           display: "flex",
           justifyContent: "center",
-          ...dashboardBackgroundSx,
+          ...torcidaBackgroundSx,
           height: "100vh",
           padding: "20px",
           alignItems: "center",
@@ -89,7 +90,7 @@ function ResetPasswordContent() {
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...torcidaBackgroundSx,
         display: "flex",
         justifyContent: "center",
         height: "100vh",
@@ -322,7 +323,7 @@ export default function ResetPasswordPage() {
       fallback={
         <Box
           sx={{
-            ...dashboardBackgroundSx,
+            ...torcidaBackgroundSx,
             display: "flex",
             justifyContent: "center",
             height: "100vh",

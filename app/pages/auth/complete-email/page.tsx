@@ -13,9 +13,10 @@ import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
 import axios from "axios";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 const API_URL = getApiUrl();
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 function CompleteEmailContent() {
   const [email, setEmail] = useState("");
@@ -149,7 +150,7 @@ function CompleteEmailContent() {
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...torcidaBackgroundSx,
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",

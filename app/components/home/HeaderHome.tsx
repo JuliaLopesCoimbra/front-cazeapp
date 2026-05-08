@@ -21,6 +21,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, AppNotification } from "@/app/services/notifications/notificationService";
 import { useToast } from "@/app/context/ToastContext";
 import { getEventBrandKey } from "@/app/utils/eventBranding";
+import PendingPostsNotification from "@/app/components/admin/pending-posts/PendingPostsNotification";
 
 interface Props {
   event: EventResponse | null;
@@ -38,7 +39,8 @@ export default function HomeHeader({
   profile: profileProp,
 }: Props) {
   const router = useRouter();
-  const { logout, isAuthenticated } = useAuth();
+  const { logout, isAuthenticated, isAdminMaster, isSubadmin } = useAuth();
+  const canApprovePosts = isAdminMaster || isSubadmin;
   const { showToast } = useToast();
   const [profile, setProfile] = useState<ProfileResponse | null>(profileProp || null);
   const [loadingProfile, setLoadingProfile] = useState(!profileProp);
@@ -469,8 +471,11 @@ export default function HomeHeader({
           </Typography>
         </Box>
 
-        {/* DIREITA: NOTIFICAÇÕES + AVATAR */}
+        {/* DIREITA: POSTS PENDENTES + NOTIFICAÇÕES + AVATAR */}
         <Box display="flex" alignItems="center" gap={{ xs: 1, md: 1.5, lg: 2 }}>
+          {canApprovePosts && currentEvent && (
+            <PendingPostsNotification eventId={currentEvent.id} />
+          )}
           <IconButton
             onClick={(e) => setNotificationsAnchorEl(e.currentTarget)}
             sx={{
@@ -564,15 +569,18 @@ export default function HomeHeader({
         onClose={() => setNotificationsAnchorEl(null)}
         PaperProps={{
           sx: {
-            backgroundColor: isTorcida ? torcidaPopupBg : "#1a1a1a",
+            backgroundColor: isTorcida ? "rgba(240,230,180,0.92)" : "rgba(14,14,14,0.88)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
             color: "white",
-            borderRadius: 2,
-            width: { xs: "90vw", sm: 400 },
-            maxWidth: 400,
+            borderRadius: "20px",
+            width: { xs: "90vw", sm: 380 },
+            maxWidth: 380,
             maxHeight: "80vh",
-            mt: 1,
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5)",
-            border: isTorcida ? "1px solid rgba(0,0,0,0.15)" : "none",
+            mt: 1.5,
+            boxShadow: "0 16px 48px rgba(0,0,0,0.45)",
+            border: isTorcida ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.08)",
+            overflow: "hidden",
           },
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
@@ -587,36 +595,55 @@ export default function HomeHeader({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            p: 2,
-            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+            px: 2.5,
+            py: 2,
+            borderBottom: isTorcida ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.07)",
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{
-              color: isTorcida ? "#000" : "white",
-              fontWeight: 700,
-              fontSize: "1.1rem",
-            }}
-          >
-            Notificações
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography
+              sx={{
+                color: isTorcida ? "#000" : "#fff",
+                fontWeight: 700,
+                fontSize: "1rem",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Notificações
+            </Typography>
+            {unreadCount > 0 && (
+              <Box sx={{
+                backgroundColor: "#ffc91f",
+                color: "#000",
+                borderRadius: "999px",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                px: 0.8,
+                py: 0.1,
+                lineHeight: 1.6,
+              }}>
+                {unreadCount}
+              </Box>
+            )}
+          </Box>
           {unreadCount > 0 && (
             <Button
               size="small"
               onClick={handleMarkAllAsRead}
               sx={{
-                color: isTorcida ? "#000" : "#ffcc01",
-                fontSize: "0.75rem",
+                color: isTorcida ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.45)",
+                fontSize: "0.72rem",
                 textTransform: "none",
                 minWidth: "auto",
                 px: 1,
+                fontWeight: 400,
                 "&:hover": {
-                  backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255, 204, 1, 0.1)",
+                  backgroundColor: "transparent",
+                  color: isTorcida ? "#000" : "#fff",
                 },
               }}
             >
-              Marcar todas como lidas
+              limpar tudo
             </Button>
           )}
         </Box>
@@ -686,114 +713,96 @@ export default function HomeHeader({
                     sx={{
                       backgroundColor: notification.is_read
                         ? "transparent"
-                        : isTorcida ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 204, 1, 0.1)",
+                        : isTorcida ? "rgba(0,0,0,0.05)" : "rgba(255,201,31,0.05)",
                     }}
                   >
                     <ListItemButton
                       onClick={() => handleNotificationClick(notification)}
                       sx={{
                         py: 1.5,
-                        px: 2,
+                        px: 2.5,
                         "&:hover": {
-                          backgroundColor: isTorcida ? "rgba(0,0,0,0.06)" : "rgba(255, 255, 255, 0.05)",
+                          backgroundColor: isTorcida ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)",
                         },
                       }}
                     >
-                      <Box sx={{ width: "100%", display: "flex", gap: 1.5 }}>
-                        {/* Ícone do tipo de notificação */}
-                        <Box
-                          sx={{
-                            width: 40,
-                            height: 40,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            bgcolor: isTorcida ? "rgba(0,0,0,0.12)" : "rgba(255, 204, 1, 0.15)",
-                            borderRadius: "50%",
-                            flexShrink: 0,
-                          }}
-                        >
-                          {getNotificationIcon(notification.type)}
-                        </Box>
-
-                        {/* Avatar do usuário relacionado (se houver) */}
-                        {notification.related_user && (
+                      <Box sx={{ width: "100%", display: "flex", gap: 1.5, alignItems: "flex-start" }}>
+                        {/* Ícone ou avatar */}
+                        {notification.related_user ? (
                           <Avatar
                             src={notification.related_user.profile_photo || undefined}
                             sx={{
-                              width: 40,
-                              height: 40,
-                              bgcolor: isTorcida ? "rgba(0,0,0,0.14)" : "rgba(255, 204, 1, 0.2)",
+                              width: 38, height: 38,
+                              bgcolor: isTorcida ? "rgba(0,0,0,0.14)" : "rgba(255,201,31,0.15)",
                               flexShrink: 0,
+                              fontSize: "0.9rem",
                             }}
                           >
-                            {!notification.related_user.profile_photo && 
+                            {!notification.related_user.profile_photo &&
                               (notification.related_user.name?.[0] || "U").toUpperCase()}
                           </Avatar>
-                        )}
-                        {/* Avatar do admin/subadmin que enviou o broadcast (se houver) */}
-                        {notification.broadcast_sender && (
+                        ) : notification.broadcast_sender ? (
                           <Avatar
                             src={notification.broadcast_sender.profile_photo || undefined}
                             sx={{
-                              width: 40,
-                              height: 40,
-                              bgcolor: isTorcida ? "rgba(0,0,0,0.14)" : "rgba(255, 204, 1, 0.2)",
+                              width: 38, height: 38,
+                              bgcolor: isTorcida ? "rgba(0,0,0,0.14)" : "rgba(255,201,31,0.15)",
+                              flexShrink: 0,
+                              fontSize: "0.9rem",
+                            }}
+                          >
+                            {!notification.broadcast_sender.profile_photo &&
+                              (notification.broadcast_sender.name?.[0] || "A").toUpperCase()}
+                          </Avatar>
+                        ) : (
+                          <Box
+                            sx={{
+                              width: 38, height: 38,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              bgcolor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.07)",
+                              borderRadius: "50%",
                               flexShrink: 0,
                             }}
                           >
-                            {!notification.broadcast_sender.profile_photo && 
-                              (notification.broadcast_sender.name?.[0] || "A").toUpperCase()}
-                          </Avatar>
+                            {getNotificationIcon(notification.type)}
+                          </Box>
                         )}
-                        
+
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "flex-start",
-                              mb: 0.5,
-                            }}
-                          >
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.3}>
                             <Typography
-                              variant="subtitle2"
                               sx={{
-                                color: isTorcida ? "#000" : "white",
-                                fontWeight: notification.is_read ? 400 : 700,
-                                fontSize: "0.9rem",
+                                color: isTorcida ? "#000" : "#fff",
+                                fontWeight: notification.is_read ? 500 : 700,
+                                fontSize: "0.875rem",
+                                lineHeight: 1.3,
                               }}
                             >
                               {notification.title}
                             </Typography>
                             {!notification.is_read && (
-                              <Box
-                                sx={{
-                                  width: 8,
-                                  height: 8,
-                                  borderRadius: "50%",
-                                  backgroundColor: isTorcida ? "#000" : "#ffcc01",
-                                  ml: 1,
-                                  flexShrink: 0,
-                                }}
-                              />
+                              <Box sx={{
+                                width: 7, height: 7,
+                                borderRadius: "50%",
+                                backgroundColor: "#ffc91f",
+                                ml: 1, flexShrink: 0,
+                              }} />
                             )}
                           </Box>
                           <Typography
-                            variant="body2"
                             sx={{
-                              color: isTorcida ? "rgba(0,0,0,0.82)" : "rgba(255, 255, 255, 0.7)",
-                              fontSize: "0.85rem",
-                              mb: 0.5,
+                              color: isTorcida ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.55)",
+                              fontSize: "0.8rem",
+                              mb: 0.4,
+                              lineHeight: 1.4,
                             }}
                           >
                             {notification.message}
                           </Typography>
                           <Typography
-                            variant="caption"
                             sx={{
-                              color: isTorcida ? "rgba(0,0,0,0.65)" : "rgba(255, 255, 255, 0.5)",
-                              fontSize: "0.75rem",
+                              color: isTorcida ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.3)",
+                              fontSize: "0.7rem",
                             }}
                           >
                             {formatDate(notification.created_at)}
@@ -803,7 +812,7 @@ export default function HomeHeader({
                     </ListItemButton>
                   </ListItem>
                   {index < notifications.length - 1 && (
-                    <Divider sx={{ borderColor: isTorcida ? "rgba(0,0,0,0.12)" : "rgba(255, 255, 255, 0.1)" }} />
+                    <Divider sx={{ borderColor: isTorcida ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.05)", mx: 2.5 }} />
                   )}
                 </Box>
               ))}
@@ -826,22 +835,12 @@ export default function HomeHeader({
           
           {/* Mensagem quando não há mais notificações */}
           {!hasMore && notifications.length > 0 && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                py: 2,
-              }}
-            >
-              <Typography
-                variant="caption"
-                sx={{
-                  color: isTorcida ? "rgba(0,0,0,0.65)" : "rgba(255, 255, 255, 0.5)",
-                  fontSize: "0.75rem",
-                }}
-              >
-                Todas as notificações foram carregadas
+            <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }}>
+              <Typography sx={{
+                color: isTorcida ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.2)",
+                fontSize: "0.7rem",
+              }}>
+                — fim —
               </Typography>
             </Box>
           )}
@@ -855,12 +854,15 @@ export default function HomeHeader({
         onClose={() => setAnchorEl(null)}
         PaperProps={{
           sx: {
-            backgroundColor: isTorcida ? torcidaPopupBg : "#1a1a1a",
-            color: "white",
-            borderRadius: 2,
-            minWidth: 200,
-            mt: 1,
-            border: isTorcida ? "1px solid rgba(0,0,0,0.15)" : "none",
+            backgroundColor: isTorcida ? "rgba(240,230,180,0.92)" : "rgba(14,14,14,0.88)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            borderRadius: "16px",
+            minWidth: 180,
+            mt: 1.5,
+            boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
+            border: isTorcida ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.08)",
+            overflow: "hidden",
           },
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
@@ -872,23 +874,21 @@ export default function HomeHeader({
             router.push("/pages/user/profile");
           }}
           sx={{
-            color: isTorcida ? "#000" : "white",
+            color: isTorcida ? "#000" : "#fff",
+            px: 2, py: 1.5,
+            gap: 1.5,
+            fontSize: "0.9rem",
             "&:hover": {
-              backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255, 255, 255, 0.1)",
+              backgroundColor: isTorcida ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
             },
           }}
         >
-          <ListItemIcon>
-            <PersonIcon sx={{ color: isTorcida ? "#000" : "white" }} fontSize="small" />
+          <ListItemIcon sx={{ minWidth: "unset" }}>
+            <PersonIcon sx={{ color: isTorcida ? "#000" : "rgba(255,255,255,0.7)" }} fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Ver Perfil</ListItemText>
+          <ListItemText primaryTypographyProps={{ fontSize: "0.9rem" }}>Ver Perfil</ListItemText>
         </MenuItem>
-        <Divider
-          sx={{
-            borderColor: isTorcida ? "rgba(0,0,0,0.18)" : "rgba(255, 255, 255, 0.12)",
-            my: 0.5,
-          }}
-        />
+        <Divider sx={{ borderColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.06)", mx: 1.5 }} />
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
@@ -897,15 +897,18 @@ export default function HomeHeader({
           }}
           sx={{
             color: isTorcida ? "#000" : "#ffc91f",
+            px: 2, py: 1.5,
+            gap: 1.5,
+            fontSize: "0.9rem",
             "&:hover": {
-              backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255, 201, 31, 0.1)",
+              backgroundColor: isTorcida ? "rgba(0,0,0,0.06)" : "rgba(255,201,31,0.07)",
             },
           }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: "unset" }}>
             <LogoutIcon sx={{ color: isTorcida ? "#000" : "#ffc91f" }} fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Sair</ListItemText>
+          <ListItemText primaryTypographyProps={{ fontSize: "0.9rem" }}>Sair</ListItemText>
         </MenuItem>
       </Menu>
     </Box>

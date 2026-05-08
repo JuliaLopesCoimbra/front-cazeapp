@@ -153,32 +153,24 @@ export default function HomeTabs({ active, onChange, eventType, activeColor = "#
                 onChange(tab.value);
               }}
               sx={{
-                borderRadius: "999px",
+                borderRadius: 0,
                 textTransform: "none",
-                fontWeight: 600,
-                lineHeight: 1.2,
-                px: { xs: 1.5, md: 2, lg: 2.5 },
-                minHeight: { xs: 40, md: 44, lg: 48 },
-                height: { xs: 40, md: 44, lg: 48 },
-                width: { xs: 100, md: 120, lg: 140 },
-                minWidth: { xs: 100, md: 120, lg: 140 }, // Garante largura mínima
-                flexShrink: 0, // Previne que os botões encolham
-                fontSize: tab.value === "mapa" 
-                  ? { xs: "0.75rem", md: "0.875rem", lg: "0.9375rem" }
-                  : { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
-                // Ativo
-                backgroundColor: isActive ? activeColor : "transparent",
-                color: isActive ? "#000" : "#fff",
-                border: `1px solid ${
-                  isActive ? activeColor : "#fff"
-                }`,
-
+                fontWeight: isActive ? 700 : 400,
+                lineHeight: 1,
+                px: { xs: 1, md: 1.5, lg: 2 },
+                py: 1.5,
+                minWidth: "unset",
+                flexShrink: 0,
+                fontSize: { xs: "0.875rem", md: "1rem", lg: "1.0625rem" },
+                backgroundColor: "transparent",
+                color: isActive ? "#ffc91f" : "rgba(255,201,31,0.5)",
+                border: "none",
+                borderBottom: `2px solid ${isActive ? "#ffc91f" : "transparent"}`,
+                transition: "color 0.2s ease, border-color 0.2s ease, font-weight 0.2s ease",
                 "&:hover": {
-                  backgroundColor: isActive
-                    ? activeColor
-                    : "rgba(255,255,255,0.1)",
-                  borderColor: isActive ? activeColor : "#fff",
-                  fontWeight: 900,
+                  backgroundColor: "transparent",
+                  color: isActive ? "#ffc91f" : "rgba(255,201,31,0.8)",
+                  borderBottomColor: isActive ? "#ffc91f" : "rgba(255,201,31,0.3)",
                 },
               }}
             >

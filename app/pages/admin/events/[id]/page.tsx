@@ -27,7 +27,7 @@ import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import StoreIcon from '@mui/icons-material/Store';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getThemedPageBackgroundSx } from "@/app/utils/backgroundStyles";
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -93,6 +93,7 @@ function SectionCard({ title, icon, children }: { title: string; icon: React.Rea
 }
 
 export default function EventDetailsPage() {
+  const pageBackgroundSx = getThemedPageBackgroundSx();
   const params = useParams();
   const router = useRouter();
   const eventId = Number(params.id);
@@ -380,7 +381,6 @@ export default function EventDetailsPage() {
       setMusicsOffset(musicsData.length);
       setHasMoreSchools(schoolsData.length >= ITEMS_PER_PAGE);
       setHasMoreMusics(musicsData.length >= ITEMS_PER_PAGE);
-      showToast("Escolas de samba atualizadas!", "success");
     } catch (err) {
       showToast("Erro ao atualizar escolas de samba", "error");
     } finally {
@@ -535,7 +535,7 @@ export default function EventDetailsPage() {
   return (
     <Box
       ref={scrollContainerRef}
-      sx={{ ...dashboardBackgroundSx, minHeight: "100vh", color: "#fff", display: "flex", flexDirection: "column" }}
+      sx={{ ...pageBackgroundSx, minHeight: "100vh", color: "#fff", display: "flex", flexDirection: "column" }}
     >
       {/* ── Sticky header ── */}
       <Box
