@@ -109,7 +109,21 @@ const login = useCallback(
       if (typeof window !== "undefined") {
         (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-          try { await OneSignal.login(`n1_${decoded.sub}`); } catch (_) {}
+          try {
+            await OneSignal.login(`n1_${decoded.sub}`);
+          } catch (_) {
+            // Login falhou (AppID mismatch ou SDK quebrado) — limpa subscriptions antigas
+            // Na próxima visita o OneSignal inicializa sem conflito e o login funciona
+            try {
+              if (navigator.serviceWorker) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                for (const reg of regs) {
+                  const sub = await reg.pushManager.getSubscription();
+                  if (sub) await sub.unsubscribe();
+                }
+              }
+            } catch (_2) {}
+          }
         });
       }
     } catch (error) {
@@ -156,7 +170,19 @@ const login = useCallback(
       if (typeof window !== "undefined") {
         (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
-          try { await OneSignal.login(`n1_${decoded.sub}`); } catch (_) {}
+          try {
+            await OneSignal.login(`n1_${decoded.sub}`);
+          } catch (_) {
+            try {
+              if (navigator.serviceWorker) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                for (const reg of regs) {
+                  const sub = await reg.pushManager.getSubscription();
+                  if (sub) await sub.unsubscribe();
+                }
+              }
+            } catch (_2) {}
+          }
         });
       }
     } catch {
