@@ -334,11 +334,11 @@ export default function NewsDetailPage() {
       created_at: new Date().toISOString(),
       likes: { count: 0, user_liked: false },
       replies_count: 0,
-      author: {
+      user: {
         id: currentUser?.id ?? 0,
         name: currentUser?.name ?? "",
-        profile_photo: currentUser?.profile_photo ?? null,
-      } as any,
+        profile_photo: currentUser?.profile_photo ?? undefined,
+      },
     };
     setNews({
       ...news,
