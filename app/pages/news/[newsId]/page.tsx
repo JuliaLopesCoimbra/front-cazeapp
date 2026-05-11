@@ -100,6 +100,12 @@ export default function NewsDetailPage() {
     () => getStoredEventBrandKey() ?? "default"
   );
   const [resolvedEvent, setResolvedEvent] = useState<EventResponse | null>(null);
+
+  useEffect(() => {
+    const key = getStoredEventBrandKey();
+    if (key) setStoredBrandKey(key);
+  }, []);
+
   const COMMENTS_PER_PAGE = 20; // Carrega 20 comentários por vez
   const REPLIES_PER_PAGE = 5; // Carrega 5 respostas por vez
   const resolvedBrandKey = resolvedEvent

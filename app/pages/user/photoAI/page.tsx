@@ -35,7 +35,7 @@ interface PhotoAIPageProps {
   accentColor?: string;
 }
 
-export default function PhotoAIPage({ eventId, accentColor = "#5a3cf1" }: PhotoAIPageProps) {
+export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoAIPageProps) {
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `photo-ai-results-event-${eventId}`;
   
@@ -410,7 +410,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#5a3cf1" }: PhotoA
         <Box px={4} py={3} display="flex" flexDirection="column" gap={3} sx={{ maxWidth: 700, width: "100%", alignSelf: "center" }}>
           <Box
             sx={{
-              background: "#e9e8ed",
+              background: "rgba(255,255,255,0.08)",
               borderRadius: 2,
               display: "flex",
               gap: 2,
@@ -428,25 +428,26 @@ export default function PhotoAIPage({ eventId, accentColor = "#5a3cf1" }: PhotoA
                 alignItems: "center",
                 justifyContent: "center",
                 color: accentColor,
-                background: "#fff",
+                background: "rgba(255,255,255,0.08)",
+                flexShrink: 0,
               }}
             >
               <ImageOutlinedIcon fontSize="medium" />
             </Box>
             <Box>
-              <Typography variant="body2" color="text.secondary">
-              Encontre suas fotos por reconhecimento facial.Tire uma selfie ou envie sua foto de rosto.
+              <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.75)" }}>
+                Encontre suas fotos por reconhecimento facial. Tire uma selfie ou envie sua foto de rosto.
               </Typography>
             </Box>
           </Box>
 
           <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="h6" fontWeight={700}>
+            <Typography variant="h6" fontWeight={700} sx={{ color: "#fff" }}>
               Encontre suas fotos tiradas durante o evento
             </Typography>
-            <Typography variant="body1">
-            Utilizamos reconhecimento facial para localizar suas fotos com rapidez e segurança.
-             Basta tirar uma selfie ou enviar uma foto do seu rosto, e o sistema encontrará automaticamente todas as imagens em que você aparece.
+            <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.75)" }}>
+              Utilizamos reconhecimento facial para localizar suas fotos com rapidez e segurança.
+              Basta tirar uma selfie ou enviar uma foto do seu rosto, e o sistema encontrará automaticamente todas as imagens em que você aparece.
             </Typography>
           </Box>
 
@@ -639,11 +640,11 @@ export default function PhotoAIPage({ eventId, accentColor = "#5a3cf1" }: PhotoA
           >
             Primeiro, posicione seu rosto dentro da marcação.
           </Typography>
-          <Typography 
-            variant="body2" 
-            textAlign="center" 
-            sx={{ 
-              color: "#666",
+          <Typography
+            variant="body2"
+            textAlign="center"
+            sx={{
+              color: "rgba(255,255,255,0.7)",
               fontSize: 14,
               lineHeight: 1.4,
             }}
@@ -740,37 +741,40 @@ export default function PhotoAIPage({ eventId, accentColor = "#5a3cf1" }: PhotoA
       >
         <Box px={2} py={3} display="flex" flexDirection="column" gap={2} sx={{ maxWidth: 700, width: "100%", alignSelf: "center" }}>
           <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Typography variant="h6" fontWeight={700}>
+            <Typography variant="h6" fontWeight={700} sx={{ color: "#fff" }}>
               Minhas fotos
             </Typography>
-            {/* Botão carrinho / sistema de compra desativado por enquanto
-            <Badge badgeContent={cart.length} color="primary">
-              <Box
-                onClick={handleCartClick}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  color: "#5a3cf1",
-                  cursor: cart.length > 0 ? "pointer" : "default",
-                  transition: "opacity 0.2s",
-                  "&:hover": cart.length > 0 ? { opacity: 0.8 } : {},
-                }}
-              >
-                <ShoppingCartOutlinedIcon />
-              </Box>
-            </Badge>
-            */}
           </Box>
 
           {searchMessage && (
-            <Typography variant="body2" >
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.75)" }}>
               {searchMessage}
             </Typography>
           )}
 
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{
+              background: accentColor,
+              color: "#000",
+              fontWeight: 700,
+              borderRadius: 2,
+              py: 1.5,
+              "&:hover": { background: accentColor, opacity: 0.9 },
+            }}
+            onClick={() => {
+              setResults([]);
+              setSearchMessage(null);
+              setStage("intro");
+            }}
+          >
+            Procurar novamente
+          </Button>
+
           {results.length === 0 ? (
-            <Typography textAlign="center">
+            <Typography textAlign="center" sx={{ color: "#fff" }}>
               Nenhuma foto encontrada. Tente novamente com outra imagem.
             </Typography>
           ) : (
@@ -812,20 +816,6 @@ export default function PhotoAIPage({ eventId, accentColor = "#5a3cf1" }: PhotoA
               ))}
             </Box>
           )}
-
-          <Button
-            variant="contained"
-            size="large"
-            fullWidth
-            sx={{ background: "#5a3cf1", borderRadius: 2, py: 1.5, mt: 1 }}
-            onClick={() => {
-              setResults([]);
-              setSearchMessage(null);
-              setStage("intro");
-            }}
-          >
-            Procurar novamente
-          </Button>
         </Box>
       </Box>
     </Box>

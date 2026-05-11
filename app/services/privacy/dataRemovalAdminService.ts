@@ -7,37 +7,23 @@ export interface DataRemovalRequestRow {
   cpf_masked: string;
   user_id: number | null;
   user_name_snapshot: string | null;
-  status: string;
   match_found: boolean;
   created_at: string | null;
   processed_at: string | null;
-  processed_by_name: string | null;
   request_ip: string | null;
 }
 
 export const listDataRemovalRequests = async (
-  status?: string
+  limit = 100,
+  offset = 0
 ): Promise<DataRemovalRequestRow[]> => {
   try {
     const response = await api.get<DataRemovalRequestRow[]>(
       "/auth/data-removal/admin/requests",
-      { params: { status, limit: 100, offset: 0 } }
+      { params: { limit, offset } }
     );
     return response.data;
   } catch (error) {
     throw new Error(extractApiError(error, "Erro ao listar solicitações"));
-  }
-};
-
-export const finalizeDataRemovalRequest = async (
-  requestId: number
-): Promise<{ message: string }> => {
-  try {
-    const response = await api.post<{ message: string }>(
-      `/auth/data-removal/admin/requests/${requestId}/finalize-removal`
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error(extractApiError(error, "Erro ao concluir remoção"));
   }
 };

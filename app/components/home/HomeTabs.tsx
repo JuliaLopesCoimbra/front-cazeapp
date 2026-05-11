@@ -118,6 +118,7 @@ export default function HomeTabs({ active, onChange, eventType, activeColor = "#
         mx: "auto",
         px: { xs: 1, sm: 2 },
         py: { xs: 2, md: 3 },
+        overflow: "hidden", // garante corte na borda direita
       }}
     >
       <Box
@@ -129,12 +130,12 @@ export default function HomeTabs({ active, onChange, eventType, activeColor = "#
           width: "100%",
           overflowX: "auto",
           overflowY: "hidden",
-          scrollbarWidth: "none", // Firefox
+          scrollbarWidth: "none",
           "&::-webkit-scrollbar": {
-            display: "none", // Chrome, Safari, Edge
+            display: "none",
           },
-          WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
-          scrollBehavior: "smooth", // restaurado no mouseup após arraste
+          WebkitOverflowScrolling: "touch",
+          scrollBehavior: "smooth",
           cursor: "grab",
           "&:active": {
             cursor: "grabbing",
@@ -157,7 +158,7 @@ export default function HomeTabs({ active, onChange, eventType, activeColor = "#
                 textTransform: "none",
                 fontWeight: isActive ? 700 : 400,
                 lineHeight: 1,
-                px: { xs: 1, md: 1.5, lg: 2 },
+                px: { xs: 1.5, md: 1.5, lg: 2 },
                 py: 1.5,
                 minWidth: "unset",
                 flexShrink: 0,
