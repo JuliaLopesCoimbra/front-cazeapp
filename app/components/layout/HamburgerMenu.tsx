@@ -504,7 +504,26 @@ export default function HamburgerMenu({
                    />
                  </ListItemButton>
                </ListItem>
-             
+               <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+               <ListItem disablePadding>
+                 <ListItemButton
+                   onClick={() => {
+                     router.push("/pages/admin/data-removal-requests");
+                     setOpen(false);
+                   }}
+                 >
+                   <PolicyIcon sx={{ mr: 2, color: "white" }} />
+                   <ListItemText
+                     primary="Remoção de Dados"
+                     secondary="Solicitações LGPD pendentes"
+                     primaryTypographyProps={{ fontWeight: 600 }}
+                     secondaryTypographyProps={{
+                       sx: { color: "rgba(255,255,255,0.6)" },
+                     }}
+                   />
+                 </ListItemButton>
+               </ListItem>
+
              </>
            )}
       

@@ -69,7 +69,7 @@ const NotificationsPage: React.FC = () => {
   );
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingKey, setSavingKey] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [total, setTotal] = useState(0);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
@@ -303,12 +303,24 @@ const NotificationsPage: React.FC = () => {
     } catch (_) {}
   };
 
-  const handleToggle = (key: keyof typeof localPreferences) => {
+  const handleToggle = async (key: keyof typeof localPreferences) => {
     if (key === "push_enabled") {
       setConfirmAction(localPreferences.push_enabled ? "disable" : "enable");
       return;
     }
-    setLocalPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
+    const newValue = !localPreferences[key];
+    const updatedPrefs = { ...localPreferences, [key]: newValue };
+    setLocalPreferences(updatedPrefs);
+    setSavingKey(key);
+    try {
+      await updateNotificationPreferences({ [key]: newValue });
+      syncOneSignalTags(updatedPrefs);
+    } catch {
+      setLocalPreferences((prev) => ({ ...prev, [key]: !newValue }));
+      showToast("Erro ao salvar preferência", "error");
+    } finally {
+      setSavingKey(null);
+    }
   };
 
   const handlePushToggleConfirm = async () => {
@@ -378,20 +390,6 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const updated = await updateNotificationPreferences(localPreferences);
-      setPreferences(updated);
-      syncOneSignalTags(localPreferences);
-      showToast("Preferências salvas com sucesso!", "success");
-    } catch (error) {
-      console.error("Erro ao salvar preferências:", error);
-      showToast("Erro ao salvar preferências", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -891,11 +889,16 @@ const NotificationsPage: React.FC = () => {
                             {item.description}
                           </Typography>
                         </Box>
-                        <Switch
-                          checked={localPreferences[item.key]}
-                          onChange={() => handleToggle(item.key)}
-                          sx={switchSx}
-                        />
+                        {savingKey === item.key ? (
+                          <CircularProgress size={22} sx={{ color: "#ffcc01", flexShrink: 0 }} />
+                        ) : (
+                          <Switch
+                            checked={localPreferences[item.key]}
+                            onChange={() => handleToggle(item.key)}
+                            disabled={savingKey !== null}
+                            sx={switchSx}
+                          />
+                        )}
                       </Box>
                       {index < prefItems.length - 1 && (
                         <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", mx: 2 }} />
@@ -904,32 +907,6 @@ const NotificationsPage: React.FC = () => {
                   ))}
                 </Paper>
 
-                <Button
-                  variant="contained"
-                  fullWidth
-                  onClick={handleSave}
-                  disabled={saving || !localPreferences.push_enabled}
-                  sx={{
-                    borderRadius: "999px",
-                    backgroundColor: "#ffc91f",
-                    color: "#000",
-                    fontWeight: 700,
-                    py: 1.5,
-                    textTransform: "none",
-                    fontSize: "0.95rem",
-                    "&:hover": { backgroundColor: "#ffd54f" },
-                    "&:disabled": {
-                      backgroundColor: "rgba(255,201,31,0.35)",
-                      color: "rgba(0,0,0,0.3)",
-                    },
-                  }}
-                >
-                  {saving ? (
-                    <CircularProgress size={22} sx={{ color: "#000" }} />
-                  ) : (
-                    "Salvar preferências"
-                  )}
-                </Button>
               </>
             )}
           </Box>

@@ -12,7 +12,13 @@ import {
   Button,
   InputAdornment,
   IconButton,
+  Dialog,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import TermsOfUseContent from "./TermsOfUseContent";
+import PrivacyPolicyContent from "./PrivacyPolicyContent";
 import { Visibility, VisibilityOff, CheckCircle } from "@mui/icons-material";
 import { formatCPF } from "@/app/utils/registerValidators";
 import { validatePassword } from "@/app/utils/passwordValidator";
@@ -76,6 +82,8 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
 }) => {
   const [showLgpdDataProtectionModal, setShowLgpdDataProtectionModal] = useState(false);
   const [showMarketingConsentModal, setShowMarketingConsentModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const passwordsMatch = password === confirmPassword;
   const isPasswordValid = password.length > 0 && passwordErrors.length === 0;
@@ -510,50 +518,24 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
         </FormControl>
       </Box>
 
-      {/* LGPD Checkbox */}
+      {/* Age Terms Checkbox */}
       <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
         <FormControlLabel
           control={
             <Checkbox
-              checked={lgpdAccepted}
-              onChange={(e) => onLgpdAcceptedChange(e.target.checked)}
-              sx={{
-                color: "rgba(255, 255, 255, 0.7)",
-                "&.Mui-checked": {
-                  color: "#ffcc01",
-                },
-              }}
+              checked={ageTermsAccepted}
+              onChange={(e) => onAgeTermsAcceptedChange(e.target.checked)}
+              sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-checked": { color: "#ffcc01" } }}
             />
           }
           label={
             <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "0.875rem" }}>
-           Declaro que li e concordo com o tratamento dos meus dados pessoais para fins de cadastro no aplicativo.
+              Confirmo que tenho 18 anos ou mais
             </Typography>
           }
           sx={{ mt: 3 }}
         />
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-          <Button
-            onClick={() => setShowLgpdDataProtectionModal(true)}
-            sx={{
-              textTransform: "none",
-              color: "#ffcc01",
-              fontSize: "0.7rem",
-              textDecoration: "underline",
-              padding: 0,
-              minWidth: "auto",
-              "&:hover": {
-                textDecoration: "underline",
-                backgroundColor: "transparent",
-              },
-            }}
-          >
-            Ler mais
-          </Button>
-        </Box>
       </Box>
-
-   
 
       {/* Marketing Email Checkbox */}
       <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
@@ -562,86 +544,61 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
             <Checkbox
               checked={marketingEmailAccepted}
               onChange={(e) => onMarketingEmailAcceptedChange(e.target.checked)}
-              sx={{
-                color: "rgba(255, 255, 255, 0.7)",
-                "&.Mui-checked": {
-                  color: "#ffcc01",
-                },
-              }}
+              sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-checked": { color: "#ffcc01" } }}
             />
           }
           label={
             <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "0.875rem" }}>
-          Autorizo o envio de promoções, ofertas e conteúdo de marketing.
+              Autorizo o envio de promoções, ofertas e conteúdo de marketing.
             </Typography>
           }
           sx={{ mt: 1 }}
         />
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-          <Button
-            onClick={() => setShowMarketingConsentModal(true)}
-            sx={{
-              textTransform: "none",
-              color: "#ffcc01",
-              fontSize: "0.7rem",
-              textDecoration: "underline",
-              padding: 0,
-              minWidth: "auto",
-              "&:hover": {
-                textDecoration: "underline",
-                backgroundColor: "transparent",
-              },
-            }}
-          >
-            Ler mais
-          </Button>
-        </Box>
       </Box>
-   {/* Age Terms Checkbox */}
-   <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
+
+      {/* LGPD Checkbox */}
+      <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
         <FormControlLabel
           control={
             <Checkbox
-              checked={ageTermsAccepted}
-              onChange={(e) => onAgeTermsAcceptedChange(e.target.checked)}
-              sx={{
-                color: "rgba(255, 255, 255, 0.7)",
-                "&.Mui-checked": {
-                  color: "#ffcc01",
-                },
-              }}
+              checked={lgpdAccepted}
+              onChange={(e) => onLgpdAcceptedChange(e.target.checked)}
+              sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-checked": { color: "#ffcc01" } }}
             />
           }
           label={
             <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "0.875rem" }}>
-              Confirmo que tenho 18 anos ou mais
+              Declaro que li e concordo com o tratamento dos meus dados pessoais para fins de cadastro no aplicativo.
             </Typography>
           }
           sx={{ mt: 1 }}
         />
       </Box>
-      {/* Ler termos completos - após todos os checkboxes */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-        <Button
-          onClick={onShowLgpdModal}
-          sx={{
-            textTransform: "none",
-            color: "#ffcc01",
-            fontSize: "0.7rem",
-            textDecoration: "underline",
-            padding: 0,
-            minWidth: "auto",
-            "&:hover": {
-              textDecoration: "underline",
-              backgroundColor: "transparent",
-            },
-          }}
-        >
-          Ler termos completos
-        </Button>
+
+      {/* Links de Termos de Uso e Política de Privacidade */}
+      <Box sx={{ mt: 2.5, textAlign: "center" }}>
+        <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.72rem", lineHeight: 1.6 }}>
+          Ao se cadastrar, você concorda com os nossos{" "}
+          <Box
+            component="span"
+            onClick={() => setShowTermsModal(true)}
+            sx={{ color: "#ffcc01", textDecoration: "underline", cursor: "pointer", "&:hover": { color: "#ffd633" } }}
+          >
+            Termos de Uso
+          </Box>
+          {" "}e a nossa{" "}
+          <Box
+            component="span"
+            onClick={() => setShowPrivacyModal(true)}
+            sx={{ color: "#ffcc01", textDecoration: "underline", cursor: "pointer", "&:hover": { color: "#ffd633" } }}
+          >
+            Política de Privacidade
+          </Box>
+          .
+        </Typography>
       </Box>
 
-      {/* Modals */}
+      {/* Modals existentes */}
       <LgpdDataProtectionModal
         open={showLgpdDataProtectionModal}
         onClose={() => setShowLgpdDataProtectionModal(false)}
@@ -650,6 +607,42 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
         open={showMarketingConsentModal}
         onClose={() => setShowMarketingConsentModal(false)}
       />
+
+      {/* Modal Termos de Uso */}
+      <Dialog
+        open={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        fullScreen
+        PaperProps={{ sx: { backgroundColor: "#111" } }}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", color: "#fff", borderBottom: "1px solid rgba(255,255,255,0.1)", py: 1.5, px: 2 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: "1rem" }}>Termos de Uso</Typography>
+          <IconButton onClick={() => setShowTermsModal(false)} sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ px: { xs: 2, sm: 4 }, py: 3 }}>
+          <TermsOfUseContent />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Política de Privacidade */}
+      <Dialog
+        open={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        fullScreen
+        PaperProps={{ sx: { backgroundColor: "#111" } }}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", color: "#fff", borderBottom: "1px solid rgba(255,255,255,0.1)", py: 1.5, px: 2 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: "1rem" }}>Política de Privacidade</Typography>
+          <IconButton onClick={() => setShowPrivacyModal(false)} sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ px: { xs: 2, sm: 4 }, py: 3 }}>
+          <PrivacyPolicyContent />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
