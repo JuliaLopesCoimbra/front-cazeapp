@@ -16,15 +16,18 @@ import {
 } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
 import { getPendingPosts, NewsResponse } from "@/app/services/news/newsService";
+import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getThemedPageBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSx } from "@/app/utils/eventBranding";
 
 function PendingPostsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAdminMaster, isSubadmin } = useAuth();
   const [posts, setPosts] = useState<NewsResponse[]>([]);
+  const [event, setEvent] = useState<EventResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
   const isLoadingRef = useRef(false);
@@ -33,6 +36,7 @@ function PendingPostsContent() {
   const canApprovePosts = isAdminMaster || isSubadmin;
   const eventIdParam = searchParams.get("eventId");
   const eventId = eventIdParam ? parseInt(eventIdParam, 10) : undefined;
+  const pageBackgroundSx = event ? getEventBackgroundSx(event) : getThemedPageBackgroundSx();
 
   useEffect(() => {
     if (!canApprovePosts) {
@@ -49,6 +53,19 @@ function PendingPostsContent() {
       try {
         const data = await getPendingPosts(eventId);
         setPosts(data);
+
+        const targetEventId = eventId ?? data[0]?.event_id;
+        if (targetEventId) {
+          try {
+            const events = await getEvents();
+            const foundEvent = events.find((e) => e.id === targetEventId);
+            setEvent(foundEvent ?? null);
+          } catch (error) {
+            console.error("Erro ao carregar evento:", error);
+          }
+        } else {
+          setEvent(null);
+        }
         
         // Se tiver apenas 1 post, redireciona direto para o detail (apenas uma vez)
         if (data.length === 1 && !hasRedirectedRef.current) {
@@ -96,7 +113,7 @@ function PendingPostsContent() {
     <Box
       sx={{
         minHeight: "100vh",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         padding: { xs: 2, sm: 3, md: 4 },
       }}
     >
@@ -274,13 +291,15 @@ function PendingPostsContent() {
 }
 
 export default function PendingPostsPage() {
+  const pageBackgroundSx = getThemedPageBackgroundSx();
+
   return (
     <Suspense
       fallback={
         <Box
           sx={{
             minHeight: "100vh",
-            ...dashboardBackgroundSx,
+            ...pageBackgroundSx,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",

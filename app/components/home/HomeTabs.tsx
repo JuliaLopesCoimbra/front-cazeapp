@@ -23,7 +23,7 @@ export default function HomeTabs({ active, onChange, eventType, activeColor = "#
 
   const tabs: { label: string; value: Tab }[] = [
     { label: "Home", value: "home" },
-    { label: "Eventos", value: "eventos" },
+    { label: "Evento", value: "eventos" },
     { label: "Mapa", value: "mapa" },
     { label: "Line Up", value: "lineup" },
     { label: "Photo Finder", value: "foto" },

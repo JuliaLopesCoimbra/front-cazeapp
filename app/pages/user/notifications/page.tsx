@@ -304,8 +304,8 @@ const NotificationsPage: React.FC = () => {
     setPushLoading(true);
     try {
       if (localPreferences.push_enabled) {
-        // Desativar — apenas salva no DB. NÃO chama optOut() para manter a subscription
-        // viva no OneSignal e permitir reativação sem precisar de novo prompt do browser.
+        // Desativar: salva no DB e marca localStorage. NÃO chama optOut() para manter a
+        // subscription viva no OneSignal — iOS não mostra o prompt de permissão duas vezes.
         localStorage.setItem("n1_push_opted_out", "true");
         const updated = { push_enabled: false, lineup_updated: false, news_feed: false, interactions: false, new_events: false };
         await updateNotificationPreferences(updated);
@@ -316,8 +316,39 @@ const NotificationsPage: React.FC = () => {
           showToast("Notificações bloqueadas no navegador. Acesse as configurações do site para reativar.", "error");
           return;
         }
-        // Ativar — chama optIn() para reativar subscription no OneSignal caso esteja opted-out
-        try { (window as any).OneSignal?.User?.PushSubscription?.optIn?.(); } catch (_) {}
+
+        // 1. Re-login no OneSignal para garantir que o external_id está vinculado ao device
+        try {
+          const rawToken = localStorage.getItem("access_token");
+          if (rawToken) {
+            const payload = JSON.parse(atob(rawToken.split(".")[1]));
+            const userId = payload.sub;
+            await (window as any).OneSignal?.login?.(`n1_${userId}`);
+          }
+        } catch (_) {}
+
+        // 2. optIn() garante que o OneSignal considera este device como inscrito
+        try { await (window as any).OneSignal?.User?.PushSubscription?.optIn?.(); } catch (_) {}
+
+        // 3. Re-registra o endpoint VAPID no backend (pode ter mudado após optIn)
+        try {
+          if ("serviceWorker" in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+              const { registerPushSubscription } = await import("@/app/services/notifications/pushService");
+              await registerPushSubscription({
+                endpoint: sub.endpoint,
+                keys: {
+                  p256dh: btoa(String.fromCharCode(...new Uint8Array(sub.getKey("p256dh")!))),
+                  auth: btoa(String.fromCharCode(...new Uint8Array(sub.getKey("auth")!))),
+                },
+                user_agent: navigator.userAgent,
+              });
+            }
+          }
+        } catch (_) {}
+
         localStorage.removeItem("n1_push_opted_out");
         const updated = { push_enabled: true, lineup_updated: true, news_feed: true, interactions: true, new_events: true };
         await updateNotificationPreferences(updated);
