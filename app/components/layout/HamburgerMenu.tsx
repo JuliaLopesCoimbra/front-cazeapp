@@ -32,6 +32,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import CampaignIcon from "@mui/icons-material/Campaign";
+import PolicyIcon from "@mui/icons-material/Policy";
+import ArticleIcon from "@mui/icons-material/Article";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { EventResponse } from "@/app/services/events/eventAppService";
@@ -528,6 +530,45 @@ export default function HamburgerMenu({
               />
             </ListItemButton>
           </ListItem> */}
+
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                router.push("/pages/privacy-policy");
+                setOpen(false);
+              }}
+            >
+              <PolicyIcon sx={{ mr: 2, color: "white" }} />
+              <ListItemText
+                primary="Política de privacidade"
+                secondary="Como tratamos seus dados"
+                primaryTypographyProps={{ fontWeight: 600 }}
+                secondaryTypographyProps={{
+                  sx: { color: "rgba(255,255,255,0.6)" },
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                router.push("/pages/terms-of-use");
+                setOpen(false);
+              }}
+            >
+              <ArticleIcon sx={{ mr: 2, color: "white" }} />
+              <ListItemText
+                primary="Termos de uso"
+                secondary="Política de uso do aplicativo"
+                primaryTypographyProps={{ fontWeight: 600 }}
+                secondaryTypographyProps={{
+                  sx: { color: "rgba(255,255,255,0.6)" },
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
 
           <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
 

@@ -1,12 +1,20 @@
 "use client";
 
-import { Box, Container, Typography } from "@mui/material";
+import NextLink from "next/link";
+import { Box, Container, Link, Typography } from "@mui/material";
 import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 const LAST_UPDATE = "11/05/2026";
 const PUBLIC_POLICY_URL = "/pages/privacy-policy";
-const DATA_REQUESTS_URL = "/pages/privacy-policy";
+const DATA_REQUESTS_URL = "/pages/data-removal-request";
 const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
+
+const linkSx = {
+  color: "#ffcc01",
+  fontWeight: 600,
+  textDecoration: "underline",
+  "&:hover": { color: "#ffd633" },
+};
 
 export default function PrivacyPolicyPage() {
   return (
@@ -220,7 +228,11 @@ export default function PrivacyPolicyPage() {
             <br />- Revogar o consentimento para tratamento de dados.
             <br />
             As solicitações poderão ser realizadas por meio dos canais oficiais disponibilizados no
-            aplicativo, através do link: ({DATA_REQUESTS_URL}).
+            aplicativo, incluindo a{" "}
+            <Link component={NextLink} href={DATA_REQUESTS_URL} sx={linkSx}>
+              solicitação de remoção de dados
+            </Link>{" "}
+            ({DATA_REQUESTS_URL}).
           </Typography>
 
           <Typography variant="h6" sx={{ fontWeight: 700, mt: 3, mb: 2 }}>

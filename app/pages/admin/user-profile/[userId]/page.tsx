@@ -288,6 +288,24 @@ export default function UserProfilePage() {
                   fontWeight: 600, fontSize: "0.72rem",
                 }}
               />
+              <Chip
+                label={user.is_online ? "Online" : "Offline"}
+                size="small"
+                sx={{
+                  backgroundColor: user.is_online ? "rgba(76,175,80,0.15)" : "rgba(255,255,255,0.06)",
+                  color: user.is_online ? "#81c784" : "rgba(255,255,255,0.35)",
+                  border: `1px solid ${user.is_online ? "rgba(76,175,80,0.3)" : "rgba(255,255,255,0.12)"}`,
+                  fontWeight: 600, fontSize: "0.72rem",
+                  "&::before": {
+                    content: '""',
+                    display: "inline-block",
+                    width: 6, height: 6,
+                    borderRadius: "50%",
+                    backgroundColor: user.is_online ? "#81c784" : "rgba(255,255,255,0.25)",
+                    marginRight: "4px",
+                  },
+                }}
+              />
             </Box>
           </Box>
         </Paper>

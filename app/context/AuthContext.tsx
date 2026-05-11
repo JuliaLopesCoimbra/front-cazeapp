@@ -1,5 +1,6 @@
 "use client";
 import { useCallback } from 'react';
+import { heartbeat } from '@/app/services/auth/authAdminService';
 import React, {
   createContext,
   useContext,
@@ -92,6 +93,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     setAuthReady(true);
   }, []);
+
+  /* Heartbeat de presença — atualiza chave Redis a cada 2 min enquanto autenticado */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    heartbeat();
+    const interval = setInterval(heartbeat, 2 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
   
 const login = useCallback(
   (accessToken: string, refreshToken: string) => {

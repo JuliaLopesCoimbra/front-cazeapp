@@ -291,6 +291,18 @@ const NotificationsPage: React.FC = () => {
     return date.toLocaleDateString("pt-BR");
   };
 
+  const syncOneSignalTags = (prefs: typeof localPreferences) => {
+    // Grava tags no device OneSignal para que o backend possa filtrar broadcasts por categoria.
+    // Dispositivos sem tag (usuários antigos) recebem notificações por padrão.
+    try {
+      (window as any).OneSignal?.User?.addTags?.({
+        news_feed: prefs.news_feed ? "1" : "0",
+        lineup_updated: prefs.lineup_updated ? "1" : "0",
+        new_events: prefs.new_events ? "1" : "0",
+      });
+    } catch (_) {}
+  };
+
   const handleToggle = (key: keyof typeof localPreferences) => {
     if (key === "push_enabled") {
       setConfirmAction(localPreferences.push_enabled ? "disable" : "enable");
@@ -310,6 +322,8 @@ const NotificationsPage: React.FC = () => {
         const updated = { push_enabled: false, lineup_updated: false, news_feed: false, interactions: false, new_events: false };
         await updateNotificationPreferences(updated);
         setLocalPreferences(updated);
+        // Grava todas as tags como "0" para que o backend exclua este device dos broadcasts
+        syncOneSignalTags(updated);
         showToast("Notificações push desativadas.", "success");
       } else {
         if (typeof Notification !== "undefined" && Notification.permission === "denied") {
@@ -353,6 +367,8 @@ const NotificationsPage: React.FC = () => {
         const updated = { push_enabled: true, lineup_updated: true, news_feed: true, interactions: true, new_events: true };
         await updateNotificationPreferences(updated);
         setLocalPreferences(updated);
+        // Restaura todas as tags para "1" ao reativar o push master
+        syncOneSignalTags(updated);
         showToast("Notificações push ativadas!", "success");
       }
     } catch (e: any) {
@@ -367,6 +383,7 @@ const NotificationsPage: React.FC = () => {
     try {
       const updated = await updateNotificationPreferences(localPreferences);
       setPreferences(updated);
+      syncOneSignalTags(localPreferences);
       showToast("Preferências salvas com sucesso!", "success");
     } catch (error) {
       console.error("Erro ao salvar preferências:", error);

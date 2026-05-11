@@ -199,7 +199,16 @@ export interface UserDetailResponse {
   reactivated_by_id: number | null;
   reactivated_by: UserInfo | null;
   reactivated_at: string | null;
+  is_online: boolean;
 }
+
+export const heartbeat = async (): Promise<void> => {
+  try {
+    await api.post('/user/heartbeat');
+  } catch {
+    // heartbeat é best-effort, nunca deve quebrar o app
+  }
+};
 
 export const getUserDetail = async (userId: number): Promise<UserDetailResponse> => {
   try {
