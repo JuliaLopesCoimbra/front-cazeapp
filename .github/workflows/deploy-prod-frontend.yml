@@ -15,6 +15,7 @@ jobs:
           host: ${{ secrets.PROD_FRONTEND_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
+          script_stop: true
           script: |
             cd /home/ec2-user/front-n1
             git fetch origin
