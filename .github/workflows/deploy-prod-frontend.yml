@@ -25,6 +25,9 @@ jobs:
             # Limpeza preventiva para não lotar o disco da EC2
             docker image prune -f
 
+            # Remove container antigo se existir (evita conflito de nome)
+            docker rm -f n1-front || true
+
             # Build e Restart automático
             docker compose up --build -d
             docker image prune -f
