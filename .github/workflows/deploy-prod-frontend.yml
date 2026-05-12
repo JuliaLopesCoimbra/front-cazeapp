@@ -17,13 +17,13 @@ jobs:
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
             cd /home/ec2-user/front-n1
+            git fetch origin
             git checkout main
-            git pull origin main
-            
+            git reset --hard origin/main
+
             # Limpeza preventiva para não lotar o disco da EC2
             docker image prune -f
-            
+
             # Build e Restart automático
-            docker-compose up --build -d
-            # O comando abaixo limpa imagens antigas e paradas automaticamente
+            docker compose up --build -d
             docker image prune -f

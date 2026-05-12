@@ -229,7 +229,7 @@ export default function MyPhotosPage() {
       // Usuários comuns veem apenas fotos baixadas
       return (
         <Box className={shouldAnimate ? "slide-up-delay-1" : ""}>
-          <MyPhotos />
+          <MyPhotos eventId={currentEvent?.id} />
         </Box>
       );
     }
@@ -344,7 +344,7 @@ export default function MyPhotosPage() {
                 Fotos Baixadas
               </Typography>
             </Box>
-            <MyPhotos hideTitle />
+            <MyPhotos hideTitle eventId={currentEvent?.id} />
           </Box>
         );
       default:

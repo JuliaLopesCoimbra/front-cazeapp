@@ -43,7 +43,11 @@ export default function LikedPostsPage() {
   
   // ===== CACHE DO FEED (Instagram/TikTok style) =====
   const { getCache, setCache } = useFeedCache();
-  const cacheKey = "liked-posts";
+  const [cacheKey, setCacheKey] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'liked-posts';
+    const eventId = localStorage.getItem(STORAGE_KEY) ?? 'none';
+    return `liked-posts-${eventId}`;
+  });
   const [initialized, setInitialized] = useState(false);
   // ==================================================
   
@@ -197,6 +201,7 @@ export default function LikedPostsPage() {
     setCurrentEvent(event);
     setStoredEventBrandKey(event);
     setStoredBrandKeyState(getEventBrandKey(event));
+    setCacheKey(`liked-posts-${event.id}`);
     reloadPostsForEvent(event.id);
   }, [reloadPostsForEvent]);
 
@@ -218,6 +223,7 @@ export default function LikedPostsPage() {
     if (!currentEvent) return;
     setStoredEventBrandKey(currentEvent);
     setStoredBrandKeyState(getEventBrandKey(currentEvent));
+    setCacheKey(`liked-posts-${currentEvent.id}`);
   }, [currentEvent]);
 
   useEffect(() => {
@@ -267,6 +273,7 @@ export default function LikedPostsPage() {
           const savedEvent = events.find((event) => event.id === savedId);
           if (savedEvent) {
             setCurrentEvent(savedEvent);
+            setCacheKey(`liked-posts-${savedId}`);
             reloadPostsForEvent(savedId);
           }
         }
