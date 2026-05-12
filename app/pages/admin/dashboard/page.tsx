@@ -261,11 +261,10 @@ function SectionSkeleton({ cards = 2 }: { cards?: number }) {
         <Skeleton variant="text" width={120} sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
       </Box>
       <Grid container spacing={1.5}>
-        {Array.from({ length: cards }).map((_, i) => (
-          <Grid item xs={6} key={i}>
-            <CardSkeleton />
-          </Grid>
-        ))}
+        <Grid item xs={6}><CardSkeleton /></Grid>
+        {cards >= 2 && <Grid item xs={6}><CardSkeleton /></Grid>}
+        {cards >= 3 && <Grid item xs={6}><CardSkeleton /></Grid>}
+        {cards >= 4 && <Grid item xs={6}><CardSkeleton /></Grid>}
       </Grid>
     </>
   );
