@@ -253,6 +253,18 @@ function CardSkeleton() {
   );
 }
 
+function SkeletonRow({ count }: { count: number }) {
+  const half = `calc(50% - 6px)`;
+  return (
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+      {count >= 1 && <Box sx={{ width: half }}><CardSkeleton /></Box>}
+      {count >= 2 && <Box sx={{ width: half }}><CardSkeleton /></Box>}
+      {count >= 3 && <Box sx={{ width: half }}><CardSkeleton /></Box>}
+      {count >= 4 && <Box sx={{ width: half }}><CardSkeleton /></Box>}
+    </Box>
+  );
+}
+
 function SectionSkeleton({ cards = 2 }: { cards?: number }) {
   return (
     <>
@@ -260,12 +272,7 @@ function SectionSkeleton({ cards = 2 }: { cards?: number }) {
         <Skeleton variant="rounded" width={4} height={20} sx={{ borderRadius: 2, bgcolor: "rgba(255,255,255,0.12)" }} />
         <Skeleton variant="text" width={120} sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
       </Box>
-      <Grid container spacing={1.5}>
-        <Grid item xs={6}><CardSkeleton /></Grid>
-        {cards >= 2 && <Grid item xs={6}><CardSkeleton /></Grid>}
-        {cards >= 3 && <Grid item xs={6}><CardSkeleton /></Grid>}
-        {cards >= 4 && <Grid item xs={6}><CardSkeleton /></Grid>}
-      </Grid>
+      <SkeletonRow count={cards} />
     </>
   );
 }
@@ -284,17 +291,16 @@ function DashboardSkeleton({ backgroundSx }: { backgroundSx: object }) {
 
         {/* Filter bar skeleton */}
         <Box sx={{ px: 2, py: 1.25, borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 1 }}>
-          {[60, 48, 72, 52].map((w, i) => (
-            <Skeleton key={i} variant="rounded" width={w} height={26} sx={{ borderRadius: 2, bgcolor: "rgba(255,255,255,0.08)" }} />
-          ))}
+          <Skeleton variant="rounded" width={60} height={26} sx={{ borderRadius: 2, bgcolor: "rgba(255,255,255,0.08)" }} />
+          <Skeleton variant="rounded" width={48} height={26} sx={{ borderRadius: 2, bgcolor: "rgba(255,255,255,0.08)" }} />
+          <Skeleton variant="rounded" width={72} height={26} sx={{ borderRadius: 2, bgcolor: "rgba(255,255,255,0.08)" }} />
+          <Skeleton variant="rounded" width={52} height={26} sx={{ borderRadius: 2, bgcolor: "rgba(255,255,255,0.08)" }} />
         </Box>
 
         <Box sx={{ px: 2, pt: 1 }}>
-          {/* Total card */}
           <Box sx={{ mt: 1.5, mb: 0.5 }}>
             <CardSkeleton />
           </Box>
-
           <SectionSkeleton cards={2} />
           <SectionSkeleton cards={3} />
           <SectionSkeleton cards={2} />
@@ -510,7 +516,7 @@ export default function DashboardPage() {
 
           {events.length > 0 && (
             <Select
-              value={eventId ?? ""}
+              value={eventId?.toString() ?? ""}
               onChange={(e) =>
                 setEventId(e.target.value === "" ? undefined : Number(e.target.value))
               }
@@ -531,7 +537,7 @@ export default function DashboardPage() {
                 Todos os eventos
               </MenuItem>
               {events.map((ev) => (
-                <MenuItem key={ev.id} value={ev.id} sx={{ fontSize: "0.8rem" }}>
+                <MenuItem key={ev.id} value={ev.id.toString()} sx={{ fontSize: "0.8rem" }}>
                   {ev.title}
                 </MenuItem>
               ))}
@@ -565,7 +571,7 @@ export default function DashboardPage() {
           {/* ── Usuários ── */}
           <SectionHeader title="Usuários" />
           <Grid container spacing={1.5}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<PeopleIcon sx={{ fontSize: 18 }} />}
                 label="Total de usuários"
@@ -573,7 +579,7 @@ export default function DashboardPage() {
                 todayValue={showToday ? data.users.new_today : undefined}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                 label="Novos esta semana"
@@ -587,7 +593,7 @@ export default function DashboardPage() {
           {/* ── Interações ── */}
           <SectionHeader title="Interações" color="#f48fb1" />
           <Grid container spacing={1.5}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<FavoriteIcon sx={{ fontSize: 18 }} />}
                 label="Curtidas totais"
@@ -596,7 +602,7 @@ export default function DashboardPage() {
                 accent="#f48fb1"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<CommentIcon sx={{ fontSize: 18 }} />}
                 label="Comentários totais"
@@ -605,7 +611,7 @@ export default function DashboardPage() {
                 accent="#f48fb1"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <MetricCard
                 icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                 label="Total de interações (curtidas + comentários)"
@@ -618,7 +624,7 @@ export default function DashboardPage() {
           {/* ── Anúncios ── */}
           <SectionHeader title="Anúncios" color="#80cbc4" />
           <Grid container spacing={1.5}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<VisibilityIcon sx={{ fontSize: 18 }} />}
                 label="Visualizações"
@@ -627,7 +633,7 @@ export default function DashboardPage() {
                 accent="#80cbc4"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<TouchAppIcon sx={{ fontSize: 18 }} />}
                 label="Cliques"
@@ -636,7 +642,7 @@ export default function DashboardPage() {
                 accent="#80cbc4"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <MetricCard
                 icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                 label="CTR — taxa de clique por visualização"
@@ -649,7 +655,7 @@ export default function DashboardPage() {
           {/* ── Photo Finder ── */}
           <SectionHeader title="Photo Finder" color="#ce93d8" />
           <Grid container spacing={1.5}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<CameraAltIcon sx={{ fontSize: 18 }} />}
                 label="Imagens enviadas"
@@ -658,7 +664,7 @@ export default function DashboardPage() {
                 accent="#ce93d8"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<FaceIcon sx={{ fontSize: 18 }} />}
                 label="Reconhecimentos"
@@ -667,7 +673,7 @@ export default function DashboardPage() {
                 accent="#ce93d8"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<DownloadIcon sx={{ fontSize: 18 }} />}
                 label="Downloads de fotos"
@@ -676,7 +682,7 @@ export default function DashboardPage() {
                 accent="#ce93d8"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                 label="Taxa de reconhecimento"
@@ -689,7 +695,7 @@ export default function DashboardPage() {
           {/* ── Posts ── */}
           <SectionHeader title="Posts" color="#ffb74d" />
           <Grid container spacing={1.5}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<ArticleIcon sx={{ fontSize: 18 }} />}
                 label="Posts publicados"
@@ -698,7 +704,7 @@ export default function DashboardPage() {
                 accent="#ffb74d"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<PendingIcon sx={{ fontSize: 18 }} />}
                 label="Aguardando aprovação"
@@ -706,7 +712,7 @@ export default function DashboardPage() {
                 accent="#ffb74d"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<RejectedIcon sx={{ fontSize: 18 }} />}
                 label="Rejeitados"
@@ -714,7 +720,7 @@ export default function DashboardPage() {
                 accent="#ffb74d"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                 label="Publicados hoje"
@@ -727,7 +733,7 @@ export default function DashboardPage() {
           {/* ── Roleta ── */}
           <SectionHeader title="Roleta" color="#aed581" />
           <Grid container spacing={1.5}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<RouletteIcon sx={{ fontSize: 18 }} />}
                 label="Total de giros"
@@ -736,7 +742,7 @@ export default function DashboardPage() {
                 accent="#aed581"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<GroupIcon sx={{ fontSize: 18 }} />}
                 label="Participantes únicos"
@@ -744,7 +750,7 @@ export default function DashboardPage() {
                 accent="#aed581"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <MetricCard
                 icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                 label="Giros hoje"
@@ -757,7 +763,7 @@ export default function DashboardPage() {
           {/* ── Notificações ── */}
           <SectionHeader title="Notificações" color="#4fc3f7" />
           <Grid container spacing={1.5}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<NotifIcon sx={{ fontSize: 18 }} />}
                 label="Total enviadas"
@@ -766,7 +772,7 @@ export default function DashboardPage() {
                 accent="#4fc3f7"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<ReadIcon sx={{ fontSize: 18 }} />}
                 label="Taxa de leitura"
@@ -774,7 +780,7 @@ export default function DashboardPage() {
                 accent="#4fc3f7"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<PushIcon sx={{ fontSize: 18 }} />}
                 label="Push habilitado"
@@ -782,7 +788,7 @@ export default function DashboardPage() {
                 accent="#4fc3f7"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                 label="Enviadas hoje"
@@ -795,7 +801,7 @@ export default function DashboardPage() {
           {/* ── Acessos ── */}
           <SectionHeader title="Acessos" color="#81d4fa" />
           <Grid container spacing={1.5}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<TrendingUpIcon sx={{ fontSize: 18 }} />}
                 label="Total de acessos"
@@ -804,7 +810,7 @@ export default function DashboardPage() {
                 accent="#81d4fa"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<DevicesIcon sx={{ fontSize: 18 }} />}
                 label="Dispositivos únicos"
@@ -812,7 +818,7 @@ export default function DashboardPage() {
                 accent="#81d4fa"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<LoginIcon sx={{ fontSize: 18 }} />}
                 label="Acessos com login"
@@ -820,7 +826,7 @@ export default function DashboardPage() {
                 accent="#81d4fa"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<AnonIcon sx={{ fontSize: 18 }} />}
                 label="Acessos sem login"
@@ -828,7 +834,7 @@ export default function DashboardPage() {
                 accent="#81d4fa"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<PeakIcon sx={{ fontSize: 18 }} />}
                 label="Pico de acesso"
@@ -836,7 +842,7 @@ export default function DashboardPage() {
                 accent="#81d4fa"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <MetricCard
                 icon={<TimeIcon sx={{ fontSize: 18 }} />}
                 label="Tempo médio na tela"
@@ -844,7 +850,7 @@ export default function DashboardPage() {
                 accent="#81d4fa"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TopPathsCard paths={data.page_views.top_paths} accent="#81d4fa" />
             </Grid>
           </Grid>
@@ -930,7 +936,7 @@ export default function DashboardPage() {
 
                   {/* Network In/Out */}
                   <Grid container spacing={1}>
-                    <Grid item xs={6}>
+                    <Grid size={6}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                         <NetworkIcon sx={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }} />
                         <Typography sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem" }}>Net In</Typography>
@@ -941,7 +947,7 @@ export default function DashboardPage() {
                           : "—"}
                       </Typography>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid size={6}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                         <NetworkIcon sx={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }} />
                         <Typography sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem" }}>Net Out</Typography>
@@ -966,7 +972,7 @@ export default function DashboardPage() {
                     </Typography>
                   </Box>
                   <Grid container spacing={1.5}>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                       <MetricCard
                         icon={<NetworkIcon sx={{ fontSize: 18 }} />}
                         label="Requisições"
@@ -974,7 +980,7 @@ export default function DashboardPage() {
                         accent="#ef9a9a"
                       />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                       <MetricCard
                         icon={<HealthErrorIcon sx={{ fontSize: 18 }} />}
                         label="Erros 5xx"
@@ -982,7 +988,7 @@ export default function DashboardPage() {
                         accent={infraData.alb.errors_5xx ? "#ef5350" : "#ef9a9a"}
                       />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                       <MetricCard
                         icon={<TimeIcon sx={{ fontSize: 18 }} />}
                         label="Latência média"
