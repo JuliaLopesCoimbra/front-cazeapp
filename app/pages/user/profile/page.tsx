@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -387,12 +386,10 @@ export default function ProfilePage() {
                 }}
               >
                 {profile.profile_photo ? (
-                  <Image
+                  <img
                     src={profile.profile_photo}
                     alt="Foto de perfil"
-                    width={96}
-                    height={96}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }}
                   />
                 ) : (
                   <Box sx={{ width: "100%", height: "100%", backgroundColor: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
