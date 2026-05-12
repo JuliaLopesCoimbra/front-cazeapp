@@ -5,9 +5,10 @@ import axios from "axios";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 const API_URL = getApiUrl();
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 interface ForgotPasswordResponse {
   message?: string;
@@ -92,7 +93,7 @@ export default function ForgotPasswordPage() {
     <Box
       sx={{
         display: "flex",
-        ...dashboardBackgroundSx,
+        ...torcidaBackgroundSx,
         justifyContent: "center",
         height: "100vh",
         padding: "20px",

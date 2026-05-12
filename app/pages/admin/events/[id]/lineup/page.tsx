@@ -28,11 +28,12 @@ import {
   deleteParadeLineupItem,
   ParadeLineupItemResponse,
 } from "@/app/services/paradeLineup/paradeLineupService";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getThemedPageBackgroundSx } from "@/app/utils/backgroundStyles";
 import { getEventById } from "@/app/services/events/eventAppService";
 import DeleteLineupItemModal from "@/app/components/admin/lineup/DeleteLineupItemModal";
 
 export default function LineupManagementPage() {
+  const pageBackgroundSx = getThemedPageBackgroundSx();
   const params = useParams();
   const router = useRouter();
   const eventId = Number(params.id);
@@ -130,7 +131,7 @@ export default function LineupManagementPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -145,7 +146,7 @@ export default function LineupManagementPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         color: "#fff",
       }}
     >

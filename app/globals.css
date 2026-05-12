@@ -82,26 +82,10 @@ article > div:not([class*="Mui"]):not([class*="form"]):not([class*="Form"]) {
   overflow-x: hidden;
 }
 
-/* Garantir que elementos fixos não ultrapassem a viewport */
-[style*="position: fixed"],
-[style*="position:fixed"] {
-  max-width: 100vw;
-  left: 0;
-  right: 0;
-}
-
 /* Garantir que elementos fixed não sejam afetados durante scroll */
 [data-fixed-bottom] {
   position: fixed !important;
-  bottom: 0 !important;
-  transform: translateZ(0) !important;
   will-change: transform !important;
-  -webkit-transform: translateZ(0) !important;
-  /* Garantir que não ultrapasse a viewport */
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  max-width: 100vw !important;
 }
 
 /* Prevenir espaços em branco abaixo do BottomNav */

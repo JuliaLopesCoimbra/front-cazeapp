@@ -5,6 +5,8 @@ import { getApiUrl } from "@/app/utils/apiUrlHelper";
 export interface EventResponse {
   id: number;
   title: string;
+  event_type: string; // "carnival" | "world_cup"
+  brand_key?: string; // "default" | "n1_torcida"
   description: string;
   location?: string;
   banner_image?: string;
@@ -18,6 +20,7 @@ export interface EventResponse {
   }>;
   line_up?: string;
   spotify_playlist_url?: string;
+  ticket_url?: string;
   starts_at: string;
   ends_at: string;
   created_at: string;
@@ -43,6 +46,9 @@ export interface EventResponse {
 
 export interface CreateEventData {
   title: string;
+  event_type?: string; // "carnival" | "world_cup"
+  brand_key?: string; // "default" | "n1_torcida"
+  ticket_url?: string;
   description?: string;
   location?: string;
   starts_at?: string;
@@ -66,6 +72,9 @@ export interface CreateEventData {
 
 export interface UpdateEventData {
   title: string;
+  event_type?: string; // "carnival" | "world_cup"
+  brand_key?: string; // "default" | "n1_torcida"
+  ticket_url?: string;
   description: string;
   location: string;
   start_date: string;
@@ -151,6 +160,9 @@ export const getPublicEventById = async (eventId: number): Promise<EventResponse
 export const createEvent = async (data: CreateEventData): Promise<EventResponse> => {
   const formData = new FormData();
   formData.append("title", data.title);
+  if (data.event_type) formData.append("event_type", data.event_type);
+  if (data.brand_key) formData.append("brand_key", data.brand_key);
+  if (data.ticket_url !== undefined) formData.append("ticket_url", data.ticket_url ?? "");
   if (data.description) formData.append("description", data.description);
   if (data.location) formData.append("location", data.location);
   if (data.starts_at) formData.append("starts_at", data.starts_at);
@@ -185,6 +197,9 @@ export const updateEvent = async (
 ): Promise<EventResponse> => {
   const formData = new FormData();
   formData.append("title", data.title);
+  if (data.event_type) formData.append("event_type", data.event_type);
+  if (data.brand_key) formData.append("brand_key", data.brand_key);
+  if (data.ticket_url !== undefined) formData.append("ticket_url", data.ticket_url ?? "");
   formData.append("description", data.description);
   formData.append("location", data.location);
   formData.append("start_date", data.start_date);

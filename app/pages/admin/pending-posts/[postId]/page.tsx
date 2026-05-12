@@ -33,7 +33,8 @@ import {
 import { getEvents, EventResponse } from "@/app/services/events/eventAppService";
 import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getThemedPageBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSx } from "@/app/utils/eventBranding";
 
 export default function PendingPostDetailPage() {
   const params = useParams();
@@ -58,6 +59,7 @@ export default function PendingPostDetailPage() {
   const isLoadingRef = useRef(false);
 
   const canApprovePosts = isAdminMaster || isSubadmin;
+  const pageBackgroundSx = event ? getEventBackgroundSx(event) : getThemedPageBackgroundSx();
 
   // Reset flags quando postId mudar
   useEffect(() => {
@@ -254,7 +256,7 @@ export default function PendingPostDetailPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           padding: { xs: 2, sm: 3, md: 4 },
         }}
       >

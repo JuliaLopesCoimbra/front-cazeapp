@@ -6,11 +6,14 @@ type Tab = "home" | "eventos" | "mapa" | "lineup" | "foto" | "enredo";
 interface Props {
   active: Tab;
   onChange: (tab: Tab) => void;
+  /** Tipo do evento atual — altera o label da aba "enredo" para "Jogos" quando world_cup */
+  eventType?: string;
+  activeColor?: string;
 }
 
 const DRAG_THRESHOLD_PX = 5;
 
-export default function HomeTabs({ active, onChange }: Props) {
+export default function HomeTabs({ active, onChange, eventType, activeColor = "#ffc91f" }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragStartXRef = useRef<number | null>(null);
   const dragStartScrollLeftRef = useRef<number>(0);
@@ -20,11 +23,11 @@ export default function HomeTabs({ active, onChange }: Props) {
 
   const tabs: { label: string; value: Tab }[] = [
     { label: "Home", value: "home" },
-    { label: "Eventos", value: "eventos" },
+    { label: "Evento", value: "eventos" },
     { label: "Mapa", value: "mapa" },
     { label: "Line Up", value: "lineup" },
     { label: "Photo Finder", value: "foto" },
-    { label: "Enredo", value: "enredo" },
+    { label: eventType === "world_cup" ? "Jogos" : "Enredo", value: "enredo" },
   ];
 
   // Mesma largura e padding do conteúdo abaixo (ex.: lineup/datas) para alinhar início e fim
@@ -115,6 +118,7 @@ export default function HomeTabs({ active, onChange }: Props) {
         mx: "auto",
         px: { xs: 1, sm: 2 },
         py: { xs: 2, md: 3 },
+        overflow: "hidden", // garante corte na borda direita
       }}
     >
       <Box
@@ -126,12 +130,12 @@ export default function HomeTabs({ active, onChange }: Props) {
           width: "100%",
           overflowX: "auto",
           overflowY: "hidden",
-          scrollbarWidth: "none", // Firefox
+          scrollbarWidth: "none",
           "&::-webkit-scrollbar": {
-            display: "none", // Chrome, Safari, Edge
+            display: "none",
           },
-          WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
-          scrollBehavior: "smooth", // restaurado no mouseup após arraste
+          WebkitOverflowScrolling: "touch",
+          scrollBehavior: "smooth",
           cursor: "grab",
           "&:active": {
             cursor: "grabbing",
@@ -150,32 +154,24 @@ export default function HomeTabs({ active, onChange }: Props) {
                 onChange(tab.value);
               }}
               sx={{
-                borderRadius: "999px",
+                borderRadius: 0,
                 textTransform: "none",
-                fontWeight: 600,
-                lineHeight: 1.2,
-                px: { xs: 1.5, md: 2, lg: 2.5 },
-                minHeight: { xs: 40, md: 44, lg: 48 },
-                height: { xs: 40, md: 44, lg: 48 },
-                width: { xs: 100, md: 120, lg: 140 },
-                minWidth: { xs: 100, md: 120, lg: 140 }, // Garante largura mínima
-                flexShrink: 0, // Previne que os botões encolham
-                fontSize: tab.value === "mapa" 
-                  ? { xs: "0.75rem", md: "0.875rem", lg: "0.9375rem" }
-                  : { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
-                // Ativo
-                backgroundColor: isActive ? "#ffc91f" : "transparent",
-                color: isActive ? "#000" : "#fff",
-                border: `1px solid ${
-                  isActive ? "#ffc91f" : "#fff"
-                }`,
-
+                fontWeight: isActive ? 700 : 400,
+                lineHeight: 1,
+                px: { xs: 1.5, md: 1.5, lg: 2 },
+                py: 1.5,
+                minWidth: "unset",
+                flexShrink: 0,
+                fontSize: { xs: "0.875rem", md: "1rem", lg: "1.0625rem" },
+                backgroundColor: "transparent",
+                color: isActive ? "#ffc91f" : "rgba(255,201,31,0.5)",
+                border: "none",
+                borderBottom: `2px solid ${isActive ? "#ffc91f" : "transparent"}`,
+                transition: "color 0.2s ease, border-color 0.2s ease, font-weight 0.2s ease",
                 "&:hover": {
-                  backgroundColor: isActive
-                    ? "#f5bf12"
-                    : "rgba(255,255,255,0.1)",
-                  borderColor: isActive ? "#f5bf12" : "#fff",
-                  fontWeight: 900,
+                  backgroundColor: "transparent",
+                  color: isActive ? "#ffc91f" : "rgba(255,201,31,0.8)",
+                  borderBottomColor: isActive ? "#ffc91f" : "rgba(255,201,31,0.3)",
                 },
               }}
             >

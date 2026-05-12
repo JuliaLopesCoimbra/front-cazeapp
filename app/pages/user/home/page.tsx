@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Box } from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
 import HomeTabs from "@/app/components/home/HomeTabs";
@@ -14,21 +14,19 @@ import EventDetails from "@/app/components/home/EventDetails";
 import { useAuth } from "@/app/context/AuthContext";
 import PhotoAI from "@/app/components/home/PhotoAI";
 import Enredo from "@/app/components/home/Enredo";
+import WorldCupGames from "@/app/components/home/WorldCupGames";
 import EventMap from "@/app/components/home/EventMap";
 import LineUp from "@/app/components/home/LineUp";
 import EventIndisponivel from "@/app/components/event/EventIndisponivel";
-import NotificationPermissionPopup from "@/app/components/home/NotificationPermissionPopup";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
 import {
-  getNotificationPreferences,
-  updateNotificationPreferences,
-} from "@/app/services/notifications/notificationPreferenceService";
-import { subscribeForPush } from "@/app/services/notifications/pushService";
-import { useToast } from "@/app/context/ToastContext";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
-
-const NOTIFICATION_POPUP_DISMISSED_KEY = "n1_notification_popup_dismissed_at";
-const NOTIFICATION_POPUP_DISMISS_DAYS = 7;
+  EventBrandKey,
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+  getEventTheme,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 const STORAGE_KEY = "selectedEventId";
 const SCROLL_KEY = "homeScrollY";
@@ -37,12 +35,14 @@ const TAB_KEY = "homeActiveTab";
 type Tab = "home" | "eventos" | "mapa" | "lineup" | "foto" | "enredo";
 
 const HomeContent: React.FC = () => {
-  const searchParams = useSearchParams();
   // Inicializa sempre "home" para evitar hydration mismatch (server vs client).
   // A aba é sincronizada da URL/sessionStorage no useEffect.
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -51,10 +51,7 @@ const HomeContent: React.FC = () => {
   const isCheckingRef = useRef(false); // Previne múltiplas verificações simultâneas
   const scrollExecutedRef = useRef(false);
   const router = useRouter();
-  const { isAdmin, authReady, isAuthenticated } = useAuth();
-  const { showToast } = useToast();
-  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
-  const [pushPopupLoading, setPushPopupLoading] = useState(false);
+  const { isAdmin, authReady } = useAuth();
 
   // Persist tab selection
   useEffect(() => {
@@ -62,6 +59,13 @@ const HomeContent: React.FC = () => {
       sessionStorage.setItem(TAB_KEY, activeTab);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (currentEvent) {
+      setStoredEventBrandKey(currentEvent);
+      setStoredBrandKeyState(currentEvent.brand_key === "n1_torcida" ? "n1_torcida" : "default");
+    }
+  }, [currentEvent]);
 
   // Controla animações quando a aba muda
   useEffect(() => {
@@ -77,10 +81,7 @@ const HomeContent: React.FC = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Usa searchParams se disponível, senão lê diretamente da URL
-    const urlParams = searchParams 
-      ? new URLSearchParams(searchParams.toString())
-      : new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(window.location.search);
     
     const urlTab = urlParams.get("tab");
     const urlEventId = urlParams.get("eventId") || urlParams.get("event"); // Suporta ambos "eventId" e "event"
@@ -115,12 +116,13 @@ const HomeContent: React.FC = () => {
         window.history.replaceState({}, "", newUrl.toString());
       }
     }
-  }, [searchParams, events, currentEvent]); // Removido activeTab das dependências para evitar loop
+  }, [events, currentEvent]); // Removido activeTab das dependências para evitar loop
 
   // Scroll para o line up quando houver o parâmetro scrollToLineup na URL
   useEffect(() => {
-    const scrollToLineup = searchParams?.get("scrollToLineup");
-    const eventIdParam = searchParams?.get("eventId");
+    const urlParams = new URLSearchParams(window.location.search);
+    const scrollToLineup = urlParams.get("scrollToLineup");
+    const eventIdParam = urlParams.get("eventId");
     
     if (!scrollToLineup || !currentEvent || !currentEvent.line_up || scrollExecutedRef.current || activeTab !== "eventos") {
       return;
@@ -213,7 +215,7 @@ const HomeContent: React.FC = () => {
 
     // Aguarda um pouco antes de tentar fazer scroll
     setTimeout(tryScrollToLineup, 300);
-  }, [currentEvent, activeTab, searchParams]);
+  }, [currentEvent, activeTab]);
 
   // Função para verificar e atualizar eventos
   const checkAndUpdateEvents = useCallback(async () => {
@@ -431,52 +433,6 @@ const HomeContent: React.FC = () => {
     };
   }, [router, isAdmin, authReady, checkAndUpdateEvents, activeTab]);
 
-  // Popup de permissão de notificações na tela inicial (uma vez por período ou até ativar)
-  useEffect(() => {
-    if (typeof window === "undefined" || !authReady || !isAuthenticated || !profileLoaded) return;
-    const dismissedAt = localStorage.getItem(NOTIFICATION_POPUP_DISMISSED_KEY);
-    if (dismissedAt) {
-      const elapsed = Date.now() - parseInt(dismissedAt, 10);
-      if (elapsed < NOTIFICATION_POPUP_DISMISS_DAYS * 24 * 60 * 60 * 1000) return;
-    }
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      try {
-        const prefs = await getNotificationPreferences();
-        if (cancelled || prefs.push_enabled) return;
-        setShowNotificationPopup(true);
-      } catch {
-        // Ignora erro (ex.: usuário não autenticado na API)
-      }
-    }, 1200);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [authReady, isAuthenticated, profileLoaded]);
-
-  const handleNotificationPopupAllow = async () => {
-    setPushPopupLoading(true);
-    try {
-      await subscribeForPush();
-      await updateNotificationPreferences({ push_enabled: true });
-      setShowNotificationPopup(false);
-      showToast("Notificações push ativadas com sucesso.", "success");
-    } catch (e: any) {
-      showToast(
-        e?.message || "Não foi possível ativar. Tente novamente nas preferências de notificações.",
-        "error"
-      );
-    } finally {
-      setPushPopupLoading(false);
-    }
-  };
-
-  const handleNotificationPopupDismiss = () => {
-    localStorage.setItem(NOTIFICATION_POPUP_DISMISSED_KEY, String(Date.now()));
-    setShowNotificationPopup(false);
-  };
-
   // Se não há eventos ativos disponíveis para usuário não-admin, mostra Evento Indisponível
   if (eventsLoaded && !currentEvent) {
     const hasActiveEvents = events.some((event) => event.is_active);
@@ -485,8 +441,11 @@ const HomeContent: React.FC = () => {
     }
   }
 
-  // Todas as abas usam o fundo responsivo (prizebackgroundpc no PC, dashboard no mobile)
-  const pageBackgroundSx = dashboardBackgroundSx;
+  // Todas as abas usam fundo por tema de evento.
+  const pageBackgroundSx = currentEvent
+    ? getEventBackgroundSx(currentEvent)
+    : getEventBackgroundSxByKey(storedBrandKey);
+  const currentTheme = getEventTheme(currentEvent);
 
   // Mostra skeleton até que tanto o evento quanto o perfil estejam carregados
   if (!currentEvent || !profileLoaded) {
@@ -613,15 +572,17 @@ const HomeContent: React.FC = () => {
 
         {/* Tabs */}
         <Box className={shouldAnimate ? "slide-up-delay-1" : ""}>
-          <HomeTabs 
-            active={activeTab} 
+          <HomeTabs
+            active={activeTab}
             onChange={(newTab) => {
               setActiveTab(newTab);
               // Atualiza a URL para refletir a aba selecionada, mas não força navegação
               const url = new URL(window.location.href);
               url.searchParams.set("tab", newTab);
               window.history.replaceState({}, "", url.toString());
-            }} 
+            }}
+            eventType={currentEvent?.event_type}
+            activeColor={currentTheme.tabActiveColor}
           />
         </Box>
 
@@ -650,86 +611,33 @@ const HomeContent: React.FC = () => {
 
         {activeTab === "lineup" && currentEvent && (
           <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <LineUp eventId={currentEvent.id} />
+            <LineUp eventId={currentEvent.id} event={currentEvent} />
           </Box>
         )}
 
         {activeTab === "foto" && currentEvent && (
           <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <PhotoAI eventId={currentEvent.id} />
+            <PhotoAI eventId={currentEvent.id} event={currentEvent} />
           </Box>
         )}
 
         {activeTab === "enredo" && currentEvent && (
           <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} />
+            {currentEvent.event_type === "world_cup" ? (
+              <WorldCupGames eventId={currentEvent.id} />
+            ) : (
+              <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} event={currentEvent} />
+            )}
           </Box>
         )}
       </Box>
-      <BottomNav />
-      <NotificationPermissionPopup
-        open={showNotificationPopup}
-        onClose={handleNotificationPopupDismiss}
-        onAllow={handleNotificationPopupAllow}
-        loading={pushPopupLoading}
-      />
+      <BottomNav activeColor={currentTheme.footerActiveColor} eventId={currentEvent?.id} />
     </>
   );
 };
 
 const Home: React.FC = () => {
-  return (
-    <Suspense fallback={
-      <Box
-        sx={{
-          minHeight: "100vh",
-          ...dashboardBackgroundSx,
-          paddingBottom: "72px",
-        }}
-      >
-        <Box
-          sx={{
-            padding: 2,
-            borderBottom: "solid 1px rgba(255,255,255,0.2)",
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box display="flex" alignItems="center" gap={1}>
-              <Skeleton
-                variant="rectangular"
-                width={40}
-                height={40}
-                sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
-              />
-              <Skeleton
-                variant="text"
-                width={150}
-                height={32}
-                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-              />
-            </Box>
-            <Skeleton
-              variant="circular"
-              width={40}
-              height={40}
-              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-            />
-          </Box>
-        </Box>
-      </Box>
-    }>
-      <HomeContent />
-    </Suspense>
-  );
+  return <HomeContent />;
 };
 
 export default Home;

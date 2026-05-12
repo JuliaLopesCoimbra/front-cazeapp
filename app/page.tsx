@@ -28,7 +28,7 @@ import {
   initGoogleLogin,
   initFacebookLogin,
 } from "@/app/services/auth/authService";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 interface LoginData {
   email: string;
@@ -37,6 +37,7 @@ interface LoginData {
 }
 
 const LoginForm: React.FC = () => {
+  const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [keepMeLoggedIn, setKeepMeLoggedIn] = useState<boolean>(false);
@@ -207,7 +208,7 @@ const LoginForm: React.FC = () => {
     return (
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...torcidaBackgroundSx,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -222,11 +223,11 @@ const LoginForm: React.FC = () => {
             width: "100%",
             maxWidth: { xs: "100%", md: "450px" },
             textAlign: "left",
-            backgroundColor: "rgba(255, 255, 255, 0.08)",
-            backdropFilter: "blur(20px)",
+            backgroundColor: "transparent",
+            backdropFilter: "none",
             borderRadius: { xs: "16px", md: "24px" },
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+            border: "none",
+            boxShadow: "none",
           }}
         >
           {/* Título Skeleton */}
@@ -361,7 +362,7 @@ const LoginForm: React.FC = () => {
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...torcidaBackgroundSx,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -377,16 +378,12 @@ const LoginForm: React.FC = () => {
           width: "100%",
           maxWidth: { xs: "100%", md: "450px" },
           textAlign: "left",
-          backgroundColor: "rgba(255, 255, 255, 0.08)",
-          backdropFilter: "blur(20px)",
+          backgroundColor: "transparent",
+          backdropFilter: "none",
           borderRadius: { xs: "16px", md: "24px" },
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+          border: "none",
+          boxShadow: "none",
           transition: "all 0.3s ease",
-          "&:hover": {
-            boxShadow: "0 12px 40px rgba(0, 0, 0, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-          },
         }}
       >
         <Box
@@ -394,23 +391,23 @@ const LoginForm: React.FC = () => {
           sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
+            alignItems: "flex-start",
             marginBottom: { xs: "16px", md: "20px" },
           }}
         >
           <Image
             src="/logo/logo-n1.png"
             alt="Camarote N1"
-            width={80}
-            height={80}
-            style={{ marginBottom: "16px" }}
+            width={112}
+            height={112}
+            style={{ marginBottom: "10px", marginTop: "-10px", alignSelf: "center" }}
           />
           <Typography
             variant="h4"
             sx={{
               fontWeight: 700,
               fontSize: { xs: "24px", md: "28px" },
-              textAlign: "center",
+              textAlign: "left",
             }}
           >
             Login
@@ -421,7 +418,7 @@ const LoginForm: React.FC = () => {
           variant="body2"
           sx={{
             marginBottom: { xs: "24px", md: "28px" },
-            textAlign: "center",
+            textAlign: "left",
             color: "rgba(255, 255, 255, 0.85)",
             fontSize: { xs: "13px", md: "14px" },
           }}
@@ -600,23 +597,23 @@ const LoginForm: React.FC = () => {
           sx={{
             mt: { xs: 2, md: 3 },
             mb: 1,
-            backgroundColor: "#ffcc01",
-            color: "#000",
+            backgroundColor: "#0f935d",
+            color: "#fff",
             fontWeight: 700,
             borderRadius: "12px",
             textTransform: "none",
             fontSize: { xs: "15px", md: "16px" },
             padding: { xs: "12px", md: "14px" },
-            boxShadow: "0 4px 12px rgba(255, 204, 1, 0.3)",
+            boxShadow: "0 4px 12px rgba(15, 147, 93, 0.35)",
             transition: "all 0.2s ease",
             "&:hover": {
-              backgroundColor: "#e6b800",
+              backgroundColor: "#0b7a4e",
               transform: "translateY(-2px)",
-              boxShadow: "0 6px 16px rgba(255, 204, 1, 0.4)",
+              boxShadow: "0 6px 16px rgba(15, 147, 93, 0.45)",
             },
             "&.Mui-disabled": {
-              backgroundColor: "rgba(255, 204, 1, 0.4)",
-              color: "rgba(0,0,0,0.6)",
+              backgroundColor: "rgba(15, 147, 93, 0.45)",
+              color: "rgba(255,255,255,0.75)",
             },
           }}
           onClick={handleLogin}

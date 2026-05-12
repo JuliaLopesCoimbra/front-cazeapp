@@ -19,7 +19,13 @@ import NewsDetailSkeleton from "@/app/components/news/NewsDetailSkeleton";
 import DeactivatePostModal from "@/app/components/news/DeactivatePostModal";
 import ReactivatePostModal from "@/app/components/news/ReactivatePostModal";
 import { useCommentScroll } from "@/app/hooks/useCommentScroll";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import {
+  EventBrandKey,
+  getEventBackgroundSxByKey,
+  getEventBrandKey,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 import {
   getNewsDetails,
   NewsDetailsResponse,
@@ -49,6 +55,7 @@ import DeleteNewsModal from "@/app/components/admin/news/DeleteNewsModal";
 import DeleteCommentModal from "@/app/components/comments/DeleteCommentModal";
 import { getMe } from "@/app/services/auth/authService";
 import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
+import { getEvents, EventResponse } from "@/app/services/events/eventAppService";
 
 export default function NewsDetailPage() {
   const params = useParams();
@@ -89,8 +96,22 @@ export default function NewsDetailPage() {
   const [hasMoreComments, setHasMoreComments] = useState(false);
   const [loadingMoreComments, setLoadingMoreComments] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(true);
+  const [storedBrandKey, setStoredBrandKey] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
+  const [resolvedEvent, setResolvedEvent] = useState<EventResponse | null>(null);
+
+  useEffect(() => {
+    const key = getStoredEventBrandKey();
+    if (key) setStoredBrandKey(key);
+  }, []);
+
   const COMMENTS_PER_PAGE = 20; // Carrega 20 comentários por vez
   const REPLIES_PER_PAGE = 5; // Carrega 5 respostas por vez
+  const resolvedBrandKey = resolvedEvent
+    ? getEventBrandKey({ brand_key: resolvedEvent.brand_key, title: resolvedEvent.title })
+    : storedBrandKey;
+  const pageBackgroundSx = getEventBackgroundSxByKey(resolvedBrandKey);
 
   const loadNewsDetails = async () => {
     if (!newsId) return;
@@ -200,6 +221,32 @@ export default function NewsDetailPage() {
     }
   }, [newsId, isAuthenticated, isAdmin]);
 
+  useEffect(() => {
+    const resolveEventBrand = async () => {
+      try {
+        const allEvents = await getEvents();
+        const targetEventId =
+          eventId ||
+          news?.event_id ||
+          (() => {
+            const saved = localStorage.getItem("selectedEventId");
+            return saved ? parseInt(saved, 10) : null;
+          })();
+
+        if (!targetEventId) return;
+        const matchedEvent = allEvents.find((e) => e.id === targetEventId);
+        if (!matchedEvent) return;
+
+        setResolvedEvent(matchedEvent);
+        setStoredEventBrandKey(matchedEvent);
+        setStoredBrandKey(getEventBrandKey({ brand_key: matchedEvent.brand_key, title: matchedEvent.title }));
+      } catch (error) {
+        console.error("Erro ao resolver evento para tema", error);
+      }
+    };
+    resolveEventBrand();
+  }, [eventId, news?.event_id]);
+
   // Controla animações quando a página carrega
   useEffect(() => {
     setShouldAnimate(true);
@@ -236,46 +283,31 @@ export default function NewsDetailPage() {
       return;
     }
 
-    setLiking(true);
     const wasLiked = news.likes.user_liked;
-    
+
+    // Atualiza UI imediatamente
+    setNews({
+      ...news,
+      likes: {
+        count: wasLiked ? Math.max(0, news.likes.count - 1) : news.likes.count + 1,
+        user_liked: !wasLiked,
+      },
+    });
+    setLiking(true);
+
     try {
       if (wasLiked) {
-        // Remove o like usando o endpoint específico
         await unlikeNews(newsId);
-        
-        // Atualiza o estado otimisticamente (não precisa sincronizar - confia na resposta do servidor)
-        setNews({
-          ...news,
-          likes: {
-            count: Math.max(0, news.likes.count - 1),
-            user_liked: false,
-          },
-        });
       } else {
-        // Adiciona o like usando o endpoint específico
         await likeNews(newsId);
-        
-        // Atualiza o estado otimisticamente (não precisa sincronizar - confia na resposta do servidor)
-        setNews({
-          ...news,
-          likes: {
-            count: news.likes.count + 1,
-            user_liked: true,
-          },
-        });
       }
     } catch (error) {
       console.error("Erro ao curtir/descurtir", error);
       showToast("Erro ao processar curtida", "error");
-      
-      // Em caso de erro, reverte o estado otimista
+      // Reverte em caso de erro
       setNews({
         ...news,
-        likes: {
-          count: wasLiked ? news.likes.count + 1 : Math.max(0, news.likes.count - 1),
-          user_liked: wasLiked,
-        },
+        likes: { count: news.likes.count, user_liked: wasLiked },
       });
     } finally {
       setLiking(false);
@@ -292,23 +324,46 @@ export default function NewsDetailPage() {
     }
 
     const commentContent = commentText.trim();
+
+    // Limpa o input e mostra o comentário imediatamente
+    setCommentText("");
+    const tempId = -Date.now();
+    const tempComment: CommentResponse = {
+      id: tempId,
+      content: commentContent,
+      created_at: new Date().toISOString(),
+      likes: { count: 0, user_liked: false },
+      replies_count: 0,
+      user: {
+        id: currentUser?.id ?? 0,
+        name: currentUser?.name ?? "",
+        profile_photo: currentUser?.profile_photo ?? undefined,
+      },
+    };
+    setNews({
+      ...news,
+      comments: [tempComment, ...news.comments],
+      comments_count: news.comments_count + 1,
+    });
+    setCommentsOffset((prev) => prev + 1);
+
     setSubmittingComment(true);
-    
+
     try {
-      // Cria o comentário usando o endpoint específico
+      // Cria o comentário no servidor
       const newComment = await createComment(newsId, commentContent);
-      
-      // Atualização otimista imediata - mostra o comentário na hora
+
+      // Substitui o temporário pelo real
       if (newComment) {
-        setNews({
-          ...news,
-          comments: [newComment, ...news.comments],
-          comments_count: news.comments_count + 1,
+        setNews((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            comments: prev.comments.map((c) => (c.id === tempId ? newComment : c)),
+          };
         });
-        setCommentsOffset((prev) => prev + 1);
       }
 
-      setCommentText("");
       showToast("Comentário adicionado!", "success");
       
       // Recarrega os comentários em background para garantir sincronização
@@ -340,26 +395,19 @@ export default function NewsDetailPage() {
       
     } catch (error: any) {
       console.error("Erro ao comentar", error);
-      const message =
-        error.response?.data?.detail || "Erro ao adicionar comentário";
+      const message = error.response?.data?.detail || "Erro ao adicionar comentário";
       showToast(message, "error");
-      
-      // Em caso de erro, tenta recarregar os comentários
-      try {
-        const comments = await listComments(newsId, COMMENTS_PER_PAGE, 0);
-        setNews((prev) =>
-          prev
-            ? {
-                ...prev,
-                comments: comments,
-                comments_count: comments.length,
-              }
-            : null
-        );
-        setCommentsOffset(comments.length);
-      } catch (reloadError) {
-        console.error("Erro ao recarregar comentários", reloadError);
-      }
+      // Reverte: remove o comentário temporário e restaura o input
+      setCommentText(commentContent);
+      setNews((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          comments: prev.comments.filter((c) => c.id !== tempId),
+          comments_count: prev.comments_count - 1,
+        };
+      });
+      setCommentsOffset((prev) => Math.max(0, prev - 1));
     } finally {
       setSubmittingComment(false);
     }
@@ -426,108 +474,79 @@ export default function NewsDetailPage() {
   const handleLikeComment = async (commentId: number, parentCommentId?: number | null) => {
     if (!isAuthenticated || !news || likingComment[commentId]) return;
 
+    // Determina estado atual antes de qualquer await
+    let wasLiked = false;
+    if (parentCommentId) {
+      const replyList = replies[parentCommentId] || [];
+      const comment = replyList.find((r) => r.id === commentId);
+      wasLiked = comment?.likes.user_liked || false;
+    } else {
+      const comment = news.comments.find((c) => c.id === commentId);
+      if (!comment) return;
+      wasLiked = comment.likes.user_liked;
+    }
+
+    // Atualiza UI imediatamente
+    if (parentCommentId) {
+      setReplies((prev) => ({
+        ...prev,
+        [parentCommentId]: (prev[parentCommentId] || []).map((r) =>
+          r.id === commentId
+            ? { ...r, likes: { count: wasLiked ? r.likes.count - 1 : r.likes.count + 1, user_liked: !wasLiked } }
+            : r
+        ),
+      }));
+    } else {
+      setNews((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          comments: prev.comments.map((c) =>
+            c.id === commentId
+              ? { ...c, likes: { count: wasLiked ? c.likes.count - 1 : c.likes.count + 1, user_liked: !wasLiked } }
+              : c
+          ),
+        };
+      });
+    }
+
     setLikingComment((prev) => ({ ...prev, [commentId]: true }));
+
     try {
-      let comment: any = null;
-      let wasLiked = false;
-
-      // Verifica se é uma resposta (tem parent_comment_id) ou um comentário principal
-      if (parentCommentId) {
-        // É uma resposta
-        const replyList = replies[parentCommentId] || [];
-        comment = replyList.find((r) => r.id === commentId);
-        wasLiked = comment?.likes.user_liked || false;
-
-        if (wasLiked) {
-          await unlikeComment(commentId);
-          setReplies((prev) => ({
-            ...prev,
-            [parentCommentId]: (prev[parentCommentId] || []).map((r) =>
-              r.id === commentId
-                ? {
-                    ...r,
-                    likes: {
-                      count: r.likes.count - 1,
-                      user_liked: false,
-                    },
-                  }
-                : r
-            ),
-          }));
-          
-          // Dispara evento para remover notificação da lista
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('notificationRemoved', {
-              detail: { commentId, type: 'comment_like' }
-            }));
-          }
-        } else {
-          await likeComment(commentId);
-          setReplies((prev) => ({
-            ...prev,
-            [parentCommentId]: (prev[parentCommentId] || []).map((r) =>
-              r.id === commentId
-                ? {
-                    ...r,
-                    likes: {
-                      count: r.likes.count + 1,
-                      user_liked: true,
-                    },
-                  }
-                : r
-            ),
-          }));
+      if (wasLiked) {
+        await unlikeComment(commentId);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("notificationRemoved", { detail: { commentId, type: "comment_like" } }));
         }
       } else {
-        // É um comentário principal
-        comment = news.comments.find((c) => c.id === commentId);
-        if (!comment) return;
-        wasLiked = comment.likes.user_liked;
-
-        if (wasLiked) {
-          await unlikeComment(commentId);
-          setNews({
-            ...news,
-            comments: news.comments.map((c) =>
-              c.id === commentId
-                ? {
-                    ...c,
-                    likes: {
-                      count: c.likes.count - 1,
-                      user_liked: false,
-                    },
-                  }
-                : c
-            ),
-          });
-          
-          // Dispara evento para remover notificação da lista
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('notificationRemoved', {
-              detail: { commentId, type: 'comment_like' }
-            }));
-          }
-        } else {
-          await likeComment(commentId);
-          setNews({
-            ...news,
-            comments: news.comments.map((c) =>
-              c.id === commentId
-                ? {
-                    ...c,
-                    likes: {
-                      count: c.likes.count + 1,
-                      user_liked: true,
-                    },
-                  }
-                : c
-            ),
-          });
-        }
+        await likeComment(commentId);
       }
     } catch (error: any) {
       console.error("Erro ao curtir comentário", error);
       showToast("Erro ao processar curtida", "error");
+      // Reverte
+      if (parentCommentId) {
+        setReplies((prev) => ({
+          ...prev,
+          [parentCommentId]: (prev[parentCommentId] || []).map((r) =>
+            r.id === commentId
+              ? { ...r, likes: { count: wasLiked ? r.likes.count + 1 : r.likes.count - 1, user_liked: wasLiked } }
+              : r
+          ),
+        }));
+      } else {
+        setNews((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            comments: prev.comments.map((c) =>
+              c.id === commentId
+                ? { ...c, likes: { count: wasLiked ? c.likes.count + 1 : c.likes.count - 1, user_liked: wasLiked } }
+                : c
+            ),
+          };
+        });
+      }
     } finally {
       setLikingComment((prev) => ({ ...prev, [commentId]: false }));
     }
@@ -874,7 +893,7 @@ export default function NewsDetailPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           color: "#fff",
           display: "flex",
           alignItems: "center",
@@ -896,7 +915,7 @@ export default function NewsDetailPage() {
       id="news-content-scroll-container"
       sx={{
         minHeight: "100vh",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",
@@ -943,7 +962,15 @@ export default function NewsDetailPage() {
               width: "100%" 
             }}
           >
-            <NewsImageCarousel images={news.images} alt={news.title} />
+            <NewsImageCarousel
+              images={news.images}
+              alt={news.title}
+              onDoubleTap={() => {
+                if (isAuthenticated && news && !news.likes.user_liked && news.status !== "pending" && news.status !== "rejected") {
+                  handleLike();
+                }
+              }}
+            />
           </Box>
         )}
 

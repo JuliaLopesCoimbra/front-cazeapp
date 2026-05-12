@@ -7,7 +7,7 @@ import { ptBR } from 'date-fns/locale';
 import { registerUser, updateEmailByCpf } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import RegisterSuccess from "@/app/components/auth/RegisterSuccess";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 import { validateFullName, validateEmailTLD } from "@/app/utils/registerValidators";
 import { validatePassword } from "@/app/utils/passwordValidator";
 import RegisterHeader from "@/app/components/auth/RegisterForm/RegisterHeader";
@@ -16,6 +16,8 @@ import RegisterFormFields from "@/app/components/auth/RegisterForm/RegisterFormF
 import LgpdModal from "@/app/components/auth/RegisterForm/LgpdModal";
 import EmailUpdateModal from "@/app/components/auth/RegisterForm/EmailUpdateModal";
 import RegisterConfirmationModal from "@/app/components/auth/RegisterForm/RegisterConfirmationModal";
+
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 const RegisterForm: React.FC = () => {
   const [name, setName] = useState("");
@@ -237,7 +239,7 @@ const RegisterForm: React.FC = () => {
       <Box
         suppressHydrationWarning
         sx={{
-          ...dashboardBackgroundSx,
+          ...torcidaBackgroundSx,
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",

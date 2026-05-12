@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto, Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import Script from "next/script";
 import "./globals.css";
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
@@ -50,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
@@ -71,6 +72,35 @@ export default function RootLayout({
           </ThemeProvider>
         </EmotionCacheProvider>
         {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+        <Script
+          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+          strategy="afterInteractive"
+        />
+        <Script id="onesignal-init" strategy="afterInteractive">{`
+          window.OneSignalDeferred = window.OneSignalDeferred || [];
+          OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+              appId: "${process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID}",
+              promptOptions: {
+                slidedown: {
+                  prompts: [{
+                    type: "push",
+                    autoPrompt: true,
+                    text: {
+                      actionMessage: "Ative as notificações para receber atualizações do N1",
+                      acceptButton: "Ativar",
+                      cancelButton: "Agora não"
+                    },
+                    delay: {
+                      pageViews: 1,
+                      timeDelay: 1
+                    }
+                  }]
+                }
+              }
+            });
+          });
+        `}</Script>
       </body>
     </html>
   );

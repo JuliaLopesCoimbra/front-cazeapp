@@ -19,12 +19,13 @@ import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
 import axios from "axios";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 import LgpdModal from "@/app/components/auth/RegisterForm/LgpdModal";
 import LgpdDataProtectionModal from "@/app/components/auth/RegisterForm/LgpdDataProtectionModal";
 import MarketingConsentModal from "@/app/components/auth/RegisterForm/MarketingConsentModal";
 
 const API_URL = getApiUrl();
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 // Função para formatar CPF
 const formatCPF = (value: string): string => {
@@ -124,7 +125,7 @@ function CompleteProfileContent() {
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...torcidaBackgroundSx,
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",

@@ -23,7 +23,16 @@ import HomeHeader from "@/app/components/home/HeaderHome";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import { getProductsByEvent, ProductEventResponse } from "@/app/services/productsEvent/productEventService";
 import { useToast } from "@/app/context/ToastContext";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import {
+  EventBrandKey,
+  getBrandIconColor,
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+  getEventBrandKey,
+  getEventTheme,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 const STORAGE_KEY = "selectedEventId";
 
@@ -33,6 +42,9 @@ export default function StorePage() {
   const { showToast } = useToast();
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
   const [products, setProducts] = useState<ProductEventResponse[]>([]);
   const [displayedProducts, setDisplayedProducts] = useState<ProductEventResponse[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -262,18 +274,28 @@ export default function StorePage() {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (!currentEvent) return;
+    setStoredEventBrandKey(currentEvent);
+    setStoredBrandKeyState(getEventBrandKey(currentEvent));
+  }, [currentEvent]);
+
+  const iconAccent = getBrandIconColor(currentEvent);
+  const isTorcida = getEventBrandKey(currentEvent) === "n1_torcida";
+  const pageBackgroundSx = currentEvent ? getEventBackgroundSx(currentEvent) : getEventBackgroundSxByKey(storedBrandKey);
+
   if (!authReady) {
     return (
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <CircularProgress sx={{ color: "#ffc91f" }} />
+        <CircularProgress sx={{ color: iconAccent }} />
       </Box>
     );
   }
@@ -286,7 +308,7 @@ export default function StorePage() {
     <>
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           minHeight: "100vh",
           paddingBottom: "72px",
         }}
@@ -374,7 +396,7 @@ export default function StorePage() {
             </Paper>
           ) : loadingProducts ? (
             <Box className={shouldAnimate ? "slide-up-delay-2" : ""} sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-              <CircularProgress sx={{ color: "#ffc91f" }} />
+              <CircularProgress sx={{ color: iconAccent }} />
             </Box>
           ) : products.length === 0 ? (
             <Paper
@@ -455,7 +477,7 @@ export default function StorePage() {
                     }}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75, marginBottom: 1.5 }}>
-                      <MeetingRoomIcon style={{ color: "#ffc91f", fontSize: 18 }} />
+                      <MeetingRoomIcon style={{ color: iconAccent, fontSize: 18 }} />
                       <Typography
                         sx={{
                           margin: 0,
@@ -470,7 +492,7 @@ export default function StorePage() {
 
                     {currentEvent.meeting_point_location && (
                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75, marginBottom: 1.5 }}>
-                        <LocationOnIcon style={{ color: "#ffc91f", fontSize: 16 }} />
+                        <LocationOnIcon style={{ color: iconAccent, fontSize: 16 }} />
                         <Typography
                           sx={{
                             margin: 0,
@@ -504,7 +526,7 @@ export default function StorePage() {
                             }}
                           >
                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75, mb: 0.5 }}>
-                              <EventIcon style={{ color: "#ffc91f", fontSize: 16 }} />
+                              <EventIcon style={{ color: iconAccent, fontSize: 16 }} />
                               <Typography
                                 sx={{
                                   color: "white",
@@ -517,7 +539,7 @@ export default function StorePage() {
                               </Typography>
                             </Box>
                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75 }}>
-                              <AccessTimeIcon style={{ color: "#ffc91f", fontSize: 16 }} />
+                              <AccessTimeIcon style={{ color: iconAccent, fontSize: 16 }} />
                               <Typography
                                 sx={{
                                   color: "white",
@@ -561,8 +583,10 @@ export default function StorePage() {
                       position: "relative",
                       "&:hover": {
                         transform: "translateY(-6px)",
-                        boxShadow: "0 12px 24px rgba(255, 201, 31, 0.25)",
-                        borderColor: "rgba(255, 201, 31, 0.3)",
+                        boxShadow: isTorcida
+                          ? "0 12px 24px rgba(15, 147, 93, 0.35)"
+                          : "0 12px 24px rgba(255, 201, 31, 0.25)",
+                        borderColor: isTorcida ? "rgba(15, 147, 93, 0.45)" : "rgba(255, 201, 31, 0.3)",
                       },
                     }}
                     onClick={() => router.push(`/pages/user/store/${product.id}`)}
@@ -690,7 +714,7 @@ export default function StorePage() {
                   }}
                 >
                   {loadingMore && (
-                    <CircularProgress sx={{ color: "#ffc91f" }} size={24} />
+                    <CircularProgress sx={{ color: iconAccent }} size={24} />
                   )}
                 </Box>
               )}
@@ -698,7 +722,7 @@ export default function StorePage() {
           )}
         </Box>
       </Box>
-      <BottomNav />
+      <BottomNav activeColor={getEventTheme(currentEvent).footerActiveColor} />
     </>
   );
 }

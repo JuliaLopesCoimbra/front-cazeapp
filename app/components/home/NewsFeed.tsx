@@ -8,7 +8,6 @@ import {
   CardMedia,
   CardContent,
   Skeleton,
-  Button,
   Divider,
   Avatar,
 } from "@mui/material";
@@ -18,8 +17,8 @@ import { getEventNews, NewsResponse } from "@/app/services/news/newsService";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import EmptyNews from "./EmptyNews";
 import { useRouter } from "next/navigation";
-import PendingPostsNotification from "@/app/components/admin/pending-posts/PendingPostsNotification";
 import AdBanner from "../ads/AdBanner";
+import { getEventBrandKey } from "@/app/utils/eventBranding";
 
 interface Props {
   eventId: number;
@@ -59,22 +58,21 @@ function formatDate(dateString: string): string {
 }
 
 export default function NewsFeed({ eventId, event }: Props) {
-  const { isAdmin, isAdminMaster, isSubadmin, canCreatePost, authVersion } = useAuth();
+  const { authVersion } = useAuth();
   const router = useRouter();
-  
+
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `feed-event-${eventId}`;
   const [initialized, setInitialized] = useState(false);
-  
+
   const [news, setNews] = useState<NewsResponse[]>([]);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
-  
-  const canApprovePosts = isAdminMaster || isSubadmin;
-  const isEventActive = event ? event.is_active === true : true;
+
+  const isTorcida = getEventBrandKey(event) === "n1_torcida";
 
   const loadNews = async (reset = false) => {
     if (loading) return;
@@ -354,29 +352,7 @@ export default function NewsFeed({ eventId, event }: Props) {
         width: { xs: "100%", md: "100%" },
       }}
     >
-      {canCreatePost && isEventActive && (
-        <Box display="flex" justifyContent="flex-end" alignItems="center" gap={2} marginBottom={2}>
-          {canApprovePosts && isEventActive && <PendingPostsNotification eventId={eventId} />}
-          <Button
-            variant="contained"
-            onClick={() => router.push(`/pages/news/create?eventId=${eventId}`)}
-            sx={{
-              backgroundColor: "#ffcc01",
-              color: "#000",
-              fontWeight: 600,
-              borderRadius: "14px",
-              textTransform: "none",
-              "&:hover": {
-                backgroundColor: "#e6b800",
-              },
-            }}
-          >
-            + Adicionar post
-          </Button>
-        </Box>
-      )}
-
-      {loading && news.length === 0 && <FeaturedNewsSkeleton />}
+      {loading && news.length === 0 && <FeaturedNewsSkeleton isTorcida={isTorcida} />}
 
       {!loading && news.length === 0 && <EmptyNews />}
 
@@ -393,28 +369,39 @@ export default function NewsFeed({ eventId, event }: Props) {
                 transition: "opacity 0.2s",
                 maxWidth: "100%",
                 boxSizing: "border-box",
-                "&:hover": {
-                  opacity: 0.8,
-                },
+                "&:hover": { opacity: 0.8 },
               }}
             >
+              {/* Header: avatar + nome + data */}
+              <Box display="flex" alignItems="center" gap={1.5} sx={{ px: 0.5, py: 1 }}>
+                <Avatar
+                  src={featured.author?.profile_photo || undefined}
+                  alt={featured.author?.name || "Autor"}
+                  sx={{ width: 34, height: 34, bgcolor: "rgba(255,255,255,0.2)" }}
+                />
+                <Box>
+                  <Typography sx={{ color: "#fff", fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>
+                    {featured.author?.name || "Autor desconhecido"}
+                  </Typography>
+                  <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: 11 }}>
+                    {formatDate(featured.created_at)}
+                  </Typography>
+                </Box>
+              </Box>
+
               {featured.images && featured.images.length > 0 && (
                 <CardMedia
                   component="img"
                   image={featured.images[0].image_url}
                   alt={featured.title}
-                  sx={{
-                    width: "100%",
-                    aspectRatio: "1 / 1",
-                    objectFit: "cover",
-                  }}
+                  sx={{ width: "100%", aspectRatio: "1 / 1", objectFit: "cover" }}
                 />
               )}
               <CardContent sx={{ padding: { xs: 2, md: 2.5, lg: 3 }, maxWidth: "100%", boxSizing: "border-box" }}>
                 <Typography
                   variant="h6"
                   fontWeight={700}
-                  sx={{ 
+                  sx={{
                     color: "#fff",
                     fontSize: { xs: "1.25rem", md: "1.5rem", lg: "1.75rem" },
                     wordWrap: "break-word",
@@ -425,37 +412,6 @@ export default function NewsFeed({ eventId, event }: Props) {
                 >
                   {featured.title}
                 </Typography>
-
-                <Typography
-                  variant="body2"
-                  sx={{ 
-                    color: "rgba(255,255,255,0.7)", 
-                    marginTop: 1,
-                    fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
-                  }}
-                >
-                  {formatDate(featured.created_at)}
-                </Typography>
-
-                {featured.author && (
-                  <Box display="flex" alignItems="center" gap={1} marginTop={1}>
-                    <Avatar
-                      src={featured.author.profile_photo || undefined}
-                      alt={featured.author.name || "Autor"}
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        bgcolor: "rgba(255,255,255,0.2)",
-                      }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }}
-                    >
-                      {featured.author.name || "Autor desconhecido"}
-                    </Typography>
-                  </Box>
-                )}
               </CardContent>
             </Card>
           )}
@@ -472,8 +428,6 @@ export default function NewsFeed({ eventId, event }: Props) {
                 <Card
                   onClick={() => handleNewsClick(item.id)}
                   sx={{
-                    display: "flex",
-                    gap: 2,
                     backgroundColor: "transparent",
                     boxShadow: "none",
                     color: "#fff",
@@ -482,70 +436,58 @@ export default function NewsFeed({ eventId, event }: Props) {
                     transition: "opacity 0.2s",
                     maxWidth: "100%",
                     boxSizing: "border-box",
-                    "&:hover": {
-                      opacity: 0.8,
-                    },
+                    "&:hover": { opacity: 0.8 },
                   }}
                 >
-                  {item.images && item.images.length > 0 && (
-                    <CardMedia
-                      component="img"
-                      image={item.images[0].image_url}
-                      alt={item.title}
-                      sx={{
-                        width: { xs: 100, md: 120, lg: 140 },
-                        height: { xs: 100, md: 120, lg: 140 },
-                        borderRadius: 1,
-                        objectFit: "cover",
-                        flexShrink: 0,
-                      }}
+                  {/* Header: avatar + nome + data */}
+                  <Box display="flex" alignItems="center" gap={1} sx={{ px: 0.5, pb: 0.8 }}>
+                    <Avatar
+                      src={item.author?.profile_photo || undefined}
+                      alt={item.author?.name || "Autor"}
+                      sx={{ width: 26, height: 26, bgcolor: "rgba(255,255,255,0.2)" }}
                     />
-                  )}
+                    <Box>
+                      <Typography sx={{ color: "#fff", fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>
+                        {item.author?.name || "Autor desconhecido"}
+                      </Typography>
+                      <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: 10 }}>
+                        {formatDate(item.created_at)}
+                      </Typography>
+                    </Box>
+                  </Box>
 
-                  <CardContent sx={{ padding: { xs: 1, md: 1.5, lg: 2 }, maxWidth: "100%", boxSizing: "border-box", minWidth: 0, flex: 1 }}>
-                    <Typography 
-                      fontWeight={600} 
-                      sx={{ 
-                        color: "#fff",
-                        fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
-                        wordWrap: "break-word",
-                        overflowWrap: "break-word",
-                        maxWidth: "100%",
-                        hyphens: "auto",
-                      }}
-                    >
-                      {item.title}
-                    </Typography>
-
-                    <Typography
-                      sx={{ 
-                        color: "rgba(255,255,255,0.6)",
-                        fontSize: { xs: 12, md: 13, lg: 14 },
-                      }}
-                    >
-                      {formatDate(item.created_at)}
-                    </Typography>
-
-                    {item.author && (
-                      <Box display="flex" alignItems="center" gap={1} marginTop={0.5}>
-                        <Avatar
-                          src={item.author.profile_photo || undefined}
-                          alt={item.author.name || "Autor"}
-                          sx={{
-                            width: 20,
-                            height: 20,
-                            bgcolor: "rgba(255,255,255,0.2)",
-                          }}
-                        />
-                        <Typography
-                          fontSize={11}
-                          sx={{ color: "rgba(255,255,255,0.6)" }}
-                        >
-                          {item.author.name || "Autor desconhecido"}
-                        </Typography>
-                      </Box>
+                  {/* Conteúdo horizontal: imagem + título */}
+                  <Box display="flex" gap={2}>
+                    {item.images && item.images.length > 0 && (
+                      <CardMedia
+                        component="img"
+                        image={item.images[0].image_url}
+                        alt={item.title}
+                        sx={{
+                          width: { xs: 100, md: 120, lg: 140 },
+                          height: { xs: 100, md: 120, lg: 140 },
+                          borderRadius: 1,
+                          objectFit: "cover",
+                          flexShrink: 0,
+                        }}
+                      />
                     )}
-                  </CardContent>
+                    <CardContent sx={{ padding: { xs: 1, md: 1.5, lg: 2 }, maxWidth: "100%", boxSizing: "border-box", minWidth: 0, flex: 1 }}>
+                      <Typography
+                        fontWeight={600}
+                        sx={{
+                          color: "#fff",
+                          fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
+                          wordWrap: "break-word",
+                          overflowWrap: "break-word",
+                          maxWidth: "100%",
+                          hyphens: "auto",
+                        }}
+                      >
+                        {item.title}
+                      </Typography>
+                    </CardContent>
+                  </Box>
                 </Card>
 
                 {/* Linha separadora */}
@@ -585,7 +527,7 @@ export default function NewsFeed({ eventId, event }: Props) {
 
             {loading &&
               Array.from({ length: 2 }).map((_, i) => (
-                <NewsItemSkeleton key={i} />
+                <NewsItemSkeleton key={i} isTorcida={isTorcida} />
               ))}
           </Box>
         </>
@@ -596,12 +538,14 @@ export default function NewsFeed({ eventId, event }: Props) {
   );
 }
 
-function FeaturedNewsSkeleton() {
+function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
+  const cardBg = isTorcida ? "#123b6b" : "#0f0f0f";
+  const skeletonBg = isTorcida ? "#2f5f96" : "#2a2a2a";
   return (
     <Card
       sx={{
         marginBottom: 3,
-        backgroundColor: "#0f0f0f",
+        backgroundColor: cardBg,
         borderRadius: 2,
       }}
     >
@@ -610,31 +554,33 @@ function FeaturedNewsSkeleton() {
         sx={{
           width: "100%",
           aspectRatio: "1 / 1",
-          bgcolor: "#2a2a2a",
+          bgcolor: skeletonBg,
         }}
       />
 
       <CardContent>
-        <Skeleton height={28} width="80%" sx={{ bgcolor: "#2a2a2a" }} />
+        <Skeleton height={28} width="80%" sx={{ bgcolor: skeletonBg }} />
 
         <Skeleton
           height={18}
           width="40%"
-          sx={{ bgcolor: "#2a2a2a", marginTop: 1 }}
+          sx={{ bgcolor: skeletonBg, marginTop: 1 }}
         />
       </CardContent>
     </Card>
   );
 }
 
-function NewsItemSkeleton() {
+function NewsItemSkeleton({ isTorcida }: { isTorcida: boolean }) {
+  const cardBg = isTorcida ? "#123b6b" : "#0f0f0f";
+  const skeletonBg = isTorcida ? "#2f5f96" : "#2a2a2a";
   return (
     <Card
       sx={{
         display: "flex",
         gap: 2,
         padding: 1,
-        backgroundColor: "#0f0f0f",
+        backgroundColor: cardBg,
         borderRadius: 2,
       }}
     >
@@ -642,16 +588,16 @@ function NewsItemSkeleton() {
         variant="rectangular"
         width={100}
         height={100}
-        sx={{ bgcolor: "#2a2a2a", borderRadius: 1 }}
+        sx={{ bgcolor: skeletonBg, borderRadius: 1 }}
       />
 
       <CardContent sx={{ padding: 1, width: "100%" }}>
-        <Skeleton height={20} width="90%" sx={{ bgcolor: "#2a2a2a" }} />
+        <Skeleton height={20} width="90%" sx={{ bgcolor: skeletonBg }} />
 
         <Skeleton
           height={14}
           width="40%"
-          sx={{ bgcolor: "#2a2a2a", marginTop: 1 }}
+          sx={{ bgcolor: skeletonBg, marginTop: 1 }}
         />
       </CardContent>
     </Card>

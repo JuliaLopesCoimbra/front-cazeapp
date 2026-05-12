@@ -1,5 +1,6 @@
 "use client";
 import { useCallback } from 'react';
+import { heartbeat } from '@/app/services/auth/authAdminService';
 import React, {
   createContext,
   useContext,
@@ -92,23 +93,58 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     setAuthReady(true);
   }, []);
+
+  /* Heartbeat de presença — atualiza chave Redis a cada 2 min enquanto autenticado */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    heartbeat();
+    const interval = setInterval(heartbeat, 2 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
   
 const login = useCallback(
   (accessToken: string, refreshToken: string) => {
     try {
       const decoded = jwtDecode<TokenPayload>(accessToken);
 
-      // Salva tokens no localStorage e cookie
       localStorage.setItem("access_token", accessToken);
       document.cookie = `refresh_token=${refreshToken}; path=/; secure`;
 
-      // Garante que o role seja definido (pode ser undefined em tokens antigos)
       const userRole = decoded.role || null;
       setRole(userRole);
       setIsAuthenticated(true);
-      
-      // Força atualização do contexto
       setAuthVersion((v) => v + 1);
+
+      if (typeof window !== "undefined") {
+        (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
+        (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+          try {
+            await OneSignal.login(`n1_${decoded.sub}`);
+          } catch (_) {
+            try {
+              // Conflito de alias (409): deleta o external_id antigo no servidor e retenta
+              const token = localStorage.getItem("access_token");
+              if (token) {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/onesignal-identity`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+              }
+              await OneSignal.login(`n1_${decoded.sub}`);
+            } catch (_2) {
+              try {
+                if (navigator.serviceWorker) {
+                  const regs = await navigator.serviceWorker.getRegistrations();
+                  for (const reg of regs) {
+                    const sub = await reg.pushManager.getSubscription();
+                    if (sub) await sub.unsubscribe();
+                  }
+                }
+              } catch (_3) {}
+            }
+          }
+        });
+      }
     } catch (error) {
       console.error("Erro ao decodificar token:", error);
       setIsAuthenticated(false);
@@ -125,8 +161,14 @@ const login = useCallback(
 
     setIsAuthenticated(false);
     setRole(null);
-
     setAuthVersion((v) => v + 1);
+
+    if (typeof window !== "undefined") {
+      (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
+      (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+        try { await OneSignal.logout(); } catch (_) {}
+      });
+    }
   };
 
   useEffect(() => {
@@ -143,6 +185,36 @@ const login = useCallback(
       const decoded = jwtDecode<TokenPayload>(token);
       setRole(decoded.role || null);
       setIsAuthenticated(true);
+
+      if (typeof window !== "undefined") {
+        (window as any).OneSignalDeferred = (window as any).OneSignalDeferred || [];
+        (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
+          try {
+            await OneSignal.login(`n1_${decoded.sub}`);
+          } catch (_) {
+            try {
+              const t = localStorage.getItem("access_token");
+              if (t) {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/onesignal-identity`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${t}` },
+                });
+              }
+              await OneSignal.login(`n1_${decoded.sub}`);
+            } catch (_2) {
+              try {
+                if (navigator.serviceWorker) {
+                  const regs = await navigator.serviceWorker.getRegistrations();
+                  for (const reg of regs) {
+                    const sub = await reg.pushManager.getSubscription();
+                    if (sub) await sub.unsubscribe();
+                  }
+                }
+              } catch (_3) {}
+            }
+          }
+        });
+      }
     } catch {
       setIsAuthenticated(false);
       setRole(null);

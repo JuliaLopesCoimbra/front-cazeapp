@@ -5,8 +5,10 @@ import CreateEventForm from "@/app/components/admin/events/CreateEventForm";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { getThemedPageBackgroundSx } from "@/app/utils/backgroundStyles";
 
 export default function CreateEventPage() {
+  const pageBackgroundSx = getThemedPageBackgroundSx();
   const { isAdmin, authReady } = useAuth();
   const router = useRouter();
 
@@ -20,8 +22,8 @@ export default function CreateEventPage() {
     return (
       <Box
         sx={{
+          ...pageBackgroundSx,
           minHeight: "100vh",
-          backgroundColor: "#000",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -39,6 +41,7 @@ export default function CreateEventPage() {
   return (
     <Box
       sx={{
+        ...pageBackgroundSx,
         minHeight: "100vh",
         height: "100vh",
         overflowY: "auto",

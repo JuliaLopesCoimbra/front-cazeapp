@@ -11,9 +11,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/app/context/ToastContext";
 import { resendVerificationEmail } from "@/app/services/auth/authService";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 const API_URL = getApiUrl();
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 function AwaitingEmailVerificationContent() {
   const [loading, setLoading] = useState(false);
@@ -69,7 +70,7 @@ function AwaitingEmailVerificationContent() {
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...torcidaBackgroundSx,
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",

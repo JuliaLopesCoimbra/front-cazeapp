@@ -17,7 +17,13 @@ import NewsHeader from "@/app/components/news/NewsHeader";
 import EventBadge from "@/app/components/news/EventBadge";
 import ImageUploadSection from "@/app/components/news/ImageUploadSection";
 import NewsFormFields from "@/app/components/news/NewsFormFields";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import {
+  EventBrandKey,
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+  getStoredEventBrandKey,
+  setStoredEventBrandKey,
+} from "@/app/utils/eventBranding";
 
 function EditNewsPageContent() {
   const router = useRouter();
@@ -37,6 +43,9 @@ function EditNewsPageContent() {
   const [newsId, setNewsId] = useState<number | null>(null);
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [news, setNews] = useState<NewsDetailsResponse | null>(null);
+  const [storedBrandKey, setStoredBrandKey] = useState<EventBrandKey>(
+    () => getStoredEventBrandKey() ?? "default"
+  );
 
   useEffect(() => {
     if (!canCreatePost) {
@@ -246,11 +255,22 @@ function EditNewsPageContent() {
     }
   };
 
+  const selectedEvent = events.find((e) => e.id === eventId);
+  const pageBackgroundSx = selectedEvent
+    ? getEventBackgroundSx(selectedEvent)
+    : getEventBackgroundSxByKey(storedBrandKey);
+
+  useEffect(() => {
+    if (!selectedEvent) return;
+    setStoredEventBrandKey(selectedEvent);
+    setStoredBrandKey(selectedEvent.brand_key === "n1_torcida" ? "n1_torcida" : "default");
+  }, [selectedEvent]);
+
   if (loadingNews || loadingEvents) {
     return (
       <Box
         sx={{
-          ...dashboardBackgroundSx,
+          ...pageBackgroundSx,
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -262,13 +282,12 @@ function EditNewsPageContent() {
     );
   }
 
-  const selectedEvent = events.find((e) => e.id === eventId);
   const totalImagesCount = imagePreviews.length;
 
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         minHeight: "100vh",
         padding: { xs: 2, sm: 3, md: 4 },
         pb: { xs: 10, sm: 4 },
@@ -394,12 +413,13 @@ function EditNewsPageContent() {
 }
 
 export default function EditNewsPage() {
+  const [storedBrandKey] = useState<EventBrandKey>(() => getStoredEventBrandKey() ?? "default");
   return (
     <Suspense
       fallback={
         <Box
           sx={{
-...dashboardBackgroundSx,
+            ...getEventBackgroundSxByKey(storedBrandKey),
             minHeight: "100vh",
             display: "flex",
             alignItems: "center",

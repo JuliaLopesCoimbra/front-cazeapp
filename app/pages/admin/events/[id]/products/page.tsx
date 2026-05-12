@@ -18,10 +18,11 @@ import AddIcon from "@mui/icons-material/Add";
 import { getProductsByEvent, ProductEventResponse } from "@/app/services/productsEvent/productEventService";
 import { getEventById, EventResponse } from "@/app/services/events/eventAppService";
 import { useAuth } from "@/app/context/AuthContext";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getThemedPageBackgroundSx } from "@/app/utils/backgroundStyles";
 import { useToast } from "@/app/context/ToastContext";
 
 export default function EventProductsPage() {
+  const pageBackgroundSx = getThemedPageBackgroundSx();
   const params = useParams();
   const router = useRouter();
   const eventId = Number(params.id);
@@ -92,7 +93,7 @@ export default function EventProductsPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         color: "#fff",
         display: "flex",
         flexDirection: "column",

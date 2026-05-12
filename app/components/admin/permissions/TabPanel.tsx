@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { useRef } from "react";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -6,18 +6,20 @@ interface TabPanelProps {
   value: number;
 }
 
-export default function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+export default function TabPanel({ children, value, index }: TabPanelProps) {
+  const hasBeenActive = useRef(false);
+  if (value === index) hasBeenActive.current = true;
+
+  if (!hasBeenActive.current) return null;
+
   return (
     <div
       role="tabpanel"
-      hidden={value !== index}
       id={`permissions-tabpanel-${index}`}
       aria-labelledby={`permissions-tab-${index}`}
-      {...other}
+      style={{ display: value !== index ? "none" : undefined, paddingTop: 24 }}
     >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+      {children}
     </div>
   );
 }
-

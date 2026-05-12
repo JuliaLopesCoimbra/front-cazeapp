@@ -16,7 +16,13 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { getLineupItemsByEvent, LineupItemResponse } from "@/app/services/lineup/lineupService";
 import { getPublicEventById } from "@/app/services/events/eventAppService";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import {
+  getEventBackgroundSx,
+  getEventBackgroundSxByKey,
+  getEventBrandKey,
+  getStoredEventBrandKey,
+  EventBrandKey,
+} from "@/app/utils/eventBranding";
 
 export default function LineupPage() {
   const params = useParams();
@@ -28,21 +34,37 @@ export default function LineupPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [initialBrandKey, setInitialBrandKey] = useState<EventBrandKey>("default");
+
+  useEffect(() => {
+    const torcidaEventIds = new Set([25]);
+    const fallbackByRoute: EventBrandKey = torcidaEventIds.has(eventId) ? "n1_torcida" : "default";
+
+    if (typeof window === "undefined") {
+      setInitialBrandKey(fallbackByRoute);
+      return;
+    }
+
+    const storedBrandKey = getStoredEventBrandKey();
+    const storedEventId = Number(window.localStorage.getItem("selectedEventId"));
+    const canReuseStoredBrand = Number.isFinite(storedEventId) && storedEventId === eventId;
+
+    setInitialBrandKey(canReuseStoredBrand ? storedBrandKey ?? fallbackByRoute : fallbackByRoute);
+  }, [eventId]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Busca lineup e evento em paralelo, mas não falha se o evento não for encontrado
-        const [items, eventData] = await Promise.all([
-          getLineupItemsByEvent(eventId).catch(() => []), // Retorna lista vazia se der erro
-          getPublicEventById(eventId).catch(() => {
-            // Silenciosamente ignora erro ao buscar evento (não é crítico para exibir o lineup)
-            return null;
-          }),
-        ]);
-        setLineupItems(items || []);
+        const eventPromise = getPublicEventById(eventId).catch(() => null);
+        const itemsPromise = getLineupItemsByEvent(eventId).catch(() => []);
+
+        // Resolve o evento primeiro para aplicar o tema correto no skeleton o quanto antes.
+        const eventData = await eventPromise;
         setEvent(eventData);
+
+        const items = await itemsPromise;
+        setLineupItems(items || []);
         setError(null);
       } catch (err: any) {
         console.error("Erro ao buscar lineup:", err);
@@ -104,12 +126,17 @@ export default function LineupPage() {
     }
   }, [dates]);
 
+  const resolvedBrandKey = event ? getEventBrandKey(event) : initialBrandKey;
+  const pageBackgroundSx = event
+    ? getEventBackgroundSx(event)
+    : getEventBackgroundSxByKey(resolvedBrandKey);
+
   if (loading) {
     return (
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#000",
+          ...pageBackgroundSx,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -124,8 +151,7 @@ export default function LineupPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundColor: "#000",
-        ...dashboardBackgroundSx,
+        ...pageBackgroundSx,
         backgroundAttachment: "fixed",
         color: "#fff",
       }}

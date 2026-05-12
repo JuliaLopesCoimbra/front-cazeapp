@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Box, Skeleton, Typography } from "@mui/material";
-import api from "@/app/services/auth/axiosConfig";
-import { jwtDecode } from "jwt-decode";
 
 interface AdPlacement {
   image_url: string;
@@ -54,9 +52,6 @@ export default function AdBanner({ isFirst = false, eventId }: AdBannerProps = {
   const [loading, setLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
-  const viewRegisteredRef = useRef(false); // Para evitar registrar múltiplas views
-  const viewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastViewTimeRef = useRef<number>(0);
 
   // Função helper para obter identificador do anúncio
   const getAdIdentifier = useCallback((adData: AdPlacement): string => {
@@ -72,83 +67,9 @@ export default function AdBanner({ isFirst = false, eventId }: AdBannerProps = {
     return adIdentifier;
   }, []);
 
-  // Função para registrar view no backend
-  const registerAdView = useCallback(async (adData: AdPlacement) => {
-    // Só registra se tiver eventId
-    if (!eventId || viewRegisteredRef.current) {
-      return;
-    }
-
-    const now = Date.now();
-    // Throttle: máximo 1 view a cada 5 segundos
-    if (now - lastViewTimeRef.current < 5000) {
-      return;
-    }
-
-    // Limpa timeout anterior se existir
-    if (viewTimeoutRef.current) {
-      clearTimeout(viewTimeoutRef.current);
-    }
-
-    // Debounce: espera 2 segundos de visibilidade antes de registrar
-    viewTimeoutRef.current = setTimeout(async () => {
-      if (viewRegisteredRef.current) return;
-
-      try {
-        const viewData = {
-          event_id: eventId,
-          ad_identifier: getAdIdentifier(adData),
-          ad_url: adData.image_url,
-        };
-
-        await api.post("/ads/views", viewData).catch((error) => {
-          // Silenciosamente ignora erros (especialmente rate limit 429)
-          if (error.response?.status !== 429) {
-            console.warn("Erro ao registrar view de anúncio:", error);
-          }
-        });
-        
-        viewRegisteredRef.current = true;
-        lastViewTimeRef.current = Date.now();
-      } catch (error) {
-        // Ignora erros silenciosamente
-        console.warn("Erro ao registrar view de anúncio:", error);
-      }
-    }, 2000); // Espera 2 segundos
-  }, [eventId, getAdIdentifier]);
-
-  // Função para registrar clique no backend
-  const registerAdClick = async (adData: AdPlacement) => {
-    // Só registra se tiver eventId
-    if (!eventId) {
-      return;
-    }
-
-    try {
-      const clickData = {
-        event_id: eventId,
-        ad_identifier: getAdIdentifier(adData),
-        ad_url: adData.image_url,
-        redirect_url: adData.redirect_url,
-      };
-
-      // Tenta registrar o clique (não bloqueia se falhar)
-      await api.post("/ads/clicks", clickData).catch((error) => {
-        // Silenciosamente ignora erros para não interromper a experiência do usuário
-        console.warn("Erro ao registrar clique de anúncio:", error);
-      });
-    } catch (error) {
-      // Silenciosamente ignora erros
-      console.warn("Erro ao registrar clique de anúncio:", error);
-    }
-  };
-
   // Função para lidar com o clique
-  const handleAdClick = async () => {
+  const handleAdClick = () => {
     if (!ad) return;
-
-    // Registra o clique (não bloqueia a navegação)
-    await registerAdClick(ad);
 
     // Abre o link (sempre executa, mesmo se o registro falhar)
     window.open(ad.redirect_url, "_blank");
@@ -162,94 +83,16 @@ export default function AdBanner({ isFirst = false, eventId }: AdBannerProps = {
         return;
       }
 
-      try {
-        const accessKey = 'A48227066';
-        const zone = 'n1'; 
-    
-        // Esta URL simplificada é a mais estável para contas Pro
-        const res = await fetch(
-          `https://www.adplugg.com/serve/${accessKey}/json.js?zn=${zone}`,
-          { cache: 'no-store' }
-        );
-        
-        if (!res.ok) throw new Error('Aguardando ativação das métricas no AdPlugg');
-    
-        const data = await res.json();
-        const adsList = Array.isArray(data) ? data : (data.ads || []);
-    
-        if (adsList.length > 0) {
-          const remoteAd = adsList[0];
-          
-          // O AdPlugg só conta a VIEW se batermos no pixel_url
-          if (remoteAd.pixel_url) {
-            const img = new window.Image();
-            img.src = remoteAd.pixel_url;
-          }
-    
-          setAd({
-            image_url: remoteAd.image_url,
-            redirect_url: remoteAd.click_url, // O AdPlugg conta o CLICK aqui
-            alt_text: remoteAd.name || "N1 App"
-          });
-        } else {
-          setAd(getRandomMockAd());
-        }
-      } catch (error) {
-        // Se a API falhar, mostramos o local para não perder o anúncio na tela
-        console.warn("API AdPlugg em propagação. Métricas iniciarão em breve.");
-        setAd(getRandomMockAd());
-      } finally {
-        setLoading(false);
-      }
+      setAd(getRandomMockAd());
+      setLoading(false);
     };
 
     fetchAd();
   }, [isFirst]);
 
-  // Intersection Observer para detectar quando o anúncio fica visível
-  useEffect(() => {
-    if (!ad || !bannerRef.current || !eventId) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          // Registra view quando o anúncio fica visível (pelo menos 70% visível)
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.7) {
-            registerAdView(ad);
-          } else {
-            // Se sair da tela, cancela o timeout
-            if (viewTimeoutRef.current) {
-              clearTimeout(viewTimeoutRef.current);
-              viewTimeoutRef.current = null;
-            }
-          }
-        });
-      },
-      {
-        threshold: 0.7, // 70% do anúncio precisa estar visível
-        rootMargin: "0px",
-      }
-    );
-
-    observer.observe(bannerRef.current);
-
-    return () => {
-      observer.disconnect();
-      if (viewTimeoutRef.current) {
-        clearTimeout(viewTimeoutRef.current);
-      }
-    };
-  }, [ad, eventId, registerAdView]);
-
-  // Reset do flag quando o anúncio muda
-  useEffect(() => {
-    viewRegisteredRef.current = false;
-    lastViewTimeRef.current = 0;
-    if (viewTimeoutRef.current) {
-      clearTimeout(viewTimeoutRef.current);
-      viewTimeoutRef.current = null;
-    }
-  }, [ad]);
+  // Mantém assinatura do componente sem depender de métricas.
+  void eventId;
+  void getAdIdentifier;
 
   if (loading) {
     return (

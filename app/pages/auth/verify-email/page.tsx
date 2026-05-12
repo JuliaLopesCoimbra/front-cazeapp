@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { verifyEmail } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import { Box, Typography, Button } from "@mui/material";
-import { dashboardBackgroundSx } from "@/app/utils/backgroundStyles";
+import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 type Status = "loading" | "success" | "error";
 
@@ -14,6 +14,8 @@ interface VerifyEmailResponse {
   needs_profile_completion?: boolean;
   temp_token?: string;
 }
+
+const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -85,7 +87,7 @@ function VerifyEmailContent() {
   return (
     <Box
       sx={{
-        ...dashboardBackgroundSx,
+        ...torcidaBackgroundSx,
         height: "100vh",
         display: "flex",
         alignItems: "center",
@@ -199,7 +201,7 @@ export default function VerifyEmailPage() {
       fallback={
         <Box
           sx={{
-            ...dashboardBackgroundSx,
+            ...torcidaBackgroundSx,
             height: "100vh",
             display: "flex",
             alignItems: "center",
