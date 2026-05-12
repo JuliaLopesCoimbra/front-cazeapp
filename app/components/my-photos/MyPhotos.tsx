@@ -26,12 +26,13 @@ import { useToast } from "@/app/context/ToastContext";
 
 interface MyPhotosProps {
   hideTitle?: boolean;
+  eventId?: number;
 }
 
-export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
+export default function MyPhotos({ hideTitle = false, eventId }: MyPhotosProps) {
   // ===== CACHE (Instagram/TikTok style) =====
   const { getCache, setCache } = useFeedCache();
-  const cacheKey = "my-photos";
+  const cacheKey = `my-photos-${eventId ?? 'all'}`;
   const [initialized, setInitialized] = useState(false);
   // =========================================
   
@@ -62,7 +63,7 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
     const nextOffset = reset ? 0 : offset;
 
     try {
-      const data = await getMyDownloadedPhotos(PHOTOS_PER_LOAD, nextOffset);
+      const data = await getMyDownloadedPhotos(PHOTOS_PER_LOAD, nextOffset, eventId);
       
       if (reset) {
         setPhotos(data);
@@ -138,7 +139,7 @@ export default function MyPhotos({ hideTitle = false }: MyPhotosProps) {
       
       (async () => {
         try {
-          const freshData = await getMyDownloadedPhotos(100, 0);
+          const freshData = await getMyDownloadedPhotos(100, 0, eventId);
           
           const cachedIds = cached.data.map((p: DownloadedPhoto) => p.id).sort().join(',');
           const freshIds = freshData.map((p: DownloadedPhoto) => p.id).sort().join(',');
