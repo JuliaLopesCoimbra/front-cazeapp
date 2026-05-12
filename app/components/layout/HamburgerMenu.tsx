@@ -33,6 +33,7 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import PolicyIcon from "@mui/icons-material/Policy";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import ArticleIcon from "@mui/icons-material/Article";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
@@ -464,6 +465,25 @@ export default function HamburgerMenu({
                 {/* ───────── PERMISSÕES (ADMIN MASTER E SUBADMIN) ───────── */}
                 {(isAdminMaster || isSubadmin) && (
              <>
+               <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+               <ListItem disablePadding>
+                 <ListItemButton
+                   onClick={() => {
+                     router.push("/pages/admin/dashboard");
+                     setOpen(false);
+                   }}
+                 >
+                   <DashboardIcon sx={{ mr: 2, color: "white" }} />
+                   <ListItemText
+                     primary="Dashboard"
+                     secondary="Métricas e infraestrutura"
+                     primaryTypographyProps={{ fontWeight: 600 }}
+                     secondaryTypographyProps={{
+                       sx: { color: "rgba(255,255,255,0.6)" },
+                     }}
+                   />
+                 </ListItemButton>
+               </ListItem>
                <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
                <ListItem disablePadding>
                  <ListItemButton

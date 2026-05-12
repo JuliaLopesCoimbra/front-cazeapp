@@ -9,6 +9,7 @@ import { FeedCacheProvider } from './context/FeedCacheContext';
 import EmotionCacheProvider from './lib/emotion-cache';
 import ThemeProvider from './lib/theme-provider';
 import ScrollRestorer from './components/layout/ScrollRestorer';
+import PageTracker from './components/layout/PageTracker';
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -65,6 +66,7 @@ export default function RootLayout({
               <ToastProvider>
                 <FeedCacheProvider>
                   <ScrollRestorer />
+                  <PageTracker />
                   {children}
                 </FeedCacheProvider>
               </ToastProvider>
