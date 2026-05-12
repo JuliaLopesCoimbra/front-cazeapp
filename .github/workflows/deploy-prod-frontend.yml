@@ -25,8 +25,15 @@ jobs:
             # Limpeza preventiva para não lotar o disco da EC2
             docker image prune -f
 
-            # Remove container antigo se existir (evita conflito de nome)
+            # Para e remove container antigo se existir
             docker rm -f n1-front || true
+
+            # Para pm2 se estiver rodando (conflito com Docker na porta 3000)
+            pm2 stop all || true
+            pm2 delete all || true
+
+            # Libera a porta 3000 se algum processo ainda estiver usando
+            sudo fuser -k 3000/tcp || true
 
             # Build e Restart automático
             docker compose up --build -d
