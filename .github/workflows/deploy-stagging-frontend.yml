@@ -15,6 +15,7 @@ jobs:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
+          script_stop: true
           script: |
             # 1. Entra na pasta
             cd /home/ec2-user/front-n1
