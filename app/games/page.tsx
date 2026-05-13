@@ -118,6 +118,45 @@ const brazilGames: Game[] = [
     venue: "MetLife Stadium, New York",
     group: "C",
   },
+  {
+    id: 4,
+    phase: "oitavas",
+    phaseLabel: "Oitavas de Final",
+    team1: "Brasil",
+    team2: "México",
+    code1: "br",
+    code2: "mx",
+    date: "2 Jul",
+    time: "19:00",
+    venue: "AT&T Stadium, Dallas",
+    group: "",
+  },
+  {
+    id: 5,
+    phase: "quartas",
+    phaseLabel: "Quartas de Final",
+    team1: "Brasil",
+    team2: "Alemanha",
+    code1: "br",
+    code2: "de",
+    date: "10 Jul",
+    time: "21:00",
+    venue: "Lumen Field, Seattle",
+    group: "",
+  },
+  {
+    id: 6,
+    phase: "semi",
+    phaseLabel: "Semifinal",
+    team1: "Brasil",
+    team2: "Espanha",
+    code1: "br",
+    code2: "es",
+    date: "15 Jul",
+    time: "20:00",
+    venue: "MetLife Stadium, New York",
+    group: "",
+  },
 ];
 
 const standingsDefault: GroupTeam[] = [
@@ -132,6 +171,43 @@ const standingsLive: GroupTeam[] = [
   { name: "Marrocos", code: "ma",     p: 1, w: 0, d: 0, l: 1, gf: 0, ga: 1, pts: 0 },
   { name: "Haiti",    code: "ht",     p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 },
   { name: "Escócia",  code: "gb-sct", p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 },
+];
+
+const oitavasTeams: GroupTeam[] = [
+  { name: "França",         code: "fr",     p: 3, w: 3, d: 0, l: 0, gf: 7, ga: 1, pts: 9 },
+  { name: "Brasil",         code: "br",     p: 3, w: 2, d: 1, l: 0, gf: 5, ga: 1, pts: 7, isBrazil: true },
+  { name: "Argentina",      code: "ar",     p: 3, w: 2, d: 1, l: 0, gf: 6, ga: 2, pts: 7 },
+  { name: "Espanha",        code: "es",     p: 3, w: 2, d: 1, l: 0, gf: 5, ga: 2, pts: 7 },
+  { name: "Portugal",       code: "pt",     p: 3, w: 2, d: 1, l: 0, gf: 5, ga: 2, pts: 7 },
+  { name: "Alemanha",       code: "de",     p: 3, w: 2, d: 0, l: 1, gf: 6, ga: 3, pts: 6 },
+  { name: "Japão",          code: "jp",     p: 3, w: 2, d: 0, l: 1, gf: 5, ga: 4, pts: 6 },
+  { name: "Uruguai",        code: "uy",     p: 3, w: 2, d: 0, l: 1, gf: 3, ga: 2, pts: 6 },
+  { name: "Inglaterra",     code: "gb-eng", p: 3, w: 2, d: 0, l: 1, gf: 4, ga: 2, pts: 6 },
+  { name: "Países Baixos",  code: "nl",     p: 3, w: 2, d: 0, l: 1, gf: 4, ga: 3, pts: 6 },
+  { name: "México",         code: "mx",     p: 3, w: 1, d: 2, l: 0, gf: 3, ga: 2, pts: 5 },
+  { name: "Colômbia",       code: "co",     p: 3, w: 1, d: 2, l: 0, gf: 2, ga: 1, pts: 5 },
+  { name: "Bélgica",        code: "be",     p: 3, w: 1, d: 2, l: 0, gf: 3, ga: 3, pts: 5 },
+  { name: "Marrocos",       code: "ma",     p: 3, w: 1, d: 1, l: 1, gf: 2, ga: 3, pts: 4 },
+  { name: "Senegal",        code: "sn",     p: 3, w: 1, d: 1, l: 1, gf: 2, ga: 3, pts: 4 },
+  { name: "Estados Unidos", code: "us",     p: 3, w: 1, d: 1, l: 1, gf: 3, ga: 4, pts: 4 },
+];
+
+const quartasTeams: GroupTeam[] = [
+  { name: "França",     code: "fr",     p: 4, w: 4, d: 0, l: 0, gf: 9,  ga: 2, pts: 12 },
+  { name: "Brasil",     code: "br",     p: 4, w: 3, d: 1, l: 0, gf: 7,  ga: 1, pts: 10, isBrazil: true },
+  { name: "Argentina",  code: "ar",     p: 4, w: 3, d: 1, l: 0, gf: 8,  ga: 3, pts: 10 },
+  { name: "Espanha",    code: "es",     p: 4, w: 3, d: 1, l: 0, gf: 7,  ga: 3, pts: 10 },
+  { name: "Portugal",   code: "pt",     p: 4, w: 3, d: 1, l: 0, gf: 7,  ga: 3, pts: 10 },
+  { name: "Alemanha",   code: "de",     p: 4, w: 3, d: 0, l: 1, gf: 8,  ga: 4, pts: 9 },
+  { name: "Marrocos",   code: "ma",     p: 4, w: 2, d: 1, l: 1, gf: 4,  ga: 4, pts: 7 },
+  { name: "Inglaterra", code: "gb-eng", p: 4, w: 2, d: 0, l: 2, gf: 5,  ga: 5, pts: 6 },
+];
+
+const semiTeams: GroupTeam[] = [
+  { name: "França",   code: "fr",   p: 5, w: 5, d: 0, l: 0, gf: 12, ga: 3, pts: 15 },
+  { name: "Brasil",   code: "br",   p: 5, w: 4, d: 1, l: 0, gf: 9,  ga: 2, pts: 13, isBrazil: true },
+  { name: "Espanha",  code: "es",   p: 5, w: 4, d: 1, l: 0, gf: 10, ga: 4, pts: 13 },
+  { name: "Marrocos", code: "ma",   p: 5, w: 3, d: 1, l: 1, gf: 6,  ga: 5, pts: 10 },
 ];
 
 const liveEvents: LiveEvent[] = [
@@ -181,9 +257,9 @@ const liveEvents: LiveEvent[] = [
 
 const phases = [
   { key: "grupos",  label: "Grupos",  sublabel: "3 jogos" },
-  { key: "oitavas", label: "Oitavas", sublabel: "A definir" },
-  { key: "quartas", label: "Quartas", sublabel: "A definir" },
-  { key: "semi",    label: "Semi",    sublabel: "A definir" },
+  { key: "oitavas", label: "Oitavas", sublabel: "1 jogo" },
+  { key: "quartas", label: "Quartas", sublabel: "1 jogo" },
+  { key: "semi",    label: "Semi",    sublabel: "1 jogo" },
 ];
 
 // ─── Estado de fase bloqueada ─────────────────────────────────────────────────
@@ -347,7 +423,23 @@ function LiveFeed() {
 
 function BracketDrawer({ game, isLive, onClose }: { game: Game; isLive: boolean; onClose: () => void }) {
   const isThisGameLive = isLive && game.id === 1;
-  const standings = isThisGameLive ? standingsLive : standingsDefault;
+  const isKnockout = game.phase !== "grupos";
+
+  const standings =
+    game.phase === "oitavas" ? oitavasTeams :
+    game.phase === "quartas" ? quartasTeams :
+    game.phase === "semi"    ? semiTeams    :
+    isThisGameLive ? standingsLive : standingsDefault;
+
+  const standingsTitle =
+    game.phase === "oitavas" ? "Oitavas de Final — 16 Seleções" :
+    game.phase === "quartas" ? "Quartas de Final — 8 Seleções"  :
+    game.phase === "semi"    ? "Semifinal — 4 Seleções"         :
+    "Classificação — Grupo C";
+
+  const drawerSubtitle =
+    game.phase === "grupos" ? "Grupo C — Copa do Mundo 2026" :
+    "Fase Eliminatória — Copa do Mundo 2026";
 
   return (
     <>
@@ -374,7 +466,7 @@ function BracketDrawer({ game, isLive, onClose }: { game: Game; isLive: boolean;
                 </Box>
               )}
             </Box>
-            <Typography sx={{ fontSize: 12, color: "#777" }}>Grupo C — Copa do Mundo 2026</Typography>
+            <Typography sx={{ fontSize: 12, color: "#777" }}>{drawerSubtitle}</Typography>
           </Box>
           <IconButton onClick={onClose} size="small" sx={{ bgcolor: "#f5f5f5" }}>
             <CloseIcon fontSize="small" />
@@ -421,7 +513,7 @@ function BracketDrawer({ game, isLive, onClose }: { game: Game; isLive: boolean;
         <Box sx={{ mb: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
             <Box sx={{ width: 4, height: 18, bgcolor: "#009739", borderRadius: 1 }} />
-            <Typography sx={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Classificação — Grupo C</Typography>
+            <Typography sx={{ fontSize: 14, fontWeight: 800, color: "#111" }}>{standingsTitle}</Typography>
             {isThisGameLive && (
               <Chip label="Atualizado" size="small" sx={{ bgcolor: "#e8f5e9", color: "#009739", fontSize: 9, fontWeight: 700, height: 18, ml: "auto" }} />
             )}
@@ -460,10 +552,12 @@ function BracketDrawer({ game, isLive, onClose }: { game: Game; isLive: boolean;
               </Box>
             ))}
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.6, mt: 0.8, px: 0.5 }}>
-            <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#009739" }} />
-            <Typography sx={{ fontSize: 10, color: "#777" }}>Top 2 avançam para as Oitavas</Typography>
-          </Box>
+          {!isKnockout && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.6, mt: 0.8, px: 0.5 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#009739" }} />
+              <Typography sx={{ fontSize: 10, color: "#777" }}>Top 2 avançam para as Oitavas</Typography>
+            </Box>
+          )}
         </Box>
 
         {/* Fase eliminatória preview */}
@@ -631,7 +725,7 @@ export default function GamesPage() {
 
       {/* Conteúdo */}
       <Box sx={{ px: 2, pt: 2.5 }}>
-        {activePhase === "grupos" ? (
+        {filteredGames.length > 0 ? (
           filteredGames.map((game, index) => {
             const gameIsLive = isLive && game.id === 1;
             return (
