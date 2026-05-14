@@ -31,6 +31,7 @@ import {
   Typography,
   Paper,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import AddIcon from "@mui/icons-material/Add";
@@ -46,7 +47,6 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
-import { TshirtQrScannerDialog } from "@/app/components/tshirt/TshirtQrScannerDialog";
 import {
   ALLOWED_SIZES,
   listTshirtStock,
@@ -232,7 +232,8 @@ export default function TshirtStockAdminPage() {
   const [addQty, setAddQty] = useState("0");
   const [movDialog, setMovDialog] = useState<{ row: TshirtStockItem; direction: "in" | "out" } | null>(null);
   const [movQty, setMovQty] = useState("1");
-  const [scannerOpen, setScannerOpen] = useState(false);
+  const [nameFilter, setNameFilter] = useState("");
+  const [reservationPage, setReservationPage] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -240,7 +241,7 @@ export default function TshirtStockAdminPage() {
       const [stock, hist, resv] = await Promise.all([
         listTshirtStock(),
         listTshirtStockMovements(100, 0),
-        listTshirtReservationsAdmin(100, 0),
+        listTshirtReservationsAdmin(500, 0),
       ]);
       setRows(stock);
       setReservations(resv);
@@ -282,6 +283,24 @@ export default function TshirtStockAdminPage() {
     const present = new Set(rows.map((r) => r.size));
     return ALLOWED_SIZES.filter((s) => !present.has(s));
   }, [rows]);
+
+  const PAGE_SIZE = 10;
+
+  const filteredReservations = useMemo(() => {
+    const q = nameFilter.trim().toLowerCase();
+    const filtered = q
+      ? reservations.filter((r) => r.user_name_snapshot.toLowerCase().includes(q))
+      : reservations;
+    return [...filtered].sort((a, b) =>
+      a.user_name_snapshot.localeCompare(b.user_name_snapshot, "pt-BR", { sensitivity: "base" })
+    );
+  }, [reservations, nameFilter]);
+
+  const reservationPageCount = Math.max(1, Math.ceil(filteredReservations.length / PAGE_SIZE));
+  const reservationPageItems = filteredReservations.slice(
+    reservationPage * PAGE_SIZE,
+    reservationPage * PAGE_SIZE + PAGE_SIZE
+  );
 
   const openEdit = (row: TshirtStockItem) => {
     setEditRow(row);
@@ -379,7 +398,7 @@ export default function TshirtStockAdminPage() {
             <Button
               variant="outlined"
               startIcon={<QrCodeScannerIcon />}
-              onClick={() => setScannerOpen(true)}
+              onClick={() => router.push("/pages/admin/tshirt-scan")}
               sx={{
                 borderColor: "rgba(255,204,1,0.5)",
                 color: "#ffcc01",
@@ -524,64 +543,6 @@ export default function TshirtStockAdminPage() {
           </Box>
         )}
 
-        {/* Reservations section */}
-        <Box display="flex" alignItems="center" gap={1.5} mb={2}>
-          <PeopleAltIcon sx={{ color: "#ffcc01", fontSize: 20 }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#fff" }}>
-            Reservas dos participantes
-          </Typography>
-          {!loading && reservations.length > 0 && (
-            <Chip
-              label={reservations.length}
-              size="small"
-              sx={{ bgcolor: "rgba(255,204,1,0.14)", color: "#ffcc01", fontWeight: 700, border: "1px solid rgba(255,204,1,0.28)" }}
-            />
-          )}
-        </Box>
-
-        {!loading && (
-          <TableContainer component={Paper} sx={{ ...tableSx, mb: 4 }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={headSx}>Participante</TableCell>
-                  <TableCell sx={headSx}>E-mail</TableCell>
-                  <TableCell align="center" sx={headSx}>Tam.</TableCell>
-                  <TableCell align="center" sx={headSx}>Status</TableCell>
-                  <TableCell sx={headSx}>Data</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {reservations.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} sx={{ ...cellSx, py: 4, textAlign: "center", color: "rgba(255,255,255,0.35)" }}>
-                      Nenhuma reserva ainda.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  reservations.map((r) => (
-                    <TableRow key={r.id} sx={{ "&:hover": { bgcolor: "rgba(255,255,255,0.03)" } }}>
-                      <TableCell sx={cellSx}>{r.user_name_snapshot}</TableCell>
-                      <TableCell sx={{ ...cellSx, color: "rgba(255,255,255,0.55)", fontSize: "0.8rem" }}>
-                        {r.user_email_snapshot}
-                      </TableCell>
-                      <TableCell align="center" sx={cellSx}>
-                        <SizeChip size={r.size} />
-                      </TableCell>
-                      <TableCell align="center" sx={cellSx}>
-                        <StatusChip status={r.status} />
-                      </TableCell>
-                      <TableCell sx={{ ...cellSx, color: "rgba(255,255,255,0.55)", fontSize: "0.8rem" }}>
-                        {formatMovementDate(r.created_at)}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-
         {/* History section */}
         <Box display="flex" alignItems="center" gap={1.5} mb={2}>
           <HistoryIcon sx={{ color: "#ffcc01", fontSize: 20 }} />
@@ -648,6 +609,117 @@ export default function TshirtStockAdminPage() {
                   sx={{ borderColor: "rgba(255,204,1,0.4)", color: "#ffcc01", "&:hover": { borderColor: "#ffcc01", bgcolor: "rgba(255,204,1,0.07)" } }}
                 >
                   {histLoadingMore ? <CircularProgress size={20} sx={{ color: "#ffcc01" }} /> : "Carregar mais"}
+                </Button>
+              </Box>
+            )}
+          </>
+        )}
+
+        {/* Reservations section */}
+        {!loading && (
+          <>
+            <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2} mb={2} mt={2}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <PeopleAltIcon sx={{ color: "#ffcc01", fontSize: 20 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700, color: "#fff" }}>
+                  Reservas dos participantes
+                </Typography>
+                <Chip
+                  label={filteredReservations.length === reservations.length
+                    ? reservations.length
+                    : `${filteredReservations.length} / ${reservations.length}`}
+                  size="small"
+                  sx={{ bgcolor: "rgba(255,204,1,0.14)", color: "#ffcc01", fontWeight: 700, border: "1px solid rgba(255,204,1,0.28)" }}
+                />
+              </Box>
+              <TextField
+                size="small"
+                placeholder="Buscar por nome..."
+                value={nameFilter}
+                onChange={(e) => { setNameFilter(e.target.value); setReservationPage(0); }}
+                InputProps={{
+                  startAdornment: (
+                    <Box component="span" sx={{ mr: 0.5, color: "rgba(255,255,255,0.4)", display: "flex" }}>
+                      <SearchIcon fontSize="small" />
+                    </Box>
+                  ),
+                }}
+                sx={{
+                  minWidth: 220,
+                  "& .MuiOutlinedInput-root": {
+                    color: "#fff",
+                    "& fieldset": { borderColor: "rgba(255,255,255,0.18)" },
+                    "&:hover fieldset": { borderColor: "rgba(255,204,1,0.45)" },
+                    "&.Mui-focused fieldset": { borderColor: "#ffcc01" },
+                  },
+                  "& .MuiInputBase-input::placeholder": { color: "rgba(255,255,255,0.3)" },
+                }}
+              />
+            </Box>
+
+            <TableContainer component={Paper} sx={{ ...tableSx, mb: 1.5 }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={headSx}>Participante</TableCell>
+                    <TableCell sx={headSx}>E-mail</TableCell>
+                    <TableCell align="center" sx={headSx}>Tam.</TableCell>
+                    <TableCell align="center" sx={headSx}>Status</TableCell>
+                    <TableCell sx={headSx}>Data</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {reservationPageItems.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} sx={{ ...cellSx, py: 4, textAlign: "center", color: "rgba(255,255,255,0.35)" }}>
+                        {nameFilter ? "Nenhum resultado para esta busca." : "Nenhuma reserva ainda."}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    reservationPageItems.map((r) => (
+                      <TableRow key={r.id} sx={{ "&:hover": { bgcolor: "rgba(255,255,255,0.03)" } }}>
+                        <TableCell sx={cellSx}>{r.user_name_snapshot}</TableCell>
+                        <TableCell sx={{ ...cellSx, color: "rgba(255,255,255,0.55)", fontSize: "0.8rem" }}>
+                          {r.user_email_snapshot}
+                        </TableCell>
+                        <TableCell align="center" sx={cellSx}>
+                          <SizeChip size={r.size} />
+                        </TableCell>
+                        <TableCell align="center" sx={cellSx}>
+                          <StatusChip status={r.status} />
+                        </TableCell>
+                        <TableCell sx={{ ...cellSx, color: "rgba(255,255,255,0.55)", fontSize: "0.8rem" }}>
+                          {formatMovementDate(r.created_at)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {filteredReservations.length > PAGE_SIZE && (
+              <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={reservationPage === 0}
+                  onClick={() => setReservationPage((p) => p - 1)}
+                  sx={{ borderColor: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.7)", minWidth: 100 }}
+                >
+                  ← Anterior
+                </Button>
+                <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: 13 }}>
+                  {reservationPage + 1} / {reservationPageCount}
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={reservationPage >= reservationPageCount - 1}
+                  onClick={() => setReservationPage((p) => p + 1)}
+                  sx={{ borderColor: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.7)", minWidth: 100 }}
+                >
+                  Próximo →
                 </Button>
               </Box>
             )}
@@ -733,12 +805,6 @@ export default function TshirtStockAdminPage() {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <TshirtQrScannerDialog
-        open={scannerOpen}
-        onClose={() => setScannerOpen(false)}
-        onSuccess={load}
-      />
 
       {/* Movement dialog */}
       <Dialog open={Boolean(movDialog)} onClose={closeMovDialog} PaperProps={{ sx: { bgcolor: "#1a1a1a", color: "#fff" } }}>

@@ -52,3 +52,24 @@ export const redeemTshirtReservation = async (
     throw new Error(extractApiError(e, "Erro ao registrar retirada"));
   }
 };
+
+export interface TshirtCpfLookupResult {
+  reservation_id: number;
+  user_name: string;
+  size: string;
+  status: string;
+  qr_token: string;
+}
+
+export const lookupTshirtReservationByCpf = async (
+  cpf: string
+): Promise<TshirtCpfLookupResult> => {
+  try {
+    const res = await api.get<TshirtCpfLookupResult>("/admin/tshirt-reservations/lookup-cpf", {
+      params: { cpf },
+    });
+    return res.data;
+  } catch (e) {
+    throw new Error(extractApiError(e, "CPF não encontrado"));
+  }
+};

@@ -202,28 +202,8 @@ export function TshirtQrScannerDialog({
 
         {phase.phase === "success" && (
           <ResultCard borderColor="#4caf50" icon={<CheckCircleIcon sx={{ fontSize: 54, color: "#4caf50" }} />}>
-            <Typography sx={{ fontSize: 20, fontWeight: 900, color: "#fff", textAlign: "center" }}>
-              {phase.userName}
-            </Typography>
-            <Box
-              sx={{
-                px: 2.5,
-                py: 1,
-                bgcolor: "rgba(123,237,159,0.12)",
-                borderRadius: 2,
-                border: "1px solid rgba(123,237,159,0.3)",
-              }}
-            >
-              <Typography sx={{ color: "#7bed9f", fontWeight: 700, textAlign: "center", fontSize: 15 }}>
-                Retire a camiseta tamanho{" "}
-                <Box component="span" sx={{ fontSize: 20, fontWeight: 900 }}>
-                  {phase.size}
-                </Box>{" "}
-                com o promotor
-              </Typography>
-            </Box>
-            <Typography sx={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>
-              Retirada registrada com sucesso
+            <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#7bed9f", textAlign: "center" }}>
+              {phase.userName} camiseta {phase.size} entrega validada
             </Typography>
           </ResultCard>
         )}

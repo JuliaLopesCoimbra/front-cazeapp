@@ -17,16 +17,18 @@ jobs:
           key: ${{ secrets.STAGING_SSH_KEY }}
           script_stop: true
           script: |
-            # 1. Entra na pasta
+            # 1. Limpeza ANTES do build (evita ENOSPC)
+            docker system prune -f
+            docker builder prune -f
+
+            # 2. Atualiza o código
             cd /home/ec2-user/front-n1
-            
-            # 2. Atualiza o código do Git
             git fetch origin
             git checkout develop
             git reset --hard origin/develop
-            
-            # 3. Roda APENAS o Docker (remova comandos de npm ou pm2 daqui)
+
+            # 3. Build e deploy
             docker compose up --build -d
-            
-            # 4. Limpeza de segurança
+
+            # 4. Remove imagens antigas pós-build
             docker image prune -f

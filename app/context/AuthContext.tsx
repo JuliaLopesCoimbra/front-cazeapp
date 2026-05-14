@@ -11,11 +11,11 @@ import React, {
 import { jwtDecode } from "jwt-decode";
 interface TokenPayload {
   sub: string;
-  role: "admin_master" | "subadmin" | "colunista" | "user" | "admin"; // Mantém "admin" para compatibilidade
+  role: "admin_master" | "subadmin" | "colunista" | "user" | "admin" | "promotor";
   exp: number;
 }
 
-type UserRole = "admin_master" | "subadmin" | "colunista" | "user" | "admin" | null;
+type UserRole = "admin_master" | "subadmin" | "colunista" | "user" | "admin" | "promotor" | null;
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -23,6 +23,7 @@ interface AuthContextType {
   isAdminMaster: boolean;
   isSubadmin: boolean;
   isColunista: boolean;
+  isPromotor: boolean;
   isAdmin: boolean; // Mantido para compatibilidade (admin_master ou subadmin)
   canCreatePost: boolean;
   canApprovePost: boolean;
@@ -82,6 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const isAdminMaster = role === "admin_master";
   const isSubadmin = role === "subadmin";
   const isColunista = role === "colunista";
+  const isPromotor = role === "promotor";
   const isAdmin = role === "admin_master" || role === "subadmin" || role === "admin"; // Compatibilidade
   const canCreatePost = role === "admin_master" || role === "subadmin" || role === "colunista";
   const canApprovePost = role === "admin_master" || role === "subadmin";
@@ -241,6 +243,7 @@ const login = useCallback(
         isAdminMaster,
         isSubadmin,
         isColunista,
+        isPromotor,
         isAdmin,
         canCreatePost,
         canApprovePost,

@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import {
   Box,
   Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
+  // Checkbox,        // CAMISETAS - comentado temporariamente
+  // Dialog,          // CAMISETAS - comentado temporariamente
+  // DialogActions,   // CAMISETAS - comentado temporariamente
+  // DialogContent,   // CAMISETAS - comentado temporariamente
+  // DialogTitle,     // CAMISETAS - comentado temporariamente
+  // FormControlLabel, // CAMISETAS - comentado temporariamente
   Skeleton,
   Typography,
 } from "@mui/material";
@@ -57,8 +57,8 @@ const HomeContent: React.FC = () => {
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(true);
-  const [shirtReserveOpen, setShirtReserveOpen] = useState(false);
-  const [shirtTicketAck, setShirtTicketAck] = useState(false);
+  // const [shirtReserveOpen, setShirtReserveOpen] = useState(false);
+  // const [shirtTicketAck, setShirtTicketAck] = useState(false);
   const currentEventIdRef = useRef<number | null>(null);
   const isCheckingRef = useRef(false); // Previne múltiplas verificações simultâneas
   const scrollExecutedRef = useRef(false);
@@ -645,6 +645,7 @@ const HomeContent: React.FC = () => {
       </Box>
       <BottomNav activeColor={currentTheme.footerActiveColor} eventId={currentEvent?.id} />
 
+      {/* CAMISETAS - comentado temporariamente, reativar quando necessário
       <Dialog
         open={shirtReserveOpen}
         onClose={() => setShirtReserveOpen(false)}
@@ -687,6 +688,7 @@ const HomeContent: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      */}
     </>
   );
 };
