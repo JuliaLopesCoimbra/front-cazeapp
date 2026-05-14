@@ -986,6 +986,7 @@ export default function NewsDetailPage() {
               onLike={handleLike}
               disabled={!isAuthenticated || liking || news.status === "pending" || news.status === "rejected"}
               newsId={newsId}
+              isTorcida={resolvedBrandKey === "n1_torcida"}
             />
           </Box>
 
@@ -1028,6 +1029,7 @@ export default function NewsDetailPage() {
             onDeleteComment={handleDeleteCommentClick}
             onLoadMoreReplies={loadMoreReplies}
             onLoadMoreComments={loadMoreComments}
+            isTorcida={resolvedBrandKey === "n1_torcida"}
           />
           </Box>
         </Box>

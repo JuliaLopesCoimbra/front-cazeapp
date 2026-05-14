@@ -13,6 +13,7 @@ interface NewsLikeSectionProps {
   onLike: () => void;
   disabled?: boolean;
   newsId?: number;
+  isTorcida?: boolean;
 }
 
 export default function NewsLikeSection({
@@ -21,6 +22,7 @@ export default function NewsLikeSection({
   onLike,
   disabled = false,
   newsId,
+  isTorcida,
 }: NewsLikeSectionProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -77,6 +79,7 @@ export default function NewsLikeSection({
           type="post"
           id={newsId}
           likesCount={likesCount}
+          isTorcida={isTorcida}
         />
       )}
     </>

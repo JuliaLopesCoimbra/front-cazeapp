@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
+  Drawer,
   Box,
   Typography,
   Avatar,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { getUsersWhoLiked, UserWhoLiked } from "@/app/services/likes/likeService";
 import UserProfileModal from "@/app/components/user/UserProfileModal";
 
@@ -24,300 +23,172 @@ interface LikesModalProps {
 
 const USERS_PER_PAGE = 10;
 
-export default function LikesModal({
-  open,
-  onClose,
-  newsId,
-  likesCount,
-}: LikesModalProps) {
+export default function LikesModal({ open, onClose, newsId, likesCount }: LikesModalProps) {
   const [users, setUsers] = useState<UserWhoLiked[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const handleUserClick = (userId: number) => {
-    // Fecha a modal de curtidas primeiro
     onClose();
-    // Abre a modal de perfil após um pequeno delay para garantir que a modal de curtidas feche primeiro
     setTimeout(() => {
       setSelectedUserId(userId);
       setProfileModalOpen(true);
     }, 150);
   };
 
-  const loadUsers = useCallback(
-    async (reset = false) => {
-      if (loading || loadingMore) return;
-
-      const currentOffset = reset ? 0 : offset;
-      const isLoadingMore = !reset && currentOffset > 0;
-
-      if (isLoadingMore) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
-
-      try {
-        const newUsers = await getUsersWhoLiked(
-          newsId,
-          USERS_PER_PAGE,
-          currentOffset
-        );
-
-        if (reset) {
-          setUsers(newUsers);
-          setOffset(newUsers.length);
-        } else {
-          setUsers((prev) => [...prev, ...newUsers]);
-          setOffset((prev) => prev + newUsers.length);
-        }
-
-        setHasMore(newUsers.length === USERS_PER_PAGE);
-      } catch (error) {
-        console.error("Erro ao carregar usuários que curtiram", error);
-        setHasMore(false);
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [newsId, offset, loading, loadingMore]
-  );
-
-  // Carrega usuários quando a modal abre
   useEffect(() => {
-    if (open) {
-      setUsers([]);
-      setOffset(0);
-      setHasMore(true);
-      // Reset loading states
-      setLoading(false);
-      setLoadingMore(false);
-      // Load initial users
-      const loadInitial = async () => {
-        setLoading(true);
-        try {
-          const newUsers = await getUsersWhoLiked(newsId, USERS_PER_PAGE, 0);
-          setUsers(newUsers);
-          setOffset(newUsers.length);
-          setHasMore(newUsers.length === USERS_PER_PAGE);
-        } catch (error) {
-          console.error("Erro ao carregar usuários que curtiram", error);
-          setHasMore(false);
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadInitial();
-    }
+    if (!open) return;
+    setUsers([]);
+    setOffset(0);
+    setHasMore(true);
+    setLoading(true);
+
+    getUsersWhoLiked(newsId, USERS_PER_PAGE, 0)
+      .then((data) => {
+        setUsers(data);
+        setOffset(data.length);
+        setHasMore(data.length === USERS_PER_PAGE);
+      })
+      .catch(() => setHasMore(false))
+      .finally(() => setLoading(false));
   }, [open, newsId]);
 
-  // Configura o Intersection Observer para infinite scroll
   useEffect(() => {
     if (!open || !hasMore || loading || loadingMore) return;
+    observerRef.current?.disconnect();
 
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    const handleIntersection = async (entries: IntersectionObserverEntry[]) => {
-      if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
-        setLoadingMore(true);
-        try {
-          const newUsers = await getUsersWhoLiked(newsId, USERS_PER_PAGE, offset);
-          if (newUsers.length > 0) {
-            setUsers((prev) => [...prev, ...newUsers]);
-            setOffset((prev) => prev + newUsers.length);
-            setHasMore(newUsers.length === USERS_PER_PAGE);
-          } else {
-            setHasMore(false);
-          }
-        } catch (error) {
-          console.error("Erro ao carregar mais usuários", error);
+    observerRef.current = new IntersectionObserver(async ([entry]) => {
+      if (!entry.isIntersecting) return;
+      setLoadingMore(true);
+      try {
+        const data = await getUsersWhoLiked(newsId, USERS_PER_PAGE, offset);
+        if (data.length > 0) {
+          setUsers((prev) => [...prev, ...data]);
+          setOffset((prev) => prev + data.length);
+          setHasMore(data.length === USERS_PER_PAGE);
+        } else {
           setHasMore(false);
-        } finally {
-          setLoadingMore(false);
         }
+      } catch {
+        setHasMore(false);
+      } finally {
+        setLoadingMore(false);
       }
-    };
+    }, { threshold: 0.1 });
 
-    observerRef.current = new IntersectionObserver(handleIntersection, {
-      threshold: 0.1,
-    });
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
+    if (loadMoreRef.current) observerRef.current.observe(loadMoreRef.current);
+    return () => observerRef.current?.disconnect();
   }, [open, hasMore, loading, loadingMore, newsId, offset]);
 
   return (
     <>
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          backgroundColor: "#1a1a1a",
-          color: "#fff",
-          borderRadius: 2,
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          pb: 2,
-          fontWeight: 600,
+      <Drawer
+        anchor="bottom"
+        open={open}
+        onClose={onClose}
+        PaperProps={{
+          sx: {
+            borderRadius: "20px 20px 0 0",
+            bgcolor: "#111",
+            maxHeight: "75vh",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          },
         }}
       >
-        {likesCount} {likesCount === 1 ? "curtida" : "curtidas"}
-        <IconButton
-          onClick={onClose}
-          sx={{ color: "#fff" }}
-          size="small"
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+        {/* Handle */}
+        <Box sx={{ pt: 1.5, pb: 0.5, display: "flex", justifyContent: "center" }}>
+          <Box sx={{ width: 40, height: 4, bgcolor: "rgba(255,255,255,0.15)", borderRadius: 2 }} />
+        </Box>
 
-      <DialogContent sx={{ p: 0, maxHeight: "60vh", overflowY: "auto" }}>
-        {loading && users.length === 0 ? (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              py: 4,
-            }}
-          >
-            <CircularProgress sx={{ color: "#ffcc01" }} />
-          </Box>
-        ) : users.length === 0 ? (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              py: 4,
-            }}
-          >
-            <Typography sx={{ color: "rgba(255,255,255,0.6)" }}>
-              Nenhum usuário encontrado
+        {/* Header */}
+        <Box sx={{
+          px: 2.5, py: 1.5,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+        }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <FavoriteIcon sx={{ fontSize: 18, color: "#e53935" }} />
+            <Typography sx={{ fontWeight: 700, fontSize: 16, color: "#fff" }}>
+              {likesCount} {likesCount === 1 ? "curtida" : "curtidas"}
             </Typography>
           </Box>
-        ) : (
-          <>
-            {users.map((user) => (
-              <Box
-                key={user.id}
-                onClick={() => handleUserClick(user.id)}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  p: 2,
-                  borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  cursor: "pointer",
-                  transition: "background-color 0.2s",
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.1)",
-                  },
-                }}
-              >
-                <Avatar
-                  src={user.profile_photo || undefined}
-                  alt={user.name || "Usuário"}
+          <IconButton onClick={onClose} size="small" sx={{ bgcolor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.6)" }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        {/* Lista */}
+        <Box sx={{ overflowY: "auto", flex: 1 }}>
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+              <CircularProgress size={28} sx={{ color: "rgba(255,255,255,0.3)" }} />
+            </Box>
+          ) : users.length === 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 6, gap: 1 }}>
+              <FavoriteIcon sx={{ fontSize: 36, color: "rgba(255,255,255,0.1)" }} />
+              <Typography sx={{ color: "rgba(255,255,255,0.35)", fontSize: 14 }}>
+                Nenhuma curtida ainda
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              {users.map((user) => (
+                <Box
+                  key={user.id}
+                  onClick={() => handleUserClick(user.id)}
                   sx={{
-                    width: 48,
-                    height: 48,
-                    bgcolor: "rgba(255,255,255,0.2)",
+                    display: "flex", alignItems: "center", gap: 1.5,
+                    px: 2.5, py: 1.4,
+                    cursor: "pointer",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    "&:active": { bgcolor: "rgba(255,255,255,0.04)" },
+                    transition: "background 0.15s",
                   }}
                 >
-                  {user.name?.[0]?.toUpperCase() || "?"}
-                </Avatar>
-                <Typography
-                  sx={{
-                    color: "#fff",
-                    fontWeight: 500,
-                    flex: 1,
-                  }}
-                >
-                  {user.name || "Usuário sem nome"}
-                </Typography>
-              </Box>
-            ))}
+                  <Avatar
+                    src={user.profile_photo || undefined}
+                    alt={user.name || "Usuário"}
+                    sx={{ width: 44, height: 44, bgcolor: "rgba(255,255,255,0.1)", fontSize: 16 }}
+                  >
+                    {user.name?.[0]?.toUpperCase() || "?"}
+                  </Avatar>
+                  <Typography sx={{ color: "#fff", fontWeight: 500, fontSize: 15, flex: 1 }}>
+                    {user.name || "Usuário sem nome"}
+                  </Typography>
+                </Box>
+              ))}
 
-            {/* Elemento para detectar quando chegar ao final */}
-            {hasMore && (
-              <Box
-                ref={loadMoreRef}
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  py: 2,
-                }}
-              >
-                {loadingMore && (
-                  <CircularProgress size={24} sx={{ color: "#ffcc01" }} />
-                )}
-              </Box>
-            )}
+              {hasMore && (
+                <Box ref={loadMoreRef} sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+                  {loadingMore && <CircularProgress size={22} sx={{ color: "rgba(255,255,255,0.25)" }} />}
+                </Box>
+              )}
 
-            {/* Mensagem quando chegar ao final */}
-            {!hasMore && users.length > 0 && (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  py: 3,
-                }}
-              >
-                <Typography
-                  sx={{
-                    color: "rgba(255,255,255,0.5)",
-                    fontSize: 14,
-                  }}
-                >
-                  Todos os usuários que curtiram esta notícia
-                </Typography>
-              </Box>
-            )}
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
+              {!hasMore && users.length > 0 && (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 2.5 }}>
+                  <Typography sx={{ color: "rgba(255,255,255,0.2)", fontSize: 12 }}>— fim —</Typography>
+                </Box>
+              )}
+            </>
+          )}
+        </Box>
+      </Drawer>
 
-    {/* Modal de perfil - renderizada fora do Dialog para evitar sobreposição */}
-    {selectedUserId !== null && (
-      <UserProfileModal
-        open={profileModalOpen}
-        onClose={() => {
-          setProfileModalOpen(false);
-          setSelectedUserId(null);
-        }}
-        userId={selectedUserId}
-      />
-    )}
-  </>
+      {selectedUserId !== null && (
+        <UserProfileModal
+          open={profileModalOpen}
+          onClose={() => { setProfileModalOpen(false); setSelectedUserId(null); }}
+          userId={selectedUserId}
+        />
+      )}
+    </>
   );
 }
-

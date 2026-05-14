@@ -1,265 +1,27 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Box, Typography, Drawer, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-
-// ─── Tipos e dados ────────────────────────────────────────────────────────────
+import {
+  CamisetaSVG,
+  COR_MEDIDAS as COR,
+  medidasPorTamanho,
+  QRCodeImg,
+} from "@/app/components/tshirt/camisetaGuideCore";
 
 const SIZES = ["PP", "P", "M", "G", "GG", "XG"] as const;
 type Size = (typeof SIZES)[number];
-
-interface Medidas {
-  ombro: number;
-  manga: number;
-  torax: number;
-  comprimento: number;
-}
-
-const medidasPorTamanho: Record<Size, Medidas> = {
-  PP: { ombro: 38, manga: 17, torax: 86, comprimento: 63 },
-  P:  { ombro: 40, manga: 18, torax: 90, comprimento: 65 },
-  M:  { ombro: 42, manga: 20, torax: 94, comprimento: 68 },
-  G:  { ombro: 44, manga: 21, torax: 98, comprimento: 70 },
-  GG: { ombro: 46, manga: 22, torax: 102, comprimento: 73 },
-  XG: { ombro: 48, manga: 23, torax: 106, comprimento: 75 },
-};
-
-// Cores de cada medida
-const COR = {
-  ombro:       "#1565c0",
-  manga:       "#e65100",
-  torax:       "#6a1b9a",
-  comprimento: "#009739",
-};
-
-// ─── SVG da camiseta ──────────────────────────────────────────────────────────
-
-function CamisetaSVG({ medidas }: { medidas: Medidas }) {
-  const svgW = 320;
-  const svgH = 330;
-  const svgTopPad = 22; // espaço extra para o label do Ombro não ser cortado
-
-  // Pontos estruturais da camiseta
-  const collarL    = { x: 116, y: 26 };
-  const collarR    = { x: 204, y: 26 };
-  const shoulderL  = { x: 76,  y: 56 };
-  const shoulderR  = { x: 244, y: 56 };
-  const sleeveOutL = { x: 22,  y: 102 };
-  const sleeveOutR = { x: 298, y: 102 };
-  const sleeveInL  = { x: 50,  y: 130 };
-  const sleeveInR  = { x: 270, y: 130 };
-  const bodyTL     = { x: 76,  y: 80 };
-  const bodyTR     = { x: 244, y: 80 };
-  const bodyBL     = { x: 76,  y: 286 };
-  const bodyBR     = { x: 244, y: 286 };
-
-  // Path da camiseta
-  const shirtPath = [
-    `M ${collarL.x} ${collarL.y}`,
-    `Q 160 54 ${collarR.x} ${collarR.y}`,   // gola interna (curva pra baixo)
-    `L ${shoulderR.x} ${shoulderR.y}`,
-    `L ${sleeveOutR.x} ${sleeveOutR.y}`,
-    `L ${sleeveInR.x} ${sleeveInR.y}`,
-    `L ${bodyTR.x} ${bodyTR.y}`,
-    `L ${bodyBR.x} ${bodyBR.y}`,
-    `L ${bodyBL.x} ${bodyBL.y}`,
-    `L ${bodyTL.x} ${bodyTL.y}`,
-    `L ${sleeveInL.x} ${sleeveInL.y}`,
-    `L ${sleeveOutL.x} ${sleeveOutL.y}`,
-    `L ${shoulderL.x} ${shoulderL.y}`,
-    "Z",
-  ].join(" ");
-
-  // Gola (collar) - forma separada com cor diferente
-  const collarPath = [
-    `M ${collarL.x} ${collarL.y}`,
-    `L ${shoulderL.x} ${shoulderL.y}`,
-    `Q 116 32 116 26`,                        // borda exterior esquerda
-    `Q 160 0 204 26`,                          // borda exterior topo
-    `Q 204 32 ${shoulderR.x} ${shoulderR.y}`,
-    `L ${collarR.x} ${collarR.y}`,
-    `Q 160 54 ${collarL.x} ${collarL.y}`,    // neckline interna
-    "Z",
-  ].join(" ");
-
-  // Listra horizontal decorativa no peito
-  const stripeY = 140;
-
-  // ── Posições das linhas de medida ──
-
-  // OMBRO: linha horizontal nos ombros
-  const ombroY   = 42;
-  const ombroX1  = shoulderL.x;
-  const ombroX2  = shoulderR.x;
-
-  // MANGA: linha diagonal da ponta do ombro até a ponta da manga (lado esquerdo)
-  const mangaX1 = shoulderL.x;
-  const mangaY1 = shoulderL.y;
-  const mangaX2 = sleeveOutL.x;
-  const mangaY2 = sleeveOutL.y;
-
-  // TÓRAX: linha horizontal no meio do corpo
-  const toraxY  = 178;
-  const toraxX1 = bodyTL.x;
-  const toraxX2 = bodyTR.x;
-
-  // COMPRIMENTO: linha vertical no lado direito, da gola até a barra
-  const compX  = 268;
-  const compY1 = collarR.y;
-  const compY2 = bodyBR.y;
-
-  function ArrowH({ x1, x2, y, cor }: { x1: number; x2: number; y: number; cor: string }) {
-    return (
-      <g>
-        <line x1={x1} y1={y} x2={x2} y2={y} stroke={cor} strokeWidth={1.5} strokeDasharray="5,3" />
-        {/* seta esquerda */}
-        <path d={`M ${x1 + 6} ${y - 4} L ${x1} ${y} L ${x1 + 6} ${y + 4}`} fill="none" stroke={cor} strokeWidth={1.5} strokeLinecap="round" />
-        {/* seta direita */}
-        <path d={`M ${x2 - 6} ${y - 4} L ${x2} ${y} L ${x2 - 6} ${y + 4}`} fill="none" stroke={cor} strokeWidth={1.5} strokeLinecap="round" />
-      </g>
-    );
-  }
-
-  function ArrowDiag({ x1, y1, x2, y2, cor }: { x1: number; y1: number; x2: number; y2: number; cor: string }) {
-    const ang = Math.atan2(y2 - y1, x2 - x1);
-    const ax1x = x1 + 6 * Math.cos(ang + 0.5);
-    const ax1y = y1 + 6 * Math.sin(ang + 0.5);
-    const ax2x = x2 - 6 * Math.cos(ang - 0.5);
-    const ax2y = y2 - 6 * Math.sin(ang - 0.5);
-    return (
-      <g>
-        <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={cor} strokeWidth={1.5} strokeDasharray="5,3" />
-        <path d={`M ${ax1x} ${ax1y} L ${x1} ${y1} L ${x1 + 6 * Math.cos(ang - 0.5)} ${y1 + 6 * Math.sin(ang - 0.5)}`} fill="none" stroke={cor} strokeWidth={1.5} strokeLinecap="round" />
-        <path d={`M ${ax2x} ${ax2y} L ${x2} ${y2} L ${x2 - 6 * Math.cos(ang + 0.5)} ${y2 - 6 * Math.sin(ang + 0.5)}`} fill="none" stroke={cor} strokeWidth={1.5} strokeLinecap="round" />
-      </g>
-    );
-  }
-
-  function ArrowV({ x, y1, y2, cor }: { x: number; y1: number; y2: number; cor: string }) {
-    return (
-      <g>
-        <line x1={x} y1={y1} x2={x} y2={y2} stroke={cor} strokeWidth={1.5} strokeDasharray="5,3" />
-        <path d={`M ${x - 4} ${y1 + 6} L ${x} ${y1} L ${x + 4} ${y1 + 6}`} fill="none" stroke={cor} strokeWidth={1.5} strokeLinecap="round" />
-        <path d={`M ${x - 4} ${y2 - 6} L ${x} ${y2} L ${x + 4} ${y2 - 6}`} fill="none" stroke={cor} strokeWidth={1.5} strokeLinecap="round" />
-      </g>
-    );
-  }
-
-  function Label({ x, y, valor, unidade, cor, align = "center" }: {
-    x: number; y: number; valor: number; unidade: string; cor: string; align?: "center" | "left" | "right";
-  }) {
-    const text = `${valor} ${unidade}`;
-    const tw = text.length * 7 + 10;
-    const tx = align === "left" ? x : align === "right" ? x - tw : x - tw / 2;
-    return (
-      <g>
-        <rect x={tx} y={y - 10} width={tw} height={18} rx={4} fill={cor} opacity={0.92} />
-        <text
-          x={tx + tw / 2} y={y + 3}
-          textAnchor="middle"
-          fill="white"
-          fontSize={11}
-          fontWeight="bold"
-          fontFamily="Inter, sans-serif"
-        >
-          {text}
-        </text>
-      </g>
-    );
-  }
-
-  // Ponto médio manga (para label)
-  const mangaMidX = (mangaX1 + mangaX2) / 2 - 24;
-  const mangaMidY = (mangaY1 + mangaY2) / 2 - 4;
-
-  return (
-    <svg
-      viewBox={`0 -${svgTopPad} ${svgW} ${svgH + svgTopPad}`}
-      overflow="visible"
-      style={{ width: "100%", maxWidth: 340, display: "block", margin: "0 auto" }}
-    >
-      {/* Sombra suave */}
-      <defs>
-        <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
-          <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="rgba(0,0,0,0.15)" />
-        </filter>
-        {/* Gradiente verde da camiseta */}
-        <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#009739" />
-          <stop offset="100%" stopColor="#006728" />
-        </linearGradient>
-        {/* Gradiente da gola */}
-        <linearGradient id="yellowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#FEDF00" />
-          <stop offset="100%" stopColor="#ffc107" />
-        </linearGradient>
-      </defs>
-
-      {/* Camiseta - corpo */}
-      <path d={shirtPath} fill="url(#greenGrad)" filter="url(#shadow)" />
-
-      {/* Listra amarela decorativa */}
-      <rect x={76} y={stripeY} width={168} height={6} fill="#FEDF00" opacity={0.85} rx={1} />
-      <rect x={76} y={stripeY + 9} width={168} height={2} fill="#002776" opacity={0.6} rx={1} />
-
-      {/* Gola */}
-      <path d={collarPath} fill="url(#yellowGrad)" />
-
-      {/* Badge CBF (círculo no peito) */}
-      <circle cx={160} cy={110} r={18} fill="#002776" opacity={0.9} />
-      <text x={160} y={107} textAnchor="middle" fill="#FEDF00" fontSize={8} fontWeight="bold" fontFamily="Inter, sans-serif">CBF</text>
-      <text x={160} y={118} textAnchor="middle" fill="#fff" fontSize={6} fontFamily="Inter, sans-serif">BRASIL</text>
-
-      {/* Número na camiseta */}
-      <text x={160} y={238} textAnchor="middle" fill="rgba(255,255,255,0.18)" fontSize={68} fontWeight="900" fontFamily="Inter, sans-serif">10</text>
-
-      {/* ── Linhas de medida ── */}
-
-      {/* OMBRO */}
-      <ArrowH x1={ombroX1} x2={ombroX2} y={ombroY} cor={COR.ombro} />
-      <Label x={(ombroX1 + ombroX2) / 2} y={ombroY - 14} valor={medidas.ombro} unidade="cm" cor={COR.ombro} />
-
-      {/* MANGA */}
-      <ArrowDiag x1={mangaX1} y1={mangaY1} x2={mangaX2} y2={mangaY2} cor={COR.manga} />
-      <Label x={mangaMidX - 2} y={mangaMidY} valor={medidas.manga} unidade="cm" cor={COR.manga} align="right" />
-
-      {/* TÓRAX */}
-      <ArrowH x1={toraxX1} x2={toraxX2} y={toraxY} cor={COR.torax} />
-      <Label x={(toraxX1 + toraxX2) / 2} y={toraxY + 16} valor={medidas.torax} unidade="cm" cor={COR.torax} />
-
-      {/* COMPRIMENTO */}
-      <ArrowV x={compX} y1={compY1} y2={compY2} cor={COR.comprimento} />
-      <Label x={compX + 6} y={(compY1 + compY2) / 2} valor={medidas.comprimento} unidade="cm" cor={COR.comprimento} align="left" />
-    </svg>
-  );
-}
-
-// ─── Página principal ─────────────────────────────────────────────────────────
 
 type Genero = "masculino" | "feminino";
 type DrawerStep = "escolha" | "qrcode";
 
 function gerarId() {
   return Math.random().toString(36).slice(2, 9).toUpperCase();
-}
-
-function QRCodeImg({ data }: { data: string }) {
-  const encoded = encodeURIComponent(data);
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=002776&data=${encoded}`}
-      alt="QR Code de reserva"
-      width={220}
-      height={220}
-      style={{ display: "block", borderRadius: 12, border: "6px solid #fff", boxShadow: "0 4px 20px rgba(0,0,0,0.12)" }}
-    />
-  );
 }
 
 function ReservaDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {

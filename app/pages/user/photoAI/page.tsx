@@ -455,7 +455,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
             variant="contained"
             size="large"
             fullWidth
-            sx={{ background: accentColor, borderRadius: 2, py: 1.5 }}
+            sx={{ background: accentColor, borderRadius: 5, py: 1.5 }}
             onClick={requestCamera}
             disabled={isRequestingCamera}
           >

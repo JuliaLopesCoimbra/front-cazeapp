@@ -114,7 +114,9 @@ api.interceptors.response.use(
         const { access_token, refresh_token } = response.data;
 
         localStorage.setItem("access_token", access_token);
-        document.cookie = `refresh_token=${refresh_token}; path=/; secure`;
+        const persist = localStorage.getItem("keep_logged_in") === "1";
+        const cookieExpiry = persist ? `; max-age=${90 * 24 * 60 * 60}` : "";
+        document.cookie = `refresh_token=${refresh_token}; path=/; secure${cookieExpiry}`;
 
         processQueue(null, access_token);
 

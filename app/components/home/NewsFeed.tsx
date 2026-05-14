@@ -11,6 +11,8 @@ import {
   Divider,
   Avatar,
 } from "@mui/material";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { useAuth } from "@/app/context/AuthContext";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { getEventNews, NewsResponse } from "@/app/services/news/newsService";
@@ -332,7 +334,7 @@ export default function NewsFeed({ eventId, event }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, offset]);
 
-  const [featured, ...others] = news;
+  const [featured, ...others] = news; // mantido para compatibilidade mas não usado para diferenciar layout
 
   const handleNewsClick = (newsId: number) => {
     router.push(`/pages/news/${newsId}?eventId=${eventId}`);
@@ -357,180 +359,116 @@ export default function NewsFeed({ eventId, event }: Props) {
       {!loading && news.length === 0 && <EmptyNews />}
 
       {news.length > 0 && (
-        <>
-          {featured && (
-            <Card
-              onClick={() => handleNewsClick(featured.id)}
-              sx={{
-                backgroundColor: "transparent",
-                boxShadow: "none",
-                color: "#fff",
-                cursor: "pointer",
-                transition: "opacity 0.2s",
-                maxWidth: "100%",
-                boxSizing: "border-box",
-                "&:hover": { opacity: 0.8 },
-              }}
-            >
-              {/* Header: avatar + nome + data */}
-              <Box display="flex" alignItems="center" gap={1.5} sx={{ px: 0.5, py: 1 }}>
-                <Avatar
-                  src={featured.author?.profile_photo || undefined}
-                  alt={featured.author?.name || "Autor"}
-                  sx={{ width: 34, height: 34, bgcolor: "rgba(255,255,255,0.2)" }}
-                />
-                <Box>
-                  <Typography sx={{ color: "#fff", fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>
-                    {featured.author?.name || "Autor desconhecido"}
-                  </Typography>
-                  <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: 11 }}>
-                    {formatDate(featured.created_at)}
-                  </Typography>
-                </Box>
-              </Box>
-
-              {featured.images && featured.images.length > 0 && (
-                <CardMedia
-                  component="img"
-                  image={featured.images[0].image_url}
-                  alt={featured.title}
-                  sx={{ width: "100%", aspectRatio: "1 / 1", objectFit: "cover" }}
-                />
-              )}
-              <CardContent sx={{ padding: { xs: 2, md: 2.5, lg: 3 }, maxWidth: "100%", boxSizing: "border-box" }}>
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  sx={{
-                    color: "#fff",
-                    fontSize: { xs: "1.25rem", md: "1.5rem", lg: "1.75rem" },
-                    wordWrap: "break-word",
-                    overflowWrap: "break-word",
-                    maxWidth: "100%",
-                    hyphens: "auto",
-                  }}
-                >
-                  {featured.title}
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
-          <Divider
-            sx={{
-              borderColor: "rgba(255,255,255,0.35)",
-              borderWidth: "1px",
-              marginY: 1.5,
-            }}
-          />
-          <Box display="flex" flexDirection="column">
-            {others.map((item, index) => (
-              <Box key={item.id}>
-                <Card
-                  onClick={() => handleNewsClick(item.id)}
-                  sx={{
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
-                    color: "#fff",
-                    paddingBottom: 1,
-                    cursor: "pointer",
-                    transition: "opacity 0.2s",
-                    maxWidth: "100%",
-                    boxSizing: "border-box",
-                    "&:hover": { opacity: 0.8 },
-                  }}
-                >
-                  {/* Header: avatar + nome + data */}
-                  <Box display="flex" alignItems="center" gap={1} sx={{ px: 0.5, pb: 0.8 }}>
-                    <Avatar
-                      src={item.author?.profile_photo || undefined}
-                      alt={item.author?.name || "Autor"}
-                      sx={{ width: 26, height: 26, bgcolor: "rgba(255,255,255,0.2)" }}
-                    />
-                    <Box>
-                      <Typography sx={{ color: "#fff", fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>
-                        {item.author?.name || "Autor desconhecido"}
-                      </Typography>
-                      <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: 10 }}>
-                        {formatDate(item.created_at)}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* Conteúdo horizontal: imagem + título */}
-                  <Box display="flex" gap={2}>
-                    {item.images && item.images.length > 0 && (
-                      <CardMedia
-                        component="img"
-                        image={item.images[0].image_url}
-                        alt={item.title}
-                        sx={{
-                          width: { xs: 100, md: 120, lg: 140 },
-                          height: { xs: 100, md: 120, lg: 140 },
-                          borderRadius: 1,
-                          objectFit: "cover",
-                          flexShrink: 0,
-                        }}
-                      />
-                    )}
-                    <CardContent sx={{ padding: { xs: 1, md: 1.5, lg: 2 }, maxWidth: "100%", boxSizing: "border-box", minWidth: 0, flex: 1 }}>
-                      <Typography
-                        fontWeight={600}
-                        sx={{
-                          color: "#fff",
-                          fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
-                          wordWrap: "break-word",
-                          overflowWrap: "break-word",
-                          maxWidth: "100%",
-                          hyphens: "auto",
-                        }}
-                      >
-                        {item.title}
-                      </Typography>
-                    </CardContent>
-                  </Box>
-                </Card>
-
-                {/* Linha separadora */}
-                {index !== others.length - 1 && (
-                  <Divider
-                    sx={{
-                      borderColor: "rgba(255,255,255,0.15)",
-                      marginY: 1,
-                    }}
+        <Box display="flex" flexDirection="column">
+          {news.map((item, index) => (
+            <Box key={item.id}>
+              <Card
+                onClick={() => handleNewsClick(item.id)}
+                sx={{
+                  backgroundColor: "transparent",
+                  boxShadow: "none",
+                  color: "#fff",
+                  cursor: "pointer",
+                  transition: "opacity 0.2s",
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  "&:hover": { opacity: 0.8 },
+                }}
+              >
+                {/* Header: avatar + nome + data */}
+                <Box display="flex" alignItems="center" gap={1.5} sx={{ px: 0.5, py: 1 }}>
+                  <Avatar
+                    src={item.author?.profile_photo || undefined}
+                    alt={item.author?.name || "Autor"}
+                    sx={{ width: 34, height: 34, bgcolor: "rgba(255,255,255,0.2)" }}
                   />
-                )}
+                  <Box>
+                    <Typography sx={{ color: "#fff", fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>
+                      {item.author?.name || "Autor desconhecido"}
+                    </Typography>
+                    <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: 11 }}>
+                      {formatDate(item.created_at)}
+                    </Typography>
+                  </Box>
+                </Box>
 
-                {/* CTVAd a cada 3 posts */}
-                {(index + 1) % 3 === 0 && index !== others.length - 1 && (
-                  <>
-                    <Box
-                      sx={{
-                        "& > div": {
-                          mx: "0 !important",
-                          maxWidth: "100% !important",
-                          width: "100% !important",
-                        },
-                      }}
-                    >
-                      <AdBanner eventId={eventId} />
-                    </Box>
-                    <Divider
-                      sx={{
-                        borderColor: "rgba(255,255,255,0.15)",
-                        marginY: 1,
-                      }}
+                {item.images && item.images.length > 0 && (
+                  <Box sx={{ position: "relative" }}>
+                    <CardMedia
+                      component="img"
+                      image={item.images[0].image_url}
+                      alt={item.title}
+                      sx={{ width: "100%", aspectRatio: "1 / 1", objectFit: "cover" }}
                     />
-                  </>
+                    {/* Likes e comentários — overlay lado direito */}
+                    <Box sx={{
+                      position: "absolute",
+                      right: 10,
+                      bottom: 12,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 1.5,
+                    }}>
+                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.3 }}>
+                        <FavoriteBorderIcon sx={{ fontSize: 26, color: "#fff", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))" }} />
+                        <Typography sx={{ fontSize: 12, color: "#fff", fontWeight: 700, lineHeight: 1, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                          {item.likes_count ?? 0}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.3 }}>
+                        <ChatBubbleOutlineIcon sx={{ fontSize: 24, color: "#fff", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))" }} />
+                        <Typography sx={{ fontSize: 12, color: "#fff", fontWeight: 700, lineHeight: 1, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                          {item.comments_count ?? 0}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
                 )}
-              </Box>
-            ))}
+                <CardContent sx={{ px: 0.5, pt: 1.5, pb: 1, maxWidth: "100%", boxSizing: "border-box" }}>
+                  <Typography
+                    fontWeight={700}
+                    sx={{
+                      color: "#fff",
+                      fontSize: { xs: "1.1rem", md: "1.35rem" },
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
+                      maxWidth: "100%",
+                      hyphens: "auto",
+                    }}
+                  >
+                    {item.title}
+                  </Typography>
+                </CardContent>
+              </Card>
 
-            {loading &&
-              Array.from({ length: 2 }).map((_, i) => (
-                <NewsItemSkeleton key={i} isTorcida={isTorcida} />
-              ))}
-          </Box>
-        </>
+              <Divider sx={{ borderColor: "rgba(255,255,255,0.15)", marginY: 1.5 }} />
+
+              {/* Ad a cada 3 posts */}
+              {(index + 1) % 3 === 0 && index !== news.length - 1 && (
+                <>
+                  <Box
+                    sx={{
+                      "& > div": {
+                        mx: "0 !important",
+                        maxWidth: "100% !important",
+                        width: "100% !important",
+                      },
+                    }}
+                  >
+                    <AdBanner eventId={eventId} />
+                  </Box>
+                  <Divider sx={{ borderColor: "rgba(255,255,255,0.15)", marginY: 1.5 }} />
+                </>
+              )}
+            </Box>
+          ))}
+
+          {loading &&
+            Array.from({ length: 2 }).map((_, i) => (
+              <FeaturedNewsSkeleton key={i} isTorcida={isTorcida} />
+            ))}
+        </Box>
       )}
 
       {hasMore && <div ref={loaderRef} />}

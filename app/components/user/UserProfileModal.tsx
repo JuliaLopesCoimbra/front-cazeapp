@@ -3,19 +3,18 @@
 import { useState, useEffect } from "react";
 import {
   Dialog,
-  DialogTitle,
-  DialogContent,
   IconButton,
   Box,
   Typography,
   Avatar,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { getUserProfile, ProfileResponse } from "@/app/services/profile/profileService";
 import { useToast } from "@/app/context/ToastContext";
-import { getEventThemeByKey, getStoredEventBrandKey } from "@/app/utils/eventBranding";
+import { getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -42,13 +41,16 @@ export default function UserProfileModal({
   const { showToast } = useToast();
   const brandKey = getStoredEventBrandKey() ?? "default";
   const isTorcida = brandKey === "n1_torcida";
-  const theme = getEventThemeByKey(brandKey);
+
+  const bgColor = isTorcida ? "#0d2244" : "#1c1c1c";
+  const bannerColor = isTorcida ? "#0a1a38" : "#141414";
+  const accentColor = isTorcida ? "#1e4a8a" : "#2a2a2a";
+  const avatarRing = isTorcida ? "#1e4a8a" : "#333";
 
   useEffect(() => {
     if (open && userId) {
       loadProfile();
     } else {
-      // Limpa o perfil quando fecha
       setProfile(null);
     }
   }, [open, userId]);
@@ -75,77 +77,66 @@ export default function UserProfileModal({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth="xs"
       fullWidth
-      sx={{
-        zIndex: 1500, // Z-index maior para ficar acima de outras modais
-      }}
+      sx={{ zIndex: 1500 }}
       PaperProps={{
         sx: {
-          backgroundColor: isTorcida ? "#d4a400" : "#1a1a1a",
-          color: isTorcida ? "#000" : "#fff",
-          borderRadius: 2,
-          boxShadow: isTorcida ? "0 8px 32px rgba(212, 164, 0, 0.55)" : "0 8px 32px rgba(0, 0, 0, 0.5)",
+          backgroundColor: bgColor,
+          borderRadius: 3,
+          overflow: "hidden",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
+          border: "1px solid rgba(255,255,255,0.06)",
         },
       }}
       slotProps={{
         backdrop: {
           sx: {
-            backgroundColor: "rgba(0, 0, 0, 0.85)", // Backdrop mais escuro para destacar
-            backdropFilter: "blur(4px)",
+            backgroundColor: "rgba(0,0,0,0.8)",
+            backdropFilter: "blur(6px)",
           },
         },
       }}
     >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          pb: 2,
-        }}
-      >
-        Perfil do Usuário
+      {/* Faixa superior + botão fechar */}
+      <Box sx={{ position: "relative", bgcolor: bannerColor, height: 72 }}>
         <IconButton
           onClick={onClose}
-          sx={{ color: isTorcida ? "#000" : "#fff" }}
           size="small"
+          sx={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            bgcolor: "rgba(255,255,255,0.08)",
+            color: "rgba(255,255,255,0.7)",
+            "&:hover": { bgcolor: "rgba(255,255,255,0.14)" },
+          }}
         >
-          <CloseIcon />
+          <CloseIcon fontSize="small" />
         </IconButton>
-      </DialogTitle>
+      </Box>
 
-      <DialogContent sx={{ p: 3 }}>
+      {/* Conteúdo */}
+      <Box sx={{ px: 3, pb: 3.5 }}>
         {loading ? (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              py: 4,
-            }}
-          >
-            <CircularProgress sx={{ color: isTorcida ? "#000" : theme.footerActiveColor }} />
+          <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
+            <CircularProgress size={32} sx={{ color: "rgba(255,255,255,0.3)" }} />
           </Box>
         ) : profile ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            {/* Foto de perfil */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            {/* Avatar overlapping the banner */}
             <Avatar
               src={profile.profile_photo || undefined}
               alt={profile.name || "Usuário"}
               sx={{
-                width: 120,
-                height: 120,
-                bgcolor: "rgba(255,255,255,0.2)",
-                border: "3px solid rgba(255,255,255,0.1)",
+                width: 88,
+                height: 88,
+                mt: "-44px",
+                bgcolor: accentColor,
+                border: `3px solid ${avatarRing}`,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+                fontSize: 32,
+                fontWeight: 700,
               }}
             >
               {profile.name?.[0]?.toUpperCase() || "?"}
@@ -153,36 +144,35 @@ export default function UserProfileModal({
 
             {/* Nome */}
             <Typography
-              variant="h5"
-              fontWeight={600}
-              sx={{ color: isTorcida ? "#000" : "#fff", textAlign: "center" }}
+              sx={{
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: 20,
+                mt: 1.5,
+                textAlign: "center",
+                letterSpacing: "-0.2px",
+              }}
             >
               {profile.name || "Usuário sem nome"}
             </Typography>
 
             {/* Membro desde */}
-            <Box
+            <Chip
+              icon={<CalendarTodayIcon sx={{ fontSize: "14px !important", color: "rgba(255,255,255,0.5) !important" }} />}
+              label={`Membro desde ${formatDate(profile.created_at)}`}
+              size="small"
               sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                mt: 1,
+                mt: 1.5,
+                bgcolor: "rgba(255,255,255,0.06)",
+                color: "rgba(255,255,255,0.55)",
+                fontSize: 12,
+                border: "1px solid rgba(255,255,255,0.08)",
+                "& .MuiChip-icon": { ml: 0.5 },
               }}
-            >
-              <CalendarTodayIcon sx={{ color: isTorcida ? "#000" : theme.footerActiveColor, fontSize: 20 }} />
-              <Typography
-                sx={{
-                  color: isTorcida ? "rgba(0,0,0,0.78)" : "rgba(255,255,255,0.7)",
-                  fontSize: 14,
-                }}
-              >
-                Membro desde {formatDate(profile.created_at)}
-              </Typography>
-            </Box>
+            />
           </Box>
         ) : null}
-      </DialogContent>
+      </Box>
     </Dialog>
   );
 }
-

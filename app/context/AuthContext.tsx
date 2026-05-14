@@ -31,7 +31,7 @@ interface AuthContextType {
   canInviteColunista: boolean;
   authReady: boolean;
   authVersion: number;
-  login: (accessToken: string, refreshToken: string) => void;
+  login: (accessToken: string, refreshToken: string, keepMeLoggedIn?: boolean) => void;
   logout: () => void;
 }
 
@@ -103,12 +103,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, [isAuthenticated]);
   
 const login = useCallback(
-  (accessToken: string, refreshToken: string) => {
+  (accessToken: string, refreshToken: string, keepMeLoggedIn?: boolean) => {
     try {
       const decoded = jwtDecode<TokenPayload>(accessToken);
 
       localStorage.setItem("access_token", accessToken);
-      document.cookie = `refresh_token=${refreshToken}; path=/; secure`;
+
+      if (keepMeLoggedIn) {
+        localStorage.setItem("keep_logged_in", "1");
+      }
+
+      const persist = keepMeLoggedIn ?? localStorage.getItem("keep_logged_in") === "1";
+      const cookieExpiry = persist ? `; max-age=${90 * 24 * 60 * 60}` : "";
+      document.cookie = `refresh_token=${refreshToken}; path=/; secure${cookieExpiry}`;
 
       const userRole = decoded.role || null;
       setRole(userRole);
@@ -156,6 +163,7 @@ const login = useCallback(
 
   const logout = () => {
     localStorage.removeItem("access_token");
+    localStorage.removeItem("keep_logged_in");
     document.cookie =
       "refresh_token=; path=/; secure; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 

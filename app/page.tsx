@@ -113,17 +113,15 @@ const LoginForm: React.FC = () => {
       showToast("Login realizado com sucesso!", "success");
 
       const { access_token, refresh_token } = response;
-      login(access_token, refresh_token);
 
-      localStorage.setItem("access_token", access_token);
+      // Persiste preferência para o ciclo de refresh do token
+      if (keepMeLoggedIn) {
+        localStorage.setItem("keep_logged_in", "1");
+      } else {
+        localStorage.removeItem("keep_logged_in");
+      }
 
-      // Se remember_me estiver marcado, cookie expira em 90 dias
-      // Caso contrário, cookie de sessão (expira quando fechar navegador)
-      const cookieOptions = keepMeLoggedIn
-        ? `refresh_token=${refresh_token}; path=/; secure; max-age=${90 * 24 * 60 * 60}` // 90 dias
-        : `refresh_token=${refresh_token}; path=/; secure`; // Sessão
-
-      document.cookie = cookieOptions;
+      login(access_token, refresh_token, keepMeLoggedIn);
 
       router.push("/pages/user/home");
     } catch (err: unknown) {

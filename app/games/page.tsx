@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -17,6 +17,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LockClockIcon from "@mui/icons-material/LockClock";
 import SensorsIcon from "@mui/icons-material/Sensors";
+import axiosInstance from "@/app/services/auth/axiosConfig";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -261,6 +262,26 @@ const phases = [
   { key: "quartas", label: "Quartas", sublabel: "1 jogo" },
   { key: "semi",    label: "Semi",    sublabel: "1 jogo" },
 ];
+
+// ─── Tipos e fetch dos stats reais ────────────────────────────────────────────
+
+interface BrazilStats {
+  jogos: number;
+  vitorias: number;
+  empates: number;
+  gols: number;
+  grupo: string;
+  pontos: number;
+}
+
+async function fetchBrazilStats(): Promise<BrazilStats | null> {
+  try {
+    const { data } = await axiosInstance.get<BrazilStats>("/football/brazil/stats");
+    return data;
+  } catch {
+    return null;
+  }
+}
 
 // ─── Estado de fase bloqueada ─────────────────────────────────────────────────
 
@@ -613,6 +634,11 @@ export default function GamesPage() {
   const [activePhase, setActivePhase] = useState("grupos");
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [isLive, setIsLive] = useState(false);
+  const [stats, setStats] = useState<BrazilStats | null>(null);
+
+  useEffect(() => {
+    fetchBrazilStats().then((s) => { if (s) setStats(s); });
+  }, []);
 
   const filteredGames = brazilGames.filter((g) => g.phase === activePhase);
 
@@ -677,16 +703,16 @@ export default function GamesPage() {
         </Box>
 
         <Typography sx={{ color: "rgba(255,255,255,0.65)", fontSize: 12, mt: 0.5 }}>
-          Grupo C · 3 jogos na fase de grupos
+          {stats ? `Grupo ${stats.grupo} · ${stats.jogos} jogos na fase de grupos` : "Copa do Mundo · Fase de Grupos"}
         </Typography>
 
         {/* Stats */}
         <Box sx={{ display: "flex", gap: 1.5, mt: 2.5, position: "relative" }}>
           {[
-            { label: "Jogos",    value: "3" },
-            { label: "Vitórias", value: isLive ? "1" : "—" },
-            { label: "Gols",     value: isLive ? "1" : "—" },
-            { label: "Grupo",    value: "C" },
+            { label: "Jogos",    value: stats ? String(stats.jogos)    : "—" },
+            { label: "Vitórias", value: stats ? String(stats.vitorias) : "—" },
+            { label: "Gols",     value: stats ? String(stats.gols)     : "—" },
+            { label: "Grupo",    value: stats ? stats.grupo            : "—" },
           ].map((s) => (
             <Box key={s.label} sx={{ flex: 1, bgcolor: "rgba(255,255,255,0.15)", borderRadius: 2, px: 1, py: 0.8, textAlign: "center" }}>
               <Typography sx={{ color: "#FEDF00", fontSize: 17, fontWeight: 900 }}>{s.value}</Typography>

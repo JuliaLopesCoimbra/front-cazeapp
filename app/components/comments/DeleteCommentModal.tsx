@@ -1,16 +1,15 @@
 "use client";
 
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Drawer,
   Box,
   Typography,
   Button,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CloseIcon from "@mui/icons-material/Close";
 import { useToast } from "@/app/context/ToastContext";
 import { getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
@@ -31,6 +30,7 @@ export default function DeleteCommentModal({
 }: Props) {
   const { showToast } = useToast();
   const isTorcida = getStoredEventBrandKey() === "n1_torcida";
+  const bgColor = isTorcida ? "#0d2244" : "#1a1a1a";
 
   const handleConfirm = async () => {
     try {
@@ -42,101 +42,91 @@ export default function DeleteCommentModal({
     }
   };
 
+  const preview =
+    commentContent.length > 100
+      ? `${commentContent.substring(0, 100)}...`
+      : commentContent;
+
   return (
-    <Dialog
+    <Drawer
+      anchor="bottom"
       open={open}
       onClose={loading ? undefined : onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{
-        backdrop: {},
-        root: {
-          sx: {
-            zIndex: 1600,
-          },
-        },
-      }}
       PaperProps={{
         sx: {
-          backgroundColor: isTorcida ? "#d4a400" : "#1a1a1a",
-          color: "#fff",
-          borderRadius: 2,
+          borderRadius: "20px 20px 0 0",
+          bgcolor: bgColor,
+          overflow: "hidden",
         },
       }}
+      slotProps={{
+        root: { sx: { zIndex: 1600 } },
+      }}
     >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          borderBottom: isTorcida ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(255,255,255,0.1)",
-          pb: 2,
-          fontWeight: 600,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 48,
-            height: 48,
-            borderRadius: "50%",
-            backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255, 48, 64, 0.1)",
-          }}
-        >
-          <WarningAmberIcon sx={{ color: "#fff", fontSize: 28 }} />
-        </Box>
-        Excluir Comentário
-      </DialogTitle>
+      {/* Handle */}
+      <Box sx={{ pt: 1.5, pb: 0.5, display: "flex", justifyContent: "center" }}>
+        <Box sx={{ width: 40, height: 4, bgcolor: "rgba(255,255,255,0.15)", borderRadius: 2 }} />
+      </Box>
 
-      <DialogContent sx={{ pt: 3, pb: 2 }}>
-        <Typography
-          variant="body1"
-          sx={{ color: "rgba(255,255,255,0.95)", mb: 2 }}
+      {/* Header */}
+      <Box sx={{
+        px: 2.5, py: 1.5,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+      }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 36, height: 36, borderRadius: "50%",
+            bgcolor: "rgba(229,57,53,0.12)",
+          }}>
+            <DeleteOutlineIcon sx={{ fontSize: 20, color: "#e53935" }} />
+          </Box>
+          <Typography sx={{ fontWeight: 700, fontSize: 16, color: "#fff" }}>
+            Excluir comentário
+          </Typography>
+        </Box>
+        <IconButton
+          onClick={onClose}
+          disabled={loading}
+          size="small"
+          sx={{ bgcolor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.6)" }}
         >
-          Tem certeza que deseja excluir este comentário?
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Box>
+
+      {/* Content */}
+      <Box sx={{ px: 2.5, pt: 2.5, pb: 1 }}>
+        <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 14, mb: 2 }}>
+          Tem certeza? Todas as respostas também serão excluídas e esta ação não pode ser desfeita.
         </Typography>
-        <Box
-          sx={{
-            backgroundColor: isTorcida ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)",
-            borderRadius: 1,
-            p: 2,
-            borderLeft: isTorcida ? "3px solid #000" : "3px solid #ff3040",
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{ color: "rgba(255,255,255,0.95)", mb: 0.5, wordBreak: "break-word" }}
-          >
-            {commentContent.length > 100
-              ? `${commentContent.substring(0, 100)}...`
-              : commentContent}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{ color: "rgba(255,255,255,0.8)" }}
-          >
-            Esta ação não pode ser desfeita. Todas as respostas também serão excluídas.
+        <Box sx={{
+          bgcolor: "rgba(255,255,255,0.05)",
+          borderRadius: 1.5,
+          p: 1.5,
+          borderLeft: "3px solid rgba(229,57,53,0.6)",
+        }}>
+          <Typography sx={{ color: "rgba(255,255,255,0.8)", fontSize: 13, wordBreak: "break-word" }}>
+            {preview}
           </Typography>
         </Box>
-      </DialogContent>
+      </Box>
 
-      <DialogActions
-        sx={{
-          borderTop: isTorcida ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(255,255,255,0.1)",
-          p: 2,
-          gap: 1,
-        }}
-      >
+      {/* Actions */}
+      <Box sx={{ px: 2.5, pt: 2, pb: 3.5, display: "flex", gap: 1.5 }}>
         <Button
           onClick={onClose}
           disabled={loading}
+          fullWidth
+          variant="outlined"
           sx={{
-            color: "rgba(255,255,255,0.9)",
-            "&:hover": {
-              backgroundColor: isTorcida ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.05)",
-            },
+            borderColor: "rgba(255,255,255,0.15)",
+            color: "rgba(255,255,255,0.8)",
+            borderRadius: 2,
+            py: 1.2,
+            fontWeight: 600,
+            "&:hover": { borderColor: "rgba(255,255,255,0.3)", bgcolor: "rgba(255,255,255,0.04)" },
           }}
         >
           Cancelar
@@ -144,49 +134,21 @@ export default function DeleteCommentModal({
         <Button
           onClick={handleConfirm}
           disabled={loading}
+          fullWidth
           variant="contained"
           sx={{
-            backgroundColor: isTorcida ? "#000" : "#ff3040",
+            bgcolor: "#e53935",
             color: "#fff",
-            fontWeight: 600,
-            "&:hover": {
-              backgroundColor: isTorcida ? "#222" : "#e02e3a",
-            },
-            "&:disabled": {
-              backgroundColor: isTorcida ? "rgba(0,0,0,0.3)" : "rgba(255, 48, 64, 0.3)",
-              color: "rgba(255,255,255,0.4)",
-            },
+            borderRadius: 2,
+            py: 1.2,
+            fontWeight: 700,
+            "&:hover": { bgcolor: "#c62828" },
+            "&:disabled": { bgcolor: "rgba(229,57,53,0.35)", color: "rgba(255,255,255,0.4)" },
           }}
         >
-          {loading ? (
-            <CircularProgress size={20} sx={{ color: "#fff" }} />
-          ) : (
-            "Excluir"
-          )}
+          {loading ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Excluir"}
         </Button>
-      </DialogActions>
-    </Dialog>
+      </Box>
+    </Drawer>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
