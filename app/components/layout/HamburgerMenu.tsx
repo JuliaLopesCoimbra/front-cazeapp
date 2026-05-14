@@ -33,7 +33,10 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import PolicyIcon from "@mui/icons-material/Policy";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import ArticleIcon from "@mui/icons-material/Article";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { EventResponse } from "@/app/services/events/eventAppService";
@@ -56,7 +59,7 @@ export default function HamburgerMenu({
 }: Props) {
   const { isAdmin, isAdminMaster, isSubadmin, logout } = useAuth();
   const [open, setOpen] = useState(false);
-  const [openEvents, setOpenEvents] = useState(false);
+  const [openEvents, setOpenEvents] = useState(true);
   const [activateModalOpen, setActivateModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventResponse | null>(
     null
@@ -177,33 +180,64 @@ export default function HamburgerMenu({
             <Box
               sx={{
                 width: "100%",
-                backgroundColor: "#d4a400",
-                borderRadius: 2,
-                padding: 2,
-                display: "flex",
-                flexDirection: "column",
-                gap: 0.8,
+                height: 90,
+                borderRadius: 2.5,
+                overflow: "hidden",
+                position: "relative",
+                bgcolor: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
-              {/* TÍTULO */}
-              <Typography fontWeight={600} sx={{ color: "#fff", fontSize: 14 }}>
-                {currentEvent?.title ?? "Nenhum evento"}
-              </Typography>
-
-              {/* STATUS */}
-              <Box display="flex" alignItems="center" gap={0.6}>
-                <Typography fontSize={12} sx={{ color: "#fff", opacity: 0.9 }}>
-                  Ambiente ativo
-                </Typography>
+              {/* Imagem de fundo */}
+              {currentEvent?.banner_image && (
                 <Box
+                  component="img"
+                  src={currentEvent.banner_image}
+                  alt={currentEvent.title}
                   sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    backgroundColor: "#2ecc71",
-                    boxShadow: "0 0 6px rgba(46, 204, 113, 0.8)",
+                    position: "absolute", inset: 0,
+                    width: "100%", height: "100%",
+                    objectFit: "cover",
                   }}
                 />
+              )}
+
+              {/* Gradiente overlay */}
+              <Box sx={{
+                position: "absolute", inset: 0,
+                background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)",
+              }} />
+
+              {/* Badge ATIVO — topo direito */}
+              <Box sx={{
+                position: "absolute", top: 8, right: 8,
+                display: "flex", alignItems: "center", gap: 0.5,
+                bgcolor: "rgba(0,0,0,0.45)",
+                border: "1px solid rgba(46,204,113,0.4)",
+                borderRadius: 5, px: 1, py: 0.3,
+                backdropFilter: "blur(4px)",
+              }}>
+                <Box sx={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  bgcolor: "#2ecc71",
+                  boxShadow: "0 0 5px rgba(46,204,113,0.9)",
+                }} />
+                <Typography sx={{ fontSize: 10, fontWeight: 700, color: "#fff", letterSpacing: 0.5 }}>
+                  ATIVO
+                </Typography>
+              </Box>
+
+              {/* Título — fundo esquerdo */}
+              <Box sx={{
+                position: "absolute", bottom: 0, left: 0, right: 0,
+                px: 1.5, pb: 1.2,
+              }}>
+                <Typography sx={{ fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1, mb: 0.3 }}>
+                  Ambiente selecionado
+                </Typography>
+                <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>
+                  {currentEvent?.title ?? "Nenhum evento"}
+                </Typography>
               </Box>
             </Box>
           </ListItem>
@@ -468,6 +502,25 @@ export default function HamburgerMenu({
                <ListItem disablePadding>
                  <ListItemButton
                    onClick={() => {
+                     router.push("/pages/admin/dashboard");
+                     setOpen(false);
+                   }}
+                 >
+                   <DashboardIcon sx={{ mr: 2, color: "white" }} />
+                   <ListItemText
+                     primary="Dashboard"
+                     secondary="Métricas e infraestrutura"
+                     primaryTypographyProps={{ fontWeight: 600 }}
+                     secondaryTypographyProps={{
+                       sx: { color: "rgba(255,255,255,0.6)" },
+                     }}
+                   />
+                 </ListItemButton>
+               </ListItem>
+               <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+               <ListItem disablePadding>
+                 <ListItemButton
+                   onClick={() => {
                      router.push("/pages/admin/permissions");
                      setOpen(false);
                    }}
@@ -516,6 +569,44 @@ export default function HamburgerMenu({
                    <ListItemText
                      primary="Remoção de Dados"
                      secondary="Solicitações LGPD pendentes"
+                     primaryTypographyProps={{ fontWeight: 600 }}
+                     secondaryTypographyProps={{
+                       sx: { color: "rgba(255,255,255,0.6)" },
+                     }}
+                   />
+                 </ListItemButton>
+               </ListItem>
+               <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+               <ListItem disablePadding>
+                 <ListItemButton
+                   onClick={() => {
+                     router.push("/pages/admin/tshirt-stock");
+                     setOpen(false);
+                   }}
+                 >
+                   <Inventory2Icon sx={{ mr: 2, color: "white" }} />
+                   <ListItemText
+                     primary="Estoque de camisetas"
+                     secondary="Quantidades por tamanho"
+                     primaryTypographyProps={{ fontWeight: 600 }}
+                     secondaryTypographyProps={{
+                       sx: { color: "rgba(255,255,255,0.6)" },
+                     }}
+                   />
+                 </ListItemButton>
+               </ListItem>
+               <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
+               <ListItem disablePadding>
+                 <ListItemButton
+                   onClick={() => {
+                     router.push("/pages/admin/tshirt-scan");
+                     setOpen(false);
+                   }}
+                 >
+                   <QrCodeScannerIcon sx={{ mr: 2, color: "white" }} />
+                   <ListItemText
+                     primary="Baixa camiseta (QR)"
+                     secondary="Registrar retirada no estande"
                      primaryTypographyProps={{ fontWeight: 600 }}
                      secondaryTypographyProps={{
                        sx: { color: "rgba(255,255,255,0.6)" },

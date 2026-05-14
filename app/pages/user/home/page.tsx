@@ -2,12 +2,22 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Box } from "@mui/material";
+import {
+  Box,
+  Button,
+  // Checkbox,        // CAMISETAS - comentado temporariamente
+  // Dialog,          // CAMISETAS - comentado temporariamente
+  // DialogActions,   // CAMISETAS - comentado temporariamente
+  // DialogContent,   // CAMISETAS - comentado temporariamente
+  // DialogTitle,     // CAMISETAS - comentado temporariamente
+  // FormControlLabel, // CAMISETAS - comentado temporariamente
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import HomeHeader from "@/app/components/home/HeaderHome";
 import HomeTabs from "@/app/components/home/HomeTabs";
 import BottomNav from "@/app/components/layout/BottomNav";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
-import { Skeleton } from "@mui/material";
 import NewsFeed from "@/app/components/home/NewsFeed";
 import AdBanner from "@/app/components/ads/AdBanner";
 import EventDetails from "@/app/components/home/EventDetails";
@@ -47,11 +57,13 @@ const HomeContent: React.FC = () => {
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(true);
+  // const [shirtReserveOpen, setShirtReserveOpen] = useState(false);
+  // const [shirtTicketAck, setShirtTicketAck] = useState(false);
   const currentEventIdRef = useRef<number | null>(null);
   const isCheckingRef = useRef(false); // Previne múltiplas verificações simultâneas
   const scrollExecutedRef = useRef(false);
   const router = useRouter();
-  const { isAdmin, authReady } = useAuth();
+  const { isAdmin, authReady, isAuthenticated } = useAuth();
 
   // Persist tab selection
   useEffect(() => {
@@ -623,7 +635,7 @@ const HomeContent: React.FC = () => {
 
         {activeTab === "enredo" && currentEvent && (
           <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            {currentEvent.event_type === "world_cup" ? (
+            {currentEvent.event_type === "world_cup" || currentEvent.brand_key === "n1_torcida" ? (
               <WorldCupGames eventId={currentEvent.id} />
             ) : (
               <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} event={currentEvent} />
@@ -632,6 +644,51 @@ const HomeContent: React.FC = () => {
         )}
       </Box>
       <BottomNav activeColor={currentTheme.footerActiveColor} eventId={currentEvent?.id} />
+
+      {/* CAMISETAS - comentado temporariamente, reativar quando necessário
+      <Dialog
+        open={shirtReserveOpen}
+        onClose={() => setShirtReserveOpen(false)}
+        PaperProps={{ sx: { borderRadius: 3, maxWidth: 420, mx: 2 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, pr: 4 }}>
+          Reserva de camiseta
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2, lineHeight: 1.6 }}>
+            A reserva de camisetas é somente para quem comprou o ingresso para participar do evento
+            N1. Ao continuar, você confirma que está elegível para reservar conforme as regras do
+            evento.
+          </Typography>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={shirtTicketAck}
+                onChange={(_, c) => setShirtTicketAck(c)}
+                color="success"
+              />
+            }
+            label="Li e comprovo que comprei o ingresso para o evento N1"
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setShirtReserveOpen(false)} color="inherit">
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!shirtTicketAck}
+            onClick={() => {
+              setShirtReserveOpen(false);
+              router.push("/pages/user/tshirt-reservation");
+            }}
+            sx={{ fontWeight: 700 }}
+          >
+            Continuar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      */}
     </>
   );
 };

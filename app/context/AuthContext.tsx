@@ -11,11 +11,11 @@ import React, {
 import { jwtDecode } from "jwt-decode";
 interface TokenPayload {
   sub: string;
-  role: "admin_master" | "subadmin" | "colunista" | "user" | "admin"; // Mantém "admin" para compatibilidade
+  role: "admin_master" | "subadmin" | "colunista" | "user" | "admin" | "promotor";
   exp: number;
 }
 
-type UserRole = "admin_master" | "subadmin" | "colunista" | "user" | "admin" | null;
+type UserRole = "admin_master" | "subadmin" | "colunista" | "user" | "admin" | "promotor" | null;
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -23,6 +23,7 @@ interface AuthContextType {
   isAdminMaster: boolean;
   isSubadmin: boolean;
   isColunista: boolean;
+  isPromotor: boolean;
   isAdmin: boolean; // Mantido para compatibilidade (admin_master ou subadmin)
   canCreatePost: boolean;
   canApprovePost: boolean;
@@ -31,7 +32,7 @@ interface AuthContextType {
   canInviteColunista: boolean;
   authReady: boolean;
   authVersion: number;
-  login: (accessToken: string, refreshToken: string) => void;
+  login: (accessToken: string, refreshToken: string, keepMeLoggedIn?: boolean) => void;
   logout: () => void;
 }
 
@@ -82,6 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const isAdminMaster = role === "admin_master";
   const isSubadmin = role === "subadmin";
   const isColunista = role === "colunista";
+  const isPromotor = role === "promotor";
   const isAdmin = role === "admin_master" || role === "subadmin" || role === "admin"; // Compatibilidade
   const canCreatePost = role === "admin_master" || role === "subadmin" || role === "colunista";
   const canApprovePost = role === "admin_master" || role === "subadmin";
@@ -103,12 +105,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, [isAuthenticated]);
   
 const login = useCallback(
-  (accessToken: string, refreshToken: string) => {
+  (accessToken: string, refreshToken: string, keepMeLoggedIn?: boolean) => {
     try {
       const decoded = jwtDecode<TokenPayload>(accessToken);
 
       localStorage.setItem("access_token", accessToken);
-      document.cookie = `refresh_token=${refreshToken}; path=/; secure`;
+
+      if (keepMeLoggedIn) {
+        localStorage.setItem("keep_logged_in", "1");
+      }
+
+      const persist = keepMeLoggedIn ?? localStorage.getItem("keep_logged_in") === "1";
+      const cookieExpiry = persist ? `; max-age=${90 * 24 * 60 * 60}` : "";
+      document.cookie = `refresh_token=${refreshToken}; path=/; secure${cookieExpiry}`;
 
       const userRole = decoded.role || null;
       setRole(userRole);
@@ -156,6 +165,7 @@ const login = useCallback(
 
   const logout = () => {
     localStorage.removeItem("access_token");
+    localStorage.removeItem("keep_logged_in");
     document.cookie =
       "refresh_token=; path=/; secure; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
@@ -233,6 +243,7 @@ const login = useCallback(
         isAdminMaster,
         isSubadmin,
         isColunista,
+        isPromotor,
         isAdmin,
         canCreatePost,
         canApprovePost,

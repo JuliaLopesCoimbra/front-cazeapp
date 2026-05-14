@@ -17,17 +17,24 @@ jobs:
           key: ${{ secrets.PROD_SSH_KEY }}
           script_stop: true
           script: |
+            # 1. Limpeza ANTES do build (evita ENOSPC)
+            docker system prune -f
+            docker builder prune -f
+
+            # 2. Atualiza o código
             cd /home/ec2-user/front-n1
             git fetch origin
             git checkout main
             git reset --hard origin/main
 
-            # Limpeza preventiva para não lotar o disco da EC2
-            docker image prune -f
-
-            # Remove container antigo se existir (evita conflito de nome)
+            # 3. Para container e processos antigos
             docker rm -f n1-front || true
+            pm2 stop all || true
+            pm2 delete all || true
+            sudo fuser -k 3000/tcp || true
 
-            # Build e Restart automático
+            # 4. Build e deploy
             docker compose up --build -d
+
+            # 5. Remove imagens antigas pós-build
             docker image prune -f

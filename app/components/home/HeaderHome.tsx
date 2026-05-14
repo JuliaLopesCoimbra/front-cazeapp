@@ -12,6 +12,10 @@ import ArticleIcon from "@mui/icons-material/Article";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import CommentIcon from "@mui/icons-material/Comment";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+// import CheckroomIcon from "@mui/icons-material/Checkroom";    // CAMISETAS - comentado temporariamente
+// import CloseIcon from "@mui/icons-material/Close";             // CAMISETAS - comentado temporariamente
+// import { getMyTshirtReservation, TshirtReservationMine } from "@/app/services/user/tshirtReservationUserService"; // CAMISETAS - comentado temporariamente
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EventResponse } from "@/app/services/events/eventAppService";
@@ -57,6 +61,13 @@ export default function HomeHeader({
   const brandKey = getEventBrandKey(currentEvent || event);
   const isTorcida = brandKey === "n1_torcida";
   const torcidaPopupBg = "#d4a400";
+  // CAMISETAS - comentado temporariamente
+  // const [shirtReservation, setShirtReservation] = useState<TshirtReservationMine | null>(null);
+  // const [shirtLoading, setShirtLoading] = useState(false);
+  // const [shirtWidgetDismissed, setShirtWidgetDismissed] = useState(() => {
+  //   if (typeof window === "undefined") return false;
+  //   return localStorage.getItem("shirtWidgetDismissed") === "1";
+  // });
 
   useEffect(() => {
     // Se o perfil foi passado como prop, não precisa buscar
@@ -78,6 +89,16 @@ export default function HomeHeader({
         setLoadingProfile(false);
       });
   }, [profileProp]);
+
+  // CAMISETAS - comentado temporariamente
+  // useEffect(() => {
+  //   if (!isTorcida || !isAuthenticated) return;
+  //   setShirtLoading(true);
+  //   getMyTshirtReservation()
+  //     .then(setShirtReservation)
+  //     .catch(() => setShirtReservation(null))
+  //     .finally(() => setShirtLoading(false));
+  // }, [isTorcida, isAuthenticated]);
 
   // Buscar contador de notificações não lidas (apenas se autenticado)
   useEffect(() => {
@@ -397,38 +418,11 @@ export default function HomeHeader({
           </Box>
         </Box>
 
-        {/* EVENTO + STATUS - Skeleton */}
-        {(event || currentEvent) && (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: { xs: 0.4, md: 0.6, lg: 0.8 },
-            }}
-          >
-            <Skeleton
-              variant="text"
-              width={200}
-              height={24}
-              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-            />
-            <Box display="flex" alignItems="center" gap={{ xs: 0.6, md: 0.8, lg: 1 }}>
-              <Skeleton
-                variant="text"
-                width={120}
-                height={20}
-                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-              />
-              <Skeleton
-                variant="circular"
-                width={12}
-                height={12}
-                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-              />
-            </Box>
-          </Box>
+        {/* CAMISETAS - comentado temporariamente
+        {isTorcida && (
+          <Skeleton variant="rectangular" height={56} sx={{ bgcolor: "rgba(255,255,255,0.07)", borderRadius: 2 }} />
         )}
+        */}
       </Box>
     );
   }
@@ -476,6 +470,20 @@ export default function HomeHeader({
           {canApprovePosts && currentEvent && (
             <PendingPostsNotification eventId={currentEvent.id} />
           )}
+          {/* CAMISETAS - comentado temporariamente
+          {isTorcida && isAuthenticated && shirtWidgetDismissed && (
+            <IconButton
+              onClick={() => router.push("/pages/user/tshirt-reservation")}
+              sx={{
+                color: "rgba(255,255,255,0.6)",
+                "&:hover": { backgroundColor: "rgba(255,255,255,0.08)" },
+                fontSize: { xs: "1.5rem", md: "1.75rem", lg: "2rem" },
+              }}
+            >
+              <CheckroomIcon sx={{ fontSize: "inherit" }} />
+            </IconButton>
+          )}
+          */}
           <IconButton
             onClick={(e) => setNotificationsAnchorEl(e.currentTarget)}
             sx={{
@@ -515,52 +523,66 @@ export default function HomeHeader({
         {today}
       </Typography> */}
 
-      {/* EVENTO + STATUS */}
-      {(event || currentEvent) && (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: { xs: 0.4, md: 0.6, lg: 0.8 },
-          }}
-        >
-          <Typography
-            variant="body1"
-            fontWeight={600}
-            sx={{ 
-              color: "#fff",
-              fontSize: { xs: "1rem", md: "1.25rem", lg: "1.5rem" },
-            }}
-          >
-            {(event || currentEvent)?.title || "Carregando..."}
-          </Typography>
-
-          <Box display="flex" alignItems="center" gap={{ xs: 0.6, md: 0.8, lg: 1 }}>
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                color: "white",
-                fontSize: { xs: "0.875rem", md: "1rem", lg: "1.125rem" },
-              }}
-            >
-              {(event || currentEvent)?.is_active ? "Ambiente ao vivo" : "Ambiente offline"}
-            </Typography>
-
+      {/* CAMISETAS - comentado temporariamente
+      {isTorcida && isAuthenticated && !shirtWidgetDismissed && (
+        <Box>
+          {shirtLoading ? (
+            <Skeleton variant="rectangular" height={62} sx={{ bgcolor: "rgba(255,255,255,0.07)", borderRadius: 2.5 }} />
+          ) : shirtReservation ? (
+            (() => {
+              const isPending = shirtReservation.status === "pending_pickup";
+              return (
+                <Box
+                  onClick={() => router.push("/pages/user/tshirt-reservation")}
+                  sx={{
+                    display: "flex", alignItems: "center", gap: 1.5,
+                    cursor: "pointer",
+                    bgcolor: isPending ? "rgba(0,151,57,0.1)" : "rgba(255,255,255,0.04)",
+                    borderRadius: 2.5,
+                    px: 1.5, py: 1.2,
+                    border: isPending ? "1px solid rgba(0,151,57,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                    transition: "transform 0.15s",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, bgcolor: isPending ? "#4caf50" : "rgba(255,255,255,0.15)", borderRadius: "3px 0 0 3px" }} />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontSize: 13, fontWeight: 700, lineHeight: 1.3, color: isPending ? "#4caf50" : "rgba(255,255,255,0.45)" }}>
+                      {isPending ? "Reserva confirmada" : "Camiseta retirada"}
+                    </Typography>
+                    <Typography sx={{ fontSize: 11, color: "rgba(255,255,255,0.35)", mt: 0.3, lineHeight: 1.3 }}>
+                      {isPending ? `Tamanho ${shirtReservation.size} · Retire na entrada do evento` : `Tamanho ${shirtReservation.size} · Obrigado pela participação`}
+                    </Typography>
+                  </Box>
+                  <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.2)", fontSize: 17, flexShrink: 0 }} />
+                  <IconButton size="small" onClick={(e) => { e.stopPropagation(); localStorage.setItem("shirtWidgetDismissed", "1"); setShirtWidgetDismissed(true); }} sx={{ color: "rgba(255,255,255,0.25)", p: 0.3, flexShrink: 0, "&:hover": { color: "rgba(255,255,255,0.6)", bgcolor: "transparent" } }}>
+                    <CloseIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+                </Box>
+              );
+            })()
+          ) : (
             <Box
-              sx={{
-                width: { xs: 8, md: 10, lg: 12 },
-                height: { xs: 8, md: 10, lg: 12 },
-                borderRadius: "50%",
-                backgroundColor: (event || currentEvent)?.is_active ? "#2ecc71" : "#9e9e9e",
-                boxShadow: (event || currentEvent)?.is_active 
-                  ? "0 0 6px rgba(46, 204, 113, 0.8)" 
-                  : "0 0 6px rgba(158, 158, 158, 0.5)",
-              }}
-            />
-          </Box>
+              onClick={() => router.push("/pages/user/tshirt-reservation")}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", bgcolor: "rgba(255,255,255,0.05)", borderRadius: 2.5, px: 1.5, py: 1.2, border: "1px solid rgba(255,255,255,0.1)", transition: "transform 0.15s", overflow: "hidden", position: "relative" }}
+            >
+              <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, bgcolor: "rgba(255,255,255,0.2)", borderRadius: "3px 0 0 3px" }} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>Camiseta oficial do evento</Typography>
+                <Typography sx={{ fontSize: 11, color: "rgba(255,255,255,0.4)", mt: 0.3, lineHeight: 1.3 }}>Disponível gratuitamente para participantes</Typography>
+              </Box>
+              <Box sx={{ flexShrink: 0, bgcolor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 1.5, px: 1.1, py: 0.5 }}>
+                <Typography sx={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: 0.6 }}>GARANTIR</Typography>
+              </Box>
+              <IconButton size="small" onClick={(e) => { e.stopPropagation(); localStorage.setItem("shirtWidgetDismissed", "1"); setShirtWidgetDismissed(true); }} sx={{ color: "rgba(255,255,255,0.25)", p: 0.3, flexShrink: 0, "&:hover": { color: "rgba(255,255,255,0.6)", bgcolor: "transparent" } }}>
+                <CloseIcon sx={{ fontSize: 14 }} />
+              </IconButton>
+            </Box>
+          )}
         </Box>
       )}
+      */}
 
       {/* MENU DE NOTIFICAÇÕES (POPUP) */}
       <Menu

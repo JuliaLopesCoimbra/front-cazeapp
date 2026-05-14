@@ -18,6 +18,7 @@ interface ReplyItemProps {
   onLike: () => void;
   onDelete: () => void;
   liking: boolean;
+  isTorcida?: boolean;
 }
 
 export default function ReplyItem({
@@ -29,6 +30,7 @@ export default function ReplyItem({
   onLike,
   onDelete,
   liking,
+  isTorcida,
 }: ReplyItemProps) {
   const canDelete = isAuthenticated && (isAdminMaster || isSubadmin || reply.user.id === currentUserId);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -170,6 +172,7 @@ export default function ReplyItem({
         type="comment"
         id={reply.id}
         likesCount={reply.likes.count}
+        isTorcida={isTorcida}
       />
     </Box>
   );

@@ -2,17 +2,14 @@
 
 import React from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  Button,
+  Drawer,
   Box,
-  Divider,
-  CircularProgress,
   Typography,
+  Button,
+  CircularProgress,
+  IconButton,
 } from "@mui/material";
+import BlockIcon from "@mui/icons-material/Block";
 import CloseIcon from "@mui/icons-material/Close";
 import { getStoredEventBrandKey } from "@/app/utils/eventBranding";
 
@@ -30,56 +27,85 @@ export default function DeactivatePostModal({
   deactivating,
 }: DeactivatePostModalProps) {
   const isTorcida = getStoredEventBrandKey() === "n1_torcida";
+  const bgColor = isTorcida ? "#0d2244" : "#1a1a1a";
+
   return (
-    <Dialog
+    <Drawer
+      anchor="bottom"
       open={open}
-      onClose={() => !deactivating && onClose()}
+      onClose={deactivating ? undefined : onClose}
       PaperProps={{
         sx: {
-          backgroundColor: isTorcida ? "#d4a400" : "rgba(26, 26, 26, 0.95)",
-          backdropFilter: isTorcida ? "none" : "blur(20px)",
-          color: "white",
-          borderRadius: 3,
-          border: isTorcida ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: "20px 20px 0 0",
+          bgcolor: bgColor,
+          overflow: "hidden",
         },
       }}
     >
-      <DialogTitle>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <CloseIcon sx={{ fontSize: 28, color: "#fff" }} />
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Desativar Post
+      {/* Handle */}
+      <Box sx={{ pt: 1.5, pb: 0.5, display: "flex", justifyContent: "center" }}>
+        <Box sx={{ width: 40, height: 4, bgcolor: "rgba(255,255,255,0.15)", borderRadius: 2 }} />
+      </Box>
+
+      {/* Header */}
+      <Box sx={{
+        px: 2.5, py: 1.5,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+      }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 36, height: 36, borderRadius: "50%",
+            bgcolor: "rgba(255,152,0,0.12)",
+          }}>
+            <BlockIcon sx={{ fontSize: 20, color: "#ff9800" }} />
+          </Box>
+          <Typography sx={{ fontWeight: 700, fontSize: 16, color: "#fff" }}>
+            Desativar post
           </Typography>
         </Box>
-      </DialogTitle>
-      <Divider sx={{ borderColor: isTorcida ? "rgba(255,255,255,0.2)" : "rgba(255, 255, 255, 0.1)", mx: 3 }} />
-      <DialogContent sx={{ pt: 3 }}>
-        <DialogContentText sx={{ color: "rgba(255,255,255,0.9)", fontSize: "1rem" }}>
-          Tem certeza que deseja <strong style={{ color: "#fff" }}>desativar</strong> este post?
-          <br />
-          <br />
-          <Box
-            component="span"
-            sx={{
-              display: "block",
-              p: 2,
-              mt: 2,
-              backgroundColor: isTorcida ? "rgba(255,255,255,0.12)" : "rgba(255, 68, 68, 0.1)",
-              borderRadius: 2,
-              border: isTorcida ? "1px solid rgba(255,255,255,0.25)" : "1px solid rgba(255, 68, 68, 0.2)",
-            }}
-          >
-            O post será desativado e não será mais visível no feed.
-          </Box>
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions sx={{ p: 3, pt: 2 }}>
+        <IconButton
+          onClick={onClose}
+          disabled={deactivating}
+          size="small"
+          sx={{ bgcolor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.6)" }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Box>
+
+      {/* Content */}
+      <Box sx={{ px: 2.5, pt: 2.5, pb: 1 }}>
+        <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 14, mb: 2 }}>
+          Tem certeza que deseja desativar este post? Ele não será mais visível no feed.
+        </Typography>
+        <Box sx={{
+          bgcolor: "rgba(255,152,0,0.07)",
+          borderRadius: 1.5,
+          p: 1.5,
+          borderLeft: "3px solid rgba(255,152,0,0.5)",
+        }}>
+          <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>
+            O post ficará desativado e poderá ser reativado posteriormente.
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Actions */}
+      <Box sx={{ px: 2.5, pt: 2, pb: 3.5, display: "flex", gap: 1.5 }}>
         <Button
           onClick={onClose}
           disabled={deactivating}
+          fullWidth
+          variant="outlined"
           sx={{
-            color: "rgba(255,255,255,0.95)",
-            textTransform: "none",
+            borderColor: "rgba(255,255,255,0.15)",
+            color: "rgba(255,255,255,0.8)",
+            borderRadius: 2,
+            py: 1.2,
+            fontWeight: 600,
+            "&:hover": { borderColor: "rgba(255,255,255,0.3)", bgcolor: "rgba(255,255,255,0.04)" },
           }}
         >
           Cancelar
@@ -87,21 +113,21 @@ export default function DeactivatePostModal({
         <Button
           onClick={onConfirm}
           disabled={deactivating}
+          fullWidth
           variant="contained"
-          startIcon={deactivating ? <CircularProgress size={16} sx={{ color: isTorcida ? "#000" : "#fff" }} /> : <CloseIcon />}
           sx={{
-            backgroundColor: isTorcida ? "#fff" : "#ff3040",
-            color: isTorcida ? "#000" : "white",
-            textTransform: "none",
-            "&:hover": {
-              backgroundColor: isTorcida ? "rgba(255,255,255,0.85)" : "#cc0000",
-            },
+            bgcolor: "#ff9800",
+            color: "#fff",
+            borderRadius: 2,
+            py: 1.2,
+            fontWeight: 700,
+            "&:hover": { bgcolor: "#e65100" },
+            "&:disabled": { bgcolor: "rgba(255,152,0,0.35)", color: "rgba(255,255,255,0.4)" },
           }}
         >
-          {deactivating ? "Desativando..." : "Desativar"}
+          {deactivating ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Desativar"}
         </Button>
-      </DialogActions>
-    </Dialog>
+      </Box>
+    </Drawer>
   );
 }
-

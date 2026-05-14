@@ -58,6 +58,7 @@ interface CommentSectionProps {
   onDeleteComment: (commentId: number, content: string) => void;
   onLoadMoreReplies: (commentId: number) => void;
   onLoadMoreComments: () => void;
+  isTorcida?: boolean;
 }
 
 export default function CommentSection({
@@ -91,6 +92,7 @@ export default function CommentSection({
   onDeleteComment,
   onLoadMoreReplies,
   onLoadMoreComments,
+  isTorcida,
 }: CommentSectionProps) {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
@@ -470,6 +472,7 @@ export default function CommentSection({
                             onLike={() => onLikeComment(reply.id, comment.id)}
                             onDelete={() => onDeleteComment(reply.id, reply.content)}
                             liking={likingComment[reply.id] || false}
+                            isTorcida={isTorcida}
                           />
                         ))}
                         {(!replies[comment.id] || replies[comment.id].length === 0) && (
@@ -593,6 +596,7 @@ export default function CommentSection({
           type="comment"
           id={selectedCommentId}
           likesCount={news.comments.find(c => c.id === selectedCommentId)?.likes.count || 0}
+          isTorcida={isTorcida}
         />
       )}
     </Box>
