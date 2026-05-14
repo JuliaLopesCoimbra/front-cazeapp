@@ -13,7 +13,12 @@ import {
   FormControlLabel,
   Checkbox,
   CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/app/context/ToastContext";
 import { useAuth } from "@/app/context/AuthContext";
@@ -23,6 +28,8 @@ import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 import LgpdModal from "@/app/components/auth/RegisterForm/LgpdModal";
 import LgpdDataProtectionModal from "@/app/components/auth/RegisterForm/LgpdDataProtectionModal";
 import MarketingConsentModal from "@/app/components/auth/RegisterForm/MarketingConsentModal";
+import TermsOfUseContent from "@/app/components/auth/RegisterForm/TermsOfUseContent";
+import PrivacyPolicyContent from "@/app/components/auth/RegisterForm/PrivacyPolicyContent";
 
 const API_URL = getApiUrl();
 const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
@@ -45,6 +52,8 @@ function CompleteProfileContent() {
   const [showLgpdModal, setShowLgpdModal] = useState(false);
   const [showLgpdDataProtectionModal, setShowLgpdDataProtectionModal] = useState(false);
   const [showMarketingConsentModal, setShowMarketingConsentModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const router = useRouter();
   const params = useSearchParams();
   const { showToast } = useToast();
@@ -387,6 +396,29 @@ function CompleteProfileContent() {
             </Button>
           </Box>
 
+          {/* Links de Termos de Uso e Política de Privacidade */}
+          <Box sx={{ mt: 1, mb: 3, textAlign: "center" }}>
+            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.72rem", lineHeight: 1.6 }}>
+              Ao continuar, você concorda com os nossos{" "}
+              <Box
+                component="span"
+                onClick={() => setShowTermsModal(true)}
+                sx={{ color: "#ffcc01", textDecoration: "underline", cursor: "pointer", "&:hover": { color: "#ffd633" } }}
+              >
+                Termos de Uso
+              </Box>
+              {" "}e a nossa{" "}
+              <Box
+                component="span"
+                onClick={() => setShowPrivacyModal(true)}
+                sx={{ color: "#ffcc01", textDecoration: "underline", cursor: "pointer", "&:hover": { color: "#ffd633" } }}
+              >
+                Política de Privacidade
+              </Box>
+              .
+            </Typography>
+          </Box>
+
           <Button
             fullWidth
             variant="contained"
@@ -423,6 +455,42 @@ function CompleteProfileContent() {
         open={showMarketingConsentModal}
         onClose={() => setShowMarketingConsentModal(false)}
       />
+
+      {/* Modal Termos de Uso */}
+      <Dialog
+        open={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        fullScreen
+        PaperProps={{ sx: { backgroundColor: "#111" } }}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", color: "#fff", borderBottom: "1px solid rgba(255,255,255,0.1)", py: 1.5, px: 2 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: "1rem" }}>Termos de Uso</Typography>
+          <IconButton onClick={() => setShowTermsModal(false)} sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ px: { xs: 2, sm: 4 }, py: 3 }}>
+          <TermsOfUseContent />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Política de Privacidade */}
+      <Dialog
+        open={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        fullScreen
+        PaperProps={{ sx: { backgroundColor: "#111" } }}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", color: "#fff", borderBottom: "1px solid rgba(255,255,255,0.1)", py: 1.5, px: 2 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: "1rem" }}>Política de Privacidade</Typography>
+          <IconButton onClick={() => setShowPrivacyModal(false)} sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ px: { xs: 2, sm: 4 }, py: 3 }}>
+          <PrivacyPolicyContent />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
