@@ -49,6 +49,7 @@ import {
   CheckCircle as HealthOkIcon,
   Error as HealthErrorIcon,
   Hub as AlbIcon,
+  CloudSync as CloudSyncIcon,
 } from "@mui/icons-material";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
@@ -60,6 +61,7 @@ import {
   InfraMetrics,
 } from "@/app/services/analytics/analyticsService";
 import { getEvents } from "@/app/services/events/eventAppService";
+import { getPhotoSyncStatus, PhotoSyncStatus } from "@/app/services/admin/photoSyncService";
 import { getEventBackgroundSxByKey, getStoredEventBrandKey } from "@/app/utils/eventBranding";
 import { useAnalyticsStream } from "@/app/hooks/useAnalyticsStream";
 
@@ -337,6 +339,7 @@ export default function DashboardPage() {
   const [events, setEvents] = useState<{ id: number; title: string }[]>([]);
   const [live, setLive] = useState(false);
   const [infraData, setInfraData] = useState<InfraMetrics | null>(null);
+  const [syncStatus, setSyncStatus] = useState<PhotoSyncStatus | null>(null);
 
   const storedBrandKey = getStoredEventBrandKey() ?? "default";
   const backgroundSx = getEventBackgroundSxByKey(storedBrandKey);
@@ -372,6 +375,7 @@ export default function DashboardPage() {
       setEvents(evs.map((e) => ({ id: e.id, title: e.title })))
     );
     getInfraMetrics().then(setInfraData).catch(() => {});
+    getPhotoSyncStatus(eventId?.toString()).then(setSyncStatus).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authReady, isAdminMaster, isSubadmin]);
 
@@ -384,6 +388,15 @@ export default function DashboardPage() {
 
   // SSE stream — updates setData directly while live is on
   useAnalyticsStream(eventId, period, setData, live);
+
+  // Poll photo sync status every 30s while in live mode
+  useEffect(() => {
+    if (!live) return;
+    const interval = setInterval(() => {
+      getPhotoSyncStatus(eventId?.toString()).then(setSyncStatus).catch(() => {});
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [live, eventId]);
 
   if (!authReady || loading) {
     return <DashboardSkeleton backgroundSx={backgroundSx} />;
@@ -998,6 +1011,141 @@ export default function DashboardPage() {
                     </Grid>
                   </Grid>
                 </>
+              )}
+            </>
+          )}
+
+          {/* ── Robô de Fotos ── */}
+          {syncStatus && (
+            <>
+              <SectionHeader title="Robô de Fotos" color="#ce93d8" />
+              <Grid container spacing={1.5}>
+                <Grid size={6}>
+                  <Paper
+                    sx={{
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.09)",
+                      borderRadius: "14px",
+                      p: 2,
+                      height: "100%",
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                      <Box
+                        sx={{
+                          width: 32, height: 32, borderRadius: "9px",
+                          backgroundColor: "#ce93d818",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                      >
+                        <CloudSyncIcon sx={{ color: "#ce93d8", fontSize: 18 }} />
+                      </Box>
+                      <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.78rem" }}>
+                        Status do robô
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8, height: 8, borderRadius: "50%",
+                          backgroundColor: syncStatus.is_alive ? "#66bb6a" : "#ef5350",
+                          boxShadow: syncStatus.is_alive ? "0 0 6px #66bb6a" : "none",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <Typography sx={{ color: "#fff", fontWeight: 700, fontSize: "1.1rem" }}>
+                        {syncStatus.is_alive ? "Online" : "Offline"}
+                      </Typography>
+                    </Box>
+                    {syncStatus.seconds_since_last_cycle !== null && (
+                      <Typography sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.72rem", mt: 0.5 }}>
+                        último ciclo há {formatDuration(syncStatus.seconds_since_last_cycle)}
+                      </Typography>
+                    )}
+                    {!syncStatus.last_cycle_at && (
+                      <Typography sx={{ color: "rgba(255,255,255,0.25)", fontSize: "0.72rem", mt: 0.5 }}>
+                        Nenhum ciclo registrado ainda
+                      </Typography>
+                    )}
+                  </Paper>
+                </Grid>
+                <Grid size={6}>
+                  <MetricCard
+                    icon={<FaceIcon sx={{ fontSize: 18 }} />}
+                    label="Fotos indexadas hoje"
+                    value={syncStatus.total_indexed_today}
+                    todayValue={syncStatus.total_cycles_today}
+                    todayLabel="ciclos hoje"
+                    accent="#ce93d8"
+                  />
+                </Grid>
+              </Grid>
+
+              {syncStatus.recent_logs.length > 0 && (
+                <Paper
+                  sx={{
+                    backgroundColor: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: "14px",
+                    p: 1.5,
+                    mt: 1.5,
+                  }}
+                >
+                  <Typography sx={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem", mb: 1 }}>
+                    Últimos ciclos
+                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                    {syncStatus.recent_logs.slice(0, 10).map((entry) => (
+                      <Box
+                        key={entry.id}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          py: 0.75,
+                          borderBottom: "1px solid rgba(255,255,255,0.04)",
+                          "&:last-child": { borderBottom: "none" },
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <Typography sx={{ color: "rgba(255,255,255,0.25)", fontSize: "0.68rem", fontFamily: "monospace", minWidth: 60 }}>
+                            {new Date(entry.cycle_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                          </Typography>
+                          {entry.server_name && (
+                            <Typography sx={{ color: "rgba(255,255,255,0.2)", fontSize: "0.65rem" }}>
+                              {entry.server_name}
+                            </Typography>
+                          )}
+                        </Box>
+                        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                          {entry.new_files > 0 && (
+                            <Typography sx={{ color: "#ce93d8", fontSize: "0.7rem", fontWeight: 600 }}>
+                              +{entry.new_files} foto{entry.new_files > 1 ? "s" : ""}
+                            </Typography>
+                          )}
+                          {entry.indexed > 0 && (
+                            <Typography sx={{ color: "#66bb6a", fontSize: "0.7rem" }}>
+                              {entry.indexed} face{entry.indexed > 1 ? "s" : ""}
+                            </Typography>
+                          )}
+                          {entry.errors > 0 && (
+                            <Typography sx={{ color: "#ef5350", fontSize: "0.7rem" }}>
+                              {entry.errors} erro{entry.errors > 1 ? "s" : ""}
+                            </Typography>
+                          )}
+                          {entry.new_files === 0 && entry.errors === 0 && (
+                            <Typography sx={{ color: "rgba(255,255,255,0.18)", fontSize: "0.68rem" }}>
+                              sem novidades
+                            </Typography>
+                          )}
+                          <Typography sx={{ color: "rgba(255,255,255,0.18)", fontSize: "0.65rem", minWidth: 28, textAlign: "right" }}>
+                            {formatDuration(entry.duration_seconds)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Paper>
               )}
             </>
           )}

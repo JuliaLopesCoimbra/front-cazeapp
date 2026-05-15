@@ -25,9 +25,6 @@ import { useAuth } from "@/app/context/AuthContext";
 import axios from "axios";
 import { getApiUrl } from "@/app/utils/apiUrlHelper";
 import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
-import LgpdModal from "@/app/components/auth/RegisterForm/LgpdModal";
-import LgpdDataProtectionModal from "@/app/components/auth/RegisterForm/LgpdDataProtectionModal";
-import MarketingConsentModal from "@/app/components/auth/RegisterForm/MarketingConsentModal";
 import TermsOfUseContent from "@/app/components/auth/RegisterForm/TermsOfUseContent";
 import PrivacyPolicyContent from "@/app/components/auth/RegisterForm/PrivacyPolicyContent";
 
@@ -46,12 +43,10 @@ const formatCPF = (value: string): string => {
 function CompleteProfileContent() {
   const [cpf, setCpf] = useState("");
   const [gender, setGender] = useState<"male" | "female" | "other" | "prefer_not_to_say" | "">("");
+  const [ageTermsAccepted, setAgeTermsAccepted] = useState(false);
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const [marketingEmailAccepted, setMarketingEmailAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showLgpdModal, setShowLgpdModal] = useState(false);
-  const [showLgpdDataProtectionModal, setShowLgpdDataProtectionModal] = useState(false);
-  const [showMarketingConsentModal, setShowMarketingConsentModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const router = useRouter();
@@ -77,6 +72,11 @@ function CompleteProfileContent() {
       return;
     }
 
+    if (!ageTermsAccepted) {
+      showToast("Você deve confirmar que tem 18 anos ou mais para continuar", "error");
+      return;
+    }
+
     if (!lgpdAccepted) {
       showToast("Você deve aceitar os termos LGPD para continuar", "error");
       return;
@@ -97,7 +97,7 @@ function CompleteProfileContent() {
           cpf: cpfClean,
           gender: gender as "male" | "female" | "other" | "prefer_not_to_say",
           lgpd_accepted: lgpdAccepted,
-          age_terms_accepted: true, // Já foi verificado na página de verificação de idade
+          age_terms_accepted: ageTermsAccepted,
           marketing_email_accepted: marketingEmailAccepted,
         },
         {
@@ -276,128 +276,53 @@ function CompleteProfileContent() {
           <FormControlLabel
             control={
               <Checkbox
-                checked={lgpdAccepted}
-                onChange={(e) => setLgpdAccepted(e.target.checked)}
-                sx={{
-                  color: "rgba(255, 255, 255, 0.7)",
-                  "&.Mui-checked": {
-                    color: "#ffcc01",
-                  },
-                }}
+                checked={ageTermsAccepted}
+                onChange={(e) => setAgeTermsAccepted(e.target.checked)}
+                sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-checked": { color: "#ffcc01" } }}
               />
             }
             label={
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: "rgba(255, 255, 255, 0.9)", 
-                  fontSize: "0.875rem",
-                  wordWrap: "break-word",
-                  overflowWrap: "break-word",
-                  whiteSpace: "normal",
-                  maxWidth: "100%",
-                  lineHeight: 1.4,
-                }}
-              >
-                Declaro que li e concordo com o tratamento dos meus dados pessoais para fins de cadastro no aplicativo.
+              <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "0.875rem" }}>
+                Confirmo que tenho 18 anos ou mais
               </Typography>
             }
-            sx={{ mb: 1, width: "100%", maxWidth: "100%" }}
+            sx={{ mt: 1 }}
           />
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-            <Button
-              onClick={() => setShowLgpdDataProtectionModal(true)}
-              sx={{
-                textTransform: "none",
-                color: "#ffcc01",
-                fontSize: "0.7rem",
-                textDecoration: "underline",
-                padding: 0,
-                minWidth: "auto",
-                "&:hover": {
-                  textDecoration: "underline",
-                  backgroundColor: "transparent",
-                },
-              }}
-            >
-              Ler mais
-            </Button>
-          </Box>
 
-       
           <FormControlLabel
             control={
               <Checkbox
                 checked={marketingEmailAccepted}
                 onChange={(e) => setMarketingEmailAccepted(e.target.checked)}
-                sx={{
-                  color: "rgba(255, 255, 255, 0.7)",
-                  "&.Mui-checked": {
-                    color: "#ffcc01",
-                  },
-                }}
+                sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-checked": { color: "#ffcc01" } }}
               />
             }
             label={
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: "rgba(255, 255, 255, 0.9)", 
-                  fontSize: "0.875rem",
-                  wordWrap: "break-word",
-                  overflowWrap: "break-word",
-                  whiteSpace: "normal",
-                  maxWidth: "100%",
-                  lineHeight: 1.4,
-                }}
-              >
-             Autorizo o envio de promoções, ofertas e conteúdo de marketing.
+              <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "0.875rem" }}>
+                Autorizo o envio de promoções, ofertas e conteúdo de marketing.
               </Typography>
             }
-            sx={{ mb: 1, width: "100%", maxWidth: "100%" }}
+            sx={{ mt: 1 }}
           />
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-            <Button
-              onClick={() => setShowMarketingConsentModal(true)}
-              sx={{
-                textTransform: "none",
-                color: "#ffcc01",
-                fontSize: "0.7rem",
-                textDecoration: "underline",
-                padding: 0,
-                minWidth: "auto",
-                "&:hover": {
-                  textDecoration: "underline",
-                  backgroundColor: "transparent",
-                },
-              }}
-            >
-              Ler mais
-            </Button>
-          </Box>
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-            <Button
-              onClick={() => setShowLgpdModal(true)}
-              sx={{
-                textTransform: "none",
-                color: "#ffcc01",
-                fontSize: "0.7rem",
-                textDecoration: "underline",
-                padding: 0,
-                minWidth: "auto",
-                "&:hover": {
-                  textDecoration: "underline",
-                  backgroundColor: "transparent",
-                },
-              }}
-            >
-              Ler termos completos
-            </Button>
-          </Box>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={lgpdAccepted}
+                onChange={(e) => setLgpdAccepted(e.target.checked)}
+                sx={{ color: "rgba(255, 255, 255, 0.7)", "&.Mui-checked": { color: "#ffcc01" } }}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.9)", fontSize: "0.875rem" }}>
+                Declaro que li e concordo com o tratamento dos meus dados pessoais para fins de cadastro no aplicativo.
+              </Typography>
+            }
+            sx={{ mt: 1 }}
+          />
 
-          {/* Links de Termos de Uso e Política de Privacidade */}
-          <Box sx={{ mt: 1, mb: 3, textAlign: "center" }}>
+          {/* Termos de Uso e Política de Privacidade */}
+          <Box sx={{ mt: 2.5, mb: 3, textAlign: "center" }}>
             <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.72rem", lineHeight: 1.6 }}>
               Ao continuar, você concorda com os nossos{" "}
               <Box
@@ -423,7 +348,7 @@ function CompleteProfileContent() {
             fullWidth
             variant="contained"
             onClick={handleSubmit}
-            disabled={loading || !cpf || !gender || !lgpdAccepted}
+            disabled={loading || !cpf || !gender || !lgpdAccepted || !ageTermsAccepted}
             sx={{
               backgroundColor: "#ffcc01",
               color: "#000",
@@ -442,19 +367,6 @@ function CompleteProfileContent() {
           </Button>
         </Box>
       </Container>
-
-      <LgpdModal
-        open={showLgpdModal}
-        onClose={() => setShowLgpdModal(false)}
-      />
-      <LgpdDataProtectionModal
-        open={showLgpdDataProtectionModal}
-        onClose={() => setShowLgpdDataProtectionModal(false)}
-      />
-      <MarketingConsentModal
-        open={showMarketingConsentModal}
-        onClose={() => setShowMarketingConsentModal(false)}
-      />
 
       {/* Modal Termos de Uso */}
       <Dialog
