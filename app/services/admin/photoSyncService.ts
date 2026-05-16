@@ -12,6 +12,7 @@ export interface PhotoSyncLogEntry {
   no_face: number;
   errors: number;
   duration_seconds: number;
+  total_drive_files: number;
 }
 
 export interface PhotoSyncStatus {
@@ -20,7 +21,10 @@ export interface PhotoSyncStatus {
   seconds_since_last_cycle: number | null;
   total_indexed_today: number;
   total_cycles_today: number;
+  total_drive_files: number;
+  total_s3_files: number;
   recent_logs: PhotoSyncLogEntry[];
+  upload_logs: PhotoSyncLogEntry[];
 }
 
 export const getPhotoSyncStatus = async (eventId?: string): Promise<PhotoSyncStatus> => {
