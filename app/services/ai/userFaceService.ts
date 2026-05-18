@@ -46,7 +46,7 @@ export async function registerFace(
   formData.append("file", file);
   formData.append("event_id", String(eventId));
   try {
-    const res = await api.post("/photo-ai/register-face", formData, {
+    const res = await api.post<{ success: boolean; message: string }>("/photo-ai/register-face", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
@@ -59,7 +59,7 @@ export async function deleteMyFace(
   eventId: number
 ): Promise<{ success: boolean }> {
   try {
-    const res = await api.delete("/photo-ai/my-face", {
+    const res = await api.delete<{ success: boolean }>("/photo-ai/my-face", {
       params: { event_id: eventId },
     });
     return res.data;
