@@ -228,6 +228,7 @@ export default function HamburgerMenu({
               </Box>
 
               {/* Título — fundo esquerdo */}
+              {!isTorcida && (
               <Box sx={{
                 position: "absolute", bottom: 0, left: 0, right: 0,
                 px: 1.5, pb: 1.2,
@@ -239,6 +240,7 @@ export default function HamburgerMenu({
                   {currentEvent?.title ?? "Nenhum evento"}
                 </Typography>
               </Box>
+              )}
             </Box>
           </ListItem>
           <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />

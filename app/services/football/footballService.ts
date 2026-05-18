@@ -85,6 +85,7 @@ export function isFinished(fixture: BrazilFixture) {
 export const ROUND_TO_PHASE: Record<string, string> = {
   // PT-BR (retornado pelo backend após tradução)
   "Fase de Grupos": "grupos",
+  "16 avos de Final": "dezesseis",
   "Oitavas de Final": "oitavas",
   "Quartas de Final": "quartas",
   "Semifinais": "semi",
@@ -94,6 +95,7 @@ export const ROUND_TO_PHASE: Record<string, string> = {
   "Group Stage - 1": "grupos",
   "Group Stage - 2": "grupos",
   "Group Stage - 3": "grupos",
+  "Round of 32": "dezesseis",
   "Round of 16": "oitavas",
   "Quarter-finals": "quartas",
   "Semi-finals": "semi",
@@ -118,8 +120,8 @@ export async function getFixtureEvents(fixtureId: number): Promise<FixtureEvent[
 }
 
 export async function getWcStandings(): Promise<StandingTeam[][]> {
-  const { data } = await axiosInstance.get<StandingTeam[][]>("/football/standings");
-  return data;
+  const { data } = await axiosInstance.get<Array<{ league: { standings: StandingTeam[][] } }>>("/football/standings");
+  return data.flatMap((entry) => entry?.league?.standings ?? []);
 }
 
 export interface BrazilStats {
@@ -140,10 +142,30 @@ export async function getBrazilStats(): Promise<BrazilStats | null> {
   }
 }
 
+export interface LiveNowGame {
+  id: number;
+  league: string;
+  home: string;
+  away: string;
+  home_goals: number | null;
+  away_goals: number | null;
+  elapsed: number | null;
+  status: string;
+}
+
+export async function getLiveNowGames(): Promise<LiveNowGame[]> {
+  const { data } = await axiosInstance.get<LiveNowGame[]>("/football/debug/live-now");
+  return data;
+}
+
 export async function mockLiveOn(elapsed = 32, homeGoals = 1, awayGoals = 0): Promise<void> {
   await axiosInstance.post(
     `/football/debug/mock-live?elapsed=${elapsed}&home_goals=${homeGoals}&away_goals=${awayGoals}`
   );
+}
+
+export async function mockLiveWithFixture(fixtureId: number): Promise<void> {
+  await axiosInstance.post(`/football/debug/mock-live?fixture_id=${fixtureId}`);
 }
 
 export async function mockLiveOff(): Promise<void> {
