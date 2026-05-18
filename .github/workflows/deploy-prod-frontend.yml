@@ -9,32 +9,30 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy na AWS via Docker (Front)
+      - name: Deploy na AWS via Docker (Front) — zero downtime
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.PROD_FRONTEND_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
           script_stop: true
+          command_timeout: 10m
           script: |
-            # 1. Limpeza ANTES do build (evita ENOSPC)
-            docker system prune -f
-            docker builder prune -f
-
-            # 2. Atualiza o código
             cd /home/ec2-user/front-n1
+
+            # Atualiza o código
             git fetch origin
             git checkout main
             git reset --hard origin/main
 
-            # 3. Para container e processos antigos
+            # Garante permissão de execução no script
+            chmod +x deploy.sh
+
+            # Remove container legado (libera porta 3000 na migração inicial)
             docker rm -f n1-front || true
-            pm2 stop all || true
-            pm2 delete all || true
-            sudo fuser -k 3000/tcp || true
 
-            # 4. Build e deploy
-            docker compose up --build -d
+            # Sobe nginx na primeira vez (se ainda não estiver rodando)
+            docker compose up -d nginx || true
 
-            # 5. Remove imagens antigas pós-build
-            docker image prune -f
+            # Deploy blue-green sem downtime
+            ./deploy.sh

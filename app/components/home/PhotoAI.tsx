@@ -7,6 +7,7 @@ import { getEventBrandKey } from "@/app/utils/eventBranding";
 interface PhotoAIPageProps {
   eventId: number;
   accentColor?: string;
+  isTorcida?: boolean;
 }
 
 const PhotoAIClient = dynamic<PhotoAIPageProps>(
@@ -20,6 +21,7 @@ interface PhotoAIProps {
 }
 
 export default function PhotoAI({ eventId, event }: PhotoAIProps) {
-  const accentColor = getEventBrandKey(event) === "n1_torcida" ? "#0f935d" : undefined;
-  return <PhotoAIClient eventId={eventId} accentColor={accentColor} />;
+  const isTorcida = getEventBrandKey(event) === "n1_torcida";
+  const accentColor = isTorcida ? "#0f935d" : undefined;
+  return <PhotoAIClient eventId={eventId} accentColor={accentColor} isTorcida={isTorcida} />;
 }

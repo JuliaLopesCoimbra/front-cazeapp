@@ -336,6 +336,7 @@ const formatTime = (timeStr: string | undefined): string => {
         />
       )}
     
+            {!isTorcida && (
             <Box
               sx={{
                 maxWidth: 700,
@@ -350,7 +351,7 @@ const formatTime = (timeStr: string | undefined): string => {
                   margin: 0,
                   fontSize: "clamp(24px, 5vw, 42px)",
                   fontWeight: 800,
-                  color: isTorcida ? "#0f935d" : "#FFD600",
+                  color: "#FFD600",
                   textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 214, 0, 0.3)",
                   letterSpacing: "0.5px",
                   lineHeight: 1.2,
@@ -360,6 +361,7 @@ const formatTime = (timeStr: string | undefined): string => {
                 {event.title}
               </h1>
             </Box>
+            )}
     
             <p
               style={{

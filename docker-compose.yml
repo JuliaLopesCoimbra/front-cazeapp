@@ -1,9 +1,38 @@
 services:
-  frontend:
-    build: .
-    container_name: n1-front
+
+  nginx:
+    image: nginx:alpine
+    container_name: n1-front-nginx
     restart: always
     ports:
-      - "3000:3000" # Ajuste se o seu front rodar em outra porta
-    env_file:
-      - .env
+      - "3000:3000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-upstream.conf:/etc/nginx/active-upstream.conf:rw
+    depends_on:
+      front-blue:
+        condition: service_healthy
+
+  front-blue:
+    build: .
+    container_name: n1-front-blue
+    restart: always
+    env_file: .env
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  front-green:
+    build: .
+    container_name: n1-front-green
+    restart: always
+    env_file: .env
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s

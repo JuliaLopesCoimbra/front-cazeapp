@@ -325,7 +325,7 @@ function RoboFotosSection({ syncStatus, eventId, onRefresh, refreshing }: { sync
   const s3Total = syncStatus.total_s3_files;
 
   // Apenas ciclos com fotos novas
-  const activeCycles = syncStatus.upload_logs;
+  const activeCycles = syncStatus.upload_logs ?? [];
 
   return (
     <>
@@ -488,7 +488,7 @@ export default function SectionDetailPage() {
 
   if (!authReady || loading) {
     return (
-      <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", ...backgroundSx }}>
+      <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000" }}>
         <CircularProgress sx={{ color: config?.color ?? "#ffcc01" }} />
       </Box>
     );

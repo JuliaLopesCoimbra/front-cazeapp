@@ -5,24 +5,39 @@ import {
   Box,
   Button,
   CircularProgress,
+  IconButton,
   Typography,
   Stack,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  // Badge, // sistema de compra (carrinho) desativado
 } from "@mui/material";
-import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
-// import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined"; // sistema de compra desativado
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
+import FaceIcon from "@mui/icons-material/Face";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { searchFace } from "@/app/services/ai/searchFaceService";
+import {
+  getMyFaceStatus,
+  getMyPhotos,
+  registerFace,
+  deleteMyFace,
+  MyPhoto,
+} from "@/app/services/ai/userFaceService";
 import { useToast } from "@/app/context/ToastContext";
 import api from "@/app/services/auth/axiosConfig";
-// import { useRouter } from "next/navigation"; // usado só para carrinho/roulette
-type Stage = "intro" | "camera" | "results";
+
+type Stage =
+  | "intro"
+  | "camera"
+  | "results"
+  | "torcida-checking"
+  | "torcida-no-face"
+  | "torcida-registering"
+  | "torcida-my-photos";
 
 interface SearchResult {
   url: string;
@@ -33,13 +48,14 @@ interface SearchResult {
 interface PhotoAIPageProps {
   eventId: number;
   accentColor?: string;
+  isTorcida?: boolean;
 }
 
-export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoAIPageProps) {
+export default function PhotoAIPage({ eventId, accentColor = "#ffc91f", isTorcida = false }: PhotoAIPageProps) {
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `photo-ai-results-event-${eventId}`;
-  
-  const [stage, setStage] = useState<Stage>("intro");
+
+  const [stage, setStage] = useState<Stage>(isTorcida ? "torcida-checking" : "intro");
   const [isRequestingCamera, setIsRequestingCamera] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -48,9 +64,11 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
   const [countdown, setCountdown] = useState<number | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<SearchResult | null>(null);
   const [cartModalOpen, setCartModalOpen] = useState(false);
-  // const [cart, setCart] = useState<SearchResult[]>([]); // sistema de compra desativado
+  const [myPhotos, setMyPhotos] = useState<MyPhoto[]>([]);
+  const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [isDeletingFace, setIsDeletingFace] = useState(false);
   const { showToast } = useToast();
-  // const router = useRouter(); // usado só para carrinho/roulette
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -60,11 +78,31 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
     return () => stopCamera();
   }, []);
 
+  // Torcida: check face registration status on mount
+  useEffect(() => {
+    if (!isTorcida) return;
+    (async () => {
+      try {
+        const status = await getMyFaceStatus(eventId);
+        if (status.registered) {
+          const photos = await getMyPhotos(eventId);
+          setMyPhotos(photos);
+          setStage("torcida-my-photos");
+        } else {
+          setStage("torcida-no-face");
+        }
+      } catch {
+        setStage("torcida-no-face");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId, isTorcida]);
+
   useEffect(() => {
     const isEventChange = previousEventIdRef.current !== null && previousEventIdRef.current !== eventId;
-    
+
     if (isEventChange) {
-      setStage("intro");
+      setStage(isTorcida ? "torcida-checking" : "intro");
       setResults([]);
       setSearchMessage(null);
       // setCart([]); // sistema de compra desativado
@@ -77,8 +115,14 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
       return;
     }
 
+    // Torcida users go through the face-status check — don't restore manual search cache
+    if (isTorcida) {
+      previousEventIdRef.current = eventId;
+      return;
+    }
+
     const cached = getCache(cacheKey);
-    
+
     if (cached && cached.data.length > 0) {
       setResults(cached.data);
       setStage("results");
@@ -202,12 +246,9 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
 
   // Garantir que o stream seja atribuído quando mudar para câmera
   useEffect(() => {
-    if (stage === "camera" && streamRef.current && videoRef.current) {
-      console.log("Atribuindo stream ao vídeo no useEffect");
+    if ((stage === "camera" || stage === "torcida-registering") && streamRef.current && videoRef.current) {
       videoRef.current.srcObject = streamRef.current;
-      videoRef.current.play().catch((err) => {
-        console.error("Erro ao reproduzir vídeo:", err);
-      });
+      videoRef.current.play().catch(() => {});
     }
   }, [stage]);
 
@@ -228,7 +269,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
     return "Câmera não disponível neste navegador ou dispositivo. Tente abrir no Chrome ou Safari (não use navegador dentro de rede social ou app de mensagem).";
   };
 
-  const requestCamera = async () => {
+  const requestCamera = async (nextStage: Stage = "camera") => {
     setIsRequestingCamera(true);
     setCameraError(null);
 
@@ -252,7 +293,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
       });
       console.log("[PhotoAI/Camera] Câmera permitida. Stream:", stream.id);
       streamRef.current = stream;
-      setStage("camera");
+      setStage(nextStage);
 
       setTimeout(() => {
         if (videoRef.current) {
@@ -389,6 +430,249 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
     }
   };
 
+  // ===== TORCIDA: register face from camera capture =====
+  const handleRegisterFace = async () => {
+    setCountdown(3);
+    let currentCount = 3;
+    const interval = setInterval(() => {
+      currentCount -= 1;
+      if (currentCount > 0) {
+        setCountdown(currentCount);
+      } else {
+        clearInterval(interval);
+        setCountdown(null);
+        performRegisterFace();
+      }
+    }, 1000);
+  };
+
+  const performRegisterFace = async () => {
+    setIsUploading(true);
+    try {
+      const file = await capturePhoto();
+      if (!file) {
+        showToast("Não foi possível capturar a foto. Tente novamente.", "error");
+        setIsUploading(false);
+        return;
+      }
+      const result = await registerFace(file, eventId);
+      showToast(result.message, "success");
+      stopCamera();
+      const photos = await getMyPhotos(eventId);
+      setMyPhotos(photos);
+      setStage("torcida-my-photos");
+    } catch (error: any) {
+      const msg = error?.message || "Erro ao cadastrar rosto.";
+      showToast(msg, "error");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteFace = async () => {
+    setIsDeletingFace(true);
+    try {
+      await deleteMyFace(eventId);
+      showToast("Rosto removido com sucesso.", "success");
+      setMyPhotos([]);
+      setStage("torcida-no-face");
+    } catch (error: any) {
+      showToast(error?.message || "Erro ao remover rosto.", "error");
+    } finally {
+      setIsDeletingFace(false);
+      setConfirmDeleteOpen(false);
+    }
+  };
+
+  const refreshPhotos = async () => {
+    setIsLoadingPhotos(true);
+    try {
+      const photos = await getMyPhotos(eventId);
+      setMyPhotos(photos);
+    } catch {
+      showToast("Não foi possível atualizar as fotos.", "error");
+    } finally {
+      setIsLoadingPhotos(false);
+    }
+  };
+
+  const renderTorcidaChecking = () => (
+    <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <CircularProgress sx={{ color: accentColor }} />
+    </Box>
+  );
+
+  const renderTorcidaNoFace = () => (
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", px: 3 }}>
+      <Box sx={{ width: "100%", maxWidth: 380, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+        <Box sx={{ width: 100, height: 100, borderRadius: "50%", background: `${accentColor}15`, border: `2px solid ${accentColor}35`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <FaceIcon sx={{ fontSize: 52, color: accentColor }} />
+        </Box>
+        <Box sx={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 1 }}>
+          <Typography variant="h5" fontWeight={700} sx={{ color: "#fff" }}>
+            Cadastre seu rosto
+          </Typography>
+          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.5)", lineHeight: 1.7 }}>
+            Tire uma selfie e receba notificação automática quando suas fotos chegarem no evento.
+          </Typography>
+        </Box>
+        <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{ background: accentColor, borderRadius: 3, py: 1.5, color: "#fff", fontWeight: 700, fontSize: 15, textTransform: "none", boxShadow: `0 4px 24px ${accentColor}45`, "&:hover": { background: accentColor, opacity: 0.9 } }}
+            onClick={() => requestCamera("torcida-registering")}
+            disabled={isRequestingCamera}
+          >
+            {isRequestingCamera ? <CircularProgress size={22} color="inherit" /> : "Cadastrar rosto"}
+          </Button>
+          <Button
+            variant="text"
+            fullWidth
+            sx={{ color: "rgba(255,255,255,0.3)", textTransform: "none", fontSize: 13 }}
+            onClick={() => setStage("intro")}
+          >
+            Prefiro buscar manualmente
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  );
+
+  const renderTorcidaRegistering = () => (
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", pt: 4, px: 3 }}>
+      <Box sx={{ width: "100%", maxWidth: 380, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+        <Box sx={{ width: "100%", textAlign: "center" }}>
+          <Typography variant="h6" fontWeight={700} sx={{ color: "#fff" }}>Posicione seu rosto</Typography>
+          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.45)", mt: 0.5, fontSize: 13 }}>
+            Sozinho, bem iluminado e de frente para a câmera.
+          </Typography>
+        </Box>
+
+        <Box sx={{ width: 280, height: 280, borderRadius: "50%", border: `3px solid ${accentColor}`, overflow: "hidden", background: "#111", position: "relative", flexShrink: 0 }}>
+          <video ref={videoRef} playsInline autoPlay muted
+            onLoadedMetadata={() => { if (videoRef.current) videoRef.current.play().catch(() => {}); }}
+            onPlaying={() => setCameraError(null)}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+          {countdown !== null && (
+            <Box sx={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>
+              <Typography sx={{ color: "white", fontSize: 100, fontWeight: 700, lineHeight: 1 }}>{countdown}</Typography>
+            </Box>
+          )}
+          {isUploading && countdown === null && (
+            <Box sx={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.75)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10, gap: 1.5 }}>
+              <CircularProgress size={48} sx={{ color: accentColor }} />
+              <Typography variant="body2" sx={{ color: "white", fontWeight: 600 }}>Cadastrando...</Typography>
+            </Box>
+          )}
+        </Box>
+
+        {cameraError && <Typography color="error" textAlign="center" sx={{ fontSize: 13 }}>{cameraError}</Typography>}
+
+        {countdown === null && !isUploading && (
+          <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth
+              onClick={handleRegisterFace}
+              sx={{ background: accentColor, borderRadius: 3, py: 1.5, color: "#fff", fontWeight: 700, fontSize: 15, textTransform: "none", boxShadow: `0 4px 24px ${accentColor}45`, "&:hover": { background: accentColor, opacity: 0.9 } }}
+            >
+              Cadastrar
+            </Button>
+            <Button
+              variant="text"
+              fullWidth
+              sx={{ color: "rgba(255,255,255,0.3)", textTransform: "none", fontSize: 13 }}
+              onClick={() => { stopCamera(); setStage("torcida-no-face"); }}
+            >
+              Cancelar
+            </Button>
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
+
+  const renderTorcidaMyPhotos = () => (
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 3, py: 2, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="h6" fontWeight={700} sx={{ color: "#fff" }}>
+            Minhas fotos
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={refreshPhotos}
+            disabled={isLoadingPhotos}
+            sx={{ color: "rgba(255,255,255,0.3)", p: 0.5 }}
+          >
+            {isLoadingPhotos
+              ? <CircularProgress size={14} sx={{ color: "rgba(255,255,255,0.3)" }} />
+              : <RefreshIcon sx={{ fontSize: 16 }} />}
+          </IconButton>
+        </Box>
+        <Button
+          size="small"
+          startIcon={<DeleteOutlineIcon sx={{ fontSize: "15px !important" }} />}
+          onClick={() => setConfirmDeleteOpen(true)}
+          sx={{ color: "rgba(255,255,255,0.3)", textTransform: "none", fontSize: 12, minWidth: 0 }}
+        >
+          Remover rosto
+        </Button>
+      </Box>
+
+      {/* Status */}
+      <Box sx={{ px: 3, pt: 2.5, pb: 2 }}>
+        <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.75, background: `${accentColor}18`, border: `1px solid ${accentColor}35`, borderRadius: 10, px: 1.5, py: 0.6 }}>
+          <FaceIcon sx={{ fontSize: 14, color: accentColor }} />
+          <Typography sx={{ fontSize: 12, color: accentColor, fontWeight: 600 }}>Rosto cadastrado</Typography>
+        </Box>
+        <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.4)", mt: 0.75, fontSize: 12 }}>
+          Novas fotos aparecerão aqui automaticamente.
+        </Typography>
+      </Box>
+
+      {/* Grid */}
+      <Box sx={{ px: 2, flex: 1 }}>
+        {myPhotos.length === 0 ? (
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", py: 8, gap: 1.5 }}>
+            <ImageOutlinedIcon sx={{ fontSize: 44, color: "rgba(255,255,255,0.12)" }} />
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.3)", textAlign: "center", lineHeight: 1.6 }}>
+              Nenhuma foto encontrada ainda.{"\n"}Você será notificado quando chegarem.
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }, gap: 1.5 }}>
+            {myPhotos.map((photo, idx) => (
+              <Box
+                key={idx}
+                onClick={() => { setSelectedPhoto({ url: photo.image_url, similarity: photo.similarity ?? undefined }); setCartModalOpen(true); }}
+                sx={{ borderRadius: 2, overflow: "hidden", cursor: "pointer", background: "rgba(255,255,255,0.04)", transition: "transform 0.15s", "&:active": { transform: "scale(0.98)" }, "&:hover": { transform: "scale(1.01)" } }}
+              >
+                <img src={photo.image_url} alt={`Foto ${idx + 1}`} style={{ width: "100%", display: "block", aspectRatio: "3 / 4", objectFit: "cover" }} />
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Box>
+
+      {/* Footer */}
+      <Box sx={{ px: 3, py: 3, textAlign: "center" }}>
+        <Button
+          variant="text"
+          sx={{ color: "rgba(255,255,255,0.3)", textTransform: "none", fontSize: 13 }}
+          onClick={() => setStage("intro")}
+        >
+          Buscar manualmente
+        </Button>
+      </Box>
+    </Box>
+  );
+
   const renderIntro = () => (
     <Box
       sx={{
@@ -456,7 +740,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
             size="large"
             fullWidth
             sx={{ background: accentColor, borderRadius: 5, py: 1.5 }}
-            onClick={requestCamera}
+            onClick={() => requestCamera()}
             disabled={isRequestingCamera}
           >
             {isRequestingCamera ? (
@@ -823,9 +1107,29 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f" }: PhotoA
 
   return (
     <>
+      {stage === "torcida-checking" && renderTorcidaChecking()}
+      {stage === "torcida-no-face" && renderTorcidaNoFace()}
+      {stage === "torcida-registering" && renderTorcidaRegistering()}
+      {stage === "torcida-my-photos" && renderTorcidaMyPhotos()}
       {stage === "camera" && renderCamera()}
       {stage === "results" && renderResults()}
       {stage === "intro" && renderIntro()}
+
+      {/* Confirm delete face dialog */}
+      <Dialog open={confirmDeleteOpen} onClose={() => setConfirmDeleteOpen(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { backgroundColor: "#1a1a1a", color: "#fff", borderRadius: 2 } }}>
+        <DialogTitle sx={{ fontWeight: 600 }}>Remover rosto cadastrado?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.75)" }}>
+            Você não receberá mais notificações automáticas de novas fotos. Suas fotos vinculadas anteriormente continuarão disponíveis.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button onClick={() => setConfirmDeleteOpen(false)} sx={{ color: "rgba(255,255,255,0.7)" }}>Cancelar</Button>
+          <Button onClick={handleDeleteFace} variant="contained" color="error" disabled={isDeletingFace}>
+            {isDeletingFace ? <CircularProgress size={18} color="inherit" /> : "Remover"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Modal da foto: visualizar e baixar */}
       <Dialog
