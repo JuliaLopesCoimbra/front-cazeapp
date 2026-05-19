@@ -95,6 +95,7 @@ export default function ProfilePage() {
   const [birthDateValue, setBirthDateValue] = useState("");
   const [genderValue, setGenderValue] = useState<"male" | "female" | "other" | "prefer_not_to_say" | "">("");
   const [saving, setSaving] = useState(false);
+  const [photoLightboxOpen, setPhotoLightboxOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const extractDateOnly = (dateString: string): string => {
@@ -367,10 +368,10 @@ export default function ProfilePage() {
             <Box
               sx={{
                 position: "relative",
-                cursor: "pointer",
+                cursor: profile.profile_photo ? "zoom-in" : "pointer",
                 "&:hover .camera-overlay": { opacity: 1 },
               }}
-              onClick={handlePhotoClick}
+              onClick={() => profile.profile_photo ? setPhotoLightboxOpen(true) : handlePhotoClick()}
             >
               <Box
                 sx={{
@@ -404,6 +405,7 @@ export default function ProfilePage() {
                     display: "flex", alignItems: "center", justifyContent: "center",
                     opacity: 0, transition: "opacity 0.3s", borderRadius: "50%",
                   }}
+                  onClick={(e) => { e.stopPropagation(); handlePhotoClick(); }}
                 >
                   {uploading
                     ? <CircularProgress sx={{ color: "#FFD600" }} size={26} />
@@ -412,6 +414,40 @@ export default function ProfilePage() {
                 </Box>
               </Box>
             </Box>
+
+            {photoLightboxOpen && profile.profile_photo && (
+              <Box
+                onClick={() => setPhotoLightboxOpen(false)}
+                sx={{
+                  position: "fixed", inset: 0, zIndex: 9999,
+                  bgcolor: "rgba(0,0,0,0.9)",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
+                }}
+              >
+                <Box
+                  component="img"
+                  src={profile.profile_photo}
+                  onClick={(e) => e.stopPropagation()}
+                  sx={{
+                    width: "72vw", height: "72vw", maxWidth: 320, maxHeight: 320,
+                    borderRadius: "50%", objectFit: "cover",
+                    border: "3px solid rgba(255,255,255,0.15)",
+                    boxShadow: "0 24px 80px rgba(0,0,0,0.7)",
+                  }}
+                />
+                <Button
+                  onClick={(e) => { e.stopPropagation(); setPhotoLightboxOpen(false); handlePhotoClick(); }}
+                  startIcon={<CameraAltIcon />}
+                  sx={{
+                    color: "#FFD600", borderColor: "rgba(255,214,0,0.4)", border: "1px solid",
+                    borderRadius: "20px", px: 3, py: 0.75, textTransform: "none", fontWeight: 600,
+                    "&:hover": { bgcolor: "rgba(255,214,0,0.1)" },
+                  }}
+                >
+                  Trocar foto
+                </Button>
+              </Box>
+            )}
 
             <Box sx={{ textAlign: "center" }}>
               <Typography sx={{ color: "#fff", fontWeight: 700, fontSize: "1.1rem", lineHeight: 1.2 }}>

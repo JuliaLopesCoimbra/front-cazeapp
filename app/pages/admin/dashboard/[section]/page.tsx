@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   Box, Typography, Container, CircularProgress, IconButton,
   Grid, Paper, Chip, Select, MenuItem, LinearProgress,
+  Drawer, Avatar,
 } from "@mui/material";
 import {
   ArrowBackIos as ArrowBackIosIcon,
@@ -41,6 +42,9 @@ import {
   FolderOpen as DriveIcon,
   CloudUpload as S3Icon,
   FiberManualRecord as DotIcon,
+  Close as CloseIcon,
+  PersonAdd as PersonAddIcon,
+  Search as SearchIcon,
 } from "@mui/icons-material";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
@@ -54,6 +58,7 @@ import {
 import { getEvents } from "@/app/services/events/eventAppService";
 import { getEventBackgroundSxByKey, getStoredEventBrandKey } from "@/app/utils/eventBranding";
 import { getPhotoSyncStatus, PhotoSyncStatus } from "@/app/services/admin/photoSyncService";
+import { listUsers, listOnlineUsers, UserResponse } from "@/app/services/auth/authAdminService";
 
 // ─── Shared UI ───────────────────────────────────────────────────────────────
 
@@ -176,12 +181,416 @@ const PERIODS: AnalyticsPeriod[] = ["all", "day", "week", "month"];
 
 // ─── Section renderers ───────────────────────────────────────────────────────
 
-function UsuariosSection({ data, showToday }: { data: AnalyticsSummary; showToday: boolean }) {
+type NewUsersPeriod = "today" | "week" | "month";
+
+function createdAfterDate(period: NewUsersPeriod): string {
+  const d = new Date();
+  if (period === "today") {
+    d.setHours(0, 0, 0, 0);
+  } else if (period === "week") {
+    d.setDate(d.getDate() - 7);
+    d.setHours(0, 0, 0, 0);
+  } else {
+    d.setDate(1);
+    d.setHours(0, 0, 0, 0);
+  }
+  return d.toISOString();
+}
+
+function formatUserDate(iso: string): string {
+  const d = new Date(iso.endsWith("Z") ? iso : iso + "Z");
+  return d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+const USER_COLORS = ["#ffcc01", "#ce93d8", "#80cbc4", "#f48fb1", "#aed581", "#4fc3f7"];
+
+function UserRow({ user, onClick, showDate = false }: { user: UserResponse; onClick: () => void; showDate?: boolean }) {
+  const initials = (user.name ?? user.email).slice(0, 2).toUpperCase();
+  const color = USER_COLORS[user.id % USER_COLORS.length];
   return (
-    <Grid container spacing={1.5}>
-      <Grid size={6}><MetricCard icon={<PeopleIcon sx={{ fontSize: 18 }} />} label="Total de usuários" value={data.users.total} todayValue={showToday ? data.users.new_today : undefined} /></Grid>
-      <Grid size={6}><MetricCard icon={<TrendingUpIcon sx={{ fontSize: 18 }} />} label="Novos esta semana" value={data.users.new_this_week} todayValue={showToday ? data.users.new_this_month : undefined} todayLabel="este mês" /></Grid>
-    </Grid>
+    <Box
+      onClick={onClick}
+      sx={{
+        display: "flex", alignItems: "center", gap: 1.5,
+        px: 1.5, py: 1.25, borderRadius: 2,
+        cursor: "pointer",
+        transition: "background-color 0.12s",
+        "&:hover": { bgcolor: "rgba(255,255,255,0.06)" },
+      }}
+    >
+      <Avatar
+        sx={{
+          width: 36, height: 36,
+          bgcolor: `${color}22`,
+          border: `1px solid ${color}44`,
+          color, fontSize: "0.75rem", fontWeight: 700, flexShrink: 0,
+        }}
+      >
+        {initials}
+      </Avatar>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography sx={{ color: "#fff", fontWeight: 600, fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {user.name ?? "—"}
+        </Typography>
+        <Typography sx={{ color: "rgba(255,255,255,0.35)", fontSize: "0.72rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {user.email}
+        </Typography>
+      </Box>
+      {showDate && (
+        <Typography sx={{ color: "rgba(255,255,255,0.25)", fontSize: "0.68rem", flexShrink: 0 }}>
+          {formatUserDate(user.created_at)}
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
+function UsuariosSection({ data }: { data: AnalyticsSummary }) {
+  const router = useRouter();
+  const u = data.users;
+
+  // Search
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<UserResponse[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const doSearch = useCallback(async (term: string) => {
+    if (!term.trim()) { setSearchResults([]); setSearchOpen(false); return; }
+    setSearchLoading(true);
+    try {
+      const results = await listUsers(10, 0, term.trim());
+      setSearchResults(results);
+      setSearchOpen(true);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  const handleSearchChange = (val: string) => {
+    setSearchTerm(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!val.trim()) { setSearchResults([]); setSearchOpen(false); return; }
+    debounceRef.current = setTimeout(() => doSearch(val), 300);
+  };
+
+  const handleResultClick = (userId: number) => {
+    setSearchOpen(false);
+    setSearchTerm("");
+    setSearchResults([]);
+    router.push(`/pages/admin/user-profile/${userId}`);
+  };
+
+  // Drawer for period lists
+  const [drawerPeriod, setDrawerPeriod] = useState<NewUsersPeriod | null>(null);
+  const [drawerUsers, setDrawerUsers] = useState<UserResponse[]>([]);
+  const [drawerLoading, setDrawerLoading] = useState(false);
+
+  // Drawer for online users
+  const [onlineDrawerOpen, setOnlineDrawerOpen] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<UserResponse[]>([]);
+  const [onlineLoading, setOnlineLoading] = useState(false);
+
+  const openOnlineDrawer = async () => {
+    setOnlineDrawerOpen(true);
+    setOnlineUsers([]);
+    setOnlineLoading(true);
+    try {
+      const users = await listOnlineUsers();
+      setOnlineUsers(users);
+    } catch {
+      setOnlineUsers([]);
+    } finally {
+      setOnlineLoading(false);
+    }
+  };
+
+  const openDrawer = async (period: NewUsersPeriod) => {
+    setDrawerPeriod(period);
+    setDrawerUsers([]);
+    setDrawerLoading(true);
+    try {
+      const users = await listUsers(500, 0, undefined, undefined, createdAfterDate(period));
+      setDrawerUsers(users);
+    } catch {
+      setDrawerUsers([]);
+    } finally {
+      setDrawerLoading(false);
+    }
+  };
+
+  const periodLabel: Record<NewUsersPeriod, string> = { today: "Hoje", week: "Semana", month: "Mês" };
+  const periodCount: Record<NewUsersPeriod, number> = { today: u.new_today, week: u.new_this_week, month: u.new_this_month };
+
+  return (
+    <>
+      <Grid container spacing={1.5}>
+        {/* Search box */}
+        <Grid size={12}>
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                display: "flex", alignItems: "center", gap: 1,
+                bgcolor: "rgba(255,255,255,0.06)",
+                border: searchOpen ? "1px solid rgba(255,204,1,0.5)" : "1px solid rgba(255,255,255,0.12)",
+                borderRadius: searchOpen && (searchResults.length > 0 || searchLoading) ? "12px 12px 0 0" : "12px",
+                px: 1.5, py: 0,
+                transition: "border-color 0.15s",
+              }}
+            >
+              {searchLoading
+                ? <CircularProgress size={16} sx={{ color: "#ffcc01", flexShrink: 0 }} />
+                : <SearchIcon sx={{ color: "rgba(255,255,255,0.35)", fontSize: 20, flexShrink: 0 }} />}
+              <Box
+                component="input"
+                value={searchTerm}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+                onFocus={() => { if (searchResults.length > 0) setSearchOpen(true); }}
+                onBlur={() => { blurTimerRef.current = setTimeout(() => setSearchOpen(false), 150); }}
+                placeholder="Buscar usuário por nome ou e-mail..."
+                sx={{
+                  flex: 1, border: "none", outline: "none", background: "transparent",
+                  color: "#fff", fontSize: "0.9rem", py: 1.3,
+                  "&::placeholder": { color: "rgba(255,255,255,0.3)" },
+                }}
+              />
+              {searchTerm && (
+                <IconButton
+                  size="small"
+                  onClick={() => { setSearchTerm(""); setSearchResults([]); setSearchOpen(false); }}
+                  sx={{ color: "rgba(255,255,255,0.3)", p: 0.4 }}
+                >
+                  <CloseIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              )}
+            </Box>
+
+            {/* Dropdown results */}
+            {searchOpen && (searchResults.length > 0 || searchLoading) && (
+              <Paper
+                onMouseDown={(e) => { e.preventDefault(); if (blurTimerRef.current) clearTimeout(blurTimerRef.current); }}
+                sx={{
+                  position: "absolute", top: "100%", left: 0, right: 0, zIndex: 100,
+                  bgcolor: "#1e1e1e",
+                  border: "1px solid rgba(255,204,1,0.4)",
+                  borderTop: "none",
+                  borderRadius: "0 0 12px 12px",
+                  overflow: "hidden",
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.5)",
+                }}
+              >
+                {searchLoading ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                    <CircularProgress size={20} sx={{ color: "#ffcc01" }} />
+                  </Box>
+                ) : (
+                  <>
+                    {searchResults.map((user) => (
+                      <UserRow key={user.id} user={user} onClick={() => handleResultClick(user.id)} />
+                    ))}
+                    {searchResults.length === 10 && (
+                      <Typography sx={{ color: "rgba(255,255,255,0.25)", fontSize: "0.7rem", textAlign: "center", py: 1 }}>
+                        Mostrando os 10 primeiros resultados
+                      </Typography>
+                    )}
+                  </>
+                )}
+              </Paper>
+            )}
+          </Box>
+        </Grid>
+
+        {/* Total */}
+        <Grid size={12}>
+          <Paper
+            sx={{
+              backgroundColor: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,201,31,0.2)",
+              borderRadius: "14px",
+              p: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 48, height: 48, borderRadius: "12px",
+                backgroundColor: "rgba(255,204,1,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}
+            >
+              <PeopleIcon sx={{ color: "#ffcc01", fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.78rem" }}>
+                Total de usuários cadastrados
+              </Typography>
+              <Typography sx={{ color: "#fff", fontWeight: 800, fontSize: "2.2rem", lineHeight: 1.1 }}>
+                {u.total.toLocaleString("pt-BR")}
+              </Typography>
+            </Box>
+          </Paper>
+        </Grid>
+
+        {/* Hoje / Semana / Mês */}
+        {(["today", "week", "month"] as NewUsersPeriod[]).map((period) => (
+          <Grid key={period} size={4}>
+            <Paper
+              onClick={() => openDrawer(period)}
+              sx={{
+                backgroundColor: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.09)",
+                borderRadius: "14px",
+                p: 1.5, textAlign: "center", cursor: "pointer",
+                transition: "border-color 0.15s, background-color 0.15s",
+                "&:hover": { borderColor: "rgba(255,204,1,0.4)", backgroundColor: "rgba(255,204,1,0.05)" },
+              }}
+            >
+              <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", mb: 0.5 }}>
+                {periodLabel[period]}
+              </Typography>
+              <Typography sx={{ color: "#ffcc01", fontWeight: 800, fontSize: "1.6rem", lineHeight: 1 }}>
+                +{periodCount[period].toLocaleString("pt-BR")}
+              </Typography>
+              <Typography sx={{ color: "rgba(255,201,31,0.35)", fontSize: "0.6rem", mt: 0.5, letterSpacing: "0.04em" }}>
+                VER LISTA
+              </Typography>
+            </Paper>
+          </Grid>
+        ))}
+
+        {/* Online agora */}
+        <Grid size={12}>
+          <Paper
+            onClick={openOnlineDrawer}
+            sx={{
+              backgroundColor: "rgba(102,187,106,0.07)",
+              border: "1px solid rgba(102,187,106,0.25)",
+              borderRadius: "14px",
+              p: 2, display: "flex", alignItems: "center", gap: 2,
+              cursor: "pointer",
+              transition: "border-color 0.15s, background-color 0.15s",
+              "&:hover": { borderColor: "rgba(102,187,106,0.5)", backgroundColor: "rgba(102,187,106,0.12)" },
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 1 }}>
+              <Box
+                sx={{
+                  width: 10, height: 10, borderRadius: "50%",
+                  backgroundColor: "#66bb6a",
+                  boxShadow: "0 0 8px #66bb6a",
+                  flexShrink: 0,
+                }}
+              />
+              <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8rem" }}>Online agora</Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Typography sx={{ color: "#66bb6a", fontWeight: 800, fontSize: "1.5rem" }}>
+                {(u.users_online ?? 0).toLocaleString("pt-BR")}
+              </Typography>
+              <Typography sx={{ color: "rgba(102,187,106,0.45)", fontSize: "0.6rem", letterSpacing: "0.04em" }}>VER LISTA</Typography>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Drawer de usuários online */}
+      <Drawer
+        anchor="bottom"
+        open={onlineDrawerOpen}
+        onClose={() => setOnlineDrawerOpen(false)}
+        sx={{ zIndex: 1400 }}
+        PaperProps={{
+          sx: { borderRadius: "20px 20px 0 0", bgcolor: "#141414", maxHeight: "80vh", display: "flex", flexDirection: "column" },
+        }}
+      >
+        <Box sx={{ px: 2, pt: 1.5, pb: 1.5, borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
+          <Box sx={{ width: 40, height: 4, bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2, mx: "auto", mb: 1.5 }} />
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#66bb6a", boxShadow: "0 0 6px #66bb6a", flexShrink: 0 }} />
+              <Typography sx={{ color: "#fff", fontWeight: 800, fontSize: 15 }}>Online agora</Typography>
+              {!onlineLoading && (
+                <Box sx={{ bgcolor: "rgba(102,187,106,0.15)", border: "1px solid rgba(102,187,106,0.3)", borderRadius: "999px", px: 1, py: 0.2 }}>
+                  <Typography sx={{ color: "#66bb6a", fontSize: 11, fontWeight: 700 }}>{onlineUsers.length}</Typography>
+                </Box>
+              )}
+            </Box>
+            <IconButton onClick={() => setOnlineDrawerOpen(false)} size="small" sx={{ bgcolor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.6)" }}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
+
+        <Box sx={{ overflowY: "auto", flex: 1, py: 1 }}>
+          {onlineLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+              <CircularProgress sx={{ color: "#66bb6a" }} size={32} />
+            </Box>
+          ) : onlineUsers.length === 0 ? (
+            <Box sx={{ textAlign: "center", py: 6 }}>
+              <Typography sx={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>Nenhum usuário online no momento</Typography>
+            </Box>
+          ) : (
+            onlineUsers.map((user) => (
+              <UserRow key={user.id} user={user} onClick={() => { setOnlineDrawerOpen(false); router.push(`/pages/admin/user-profile/${user.id}`); }} />
+            ))
+          )}
+        </Box>
+      </Drawer>
+
+      {/* Drawer de lista de novos usuários */}
+      <Drawer
+        anchor="bottom"
+        open={drawerPeriod !== null}
+        onClose={() => setDrawerPeriod(null)}
+        sx={{ zIndex: 1400 }}
+        PaperProps={{
+          sx: { borderRadius: "20px 20px 0 0", bgcolor: "#141414", maxHeight: "80vh", display: "flex", flexDirection: "column" },
+        }}
+      >
+        <Box sx={{ px: 2, pt: 1.5, pb: 1.5, borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
+          <Box sx={{ width: 40, height: 4, bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2, mx: "auto", mb: 1.5 }} />
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <PersonAddIcon sx={{ color: "#ffcc01", fontSize: 18 }} />
+              <Typography sx={{ color: "#fff", fontWeight: 800, fontSize: 15 }}>
+                Novos usuários — {drawerPeriod ? periodLabel[drawerPeriod] : ""}
+              </Typography>
+              {!drawerLoading && (
+                <Box sx={{ bgcolor: "rgba(255,204,1,0.15)", border: "1px solid rgba(255,204,1,0.25)", borderRadius: "999px", px: 1, py: 0.2 }}>
+                  <Typography sx={{ color: "#ffcc01", fontSize: 11, fontWeight: 700 }}>{drawerUsers.length}</Typography>
+                </Box>
+              )}
+            </Box>
+            <IconButton onClick={() => setDrawerPeriod(null)} size="small" sx={{ bgcolor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.6)" }}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
+
+        <Box sx={{ overflowY: "auto", flex: 1, py: 1 }}>
+          {drawerLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+              <CircularProgress sx={{ color: "#ffcc01" }} size={32} />
+            </Box>
+          ) : drawerUsers.length === 0 ? (
+            <Box sx={{ textAlign: "center", py: 6 }}>
+              <Typography sx={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>Nenhum usuário novo neste período</Typography>
+            </Box>
+          ) : (
+            drawerUsers.map((user) => (
+              <UserRow key={user.id} user={user} showDate onClick={() => { setDrawerPeriod(null); router.push(`/pages/admin/user-profile/${user.id}`); }} />
+            ))
+          )}
+        </Box>
+      </Drawer>
+    </>
   );
 }
 
@@ -516,7 +925,7 @@ export default function SectionDetailPage() {
         </Box>
 
         {/* Filtros */}
-        {(config.needsAnalytics || config.needsSync) && (
+        {(config.needsAnalytics || config.needsSync) && section !== "usuarios" && (
           <Box sx={{ px: 2, py: 1.25, borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
             {config.needsAnalytics && (
               <Box sx={{ display: "flex", gap: 0.5 }}>
@@ -538,7 +947,7 @@ export default function SectionDetailPage() {
 
         {/* Conteúdo */}
         <Box sx={{ px: 2, pt: 2 }}>
-          {section === "usuarios"       && data && <UsuariosSection data={data} showToday={showToday} />}
+          {section === "usuarios"       && data && <UsuariosSection data={data} />}
           {section === "interacoes"     && data && <InteracoesSection data={data} showToday={showToday} />}
           {section === "anuncios"       && data && <AnunciosSection data={data} showToday={showToday} />}
           {section === "photo-finder"   && data && <PhotoFinderSection data={data} showToday={showToday} />}
