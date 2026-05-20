@@ -37,9 +37,9 @@ export const getMyTshirtReservation = async (): Promise<TshirtReservationMine | 
   }
 };
 
-export const createTshirtReservation = async (size: string): Promise<TshirtReservationMine> => {
+export const createTshirtReservation = async (size: string, ticketDate?: string): Promise<TshirtReservationMine> => {
   try {
-    const res = await api.post<TshirtReservationMine>("/user/tshirt-reservation", { size });
+    const res = await api.post<TshirtReservationMine>("/user/tshirt-reservation", { size, ticket_date: ticketDate });
     return res.data;
   } catch (e) {
     throw new Error(extractApiError(e, "Erro ao reservar"));

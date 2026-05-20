@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Avatar, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Skeleton, Badge, List, ListItem, ListItemButton, Divider, Button, CircularProgress, Paper } from "@mui/material";
+import { Box, Typography, Avatar, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Skeleton, Badge, List, ListItem, ListItemButton, Divider, Button, CircularProgress, Paper, Drawer, Checkbox, FormControlLabel } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -13,9 +13,9 @@ import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import CommentIcon from "@mui/icons-material/Comment";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-// import CheckroomIcon from "@mui/icons-material/Checkroom";    // CAMISETAS - comentado temporariamente
-// import CloseIcon from "@mui/icons-material/Close";             // CAMISETAS - comentado temporariamente
-// import { getMyTshirtReservation, TshirtReservationMine } from "@/app/services/user/tshirtReservationUserService"; // CAMISETAS - comentado temporariamente
+import CheckroomIcon from "@mui/icons-material/Checkroom";
+import CloseIcon from "@mui/icons-material/Close";
+import { getMyTshirtReservation, TshirtReservationMine } from "@/app/services/user/tshirtReservationUserService";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EventResponse } from "@/app/services/events/eventAppService";
@@ -61,13 +61,14 @@ export default function HomeHeader({
   const brandKey = getEventBrandKey(currentEvent || event);
   const isTorcida = brandKey === "n1_torcida";
   const torcidaPopupBg = "#d4a400";
-  // CAMISETAS - comentado temporariamente
-  // const [shirtReservation, setShirtReservation] = useState<TshirtReservationMine | null>(null);
-  // const [shirtLoading, setShirtLoading] = useState(false);
-  // const [shirtWidgetDismissed, setShirtWidgetDismissed] = useState(() => {
-  //   if (typeof window === "undefined") return false;
-  //   return localStorage.getItem("shirtWidgetDismissed") === "1";
-  // });
+  const [shirtReservation, setShirtReservation] = useState<TshirtReservationMine | null>(null);
+  const [shirtLoading, setShirtLoading] = useState(false);
+  const [shirtWidgetDismissed, setShirtWidgetDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("shirtWidgetDismissed") === "1";
+  });
+  const [shirtConfirmOpen, setShirtConfirmOpen] = useState(false);
+  const [shirtTicketAck, setShirtTicketAck] = useState(false);
 
   useEffect(() => {
     // Se o perfil foi passado como prop, não precisa buscar
@@ -90,15 +91,14 @@ export default function HomeHeader({
       });
   }, [profileProp]);
 
-  // CAMISETAS - comentado temporariamente
-  // useEffect(() => {
-  //   if (!isTorcida || !isAuthenticated) return;
-  //   setShirtLoading(true);
-  //   getMyTshirtReservation()
-  //     .then(setShirtReservation)
-  //     .catch(() => setShirtReservation(null))
-  //     .finally(() => setShirtLoading(false));
-  // }, [isTorcida, isAuthenticated]);
+  useEffect(() => {
+    if (!isTorcida || !canApprovePosts) return;
+    setShirtLoading(true);
+    getMyTshirtReservation()
+      .then(setShirtReservation)
+      .catch(() => setShirtReservation(null))
+      .finally(() => setShirtLoading(false));
+  }, [isTorcida, canApprovePosts]);
 
   // Buscar contador de notificações não lidas (apenas se autenticado)
   useEffect(() => {
@@ -418,11 +418,9 @@ export default function HomeHeader({
           </Box>
         </Box>
 
-        {/* CAMISETAS - comentado temporariamente
-        {isTorcida && (
+        {isTorcida && canApprovePosts && (
           <Skeleton variant="rectangular" height={56} sx={{ bgcolor: "rgba(255,255,255,0.07)", borderRadius: 2 }} />
         )}
-        */}
       </Box>
     );
   }
@@ -470,10 +468,16 @@ export default function HomeHeader({
           {canApprovePosts && currentEvent && (
             <PendingPostsNotification eventId={currentEvent.id} />
           )}
-          {/* CAMISETAS - comentado temporariamente
-          {isTorcida && isAuthenticated && shirtWidgetDismissed && (
+          {isTorcida && canApprovePosts && shirtWidgetDismissed && (
             <IconButton
-              onClick={() => router.push("/pages/user/tshirt-reservation")}
+              onClick={() => {
+                if (shirtReservation) {
+                  router.push("/pages/user/tshirt-reservation");
+                } else {
+                  setShirtTicketAck(false);
+                  setShirtConfirmOpen(true);
+                }
+              }}
               sx={{
                 color: "rgba(255,255,255,0.6)",
                 "&:hover": { backgroundColor: "rgba(255,255,255,0.08)" },
@@ -483,7 +487,6 @@ export default function HomeHeader({
               <CheckroomIcon sx={{ fontSize: "inherit" }} />
             </IconButton>
           )}
-          */}
           <IconButton
             onClick={(e) => setNotificationsAnchorEl(e.currentTarget)}
             sx={{
@@ -523,8 +526,7 @@ export default function HomeHeader({
         {today}
       </Typography> */}
 
-      {/* CAMISETAS - comentado temporariamente
-      {isTorcida && isAuthenticated && !shirtWidgetDismissed && (
+      {isTorcida && canApprovePosts && !shirtWidgetDismissed && (
         <Box>
           {shirtLoading ? (
             <Skeleton variant="rectangular" height={62} sx={{ bgcolor: "rgba(255,255,255,0.07)", borderRadius: 2.5 }} />
@@ -564,7 +566,7 @@ export default function HomeHeader({
             })()
           ) : (
             <Box
-              onClick={() => router.push("/pages/user/tshirt-reservation")}
+              onClick={() => { setShirtTicketAck(false); setShirtConfirmOpen(true); }}
               sx={{ display: "flex", alignItems: "center", gap: 1.5, cursor: "pointer", bgcolor: "rgba(255,255,255,0.05)", borderRadius: 2.5, px: 1.5, py: 1.2, border: "1px solid rgba(255,255,255,0.1)", transition: "transform 0.15s", overflow: "hidden", position: "relative" }}
             >
               <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, bgcolor: "rgba(255,255,255,0.2)", borderRadius: "3px 0 0 3px" }} />
@@ -582,7 +584,6 @@ export default function HomeHeader({
           )}
         </Box>
       )}
-      */}
 
       {/* MENU DE NOTIFICAÇÕES (POPUP) */}
       <Menu
@@ -933,6 +934,94 @@ export default function HomeHeader({
           <ListItemText primaryTypographyProps={{ fontSize: "0.9rem" }}>Sair</ListItemText>
         </MenuItem>
       </Menu>
+
+      {/* DRAWER DE CONFIRMAÇÃO DE CAMISETA */}
+      <Drawer
+        anchor="bottom"
+        open={shirtConfirmOpen}
+        onClose={() => setShirtConfirmOpen(false)}
+        sx={{ zIndex: 10000 }}
+        PaperProps={{
+          sx: {
+            borderRadius: "20px 20px 0 0",
+            bgcolor: "#fff",
+            overflow: "hidden",
+          },
+        }}
+      >
+        {/* Handle + header */}
+        <Box sx={{ px: 2, pt: 1.5, pb: 1, borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+          <Box sx={{ width: 40, height: 4, bgcolor: "rgba(0,0,0,0.1)", borderRadius: 2, mx: "auto", mb: 1.5 }} />
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Typography sx={{ fontSize: 15, fontWeight: 800, color: "#111" }}>Reserva de camiseta</Typography>
+            <IconButton onClick={() => setShirtConfirmOpen(false)} size="small" sx={{ bgcolor: "rgba(0,0,0,0.06)" }}>
+              <CloseIcon fontSize="small" sx={{ color: "rgba(0,0,0,0.6)" }} />
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* Conteúdo */}
+        <Box sx={{ px: 2, pt: 2, pb: 3, display: "flex", flexDirection: "column", gap: 2.5 }}>
+          <Typography variant="body2" sx={{ color: "rgba(0,0,0,0.6)", lineHeight: 1.7 }}>
+            A reserva de camisetas é exclusiva para quem comprou ingresso para participar do evento N1.
+            Ao confirmar, você declara que está elegível conforme as regras do evento.
+          </Typography>
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={shirtTicketAck}
+                onChange={(_, checked) => setShirtTicketAck(checked)}
+                sx={{ color: "rgba(0,0,0,0.3)", "&.Mui-checked": { color: "#111" } }}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ color: "rgba(0,0,0,0.75)", lineHeight: 1.5 }}>
+                Confirmo que comprei o ingresso para o evento N1
+              </Typography>
+            }
+          />
+
+          <Box sx={{ display: "flex", gap: 1.5 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => setShirtConfirmOpen(false)}
+              sx={{
+                borderColor: "rgba(0,0,0,0.15)",
+                color: "rgba(0,0,0,0.5)",
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+                "&:hover": { borderColor: "rgba(0,0,0,0.3)", bgcolor: "transparent" },
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              disabled={!shirtTicketAck}
+              onClick={() => {
+                setShirtConfirmOpen(false);
+                router.push("/pages/user/tshirt-reservation");
+              }}
+              sx={{
+                bgcolor: "#ffc91f",
+                color: "#000",
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 700,
+                boxShadow: "none",
+                "&:hover": { bgcolor: "#ffd84d", boxShadow: "none" },
+                "&.Mui-disabled": { bgcolor: "rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.3)" },
+              }}
+            >
+              Confirmar
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
     </Box>
   );
 }

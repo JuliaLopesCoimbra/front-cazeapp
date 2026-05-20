@@ -15,6 +15,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import CheckroomIcon from "@mui/icons-material/Checkroom";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
@@ -39,44 +40,65 @@ function QrSuccessBlock({ reservation }: { reservation: TshirtReservationMine })
   const pickedUp = reservation.status === "picked_up";
 
   return (
-    <Box sx={{ px: 2, pt: 2, pb: 3 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-        <CheckCircleIcon sx={{ color: pickedUp ? "#aaa" : "#009739", fontSize: 28 }} />
-        <Typography sx={{ fontSize: 18, fontWeight: 900, color: "#111" }}>
-          {pickedUp ? "Camiseta retirada" : "Reserva confirmada"}
-        </Typography>
-      </Box>
-      <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
-        <Box sx={{ bgcolor: pickedUp ? "#f5f5f5" : "#e8f5e9", borderRadius: 2, px: 1.5, py: 0.6 }}>
-          <Typography sx={{ fontSize: 12, fontWeight: 700, color: pickedUp ? "#888" : "#2e7d32" }}>
-            Unissex · Tam. {reservation.size}
+    <Box sx={{ px: 2, pt: 3, pb: 4 }}>
+      {/* Status header */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
+        <CheckCircleIcon sx={{ color: pickedUp ? "#aaa" : "#009739", fontSize: 32, flexShrink: 0 }} />
+        <Box>
+          <Typography sx={{ fontSize: 20, fontWeight: 900, color: "#111", lineHeight: 1.2 }}>
+            {pickedUp ? "Camiseta retirada" : "Reserva confirmada!"}
           </Typography>
-        </Box>
-        <Box sx={{ bgcolor: "#e3f2fd", borderRadius: 2, px: 1.5, py: 0.6 }}>
-          <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#1565c0" }}>
-            #{reservation.id}
+          <Typography sx={{ fontSize: 13, color: "#888", mt: 0.3 }}>
+            {pickedUp ? "Retirada registrada" : `Tamanho ${reservation.size} · Reserva #${reservation.id}`}
           </Typography>
         </Box>
       </Box>
 
-      {/* QR code — expirado visualmente quando já retirado */}
+      {/* QR code card — grande */}
       <Box
         sx={{
-          p: 3,
           bgcolor: "#fff",
           borderRadius: 4,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
+          p: 3,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: 2,
-          maxWidth: 320,
-          mx: "auto",
           position: "relative",
           overflow: "hidden",
+          border: pickedUp ? "2px solid #e0e0e0" : "2px solid #c8ecd4",
         }}
       >
-        <Box sx={{ filter: pickedUp ? "grayscale(1) opacity(0.35)" : "none", transition: "filter 0.3s" }}>
+        {/* Faixa superior */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 6,
+            background: pickedUp
+              ? "linear-gradient(90deg, #aaa, #888)"
+              : "linear-gradient(90deg, #009739, #FEDF00, #009739)",
+          }}
+        />
+
+        <Box sx={{ pt: 0.5, textAlign: "center" }}>
+          <Typography sx={{ fontSize: 10, fontWeight: 700, color: pickedUp ? "#aaa" : "#009739", letterSpacing: 1.2 }}>
+            {pickedUp ? "JÁ RETIRADO" : "QR CODE DE RETIRADA"}
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            filter: pickedUp ? "grayscale(1) opacity(0.3)" : "none",
+            transition: "filter 0.3s",
+            width: "100%",
+            maxWidth: 280,
+            "& img, & canvas, & svg": { width: "100% !important", height: "auto !important" },
+          }}
+        >
           <QRCodeImg data={reservation.qr_payload} />
         </Box>
 
@@ -89,25 +111,26 @@ function QrSuccessBlock({ reservation }: { reservation: TshirtReservationMine })
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: 1,
+              gap: 1.5,
             }}
           >
-            <CheckCircleIcon sx={{ color: "#009739", fontSize: 48 }} />
+            <CheckCircleIcon sx={{ color: "#009739", fontSize: 56 }} />
             <Box
               sx={{
-                px: 2,
-                py: 0.6,
-                border: "2.5px solid #009739",
-                borderRadius: 1,
+                px: 2.5,
+                py: 0.8,
+                border: "3px solid #009739",
+                borderRadius: 1.5,
                 transform: "rotate(-8deg)",
+                bgcolor: "rgba(255,255,255,0.9)",
               }}
             >
-              <Typography sx={{ fontSize: 18, fontWeight: 900, color: "#009739", letterSpacing: 3 }}>
+              <Typography sx={{ fontSize: 22, fontWeight: 900, color: "#009739", letterSpacing: 4 }}>
                 RETIRADO
               </Typography>
             </Box>
             {reservation.picked_up_by_name && (
-              <Typography sx={{ fontSize: 11, color: "#555", mt: 0.5 }}>
+              <Typography sx={{ fontSize: 12, color: "#555", fontWeight: 600 }}>
                 por {reservation.picked_up_by_name}
               </Typography>
             )}
@@ -115,17 +138,24 @@ function QrSuccessBlock({ reservation }: { reservation: TshirtReservationMine })
         )}
 
         {!pickedUp && (
-          <Typography sx={{ fontSize: 11, color: "#888", textAlign: "center", lineHeight: 1.5 }}>
-            Apresente este QR code ao promotor no estande. Ao escanear, a retirada será registrada e o
-            estoque atualizado.
-          </Typography>
+          <Box sx={{ textAlign: "center" }}>
+            <Typography sx={{ fontSize: 12, color: "#888", lineHeight: 1.6, maxWidth: 240 }}>
+              Apresente ao promotor no estande N1 para retirar sua camiseta.
+            </Typography>
+            <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, mt: 1.2, bgcolor: "#fff3e0", borderRadius: 2, px: 1.4, py: 0.5 }}>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#e65100" }}>
+                🔒 Não compartilhe este QR code com ninguém
+              </Typography>
+            </Box>
+          </Box>
         )}
       </Box>
 
+      {/* Info card */}
       {!pickedUp && (
         <Box
           sx={{
-            mt: 2,
+            mt: 2.5,
             p: 2,
             background: "linear-gradient(135deg, #009739, #005f28)",
             borderRadius: 3,
@@ -134,13 +164,17 @@ function QrSuccessBlock({ reservation }: { reservation: TshirtReservationMine })
             alignItems: "flex-start",
           }}
         >
-          <StorefrontIcon sx={{ color: "#FEDF00", fontSize: 26, flexShrink: 0, mt: 0.3 }} />
+          <StorefrontIcon sx={{ color: "#FEDF00", fontSize: 28, flexShrink: 0, mt: 0.2 }} />
           <Box>
-            <Typography sx={{ fontSize: 13, fontWeight: 800, color: "#FEDF00", mb: 0.5 }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 800, color: "#FEDF00", mb: 0.3 }}>
               Retirada no evento N1
             </Typography>
-            <Typography sx={{ fontSize: 12, color: "rgba(255,255,255,0.9)", lineHeight: 1.6 }}>
-              Guarde este código até a retirada da camiseta.
+            <Typography sx={{ fontSize: 12, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>
+              Guarde este código. Ao escanear, sua camiseta tamanho{" "}
+              <Box component="span" sx={{ fontWeight: 800, color: "#fff" }}>
+                {reservation.size}
+              </Box>{" "}
+              será separada para você.
             </Typography>
           </Box>
         </Box>
@@ -158,7 +192,7 @@ export default function TshirtReservationPage() {
   const [reservation, setReservation] = useState<TshirtReservationMine | null>(null);
   const [tamanho, setTamanho] = useState<string>("M");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selSize, setSelSize] = useState<string | null>(null);
+  const [ticketDate, setTicketDate] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const load = useCallback(async () => {
@@ -191,22 +225,22 @@ export default function TshirtReservationPage() {
 
   const medidas = medidasPorTamanho[tamanho] ?? medidasPorTamanho.M;
   const linhas = [
-    { key: "ombro", label: "Ombro", valor: medidas.ombro, cor: COR.ombro },
-    { key: "manga", label: "Manga", valor: medidas.manga, cor: COR.manga },
-    { key: "torax", label: "Tórax", valor: medidas.torax, cor: COR.torax },
-    { key: "comprimento", label: "Comprimento", valor: medidas.comprimento, cor: COR.comprimento },
+    { key: "ombro",       label: "Ombro",       valor: medidas.ombro,       cor: COR.ombro },
+    { key: "manga",       label: "Manga",        valor: medidas.manga,       cor: COR.manga },
+    { key: "torax",       label: "Tórax",        valor: medidas.torax,       cor: COR.torax },
+    { key: "comprimento", label: "Comprimento",  valor: medidas.comprimento, cor: COR.comprimento },
   ] as const;
 
   const openReserve = () => {
-    setSelSize(tamanho);
+    setTicketDate(null);
     setDrawerOpen(true);
   };
 
   const confirmReserve = async () => {
-    if (!selSize) return;
+    if (!ticketDate) return;
     setSubmitting(true);
     try {
-      const created = await createTshirtReservation(selSize);
+      const created = await createTshirtReservation(tamanho, ticketDate);
       setReservation(created);
       setDrawerOpen(false);
       showToast("Reserva realizada!", "success");
@@ -217,76 +251,93 @@ export default function TshirtReservationPage() {
     }
   };
 
-  if (!authReady || !isAuthenticated) {
-    return null;
-  }
+  if (!authReady || !isAuthenticated) return null;
 
-  const hasPending = reservation && reservation.status === "pending_pickup";
+  const hasPending = reservation?.status === "pending_pickup";
   const pickedUp = reservation?.status === "picked_up";
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f5f5f5", pb: 22 }}>
-      <AppBar position="sticky" elevation={0} sx={{ bgcolor: "#009739" }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f4f6f4", pb: 22 }}>
+      <AppBar position="sticky" elevation={0} sx={{ background: "linear-gradient(90deg, #009739, #005f28)" }}>
         <Toolbar>
           <IconButton edge="start" color="inherit" onClick={() => router.back()} sx={{ mr: 1 }}>
             <ArrowBackIosNewIcon fontSize="small" />
           </IconButton>
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 800, fontSize: 17 }}>
-            Reserva de camiseta N1
+            Camiseta N1
           </Typography>
+          <CheckroomIcon sx={{ color: "#FEDF00" }} />
         </Toolbar>
       </AppBar>
 
       {loading ? (
-        <Box display="flex" justifyContent="center" py={8}>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
           <CircularProgress sx={{ color: "#009739" }} />
         </Box>
       ) : (pickedUp || hasPending) && reservation ? (
         <QrSuccessBlock reservation={reservation} />
       ) : (
         <>
+          {/* Hero */}
           <Box
             sx={{
               background: "linear-gradient(135deg, #009739 0%, #005f28 100%)",
-              pt: 3,
-              pb: 2.5,
-              px: 2,
+              pt: 3.5,
+              pb: 4,
+              px: 2.5,
               position: "relative",
               overflow: "hidden",
             }}
           >
-            <Typography sx={{ color: "#FEDF00", fontSize: 11, fontWeight: 700, letterSpacing: 1.2 }}>
-              EVENTO N1
+            {/* círculos decorativos */}
+            <Box sx={{ position: "absolute", top: -30, right: -30, width: 140, height: 140, borderRadius: "50%", bgcolor: "rgba(254,223,0,0.07)" }} />
+            <Box sx={{ position: "absolute", bottom: -20, right: 40, width: 80, height: 80, borderRadius: "50%", bgcolor: "rgba(254,223,0,0.05)" }} />
+
+            <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.7, bgcolor: "rgba(254,223,0,0.15)", borderRadius: 10, px: 1.2, py: 0.4, mb: 1.5 }}>
+              <CheckroomIcon sx={{ fontSize: 12, color: "#FEDF00" }} />
+              <Typography sx={{ color: "#FEDF00", fontSize: 10, fontWeight: 800, letterSpacing: 1 }}>EVENTO N1</Typography>
+            </Box>
+            <Typography sx={{ color: "#fff", fontSize: 26, fontWeight: 900, lineHeight: 1.15 }}>
+              Camiseta oficial
             </Typography>
-            <Typography sx={{ color: "#fff", fontSize: 22, fontWeight: 900, mt: 0.2 }}>
-              Camiseta unissex
-            </Typography>
-            <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 12, mt: 0.5 }}>
-              Guia de tamanhos — escolha um tamanho com estoque disponível para reservar
+            <Typography sx={{ color: "rgba(255,255,255,0.65)", fontSize: 13, mt: 0.8 }}>
+              Gratuita para participantes · Escolha seu tamanho
             </Typography>
           </Box>
 
-          <Box sx={{ bgcolor: "#fff", px: 2, pt: 3, pb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+          {/* SVG + legenda */}
+          <Box
+            sx={{
+              bgcolor: "#fff",
+              mx: 2,
+              mt: -1.5,
+              borderRadius: 3,
+              px: 2,
+              pt: 3,
+              pb: 2,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            }}
+          >
             <CamisetaSVG medidas={medidas} />
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center", mt: 2 }}>
               {linhas.map((l) => (
                 <Box key={l.key} sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
                   <Box sx={{ width: 10, height: 10, borderRadius: 0.5, bgcolor: l.cor }} />
-                  <Typography sx={{ fontSize: 11, color: "#555" }}>{l.label}</Typography>
+                  <Typography sx={{ fontSize: 11, color: "#666", fontWeight: 500 }}>{l.label}</Typography>
                 </Box>
               ))}
             </Box>
           </Box>
 
-          <Box sx={{ px: 2, pt: 2.5 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#444", mb: 1.2 }}>
-              Selecione o tamanho:
+          {/* Seletor de tamanho */}
+          <Box sx={{ px: 2, pt: 3 }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 800, color: "#222", mb: 1.5 }}>
+              Selecione o tamanho
             </Typography>
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
               {SIZES.map((s) => {
                 const active = tamanho === s;
-                const row = availBySize.get(s);
-                const free = row?.available_to_reserve ?? 0;
+                const free = availBySize.get(s)?.available_to_reserve ?? 0;
                 return (
                   <Box
                     key={s}
@@ -294,28 +345,22 @@ export default function TshirtReservationPage() {
                     sx={{
                       minWidth: "14%",
                       flex: "1 1 14%",
-                      py: 1.2,
+                      py: 1.4,
                       textAlign: "center",
-                      borderRadius: 2,
+                      borderRadius: 2.5,
                       cursor: "pointer",
-                      border: active ? "2px solid #009739" : "2px solid #e0e0e0",
+                      border: active ? "2.5px solid #009739" : "2px solid #e0e0e0",
                       bgcolor: active ? "#009739" : "#fff",
-                      boxShadow: active ? "0 2px 10px rgba(0,151,57,0.25)" : "none",
+                      boxShadow: active ? "0 4px 14px rgba(0,151,57,0.3)" : "0 1px 4px rgba(0,0,0,0.06)",
                       transition: "all 0.15s",
-                      opacity: free < 1 ? 0.55 : 1,
+                      opacity: free < 1 ? 0.5 : 1,
                     }}
                   >
-                    <Typography
-                      sx={{
-                        fontSize: 13,
-                        fontWeight: 800,
-                        color: active ? "#fff" : "#555",
-                      }}
-                    >
+                    <Typography sx={{ fontSize: 14, fontWeight: 900, color: active ? "#fff" : "#444" }}>
                       {s}
                     </Typography>
-                    <Typography sx={{ fontSize: 9, color: active ? "rgba(255,255,255,0.85)" : "#888", mt: 0.3 }}>
-                      {free} livre(s)
+                    <Typography sx={{ fontSize: 9, fontWeight: 600, color: active ? "rgba(255,255,255,0.8)" : free < 1 ? "#d32f2f" : "#888", mt: 0.3 }}>
+                      {free < 1 ? "esgotado" : `${free} livre${free > 1 ? "s" : ""}`}
                     </Typography>
                   </Box>
                 );
@@ -323,36 +368,37 @@ export default function TshirtReservationPage() {
             </Box>
           </Box>
 
-          <Box sx={{ px: 2, pt: 2.5 }}>
+          {/* Tabela de medidas */}
+          <Box sx={{ px: 2, pt: 3 }}>
             <Box
               sx={{
                 bgcolor: "#fff",
                 borderRadius: 3,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                 overflow: "hidden",
               }}
             >
               <Box
                 sx={{
-                  px: 2,
-                  py: 1.2,
+                  px: 2.5,
+                  py: 1.4,
                   background: "linear-gradient(90deg, #002776, #003a9e)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                 }}
               >
-                <Typography sx={{ fontSize: 13, fontWeight: 800, color: "#fff" }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 800, color: "#fff" }}>
                   Medidas — {tamanho}
                 </Typography>
-                <Typography sx={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>cm</Typography>
+                <Typography sx={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>cm</Typography>
               </Box>
               {linhas.map((l, i) => (
                 <Box
                   key={l.key}
                   sx={{
-                    px: 2,
-                    py: 1.4,
+                    px: 2.5,
+                    py: 1.6,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
@@ -361,20 +407,10 @@ export default function TshirtReservationPage() {
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: l.cor, flexShrink: 0 }} />
+                    <Box sx={{ width: 11, height: 11, borderRadius: "50%", bgcolor: l.cor, flexShrink: 0 }} />
                     <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#333" }}>{l.label}</Typography>
                   </Box>
-                  <Typography
-                    sx={{
-                      fontSize: 18,
-                      fontWeight: 900,
-                      color: l.cor,
-                      borderBottom: `3px solid ${l.cor}`,
-                      pb: 0.1,
-                      lineHeight: 1.3,
-                      display: "inline-block",
-                    }}
-                  >
+                  <Typography sx={{ fontSize: 20, fontWeight: 900, color: l.cor, borderBottom: `3px solid ${l.cor}`, pb: 0.1, lineHeight: 1.3 }}>
                     {l.valor} cm
                   </Typography>
                 </Box>
@@ -383,13 +419,14 @@ export default function TshirtReservationPage() {
           </Box>
 
           <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-            <Typography sx={{ fontSize: 11, color: "#aaa", textAlign: "center", lineHeight: 1.6 }}>
-              Medidas aproximadas. Em dúvida, prefira o maior tamanho com disponibilidade.
+            <Typography sx={{ fontSize: 11, color: "#bbb", textAlign: "center", lineHeight: 1.7 }}>
+              Medidas aproximadas. Em dúvida, prefira o tamanho maior com disponibilidade.
             </Typography>
           </Box>
         </>
       )}
 
+      {/* Botão fixo */}
       {!loading && !pickedUp && !hasPending && (
         <Box
           sx={{
@@ -398,9 +435,9 @@ export default function TshirtReservationPage() {
             left: 0,
             right: 0,
             px: 2,
-            pt: 1.5,
-            pb: 3.5,
-            background: "linear-gradient(to top, #f5f5f5 75%, transparent)",
+            pt: 2,
+            pb: 4,
+            background: "linear-gradient(to top, #f4f6f4 70%, transparent)",
             zIndex: 10,
           }}
         >
@@ -418,79 +455,117 @@ export default function TshirtReservationPage() {
               borderRadius: 3,
               textAlign: "center",
               cursor: "pointer",
-              background: "linear-gradient(135deg, #009739 0%, #005f28 100%)",
-              boxShadow: "0 6px 24px rgba(0,151,57,0.35)",
+              background: "linear-gradient(135deg, #009739, #005f28)",
+              boxShadow: "0 8px 28px rgba(0,151,57,0.4)",
+              "&:active": { transform: "scale(0.98)" },
+              transition: "all 0.15s",
             }}
           >
             <Typography sx={{ fontSize: 16, fontWeight: 900, color: "#fff" }}>
-              Reservar camiseta ({tamanho})
+              Reservar camiseta — tamanho {tamanho}
             </Typography>
           </Box>
         </Box>
       )}
 
+      {/* Drawer de revisão */}
       <Drawer
         anchor="bottom"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        PaperProps={{
-          sx: {
-            borderRadius: "20px 20px 0 0",
-            maxHeight: "88vh",
-          },
-        }}
+        PaperProps={{ sx: { borderRadius: "20px 20px 0 0", maxHeight: "92vh" } }}
       >
         <Box sx={{ pt: 1.5, pb: 0.5, textAlign: "center" }}>
           <Box sx={{ width: 40, height: 4, bgcolor: "#e0e0e0", borderRadius: 2, mx: "auto" }} />
         </Box>
-        <Box sx={{ px: 2.5, pt: 1, pb: 3 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-            <Typography sx={{ fontSize: 18, fontWeight: 900 }}>Confirmar reserva</Typography>
-            <IconButton size="small" onClick={() => setDrawerOpen(false)} sx={{ bgcolor: "#f5f5f5" }}>
-              <CloseIcon fontSize="small" />
-            </IconButton>
+
+        <Box sx={{ px: 2.5, pt: 1, pb: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography sx={{ fontSize: 18, fontWeight: 900, color: "#111" }}>Revisão do pedido</Typography>
+          <IconButton size="small" onClick={() => setDrawerOpen(false)} sx={{ bgcolor: "#f5f5f5" }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ px: 2.5, pt: 2, pb: 5, overflowY: "auto" }}>
+          {/* Card da camiseta */}
+          <Box
+            sx={{
+              bgcolor: "#f0faf4",
+              border: "1.5px solid #c8ecd4",
+              borderRadius: 3,
+              p: 2,
+              mb: 3,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Box sx={{ width: 80, flexShrink: 0, "& svg": { width: "100%", height: "auto" } }}>
+              <CamisetaSVG medidas={medidas} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: 10, fontWeight: 700, color: "#009739", letterSpacing: 1 }}>
+                CAMISETA OFICIAL
+              </Typography>
+              <Typography sx={{ fontSize: 16, fontWeight: 900, color: "#111", mt: 0.2 }}>
+                Evento N1
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: "#666", mt: 0.2 }}>Unissex</Typography>
+              <Box sx={{ display: "inline-flex", bgcolor: "#009739", borderRadius: 1.5, px: 1.2, py: 0.3, mt: 0.8 }}>
+                <Typography sx={{ fontSize: 13, fontWeight: 900, color: "#fff" }}>
+                  Tamanho {tamanho}
+                </Typography>
+              </Box>
+            </Box>
           </Box>
-          <Typography sx={{ fontSize: 13, color: "#666", mb: 2 }}>
-            Modelo unissex. Confirme o tamanho. A reserva bloqueia uma unidade até a retirada com QR
-            code.
+
+          {/* Data do ingresso */}
+          <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#444", mb: 1.2 }}>
+            Quando você comprou o ingresso?
           </Typography>
-          <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#444", mb: 1 }}>Tamanho</Typography>
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 3 }}>
-            {SIZES.map((s) => {
-              const active = selSize === s;
-              const free = availBySize.get(s)?.available_to_reserve ?? 0;
-              const disabled = free < 1;
+          <Box sx={{ display: "flex", gap: 1, mb: 3 }}>
+            {["13/06", "19/06", "24/06"].map((date) => {
+              const active = ticketDate === date;
               return (
                 <Box
-                  key={s}
-                  onClick={() => !disabled && setSelSize(s)}
+                  key={date}
+                  onClick={() => setTicketDate(date)}
                   sx={{
-                    width: "calc(33.3% - 6px)",
-                    py: 1.4,
+                    flex: 1,
+                    py: 1.6,
                     textAlign: "center",
-                    borderRadius: 2,
-                    cursor: disabled ? "not-allowed" : "pointer",
-                    border: active ? "2px solid #009739" : "2px solid #e0e0e0",
+                    borderRadius: 2.5,
+                    cursor: "pointer",
+                    border: active ? "2.5px solid #009739" : "2px solid #e0e0e0",
                     bgcolor: active ? "#009739" : "#fff",
-                    opacity: disabled ? 0.45 : 1,
+                    boxShadow: active ? "0 4px 12px rgba(0,151,57,0.25)" : "none",
+                    transition: "all 0.15s",
                   }}
                 >
                   <Typography sx={{ fontSize: 15, fontWeight: 800, color: active ? "#fff" : "#555" }}>
-                    {s}
-                  </Typography>
-                  <Typography sx={{ fontSize: 10, color: active ? "rgba(255,255,255,0.85)" : "#999" }}>
-                    {free} disp.
+                    {date}
                   </Typography>
                 </Box>
               );
             })}
           </Box>
+
           <Button
             fullWidth
             variant="contained"
-            disabled={!selSize || submitting || (availBySize.get(selSize)?.available_to_reserve ?? 0) < 1}
+            disabled={!ticketDate || submitting}
             onClick={confirmReserve}
-            sx={{ py: 1.5, fontWeight: 900, bgcolor: "#009739" }}
+            sx={{
+              py: 1.8,
+              fontWeight: 900,
+              fontSize: 15,
+              background: "linear-gradient(135deg, #009739, #005f28)",
+              borderRadius: 2.5,
+              boxShadow: "0 6px 20px rgba(0,151,57,0.35)",
+              textTransform: "none",
+              "&:hover": { background: "linear-gradient(135deg, #007a2f, #004d20)" },
+              "&.Mui-disabled": { bgcolor: "#e0e0e0", color: "#aaa" },
+            }}
           >
             {submitting ? <CircularProgress size={22} color="inherit" /> : "Confirmar reserva"}
           </Button>

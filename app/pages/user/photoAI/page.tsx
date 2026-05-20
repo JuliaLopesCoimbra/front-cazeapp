@@ -503,7 +503,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f", isTorcid
   );
 
   const renderTorcidaNoFace = () => (
-    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", px: 3 }}>
+    <Box sx={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", pt: 6, px: 3 }}>
       <Box sx={{ width: "100%", maxWidth: 380, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
         <Box sx={{ width: 100, height: 100, borderRadius: "50%", background: `${accentColor}15`, border: `2px solid ${accentColor}35`, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <FaceIcon sx={{ fontSize: 52, color: accentColor }} />

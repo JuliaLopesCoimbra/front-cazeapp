@@ -158,17 +158,27 @@ export const listColunistas = async (limit?: number, offset?: number, search?: s
   }
 };
 
-export const listUsers = async (limit?: number, offset?: number, search?: string, status?: string): Promise<UserResponse[]> => {
+export const listUsers = async (limit?: number, offset?: number, search?: string, status?: string, created_after?: string): Promise<UserResponse[]> => {
   try {
     const params: any = {};
     if (limit !== undefined) params.limit = limit;
     if (offset !== undefined) params.offset = offset;
     if (search) params.search = search;
     if (status) params.status = status;
+    if (created_after) params.created_after = created_after;
     const response = await api.get<UserResponse[]>("/auth/users", { params });
     return response.data;
   } catch (error) {
     throw new Error(extractApiError(error, "Erro ao listar usuários"));
+  }
+};
+
+export const listOnlineUsers = async (): Promise<UserResponse[]> => {
+  try {
+    const response = await api.get<UserResponse[]>("/analytics/online-users");
+    return response.data;
+  } catch (error) {
+    throw new Error(extractApiError(error, "Erro ao listar usuários online"));
   }
 };
 

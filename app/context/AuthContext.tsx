@@ -104,6 +104,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     return () => clearInterval(interval);
   }, [isAuthenticated]);
   
+const saveSubscriptionId = async (OneSignal: any) => {
+  try {
+    const subId = OneSignal.User?.PushSubscription?.id;
+    if (!subId) return;
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/subscription`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ subscription_id: subId }),
+    });
+  } catch (_) {}
+};
+
 const login = useCallback(
   (accessToken: string, refreshToken: string, keepMeLoggedIn?: boolean) => {
     try {
@@ -129,6 +143,7 @@ const login = useCallback(
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
           try {
             await OneSignal.login(`n1_${decoded.sub}`);
+            await saveSubscriptionId(OneSignal);
           } catch (_) {
             try {
               // Conflito de alias (409): deleta o external_id antigo no servidor e retenta
@@ -140,6 +155,7 @@ const login = useCallback(
                 });
               }
               await OneSignal.login(`n1_${decoded.sub}`);
+              await saveSubscriptionId(OneSignal);
             } catch (_2) {
               try {
                 if (navigator.serviceWorker) {
@@ -201,6 +217,7 @@ const login = useCallback(
         (window as any).OneSignalDeferred.push(async (OneSignal: any) => {
           try {
             await OneSignal.login(`n1_${decoded.sub}`);
+            await saveSubscriptionId(OneSignal);
           } catch (_) {
             try {
               const t = localStorage.getItem("access_token");
@@ -211,6 +228,7 @@ const login = useCallback(
                 });
               }
               await OneSignal.login(`n1_${decoded.sub}`);
+              await saveSubscriptionId(OneSignal);
             } catch (_2) {
               try {
                 if (navigator.serviceWorker) {

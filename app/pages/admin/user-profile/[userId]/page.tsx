@@ -144,6 +144,7 @@ export default function UserProfilePage() {
   const [user, setUser] = useState<UserDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   const [activity, setActivity] = useState<UserActivityItem[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
@@ -266,10 +267,46 @@ export default function UserProfilePage() {
         <Paper sx={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "18px", p: 3, mb: 2, display: "flex", alignItems: "center", gap: 2.5 }}>
           <Avatar
             src={user.profile_photo || undefined}
-            sx={{ width: 72, height: 72, backgroundColor: "rgba(255,204,1,0.2)", color: "#ffcc01", fontWeight: 700, fontSize: "1.5rem", border: "2px solid rgba(255,204,1,0.3)", flexShrink: 0 }}
+            onClick={() => user.profile_photo && setPhotoOpen(true)}
+            sx={{
+              width: 72, height: 72, backgroundColor: "rgba(255,204,1,0.2)", color: "#ffcc01",
+              fontWeight: 700, fontSize: "1.5rem", border: "2px solid rgba(255,204,1,0.3)",
+              flexShrink: 0,
+              cursor: user.profile_photo ? "zoom-in" : "default",
+            }}
           >
             {getInitials(user.name, user.email)}
           </Avatar>
+
+          {/* Lightbox */}
+          {photoOpen && user.profile_photo && (
+            <Box
+              onClick={() => setPhotoOpen(false)}
+              sx={{
+                position: "fixed", inset: 0, zIndex: 9999,
+                bgcolor: "rgba(0,0,0,0.88)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                animation: "fadeIn 0.15s ease",
+                "@keyframes fadeIn": { from: { opacity: 0 }, to: { opacity: 1 } },
+              }}
+            >
+              <Box
+                component="img"
+                src={user.profile_photo}
+                alt={user.name || user.email}
+                onClick={(e) => e.stopPropagation()}
+                sx={{
+                  width: "72vw", height: "72vw",
+                  maxWidth: 320, maxHeight: 320,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "3px solid rgba(255,255,255,0.15)",
+                  boxShadow: "0 24px 80px rgba(0,0,0,0.7)",
+                  userSelect: "none",
+                }}
+              />
+            </Box>
+          )}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ color: "#fff", fontWeight: 700, fontSize: "1.1rem", mb: 0.5, wordBreak: "break-word" }}>
               {user.name || "Sem nome"}

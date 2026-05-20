@@ -7,6 +7,7 @@ export interface UserMetrics {
   new_today: number;
   new_this_week: number;
   new_this_month: number;
+  users_online?: number;
 }
 
 export interface InteractionMetrics {
