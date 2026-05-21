@@ -125,7 +125,7 @@ export default function JogosPage() {
 
   return (
     <Box sx={{ backgroundColor: "#000", minHeight: "100vh", pb: "100px" }}>
-      <TopBar title="Copa do Mundo 2026" />
+      <TopBar title="Quer apostar?" />
 
       <Box sx={{ px: 2, pt: 2 }}>
         {liveGame && <LiveScoreBanner fixture={liveGame} />}
@@ -182,7 +182,11 @@ export default function JogosPage() {
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             {phaseFixtures.map((fixture) => (
-              <MatchCard key={fixture.fixture.id} fixture={fixture} />
+              <MatchCard
+                key={fixture.fixture.id}
+                fixture={fixture}
+                href={`/pages/user/bolao/${fixture.fixture.id}`}
+              />
             ))}
           </Box>
         )}

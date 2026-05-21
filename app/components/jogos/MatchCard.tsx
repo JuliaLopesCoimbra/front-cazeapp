@@ -11,6 +11,7 @@ import LiveBadge from "@/app/components/shared/LiveBadge";
 interface MatchCardProps {
   fixture: BrazilFixture;
   compact?: boolean;
+  href?: string;
 }
 
 function TeamLogo({ name, logo }: { name: string; logo: string }) {
@@ -97,15 +98,17 @@ function ScoreDisplay({ fixture }: { fixture: BrazilFixture }) {
   );
 }
 
-export default function MatchCard({ fixture, compact = false }: MatchCardProps) {
+export default function MatchCard({ fixture, compact = false, href }: MatchCardProps) {
   const router = useRouter();
   const live = isLive(fixture);
   const finished = isFinished(fixture);
   const matchDate = parseISO(fixture.fixture.date);
 
+  const destination = href ?? `/pages/user/jogos/${fixture.fixture.id}`;
+
   return (
     <Box
-      onClick={() => router.push(`/pages/user/jogos/${fixture.fixture.id}`)}
+      onClick={() => router.push(destination)}
       sx={{
         backgroundColor: live ? "rgba(230,57,70,0.08)" : "#1A1A1A",
         border: live
