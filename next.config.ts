@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const turbopackRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   images: {
@@ -49,13 +53,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // Configuração do Turbopack para resolução de módulos
-  turbopack: {
-    resolveAlias: {
-      "@": "./",
-    },
-    resolveExtensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
-  },
+  turbopack: {
+    root: turbopackRoot,
+    resolveAlias: {
+      "@": "./",
+    },
+    resolveExtensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+  },
 };
 
 export default nextConfig;
