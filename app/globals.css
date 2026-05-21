@@ -10,6 +10,27 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Cazé TV Design System */
+  --color-caze-yellow: #F5C900;
+  --color-caze-yellow-dark: #D4A800;
+  --color-caze-blue: #0055B8;
+  --color-caze-blue-dark: #003E8A;
+  --color-caze-red: #E63946;
+  --color-caze-black: #000000;
+  --color-caze-surface: #1A1A1A;
+  --color-caze-muted: #9E9E9E;
+
+  --font-heading: 'Montserrat', Arial, sans-serif;
+  --font-sub: 'Poppins', Arial, sans-serif;
+  --font-body: 'Roboto', Arial, sans-serif;
+
+  --animate-live-pulse: live-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 @media (prefers-color-scheme: dark) {

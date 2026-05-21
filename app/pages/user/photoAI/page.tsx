@@ -55,7 +55,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f", isTorcid
   const { getCache, setCache } = useFeedCache();
   const cacheKey = `photo-ai-results-event-${eventId}`;
 
-  const [stage, setStage] = useState<Stage>(isTorcida ? "torcida-checking" : "intro");
+  const [stage, setStage] = useState<Stage>("intro");
   const [isRequestingCamera, setIsRequestingCamera] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -78,31 +78,12 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f", isTorcid
     return () => stopCamera();
   }, []);
 
-  // Torcida: check face registration status on mount
-  useEffect(() => {
-    if (!isTorcida) return;
-    (async () => {
-      try {
-        const status = await getMyFaceStatus(eventId);
-        if (status.registered) {
-          const photos = await getMyPhotos(eventId);
-          setMyPhotos(photos);
-          setStage("torcida-my-photos");
-        } else {
-          setStage("torcida-no-face");
-        }
-      } catch {
-        setStage("torcida-no-face");
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId, isTorcida]);
 
   useEffect(() => {
     const isEventChange = previousEventIdRef.current !== null && previousEventIdRef.current !== eventId;
 
     if (isEventChange) {
-      setStage(isTorcida ? "torcida-checking" : "intro");
+      setStage("intro");
       setResults([]);
       setSearchMessage(null);
       // setCart([]); // sistema de compra desativado
@@ -111,12 +92,6 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f", isTorcid
       setCountdown(null);
       setCameraError(null);
       stopCamera();
-      previousEventIdRef.current = eventId;
-      return;
-    }
-
-    // Torcida users go through the face-status check — don't restore manual search cache
-    if (isTorcida) {
       previousEventIdRef.current = eventId;
       return;
     }
@@ -392,7 +367,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f", isTorcid
         return;
       }
 
-      const response = await searchFace(file, String(eventId), eventId);
+      const response = await searchFace(file, "caze-rostos", eventId);
       console.log("Resposta completa da API:", response);
       console.log("Matches:", response.matches);
 
@@ -1107,10 +1082,6 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f", isTorcid
 
   return (
     <>
-      {stage === "torcida-checking" && renderTorcidaChecking()}
-      {stage === "torcida-no-face" && renderTorcidaNoFace()}
-      {stage === "torcida-registering" && renderTorcidaRegistering()}
-      {stage === "torcida-my-photos" && renderTorcidaMyPhotos()}
       {stage === "camera" && renderCamera()}
       {stage === "results" && renderResults()}
       {stage === "intro" && renderIntro()}

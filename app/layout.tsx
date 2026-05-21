@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Roboto, Inter } from "next/font/google";
+import { Roboto, Montserrat, Poppins } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Script from "next/script";
 import "./globals.css";
@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import { FeedCacheProvider } from './context/FeedCacheContext';
 import EmotionCacheProvider from './lib/emotion-cache';
 import ThemeProvider from './lib/theme-provider';
+import QueryProvider from './lib/query-provider';
 import ScrollRestorer from './components/layout/ScrollRestorer';
 import PageTracker from './components/layout/PageTracker';
 
@@ -16,33 +17,32 @@ const gaId = process.env.NEXT_PUBLIC_GA_ID;
 const roboto = Roboto({
   variable: "--font-roboto",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
+  weight: ["400", "500", "700"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600", "700", "900"],
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "N1 - Application Event",
+  title: "Casa CazéTV",
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo/logo-n1.png", // Caminho do ícone
+    icon: "/logo/logo-n1.png",
     apple: "/logo/logo-apple.png",
   },
-  // define o nome curto que aparece abaixo do ícone na Home do iOS
   appleWebApp: {
-    title: "N1 App",
-    statusBarStyle: "default",
+    title: "Casa CazéTV",
+    statusBarStyle: "black-translucent",
     capable: true,
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
   },
 };
 
@@ -57,20 +57,22 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
       <body
-        className={`${roboto.variable} ${inter.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}
+        className={`${roboto.variable} ${montserrat.variable} ${poppins.variable} antialiased`}
+        style={{ fontFamily: 'var(--font-roboto), Roboto, -apple-system, sans-serif' }}
       >
         <EmotionCacheProvider>
           <ThemeProvider>
-            <AuthProvider>
-              <ToastProvider>
-                <FeedCacheProvider>
-                  <ScrollRestorer />
-                  <PageTracker />
-                  {children}
-                </FeedCacheProvider>
-              </ToastProvider>
-            </AuthProvider>
+            <QueryProvider>
+              <AuthProvider>
+                <ToastProvider>
+                  <FeedCacheProvider>
+                    <ScrollRestorer />
+                    <PageTracker />
+                    {children}
+                  </FeedCacheProvider>
+                </ToastProvider>
+              </AuthProvider>
+            </QueryProvider>
           </ThemeProvider>
         </EmotionCacheProvider>
         {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
@@ -89,14 +91,11 @@ export default function RootLayout({
                     type: "push",
                     autoPrompt: true,
                     text: {
-                      actionMessage: "Ative as notificações para receber atualizações do N1",
+                      actionMessage: "Ative as notificações para receber atualizações da Casa CazéTV",
                       acceptButton: "Ativar",
                       cancelButton: "Agora não"
                     },
-                    delay: {
-                      pageViews: 1,
-                      timeDelay: 1
-                    }
+                    delay: { pageViews: 1, timeDelay: 1 }
                   }]
                 }
               }
