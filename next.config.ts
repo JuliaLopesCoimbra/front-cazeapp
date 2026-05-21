@@ -23,6 +23,16 @@ const nextConfig: NextConfig = {
         hostname: "d2dbwpuqh2i6wo.cloudfront.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "media.api-sports.io",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "flagcdn.com",
+        pathname: "/**",
+      },
     ],
     unoptimized: false,
   },

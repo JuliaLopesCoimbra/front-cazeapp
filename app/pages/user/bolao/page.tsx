@@ -2,16 +2,90 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Box, Typography, Tabs, Tab, Skeleton } from "@mui/material";
+import { Box, Typography, Tabs, Tab, Skeleton, CircularProgress } from "@mui/material";
 import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
 import BottomNav from "@/app/components/layout/BottomNav";
 import TopBar from "@/app/components/layout/TopBar";
 import { PointsBadge } from "@/app/components/shared/PointsBadge";
 import { useBolaoFixtures, useBolaoMyPoints } from "@/app/hooks/useBolao";
+import { devSettle, devReset } from "@/app/services/bolao/bolao.service";
 import type { BolaoFixture } from "@/app/types/bolao";
 
 type TabValue = "open" | "closed";
+
+const STATUS_COLOR: Record<string, string> = {
+  exact:   "#F5C900",
+  outcome: "#0055B8",
+  wrong:   "#9E9E9E",
+  pending: "#F5C900",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  exact:   "🎯",
+  outcome: "✅",
+  wrong:   "😅",
+};
+
+function DevButton({
+  fixture,
+  onDone,
+}: {
+  fixture: BolaoFixture;
+  onDone: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  if (process.env.NODE_ENV !== "development") return null;
+
+  const pred = fixture.user_prediction;
+  if (!pred) return null;
+
+  const isSettled = pred.status !== "pending";
+
+  async function handleClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setLoading(true);
+    try {
+      if (isSettled) {
+        await devReset(fixture.fixture_id);
+      } else {
+        await devSettle(fixture.fixture_id, pred!.home_score, pred!.away_score);
+      }
+      onDone();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Box
+      onClick={handleClick}
+      sx={{
+        width: 24,
+        height: 24,
+        borderRadius: "50%",
+        backgroundColor: isSettled ? "#555" : "#22c55e",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        cursor: "pointer",
+        ml: 1,
+        transition: "background-color 0.2s",
+        "&:hover": { backgroundColor: isSettled ? "#777" : "#16a34a" },
+      }}
+    >
+      {loading ? (
+        <CircularProgress size={12} sx={{ color: "#fff" }} />
+      ) : (
+        <Typography sx={{ fontSize: "0.6rem", lineHeight: 1, userSelect: "none", color: "#fff" }}>
+          {isSettled ? "↺" : "▶"}
+        </Typography>
+      )}
+    </Box>
+  );
+}
 
 function FixtureRowSkeleton() {
   return (
@@ -23,9 +97,16 @@ function FixtureRowSkeleton() {
   );
 }
 
-function FixtureRow({ fixture }: { fixture: BolaoFixture }) {
+function FixtureRow({
+  fixture,
+  onRefetch,
+}: {
+  fixture: BolaoFixture;
+  onRefetch: () => void;
+}) {
   const isClosed = new Date() >= new Date(fixture.betting_closes_at);
   const pred = fixture.user_prediction;
+  const isSettled = pred != null && pred.status !== "pending";
 
   return (
     <Link href={`/pages/user/bolao/${fixture.fixture_id}`} style={{ textDecoration: "none" }}>
@@ -43,8 +124,9 @@ function FixtureRow({ fixture }: { fixture: BolaoFixture }) {
           "&:hover": { backgroundColor: "#222" },
         }}
       >
-        <Box>
-          <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.9375rem" }}>
+        {/* Left: match info */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography noWrap sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.9375rem" }}>
             {fixture.home_team} × {fixture.away_team}
           </Typography>
           <Typography sx={{ color: "#9E9E9E", fontSize: "0.75rem", mt: 0.25 }}>
@@ -57,32 +139,41 @@ function FixtureRow({ fixture }: { fixture: BolaoFixture }) {
           </Typography>
         </Box>
 
-        <Box sx={{ textAlign: "right", flexShrink: 0, ml: 2 }}>
-          {pred ? (
-            <>
-              <Typography
-                sx={{
-                  color: "#F5C900",
-                  fontFamily: '"Montserrat", Arial, sans-serif',
-                  fontWeight: 700,
-                  fontSize: "1rem",
-                }}
-              >
-                {pred.home_score} × {pred.away_score}
-              </Typography>
-              {pred.points_earned > 0 && (
-                <Typography sx={{ color: "#F5C900", fontSize: "0.7rem" }}>
-                  +{pred.points_earned}pts
+        {/* Right: prediction + dev button */}
+        <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0, ml: 2 }}>
+          <Box sx={{ textAlign: "right" }}>
+            {pred ? (
+              <>
+                <Typography
+                  sx={{
+                    color: STATUS_COLOR[pred.status],
+                    fontFamily: '"Montserrat", Arial, sans-serif',
+                    fontWeight: 700,
+                    fontSize: "1rem",
+                  }}
+                >
+                  {pred.home_score} × {pred.away_score}
+                  {isSettled && ` ${STATUS_LABEL[pred.status]}`}
                 </Typography>
-              )}
-            </>
-          ) : !isClosed ? (
-            <Typography sx={{ color: "#F5C900", fontSize: "0.8rem", fontWeight: 600 }}>
-              Apostar →
-            </Typography>
-          ) : (
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.75rem" }}>Encerrado</Typography>
-          )}
+                {pred.points_earned > 0 && (
+                  <Typography sx={{ color: "#F5C900", fontSize: "0.7rem" }}>
+                    +{pred.points_earned}pts
+                  </Typography>
+                )}
+                {pred.status === "wrong" && (
+                  <Typography sx={{ color: "#9E9E9E", fontSize: "0.7rem" }}>0pts</Typography>
+                )}
+              </>
+            ) : !isClosed ? (
+              <Typography sx={{ color: "#F5C900", fontSize: "0.8rem", fontWeight: 600 }}>
+                Apostar →
+              </Typography>
+            ) : (
+              <Typography sx={{ color: "#9E9E9E", fontSize: "0.75rem" }}>Encerrado</Typography>
+            )}
+          </Box>
+
+          <DevButton fixture={fixture} onDone={onRefetch} />
         </Box>
       </Box>
     </Link>
@@ -91,8 +182,13 @@ function FixtureRow({ fixture }: { fixture: BolaoFixture }) {
 
 export default function BolaoPage() {
   const [tab, setTab] = useState<TabValue>("open");
-  const { data: fixtures, isLoading, isError } = useBolaoFixtures();
-  const { data: myPoints, isLoading: loadingPoints } = useBolaoMyPoints();
+  const { data: fixtures, isLoading, isError, refetch } = useBolaoFixtures();
+  const { data: myPoints, isLoading: loadingPoints, refetch: refetchPoints } = useBolaoMyPoints();
+
+  function handleRefetch() {
+    refetch();
+    refetchPoints();
+  }
 
   const now = new Date();
   const open = fixtures?.filter((f) => new Date(f.betting_closes_at) > now) ?? [];
@@ -192,7 +288,7 @@ export default function BolaoPage() {
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             {displayed.map((f) => (
-              <FixtureRow key={f.fixture_id} fixture={f} />
+              <FixtureRow key={f.fixture_id} fixture={f} onRefetch={handleRefetch} />
             ))}
           </Box>
         )}
