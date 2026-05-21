@@ -4,71 +4,70 @@ import { useState } from "react";
 import { Box, IconButton, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import CazeButton from "@/app/components/shared/CazeButton";
 import { useCreatePrediction } from "@/app/hooks/useBolao";
 import type { BolaoFixture } from "@/app/types/bolao";
 
 interface ScoreControlProps {
-  label: string;
   value: number;
   onChange: (v: number) => void;
   disabled: boolean;
 }
 
-function ScoreControl({ label, value, onChange, disabled }: ScoreControlProps) {
+function ScoreControl({ value, onChange, disabled }: ScoreControlProps) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-      <Typography sx={{ color: "#9E9E9E", fontSize: "0.75rem", fontWeight: 600 }}>
-        {label}
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5 }}>
+      {/* + */}
+      <IconButton
+        onClick={() => onChange(Math.min(20, value + 1))}
+        disabled={disabled}
+        sx={{
+          width: 44, height: 44, borderRadius: "50%",
+          backgroundColor: disabled ? "rgba(255,255,255,0.04)" : "rgba(245,201,0,0.12)",
+          border: `1.5px solid ${disabled ? "#2A2A2A" : "#F5C900"}`,
+          color: disabled ? "#333" : "#F5C900",
+          "&:hover": { backgroundColor: "rgba(245,201,0,0.2)" },
+          "&:disabled": { borderColor: "#2A2A2A", color: "#333" },
+          transition: "all 0.15s ease",
+        }}
+      >
+        <AddIcon sx={{ fontSize: "1.25rem" }} />
+      </IconButton>
+
+      {/* score number */}
+      <Typography sx={{
+        fontFamily: '"Montserrat", Arial, sans-serif',
+        fontWeight: 900,
+        fontSize: "4rem",
+        lineHeight: 1,
+        color: disabled ? "#555" : "#FFFFFF",
+        minWidth: 72,
+        textAlign: "center",
+        userSelect: "none",
+        transition: "color 0.15s ease",
+      }}>
+        {value}
       </Typography>
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <IconButton
-          onClick={() => onChange(Math.max(0, value - 1))}
-          disabled={disabled || value === 0}
-          size="small"
-          sx={{
-            color: "#F5C900",
-            border: "1px solid #F5C900",
-            borderRadius: "8px",
-            width: 36,
-            height: 36,
-            "&:disabled": { borderColor: "#444", color: "#444" },
-          }}
-        >
-          <RemoveIcon fontSize="small" />
-        </IconButton>
-
-        <Typography
-          sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
-            fontWeight: 900,
-            fontSize: "2.25rem",
-            color: "#FFFFFF",
-            minWidth: "48px",
-            textAlign: "center",
-            lineHeight: 1,
-          }}
-        >
-          {value}
-        </Typography>
-
-        <IconButton
-          onClick={() => onChange(Math.min(20, value + 1))}
-          disabled={disabled}
-          size="small"
-          sx={{
-            color: "#F5C900",
-            border: "1px solid #F5C900",
-            borderRadius: "8px",
-            width: 36,
-            height: 36,
-            "&:disabled": { borderColor: "#444", color: "#444" },
-          }}
-        >
-          <AddIcon fontSize="small" />
-        </IconButton>
-      </Box>
+      {/* - */}
+      <IconButton
+        onClick={() => onChange(Math.max(0, value - 1))}
+        disabled={disabled || value === 0}
+        sx={{
+          width: 44, height: 44, borderRadius: "50%",
+          backgroundColor: "transparent",
+          border: `1.5px solid ${disabled || value === 0 ? "#2A2A2A" : "rgba(255,255,255,0.2)"}`,
+          color: disabled || value === 0 ? "#333" : "#9E9E9E",
+          "&:hover": { backgroundColor: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.3)" },
+          "&:disabled": { borderColor: "#2A2A2A", color: "#333" },
+          transition: "all 0.15s ease",
+        }}
+      >
+        <RemoveIcon sx={{ fontSize: "1.25rem" }} />
+      </IconButton>
     </Box>
   );
 }
@@ -90,94 +89,124 @@ export function PredictionInput({ fixture, onSuccess }: PredictionInputProps) {
 
   function handleSubmit() {
     mutate(
-      {
-        fixture_id: fixture.fixture_id,
-        home_score_prediction: homeScore,
-        away_score_prediction: awayScore,
-      },
+      { fixture_id: fixture.fixture_id, home_score_prediction: homeScore, away_score_prediction: awayScore },
       { onSuccess }
     );
   }
 
+  const hasExisting = existing != null && !isSettled;
+
   return (
-    <Box sx={{ backgroundColor: "#1A1A1A", borderRadius: "16px", p: 3 }}>
-      <Typography
-        sx={{
-          color: "#9E9E9E",
-          fontSize: "0.75rem",
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          mb: 3,
-          textAlign: "center",
-        }}
-      >
-        {existing ? "Sua aposta" : "Faça sua aposta"}
+    <Box sx={{
+      background: "linear-gradient(160deg, #161616 0%, #1C1C1C 100%)",
+      border: isSettled
+        ? existing!.status === "exact"   ? "1.5px solid rgba(245,201,0,0.5)"
+          : existing!.status === "outcome" ? "1.5px solid rgba(91,156,246,0.5)"
+          : "1.5px solid rgba(255,255,255,0.1)"
+        : "1.5px solid rgba(255,255,255,0.08)",
+      borderRadius: "20px",
+      p: 3,
+      overflow: "hidden",
+      position: "relative",
+    }}>
+      {/* título */}
+      <Typography sx={{
+        color: "#9E9E9E",
+        fontSize: "0.7rem",
+        fontWeight: 700,
+        fontFamily: '"Montserrat"',
+        textTransform: "uppercase",
+        letterSpacing: "0.1em",
+        textAlign: "center",
+        mb: 3,
+      }}>
+        {isSettled ? "Resultado da sua aposta" : hasExisting ? "Alterar sua aposta" : "Seu palpite"}
       </Typography>
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 3,
-          mb: 3,
-        }}
-      >
-        <ScoreControl
-          label={fixture.home_team}
-          value={homeScore}
-          onChange={setHomeScore}
-          disabled={disabled}
-        />
+      {/* labels dos times */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5, px: 1 }}>
+        <Typography sx={{ color: "#9E9E9E", fontSize: "0.7rem", fontWeight: 600, fontFamily: '"Montserrat"', flex: 1, textAlign: "center" }}>
+          {fixture.home_team}
+        </Typography>
+        <Box sx={{ minWidth: 40 }} />
+        <Typography sx={{ color: "#9E9E9E", fontSize: "0.7rem", fontWeight: 600, fontFamily: '"Montserrat"', flex: 1, textAlign: "center" }}>
+          {fixture.away_team}
+        </Typography>
+      </Box>
 
-        <Typography
-          sx={{
-            color: "#9E9E9E",
-            fontWeight: 700,
-            fontSize: "1.5rem",
-            mt: 2.5,
-          }}
-        >
+      {/* controles de placar */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, mb: 3 }}>
+        <ScoreControl value={homeScore} onChange={setHomeScore} disabled={disabled} />
+
+        <Typography sx={{
+          color: "rgba(255,255,255,0.2)",
+          fontFamily: '"Montserrat"',
+          fontWeight: 900,
+          fontSize: "2rem",
+          lineHeight: 1,
+          userSelect: "none",
+          mt: 0.5,
+        }}>
           ×
         </Typography>
 
-        <ScoreControl
-          label={fixture.away_team}
-          value={awayScore}
-          onChange={setAwayScore}
-          disabled={disabled}
-        />
+        <ScoreControl value={awayScore} onChange={setAwayScore} disabled={disabled} />
       </Box>
 
+      {/* estado do resultado */}
       {isSettled ? (
-        <Box sx={{ textAlign: "center" }}>
+        <Box sx={{
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
+          backgroundColor: "rgba(0,0,0,0.3)", borderRadius: "12px", p: 2,
+        }}>
           {existing!.status === "exact" && (
-            <Typography sx={{ color: "#F5C900", fontWeight: 700 }}>
-              Placar exato! +{existing!.points_earned}pts 🎯
-            </Typography>
+            <>
+              <EmojiEventsOutlinedIcon sx={{ color: "#F5C900", fontSize: "1.75rem" }} />
+              <Typography sx={{ color: "#F5C900", fontFamily: '"Montserrat"', fontWeight: 900, fontSize: "1rem" }}>
+                Placar exato!
+              </Typography>
+              <Typography sx={{ color: "#F5C900", fontSize: "0.8rem" }}>
+                +{existing!.points_earned} pontos ganhos
+              </Typography>
+            </>
           )}
           {existing!.status === "outcome" && (
-            <Typography sx={{ color: "#0055B8", fontWeight: 700 }}>
-              Resultado certo! +{existing!.points_earned}pts ✅
-            </Typography>
+            <>
+              <CheckCircleOutlineIcon sx={{ color: "#5B9CF6", fontSize: "1.75rem" }} />
+              <Typography sx={{ color: "#5B9CF6", fontFamily: '"Montserrat"', fontWeight: 900, fontSize: "1rem" }}>
+                Resultado certo!
+              </Typography>
+              <Typography sx={{ color: "#5B9CF6", fontSize: "0.8rem" }}>
+                +{existing!.points_earned} pontos ganhos
+              </Typography>
+            </>
           )}
           {existing!.status === "wrong" && (
-            <Typography sx={{ color: "#9E9E9E" }}>Não foi dessa vez 😅</Typography>
+            <>
+              <CancelOutlinedIcon sx={{ color: "#9E9E9E", fontSize: "1.75rem" }} />
+              <Typography sx={{ color: "#9E9E9E", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "1rem" }}>
+                Não foi dessa vez
+              </Typography>
+            </>
           )}
           {existing!.status === "cancelled" && (
             <Typography sx={{ color: "#9E9E9E" }}>Aposta cancelada</Typography>
           )}
         </Box>
       ) : isClosed ? (
-        <Typography
-          sx={{ color: "#E63946", textAlign: "center", fontSize: "0.875rem", fontWeight: 600 }}
-        >
-          Apostas encerradas para este jogo
-        </Typography>
+        <Box sx={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
+          backgroundColor: "rgba(230,57,70,0.08)", border: "1px solid rgba(230,57,70,0.2)",
+          borderRadius: "12px", p: 1.5,
+        }}>
+          <Box sx={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#E63946" }} />
+          <Typography sx={{ color: "#E63946", fontSize: "0.8rem", fontWeight: 600 }}>
+            Apostas encerradas
+          </Typography>
+        </Box>
       ) : (
         <CazeButton fullWidth loading={isPending} onClick={handleSubmit}>
-          {existing ? "Atualizar aposta ✏️" : "Confirmar aposta ⚽"}
+          {hasExisting ? "Atualizar aposta" : "Confirmar aposta"}
         </CazeButton>
       )}
     </Box>
