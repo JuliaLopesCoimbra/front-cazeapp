@@ -57,3 +57,15 @@ export async function getMyRedemptions(): Promise<BolaoRedemption[]> {
   const { data } = await api.get<BolaoRedemption[]>("/bolao/my-redemptions");
   return data;
 }
+
+export async function devSettle(
+  fixture_id: number,
+  actual_home: number,
+  actual_away: number
+): Promise<void> {
+  await api.post("/bolao/dev/settle", { fixture_id, actual_home, actual_away });
+}
+
+export async function devReset(fixture_id: number): Promise<void> {
+  await api.post(`/bolao/dev/reset/${fixture_id}`);
+}
