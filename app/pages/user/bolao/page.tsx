@@ -147,7 +147,7 @@ function FixtureRow({
                 <Typography
                   sx={{
                     color: STATUS_COLOR[pred.status],
-                    fontFamily: '"Montserrat", Arial, sans-serif',
+                    fontFamily: 'var(--font-syne), Syne, sans-serif',
                     fontWeight: 700,
                     fontSize: "1rem",
                   }}
@@ -256,7 +256,7 @@ export default function BolaoPage() {
             "& .MuiTabs-indicator": { backgroundColor: "#F5C900" },
             "& .MuiTab-root": {
               color: "#9E9E9E",
-              fontFamily: '"Montserrat", Arial, sans-serif',
+              fontFamily: 'var(--font-syne), Syne, sans-serif',
               fontWeight: 700,
               fontSize: "0.8rem",
               textTransform: "none",

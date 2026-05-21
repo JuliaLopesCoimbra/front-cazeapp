@@ -40,9 +40,10 @@ export function PointsBadge({ points, isLoading, compact = false }: PointsBadgeP
         <Typography
           sx={{
             color: "#F5C900",
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
             fontWeight: 700,
             fontSize: "0.875rem",
+            fontVariantNumeric: "tabular-nums",
           }}
         >
           {points?.total_points ?? 0}pts
@@ -69,10 +70,11 @@ export function PointsBadge({ points, isLoading, compact = false }: PointsBadgeP
         <Typography
           sx={{
             color: "#F5C900",
-            fontFamily: '"Montserrat", Arial, sans-serif',
-            fontWeight: 900,
+            fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
+            fontWeight: 700,
             fontSize: "1.75rem",
             lineHeight: 1,
+            fontVariantNumeric: "tabular-nums",
           }}
         >
           {points?.total_points ?? 0}
@@ -85,10 +87,11 @@ export function PointsBadge({ points, isLoading, compact = false }: PointsBadgeP
           <Typography
             sx={{
               color: "#FFFFFF",
-              fontFamily: '"Montserrat", Arial, sans-serif',
+              fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
               fontWeight: 700,
               fontSize: "1.25rem",
               lineHeight: 1,
+              fontVariantNumeric: "tabular-nums",
             }}
           >
             #{points.rank}

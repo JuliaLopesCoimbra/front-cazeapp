@@ -28,7 +28,7 @@ export default function CazeButton({
     primary: {
       backgroundColor: "#F5C900",
       color: "#000000",
-      fontFamily: '"Montserrat", Arial, sans-serif',
+      fontFamily: 'var(--font-syne), Syne, sans-serif',
       fontWeight: 700,
       "&:hover": { backgroundColor: "#D4A800" },
       "&:disabled": { backgroundColor: "#9E9E9E", color: "#1A1A1A" },
@@ -36,7 +36,7 @@ export default function CazeButton({
     secondary: {
       backgroundColor: "transparent",
       color: "#0055B8",
-      fontFamily: '"Montserrat", Arial, sans-serif',
+      fontFamily: 'var(--font-syne), Syne, sans-serif',
       fontWeight: 700,
       border: "2px solid #0055B8",
       "&:hover": { borderColor: "#003E8A", color: "#003E8A", backgroundColor: "rgba(0,85,184,0.04)" },
@@ -45,7 +45,7 @@ export default function CazeButton({
     ghost: {
       backgroundColor: "transparent",
       color: "#FFFFFF",
-      fontFamily: '"Montserrat", Arial, sans-serif',
+      fontFamily: 'var(--font-syne), Syne, sans-serif',
       fontWeight: 600,
       textDecoration: "underline",
       "&:hover": { backgroundColor: "rgba(255,255,255,0.06)" },

@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useMobileMenu } from "@/app/context/MobileMenuContext";
 import {
   Drawer,
   List,
@@ -15,7 +16,7 @@ import {
   MenuItem,
   ListItemIcon,
 } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
+import LogoutButton from "@/app/components/auth/LogoutButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -61,8 +62,14 @@ export default function HamburgerMenu({
   onSelectEvent,
   triggerVariant = "default",
 }: Props) {
-  const { isAdmin, isAdminMaster, isSubadmin, logout } = useAuth();
+  const { isAdmin, isAdminMaster, isSubadmin } = useAuth();
+  const { setMenuOpen: setGlobalMenuOpen } = useMobileMenu();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setGlobalMenuOpen(open);
+    return () => setGlobalMenuOpen(false);
+  }, [open, setGlobalMenuOpen]);
   const [openEvents, setOpenEvents] = useState(true);
   const [activateModalOpen, setActivateModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventResponse | null>(
@@ -696,20 +703,7 @@ export default function HamburgerMenu({
 
           {/* ───────── SAIR ───────── */}
           <Box display="flex" justifyContent="center" py={2}>
-            <ListItemButton
-              onClick={() => {
-                logout();
-                router.replace("/pages/auth/login");
-              }}
-              sx={{
-                justifyContent: "center",
-                gap: 1,
-                color: "#ffc91f",
-              }}
-            >
-              <LogoutIcon fontSize="small" />
-              <Typography fontSize={14}>Sair</Typography>
-            </ListItemButton>
+            <LogoutButton variant="menu" onAfterLogout={() => setOpen(false)} />
           </Box>
         </List>
       </Drawer>

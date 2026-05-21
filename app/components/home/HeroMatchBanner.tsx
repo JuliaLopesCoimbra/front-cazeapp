@@ -60,7 +60,7 @@ export default function HeroMatchBanner() {
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
         <Typography
           sx={{
-            fontFamily: '"Poppins", Arial, sans-serif',
+            fontFamily: 'var(--font-inter), Inter, sans-serif',
             fontWeight: 600,
             fontSize: "0.7rem",
             color: live ? "#E63946" : "#F5C900",
@@ -83,7 +83,7 @@ export default function HeroMatchBanner() {
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 900,
             fontSize: "1.125rem",
             color: "#FFFFFF",
@@ -97,7 +97,7 @@ export default function HeroMatchBanner() {
           <Box sx={{ mx: 1.5, textAlign: "center" }}>
             <Typography
               sx={{
-                fontFamily: '"Montserrat"',
+                fontFamily: 'var(--font-syne), Syne',
                 fontWeight: 900,
                 fontSize: "2rem",
                 color: "#E63946",
@@ -116,7 +116,7 @@ export default function HeroMatchBanner() {
           <Typography
             sx={{
               mx: 2,
-              fontFamily: '"Montserrat"',
+              fontFamily: 'var(--font-syne), Syne',
               fontWeight: 900,
               fontSize: "1.25rem",
               color: "#F5C900",
@@ -128,7 +128,7 @@ export default function HeroMatchBanner() {
 
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 900,
             fontSize: "1.125rem",
             color: "#FFFFFF",

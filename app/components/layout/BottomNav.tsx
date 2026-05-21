@@ -15,6 +15,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import FrostedGlass from "@/app/components/shared/FrostedGlass";
+import { useMobileMenu } from "@/app/context/MobileMenuContext";
+
+/** Abaixo do Drawer do menu (1400) e da sidebar desktop (1200) */
+const BOTTOM_NAV_Z_INDEX = 1100;
 
 interface BottomNavProps {
   bolaoHasPendingBets?: boolean;
@@ -89,6 +93,7 @@ export default function BottomNav({
 }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { isMenuOpen } = useMobileMenu();
   const scrollY = useMotionValue(0);
   const compact = useCompactMotion(scrollY);
 
@@ -128,7 +133,14 @@ export default function BottomNav({
     <motion.nav
       role="navigation"
       aria-label="Navegação principal"
+      aria-hidden={isMenuOpen}
       className="block md:hidden"
+      initial={false}
+      animate={{
+        opacity: isMenuOpen ? 0 : 1,
+        y: isMenuOpen ? 16 : 0,
+      }}
+      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
       style={{
         position: "fixed",
         bottom,
@@ -138,8 +150,10 @@ export default function BottomNav({
         maxWidth: dockMaxWidth,
         minWidth: dockMinWidth,
         scale: dockScale,
-        zIndex: 9999,
+        zIndex: BOTTOM_NAV_Z_INDEX,
         touchAction: "none",
+        pointerEvents: isMenuOpen ? "none" : "auto",
+        visibility: isMenuOpen ? "hidden" : "visible",
       }}
     >
       <FrostedGlass

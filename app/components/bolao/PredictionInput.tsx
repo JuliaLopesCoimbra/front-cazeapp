@@ -41,13 +41,14 @@ function ScoreControl({ label, value, onChange, disabled }: ScoreControlProps) {
 
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
-            fontWeight: 900,
+            fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
+            fontWeight: 700,
             fontSize: "2.25rem",
             color: "#FFFFFF",
             minWidth: "48px",
             textAlign: "center",
             lineHeight: 1,
+            fontVariantNumeric: "tabular-nums",
           }}
         >
           {value}

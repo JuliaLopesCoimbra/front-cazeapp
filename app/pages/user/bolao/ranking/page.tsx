@@ -35,7 +35,7 @@ export default function RankingPage() {
         <Typography
           sx={{
             color: "#FFFFFF",
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 700,
             fontSize: "1rem",
             mb: 2,

@@ -117,7 +117,7 @@ export default function BolaoFixturePage({ params }: Props) {
                 day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
               })}
             </Typography>
-            <Typography sx={{ color: "#9E9E9E", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "1.5rem" }}>
+            <Typography sx={{ color: "#9E9E9E", fontFamily: 'var(--font-syne), Syne, sans-serif', fontWeight: 800, fontSize: "1.5rem" }}>
               VS
             </Typography>
           </Box>
@@ -149,7 +149,7 @@ export default function BolaoFixturePage({ params }: Props) {
           ].map(({ pts, label, color }, i, arr) => (
             <Box key={pts} sx={{ display: "flex", alignItems: "center", gap: 0 }}>
               <Box sx={{ textAlign: "center" }}>
-                <Typography sx={{ color, fontFamily: '"Montserrat"', fontWeight: 900, fontSize: "1.5rem", lineHeight: 1 }}>
+                <Typography sx={{ color, fontFamily: 'var(--font-space-mono), "Space Mono", monospace', fontWeight: 700, fontSize: "1.5rem", lineHeight: 1 }}>
                   {pts}
                 </Typography>
                 <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", mt: 0.5 }}>{label}</Typography>

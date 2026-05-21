@@ -26,7 +26,7 @@ export default function FigurinhasPage() {
 
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 900,
             fontSize: "1.5rem",
             color: "#FFFFFF",

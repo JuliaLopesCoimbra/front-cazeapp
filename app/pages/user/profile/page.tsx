@@ -38,6 +38,8 @@ import {
   setStoredEventBrandKey,
 } from "@/app/utils/eventBranding";
 import { useToast } from "@/app/context/ToastContext";
+import LogoutButton from "@/app/components/auth/LogoutButton";
+import BottomNav from "@/app/components/layout/BottomNav";
 
 const textFieldSx = {
   "& .MuiOutlinedInput-root": {
@@ -339,7 +341,7 @@ export default function ProfilePage() {
   );
 
   return (
-    <Box sx={{ minHeight: "100vh", ...pageBackgroundSx, pb: "72px" }}>
+    <Box sx={{ minHeight: "100vh", ...pageBackgroundSx, pb: "100px" }}>
       <Container maxWidth="md" sx={{ pt: { xs: 0, sm: 2 }, pb: 4, px: { xs: 0, sm: 2 }, maxWidth: "100%" }}>
         <Box className={shouldAnimate ? "slide-up-animation" : ""}>
           {/* Compact header */}
@@ -591,9 +593,14 @@ export default function ProfilePage() {
                 </>
               )}
             </Paper>
+
+            <Box sx={{ px: { xs: 2, sm: 0 }, mt: 1 }}>
+              <LogoutButton variant="profile" />
+            </Box>
           </Box>
         </Box>
       </Container>
+      <BottomNav />
     </Box>
   );
 }

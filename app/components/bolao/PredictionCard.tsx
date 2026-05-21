@@ -70,7 +70,7 @@ export function PredictionCard({ fixture }: PredictionCardProps) {
         <Typography
           sx={{
             color: "#F5C900",
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 700,
             fontSize: "0.9375rem",
           }}

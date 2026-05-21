@@ -1,7 +1,6 @@
 // /components/auth/LoginForm.tsx
 "use client";
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import {
   Button,
   TextField,
@@ -28,7 +27,16 @@ import {
   initGoogleLogin,
   initFacebookLogin,
 } from "@/app/services/auth/authService";
-import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
+import LoginVideoBackground from "@/app/components/auth/LoginVideoBackground";
+import LoginBrandHeader from "@/app/components/auth/LoginBrandHeader";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
+import {
+  LOGIN_PANEL_CLASS,
+  loginColors,
+  loginFieldSx,
+  loginLabelSx,
+  loginPageSx,
+} from "@/app/constants/loginTheme";
 
 interface LoginData {
   email: string;
@@ -37,7 +45,6 @@ interface LoginData {
 }
 
 const LoginForm: React.FC = () => {
-  const torcidaBackgroundSx = getEventBackgroundSxByKey("n1_torcida");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [keepMeLoggedIn, setKeepMeLoggedIn] = useState<boolean>(false);
@@ -204,28 +211,16 @@ const LoginForm: React.FC = () => {
   // Skeleton component
   if (isInitialLoading) {
     return (
-      <Box
-        sx={{
-          ...torcidaBackgroundSx,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          padding: { xs: "20px", md: "40px" },
-        }}
-      >
+      <>
+        <LoginVideoBackground />
+        <Box sx={loginPageSx.root}>
+          <Box sx={loginPageSx.stack}>
+            <LoginBrandHeader />
         <Box
+          className={LOGIN_PANEL_CLASS}
           sx={{
-            padding: { xs: "30px", md: "40px" },
-            color: "white",
-            width: "100%",
-            maxWidth: { xs: "100%", md: "450px" },
+            ...loginPageSx.panel,
             textAlign: "left",
-            backgroundColor: "transparent",
-            backdropFilter: "none",
-            borderRadius: { xs: "16px", md: "24px" },
-            border: "none",
-            boxShadow: "none",
           }}
         >
           {/* Título Skeleton */}
@@ -259,7 +254,7 @@ const LoginForm: React.FC = () => {
             height={56}
             sx={{
               bgcolor: "rgba(255, 255, 255, 0.1)",
-              borderRadius: "12px",
+              borderRadius: CAZE_RADIUS.sm,
               marginBottom: 2,
             }}
           />
@@ -271,7 +266,7 @@ const LoginForm: React.FC = () => {
             height={56}
             sx={{
               bgcolor: "rgba(255, 255, 255, 0.1)",
-              borderRadius: "12px",
+              borderRadius: CAZE_RADIUS.sm,
               marginBottom: { xs: 2, md: 3 },
             }}
           />
@@ -283,7 +278,7 @@ const LoginForm: React.FC = () => {
             height={48}
             sx={{
               bgcolor: "rgba(255, 204, 1, 0.2)",
-              borderRadius: "12px",
+              borderRadius: CAZE_RADIUS.sm,
               marginBottom: 2,
             }}
           />
@@ -327,7 +322,7 @@ const LoginForm: React.FC = () => {
               height={44}
               sx={{
                 bgcolor: "rgba(255, 255, 255, 0.1)",
-                borderRadius: "12px",
+                borderRadius: CAZE_RADIUS.sm,
               }}
             />
             <Skeleton
@@ -336,7 +331,7 @@ const LoginForm: React.FC = () => {
               height={44}
               sx={{
                 bgcolor: "rgba(255, 255, 255, 0.1)",
-                borderRadius: "12px",
+                borderRadius: CAZE_RADIUS.sm,
               }}
             />
           </Box>
@@ -353,75 +348,52 @@ const LoginForm: React.FC = () => {
             }}
           />
         </Box>
-      </Box>
+          </Box>
+        </Box>
+      </>
     );
   }
 
   return (
-    <Box
-      sx={{
-        ...torcidaBackgroundSx,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        padding: { xs: "20px", md: "40px" },
-      }}
-    >
+    <>
+      <LoginVideoBackground />
+      <Box sx={loginPageSx.root}>
+        <Box sx={loginPageSx.stack}>
+          <LoginBrandHeader />
       <Box
-        className={shouldAnimate ? "slide-up-animation" : ""}
+        className={`${LOGIN_PANEL_CLASS}${shouldAnimate ? " slide-up-animation" : ""}`}
         sx={{
-          padding: { xs: "30px", md: "40px" },
-          color: "white",
-          width: "100%",
-          maxWidth: { xs: "100%", md: "450px" },
+          ...loginPageSx.panel,
           textAlign: "left",
-          backgroundColor: "transparent",
-          backdropFilter: "none",
-          borderRadius: { xs: "16px", md: "24px" },
-          border: "none",
-          boxShadow: "none",
           transition: "all 0.3s ease",
         }}
       >
-        <Box
+        <Typography
           className={shouldAnimate ? "slide-up-delay-1" : ""}
+          variant="h4"
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            marginBottom: { xs: "16px", md: "20px" },
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
+            fontWeight: 900,
+            fontSize: { xs: "24px", md: "28px" },
+            textAlign: "left",
+            letterSpacing: "-0.02em",
+            marginBottom: { xs: 1, md: 1.25 },
           }}
         >
-          <Image
-            src="/logo/logo-n1.png"
-            alt="Camarote N1"
-            width={112}
-            height={112}
-            style={{ marginBottom: "10px", marginTop: "-10px", alignSelf: "center" }}
-          />
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              fontSize: { xs: "24px", md: "28px" },
-              textAlign: "left",
-            }}
-          >
-            Login
-          </Typography>
-        </Box>
+          Login
+        </Typography>
         <Typography
           className={shouldAnimate ? "slide-up-delay-1" : ""}
           variant="body2"
           sx={{
             marginBottom: { xs: "24px", md: "28px" },
             textAlign: "left",
-            color: "rgba(255, 255, 255, 0.85)",
+            color: loginColors.muted,
             fontSize: { xs: "13px", md: "14px" },
+            fontFamily: 'var(--font-inter), Inter, sans-serif',
           }}
         >
-          Bem-vindo de volta. Entre com suas credenciais para acessar sua conta.
+          Bem-vindo à Casa CazéTV. Entre com suas credenciais para acessar a Copa.
         </Typography>
 
         {/* Formulário de login */}
@@ -441,47 +413,10 @@ const LoginForm: React.FC = () => {
             spellCheck: false,
           }}
           InputLabelProps={{
-            shrink: true, // ✅ fixa o label em cima
-            sx: {
-              color: "#fff",
-              fontSize: 13,
-              transform: "translate(14px, -9px) scale(1)", // canto superior esquerdo
-              "&.Mui-focused": {
-                color: "#fff",
-              },
-            },
+            shrink: true,
+            sx: loginLabelSx,
           }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              color: "#fff",
-              borderRadius: "12px",
-              transition: "all 0.2s ease",
-              "& fieldset": {
-                borderColor: "rgba(255, 255, 255, 0.3)",
-                borderWidth: "1.5px",
-              },
-              "&:hover fieldset": {
-                borderColor: "rgba(255, 255, 255, 0.5)",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#ffcc01",
-                borderWidth: "2px",
-              },
-              "&.Mui-focused": {
-                backgroundColor: "rgba(255, 255, 255, 0.08)",
-              },
-              "& input:-webkit-autofill": {
-                WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.05) inset",
-                WebkitTextFillColor: "#fff",
-                transition: "background-color 9999s ease-in-out 0s",
-              },
-              "& input:-webkit-autofill:focus": {
-                WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.08) inset",
-                WebkitTextFillColor: "#fff",
-              },
-            },
-          }}
+          sx={loginFieldSx}
         />
 
         <TextField
@@ -500,15 +435,10 @@ const LoginForm: React.FC = () => {
           }
           InputLabelProps={{
             shrink: true,
-            sx: {
-              color: "#fff",
-              fontSize: 13,
-              transform: "translate(14px, -9px) scale(1)",
-              "&.Mui-focused": { color: "#fff" },
-            },
+            sx: loginLabelSx,
           }}
           FormHelperTextProps={{
-            sx: { color: "#ff6b6b", fontSize: 12 },
+            sx: { color: loginColors.error, fontSize: 12 },
           }}
           InputProps={{
             endAdornment: (
@@ -523,42 +453,7 @@ const LoginForm: React.FC = () => {
               </InputAdornment>
             ),
           }}
-          sx={{
-            mt: 2,
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              color: "#fff",
-              borderRadius: "12px",
-              transition: "all 0.2s ease",
-              "& fieldset": {
-                borderColor: "rgba(255, 255, 255, 0.3)",
-                borderWidth: "1.5px",
-              },
-              "&:hover fieldset": {
-                borderColor: "rgba(255, 255, 255, 0.5)",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#ffcc01",
-                borderWidth: "2px",
-              },
-              "&.Mui-error fieldset": {
-                borderColor: "#ff6b6b",
-                borderWidth: "2px",
-              },
-              "&.Mui-focused": {
-                backgroundColor: "rgba(255, 255, 255, 0.08)",
-              },
-              "& input:-webkit-autofill": {
-                WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.05) inset",
-                WebkitTextFillColor: "#fff",
-                transition: "background-color 9999s ease-in-out 0s",
-              },
-              "& input:-webkit-autofill:focus": {
-                WebkitBoxShadow: "0 0 0 1000px rgba(255, 255, 255, 0.08) inset",
-                WebkitTextFillColor: "#fff",
-              },
-            },
-          }}
+          sx={{ mt: 2, ...loginFieldSx }}
         />
         </Box>
 
@@ -569,12 +464,12 @@ const LoginForm: React.FC = () => {
               checked={keepMeLoggedIn}
               onChange={(e) => setKeepMeLoggedIn(e.target.checked)}
               sx={{
-                color: "#ffcc01", // cor quando desmarcado
+                color: loginColors.yellow,
                 "&.Mui-checked": {
-                  color: "#ffcc01", // cor quando marcado
+                  color: loginColors.yellow,
                 },
                 "&:hover": {
-                  backgroundColor: "rgba(255, 204, 1, 0.08)", // hover suave
+                  backgroundColor: "rgba(255, 203, 0, 0.12)",
                 },
               }}
             />
@@ -595,23 +490,24 @@ const LoginForm: React.FC = () => {
           sx={{
             mt: { xs: 2, md: 3 },
             mb: 1,
-            backgroundColor: "#0f935d",
-            color: "#fff",
+            backgroundColor: loginColors.yellow,
+            color: loginColors.black,
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 700,
-            borderRadius: "12px",
+            borderRadius: CAZE_RADIUS.sm,
             textTransform: "none",
             fontSize: { xs: "15px", md: "16px" },
             padding: { xs: "12px", md: "14px" },
-            boxShadow: "0 4px 12px rgba(15, 147, 93, 0.35)",
+            boxShadow: "0 4px 16px rgba(255, 203, 0, 0.35)",
             transition: "all 0.2s ease",
             "&:hover": {
-              backgroundColor: "#0b7a4e",
+              backgroundColor: loginColors.yellowHover,
               transform: "translateY(-2px)",
-              boxShadow: "0 6px 16px rgba(15, 147, 93, 0.45)",
+              boxShadow: "0 6px 20px rgba(255, 203, 0, 0.45)",
             },
             "&.Mui-disabled": {
-              backgroundColor: "rgba(15, 147, 93, 0.45)",
-              color: "rgba(255,255,255,0.75)",
+              backgroundColor: "rgba(255, 203, 0, 0.35)",
+              color: "rgba(0,0,0,0.5)",
             },
           }}
           onClick={handleLogin}
@@ -632,7 +528,7 @@ const LoginForm: React.FC = () => {
             color: "#fff",
             borderColor: "rgba(255, 255, 255, 0.3)",
             backgroundColor: "transparent",
-            borderRadius: "12px",
+            borderRadius: CAZE_RADIUS.sm,
             textTransform: "none",
             fontWeight: 600,
             fontSize: { xs: "14px", md: "15px" },
@@ -656,9 +552,9 @@ const LoginForm: React.FC = () => {
             sx={{
               mt: 2,
               p: { xs: 2, md: 2.5 },
-              backgroundColor: "rgba(255, 204, 1, 0.12)",
-              borderRadius: "12px",
-              border: "1px solid rgba(255, 204, 1, 0.4)",
+              backgroundColor: "rgba(255, 203, 0, 0.12)",
+              borderRadius: CAZE_RADIUS.md,
+              border: `1px solid ${loginColors.yellow}`,
               backdropFilter: "blur(10px)",
               transition: "all 0.2s ease",
             }}
@@ -680,23 +576,23 @@ const LoginForm: React.FC = () => {
               onClick={handleResendEmail}
               disabled={resendLoading || cooldownSeconds > 0}
               sx={{
-                color: "#ffcc01",
-                borderColor: "#ffcc01",
+                color: loginColors.yellow,
+                borderColor: loginColors.yellow,
                 backgroundColor: "transparent",
-                borderRadius: "12px",
+                borderRadius: CAZE_RADIUS.sm,
                 textTransform: "none",
                 fontWeight: 600,
                 fontSize: { xs: "13px", md: "14px" },
                 padding: { xs: "10px", md: "12px" },
                 transition: "all 0.2s ease",
                 "&:hover": {
-                  backgroundColor: "rgba(255, 204, 1, 0.15)",
-                  borderColor: "#ffcc01",
+                  backgroundColor: "rgba(255, 203, 0, 0.15)",
+                  borderColor: loginColors.yellow,
                   transform: "translateY(-2px)",
                 },
                 "&.Mui-disabled": {
-                  color: "rgba(255, 204, 1, 0.5)",
-                  borderColor: "rgba(255, 204, 1, 0.3)",
+                  color: "rgba(255, 203, 0, 0.5)",
+                  borderColor: "rgba(255, 203, 0, 0.3)",
                 },
               }}
             >
@@ -729,14 +625,14 @@ const LoginForm: React.FC = () => {
             variant="body2"
             sx={{
               mt: 2,
-              color: "#ffcc01",
+              color: loginColors.yellow,
               cursor: "pointer",
               textAlign: "center",
               fontSize: { xs: "13px", md: "14px" },
               fontWeight: 500,
               transition: "all 0.2s ease",
               "&:hover": {
-                color: "#e6b800",
+                color: loginColors.yellowHover,
                 textDecoration: "underline",
               },
             }}
@@ -797,7 +693,7 @@ const LoginForm: React.FC = () => {
               color: "#fff",
               borderColor: "rgba(255, 255, 255, 0.3)",
               backgroundColor: "rgba(255, 255, 255, 0.05)",
-              borderRadius: "12px",
+              borderRadius: CAZE_RADIUS.sm,
               textTransform: "none",
               fontWeight: 600,
               fontSize: { xs: "13px", md: "14px" },
@@ -832,7 +728,7 @@ const LoginForm: React.FC = () => {
               color: "#fff",
               borderColor: "rgba(255, 255, 255, 0.3)",
               backgroundColor: "rgba(255, 255, 255, 0.05)",
-              borderRadius: "12px",
+              borderRadius: CAZE_RADIUS.sm,
               textTransform: "none",
               fontWeight: 600,
               fontSize: { xs: "13px", md: "14px" },
@@ -848,7 +744,7 @@ const LoginForm: React.FC = () => {
               },
             }}
           >
-            Facebookk
+            Facebook
           </Button>
         </Box>
 
@@ -867,16 +763,16 @@ const LoginForm: React.FC = () => {
             href="/pages/auth/register"
             style={{
               textDecoration: "none",
-              color: "#ffcc01",
+              color: loginColors.yellow,
               fontWeight: 600,
               transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#e6b800";
+              e.currentTarget.style.color = loginColors.yellowHover;
               e.currentTarget.style.textDecoration = "underline";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#ffcc01";
+              e.currentTarget.style.color = loginColors.yellow;
               e.currentTarget.style.textDecoration = "none";
             }}
           >
@@ -884,7 +780,9 @@ const LoginForm: React.FC = () => {
           </a>
         </Typography>
       </Box>
-    </Box>
+        </Box>
+      </Box>
+    </>
   );
 };
 

@@ -5,6 +5,7 @@ import "./globals.css";
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import { FeedCacheProvider } from './context/FeedCacheContext';
+import { MobileMenuProvider } from './context/MobileMenuContext';
 import EmotionCacheProvider from './lib/emotion-cache';
 import ThemeProvider from './lib/theme-provider';
 import QueryProvider from './lib/query-provider';
@@ -74,9 +75,11 @@ export default function RootLayout({
               <AuthProvider>
                 <ToastProvider>
                   <FeedCacheProvider>
-                    <ScrollRestorer />
-                    <PageTracker />
-                    {children}
+                    <MobileMenuProvider>
+                      <ScrollRestorer />
+                      <PageTracker />
+                      {children}
+                    </MobileMenuProvider>
                   </FeedCacheProvider>
                 </ToastProvider>
               </AuthProvider>

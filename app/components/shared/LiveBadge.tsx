@@ -43,7 +43,7 @@ export default function LiveBadge({
         />
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 700,
             fontSize: "0.625rem",
             color: "#FFFFFF",
@@ -72,7 +72,7 @@ export default function LiveBadge({
       {homeTeam && (
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 700,
             fontSize: "0.875rem",
             color: "#FFFFFF",
@@ -85,11 +85,12 @@ export default function LiveBadge({
       {score !== undefined && (
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
-            fontWeight: 900,
+            fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
+            fontWeight: 700,
             fontSize: "1.25rem",
             color: "#F5C900",
             letterSpacing: "0.05em",
+            fontVariantNumeric: "tabular-nums",
           }}
         >
           {score.home} – {score.away}
@@ -99,7 +100,7 @@ export default function LiveBadge({
       {awayTeam && (
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 700,
             fontSize: "0.875rem",
             color: "#FFFFFF",
@@ -136,7 +137,7 @@ export default function LiveBadge({
         />
         <Typography
           sx={{
-            fontFamily: '"Montserrat", Arial, sans-serif',
+            fontFamily: 'var(--font-syne), Syne, sans-serif',
             fontWeight: 700,
             fontSize: "0.625rem",
             color: "#FFFFFF",

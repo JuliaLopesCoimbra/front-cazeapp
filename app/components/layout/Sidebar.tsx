@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { NAV_ITEMS } from "./BottomNav";
 import BrazilDivider from "./BrazilDivider";
+import LogoutButton from "@/app/components/auth/LogoutButton";
 import RainbowGradientDefs from "@/app/components/shared/RainbowGradientDefs";
 import { RAINBOW_GRADIENT_CSS } from "@/app/constants/rainbowGradient";
 
@@ -180,11 +181,15 @@ export default function Sidebar({
         })}
       </Box>
 
+      <Box sx={{ mt: "auto", pt: 1 }}>
+        <LogoutButton variant="sidebar" />
+      </Box>
+
       <Box
         sx={{
-          mt: "auto",
           mx: 2,
           mb: 2,
+          mt: 1.5,
           height: 2,
           borderRadius: 1,
           backgroundImage: RAINBOW_GRADIENT_CSS,

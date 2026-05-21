@@ -916,7 +916,7 @@ export default function HomeHeader({
           onClick={() => {
             setAnchorEl(null);
             logout();
-            router.replace("/pages/auth/login");
+            router.replace("/");
           }}
           sx={{
             color: isTorcida ? "#000" : "#ffc91f",
