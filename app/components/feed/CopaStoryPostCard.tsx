@@ -19,6 +19,8 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SendIcon from "@mui/icons-material/Send";
 import FrostedGlass from "@/app/components/shared/FrostedGlass";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
+import { COLORS, LAYOUT } from "@/app/constants/designTokens";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import { useAuth } from "@/app/context/AuthContext";
 import {
@@ -31,6 +33,8 @@ import { formatDate } from "@/app/utils/dateUtils";
 
 const FIGMA_POST_ART = "/assets/figma/post-copa-art.png";
 const POST_HEADER_HEIGHT = 52;
+/** Barra recolhida do bloco de comentários — alinhada ao header do post */
+const COMMENTS_TOGGLE_MIN_HEIGHT = 40;
 
 const POST_IMAGE_HEIGHT = { xs: 580, sm: 600 } as const;
 
@@ -62,7 +66,6 @@ export interface CopaStoryPostCardProps {
   commentsCount?: number;
   onClick?: () => void;
   postArtUrl?: string;
-  eyebrowLabel?: string;
 }
 
 function CopaCommentRow({ comment }: { comment: CommentResponse }) {
@@ -114,7 +117,6 @@ export default function CopaStoryPostCard({
   commentsCount = 0,
   onClick,
   postArtUrl = FIGMA_POST_ART,
-  eyebrowLabel = "POST EM DESTAQUE",
   newsId,
 }: CopaStoryPostCardProps) {
   const { isAuthenticated, authReady } = useAuth();
@@ -208,7 +210,7 @@ export default function CopaStoryPostCard({
       onClick={onClick}
       sx={{
         cursor: onClick ? "pointer" : "default",
-        px: "14px",
+        px: `${LAYOUT.pagePaddingX}px`,
         maxWidth: 393,
         mx: "auto",
         width: "100%",
@@ -218,79 +220,106 @@ export default function CopaStoryPostCard({
     >
       <Box
         sx={{
-          borderRadius: "15px",
+          borderRadius: CAZE_RADIUS.md,
           overflow: "hidden",
-          bgcolor: "#282828",
+          bgcolor: "transparent",
         }}
       >
-        <FrostedGlass
-          borderRadius="15px 15px 0 0"
-          blurPx={14}
-          fillAlpha={0.06}
-          noPadding
+        {/* Cabeçalho transparente — fica acima da mídia; divisão arco-íris abaixo */}
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: 4,
+            isolation: "isolate",
+          }}
         >
-          <Box
+          <FrostedGlass
+            borderRadius={`${CAZE_RADIUS.md} ${CAZE_RADIUS.md} 0 0`}
+            blurPx={12}
+            fillAlpha={0}
+            noPadding
             sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              height: POST_HEADER_HEIGHT,
-              px: "14px",
+              backgroundColor: "rgba(40, 40, 40, 0.28)",
+              backdropFilter: "blur(14px) saturate(1.2)",
+              WebkitBackdropFilter: "blur(14px) saturate(1.2)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderBottom: "none",
+              boxShadow: "none",
             }}
           >
-            <Avatar
-              src={headerAvatar}
-              alt={authorName}
-              sx={{ width: 32, height: 32, flexShrink: 0 }}
-            />
-            <Typography
-              component="span"
+            <Box
               sx={{
-                flex: 1,
-                color: "#FFFFFF",
-                fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                fontWeight: 600,
-                fontSize: 12,
-                letterSpacing: "0.01em",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                height: POST_HEADER_HEIGHT,
+                px: "14px",
               }}
             >
-              {authorName}
-            </Typography>
-            {createdAtLabel ? (
+              <Avatar
+                src={headerAvatar}
+                alt={authorName}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  flexShrink: 0,
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                }}
+              />
               <Typography
                 component="span"
                 sx={{
-                  color: "rgba(255,255,255,0.55)",
-                  fontSize: 10,
-                  fontFamily: "var(--font-roboto), Roboto, sans-serif",
-                  flexShrink: 0,
+                  flex: 1,
+                  color: COLORS.text,
+                  fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
+                  fontWeight: 600,
+                  fontSize: 12,
+                  letterSpacing: "0.01em",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  textShadow: "0 1px 8px rgba(0, 0, 0, 0.45)",
                 }}
               >
-                {createdAtLabel}
+                {authorName}
               </Typography>
-            ) : null}
-            <MoreHorizIcon
-              sx={{
-                fontSize: 18,
-                color: "rgba(255,255,255,0.45)",
-                flexShrink: 0,
-              }}
-            />
+              {createdAtLabel ? (
+                <Typography
+                  component="span"
+                  sx={{
+                    color: COLORS.textSecondary,
+                    fontSize: 10,
+                    fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                    flexShrink: 0,
+                    textShadow: "0 1px 6px rgba(0, 0, 0, 0.4)",
+                  }}
+                >
+                  {createdAtLabel}
+                </Typography>
+              ) : null}
+              <MoreHorizIcon
+                sx={{
+                  fontSize: 18,
+                  color: "rgba(255, 255, 255, 0.55)",
+                  flexShrink: 0,
+                }}
+              />
+            </Box>
+          </FrostedGlass>
+          <Box sx={{ position: "relative", zIndex: 5 }}>
+            <RainbowDivider />
           </Box>
-        </FrostedGlass>
-
-        <RainbowDivider />
+        </Box>
 
         <Box
           sx={{
             position: "relative",
+            zIndex: 1,
             width: "100%",
             height: { xs: POST_IMAGE_HEIGHT.xs, sm: POST_IMAGE_HEIGHT.sm },
             minHeight: { xs: POST_IMAGE_HEIGHT.xs, sm: POST_IMAGE_HEIGHT.sm },
             overflow: "hidden",
+            mt: -0.25,
           }}
         >
           <Image
@@ -328,24 +357,6 @@ export default function CopaStoryPostCard({
               pointerEvents: "none",
             }}
           >
-            {eyebrowLabel ? (
-              <Typography
-                component="p"
-                sx={{
-                  m: 0,
-                  mb: 0.75,
-                  color: "rgba(196, 172, 120, 0.95)",
-                  fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                  fontWeight: 600,
-                  fontSize: 10,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  lineHeight: 1.2,
-                }}
-              >
-                {eyebrowLabel}
-              </Typography>
-            ) : null}
             <Typography
               component="h2"
               sx={{
@@ -432,14 +443,30 @@ export default function CopaStoryPostCard({
 
         <RainbowDivider />
 
-        <Box onClick={stopCardNav}>
+        <Box onClick={stopCardNav} sx={{ position: "relative", zIndex: 2, bgcolor: "transparent" }}>
           <FrostedGlass
-            borderRadius="0 0 15px 15px"
-            blurPx={16}
-            fillAlpha={0.05}
+            borderRadius={`0 0 ${CAZE_RADIUS.md} ${CAZE_RADIUS.md}`}
+            blurPx={commentsExpanded ? 18 : 14}
+            fillAlpha={commentsExpanded ? 0.08 : 0}
             noPadding
+            sx={{
+              backgroundColor: commentsExpanded
+                ? "rgba(40, 40, 40, 0.9)"
+                : "rgba(40, 40, 40, 0.28)",
+              backdropFilter: commentsExpanded
+                ? "blur(18px) saturate(1.25)"
+                : "blur(14px) saturate(1.2)",
+              WebkitBackdropFilter: commentsExpanded
+                ? "blur(18px) saturate(1.25)"
+                : "blur(14px) saturate(1.2)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderTop: "none",
+              boxShadow: "none",
+              transition:
+                "background-color 0.22s ease, backdrop-filter 0.22s ease, -webkit-backdrop-filter 0.22s ease",
+            }}
           >
-            <Box sx={{ px: 1.25, py: 0.75 }}>
+            <Box sx={{ px: 1.25, py: commentsExpanded ? 1 : 1.125 }}>
               <Box ref={commentsSectionRef}>
                 <Box
                   component="button"
@@ -456,13 +483,15 @@ export default function CopaStoryPostCard({
                     background: "transparent",
                     cursor: "pointer",
                     p: 0,
-                    minHeight: 28,
+                    minHeight: COMMENTS_TOGGLE_MIN_HEIGHT,
                     textAlign: "left",
                   }}
                 >
                   <Typography
                     sx={{
-                      color: "rgba(255,255,255,0.7)",
+                      color: commentsExpanded
+                        ? "rgba(255,255,255,0.85)"
+                        : "rgba(255,255,255,0.75)",
                       fontFamily: "var(--font-roboto), Roboto, sans-serif",
                       fontWeight: 500,
                       fontSize: 11,
@@ -478,7 +507,7 @@ export default function CopaStoryPostCard({
                 </Box>
 
                 <Collapse in={commentsExpanded} timeout={220} unmountOnExit>
-                  <Box sx={{ pt: 0.5, pb: 0.25 }}>
+                  <Box sx={{ pt: 0.75, pb: 0.5 }}>
                     {commentsLoading ? (
                       <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }}>
                         <CircularProgress size={18} sx={{ color: "#009440" }} />

@@ -24,6 +24,18 @@
   --color-caze-purple:      #432B9D;
   --color-caze-muted:       #9E9E9E;
 
+  /* Espaçamento — escala 4px (referência feed social) */
+  --caze-space-xs: 4px;
+  --caze-space-sm: 8px;
+  --caze-space-md: 12px;
+  --caze-space-lg: 16px;
+  --caze-space-xl: 20px;
+  --caze-space-xxl: 24px;
+  --caze-page-px: 16px;
+  --caze-header-toolbar: 44px;
+  --caze-radius-sm: 8px;
+  --caze-radius-md: 15px;
+
   --font-heading: 'Montserrat', Arial, sans-serif;
   --font-sub: 'Poppins', Arial, sans-serif;
   --font-body: 'Roboto', Arial, sans-serif;

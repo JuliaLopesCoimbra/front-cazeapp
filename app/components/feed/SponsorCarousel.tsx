@@ -99,9 +99,10 @@ export default function SponsorCarousel({
             }}
           >
             <Image
-              src={current.image_url}
+              src={encodeURI(current.image_url)}
               alt={`Patrocinador ${current.sponsor_name}`}
               fill
+              unoptimized
               sizes="100vw"
               style={{ objectFit: "cover" }}
               priority={index === 0}
@@ -151,26 +152,27 @@ export default function SponsorCarousel({
   );
 }
 
+/** Banners em public/assets/casa-cazetv (encodeURI no src por espaços no nome) */
+export const SPONSOR_BANNER_ASSETS = {
+  cocaCola: "/assets/casa-cazetv/coca cola - banner.png",
+  cazetvAnuncio: "/assets/casa-cazetv/anuncio 2 - banner.png",
+} as const;
+
 /**
- * Mock para desenvolvimento. Substituir por consumo da API quando endpoint estiver pronto.
+ * Patrocinadores do carrossel no topo da Home — só os 2 assets reais, alternância automática.
  */
 export function getMockSponsors(): SponsorBanner[] {
   return [
     {
       id: "sponsor-coca-cola",
-      image_url: "/assets/figma/sponsor-banner.png",
+      image_url: SPONSOR_BANNER_ASSETS.cocaCola,
       sponsor_name: "Coca-Cola Zero",
       link_url: "https://www.coca-cola.com.br",
     },
     {
-      id: "sponsor-placeholder-2",
-      image_url: "/assets/figma/sponsor-banner.png",
-      sponsor_name: "Patrocinador 2",
-    },
-    {
-      id: "sponsor-placeholder-3",
-      image_url: "/assets/figma/sponsor-banner.png",
-      sponsor_name: "Patrocinador 3",
+      id: "sponsor-cazetv-anuncio-2",
+      image_url: SPONSOR_BANNER_ASSETS.cazetvAnuncio,
+      sponsor_name: "Casa CazéTV",
     },
   ];
 }

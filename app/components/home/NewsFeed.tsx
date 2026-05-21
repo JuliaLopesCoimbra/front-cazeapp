@@ -365,7 +365,7 @@ export default function NewsFeed({ eventId, event }: Props) {
       {!loading && news.length === 0 && <EmptyNews />}
 
       {news.length > 0 && (
-        <Box display="flex" flexDirection="column" sx={{ gap: "16px" }}>
+        <Box display="flex" flexDirection="column" sx={{ gap: "12px" }}>
           {news.map((item, index) => (
             <Box key={item.id}>
               <motion.div

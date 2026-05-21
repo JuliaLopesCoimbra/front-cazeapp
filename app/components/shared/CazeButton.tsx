@@ -10,6 +10,7 @@ interface CazeButtonProps {
   disabled?: boolean;
   fullWidth?: boolean;
   variant?: "primary" | "secondary" | "ghost";
+  size?: "small" | "medium";
   type?: "button" | "submit" | "reset";
   className?: string;
 }
@@ -21,9 +22,26 @@ export default function CazeButton({
   disabled = false,
   fullWidth = false,
   variant = "primary",
+  size = "medium",
   type = "button",
   className,
 }: CazeButtonProps) {
+  const sizeStyles =
+    size === "small"
+      ? {
+          fontSize: "0.75rem",
+          paddingY: "5px",
+          paddingX: "12px",
+          minHeight: "30px",
+          borderRadius: "8px",
+        }
+      : {
+          fontSize: "0.9375rem",
+          paddingY: "10px",
+          paddingX: "24px",
+          minHeight: "44px",
+          borderRadius: "8px",
+        };
   const styles = {
     primary: {
       backgroundColor: "#F5C900",
@@ -62,12 +80,8 @@ export default function CazeButton({
       className={className}
       sx={{
         ...styles[variant],
-        borderRadius: "8px",
+        ...sizeStyles,
         textTransform: "none",
-        fontSize: "0.9375rem",
-        paddingY: "10px",
-        paddingX: "24px",
-        minHeight: "44px",
         position: "relative",
         transition: "all 0.2s ease",
       }}

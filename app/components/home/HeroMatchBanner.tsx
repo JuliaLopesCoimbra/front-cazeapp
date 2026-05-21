@@ -1,159 +1,240 @@
 "use client";
 
 import { Box, Typography, Skeleton } from "@mui/material";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useBrazilFixtures, useBrazilLive } from "@/app/hooks/useFixtures";
 import { isLive, isFinished } from "@/app/services/football/footballService";
 import LiveBadge from "@/app/components/shared/LiveBadge";
-import CazeButton from "@/app/components/shared/CazeButton";
+import TeamFlag from "@/app/components/shared/TeamFlag";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
+import { COLORS } from "@/app/constants/designTokens";
+
+const FLAG_SIZE = 40;
+const BANNER_MIN_HEIGHT = 52;
+
+function PalpiteButton({
+  onClick,
+}: {
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      aria-label="Palpitar no bolão"
+      sx={{
+        flexShrink: 0,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 0.25,
+        border: "none",
+        background: "transparent",
+        cursor: "pointer",
+        py: 0.5,
+        pl: 0.5,
+        pr: 0,
+        color: "rgba(255, 255, 255, 0.55)",
+        "&:hover": {
+          color: COLORS.yellow,
+        },
+      }}
+    >
+      <Typography
+        component="span"
+        sx={{
+          fontFamily: 'var(--font-roboto), Roboto, sans-serif',
+          fontWeight: 600,
+          fontSize: "0.75rem",
+          lineHeight: 1,
+        }}
+      >
+        Palpitar
+      </Typography>
+      <ChevronRightIcon sx={{ fontSize: 20 }} />
+    </Box>
+  );
+}
 
 export default function HeroMatchBanner() {
   const router = useRouter();
   const { data: fixtures, isLoading } = useBrazilFixtures();
   const { data: liveFixtures } = useBrazilLive();
 
+  const goToBolao = (fixtureId: number, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    router.push(`/pages/user/bolao/${fixtureId}`);
+  };
+
   if (isLoading) {
     return (
       <Skeleton
         variant="rectangular"
-        sx={{ borderRadius: "16px", mb: 2, height: 160, backgroundColor: "#1A1A1A" }}
+        sx={{
+          borderRadius: CAZE_RADIUS.md,
+          height: BANNER_MIN_HEIGHT,
+          width: "100%",
+          bgcolor: "rgba(255,255,255,0.06)",
+        }}
       />
     );
   }
 
   const liveGame = liveFixtures && liveFixtures.length > 0 ? liveFixtures[0] : null;
-  const nextGame = !liveGame && fixtures
-    ? fixtures
-        .filter((f) => !isFinished(f))
-        .sort((a, b) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime())[0]
-    : null;
+  const nextGame =
+    !liveGame && fixtures
+      ? fixtures
+          .filter((f) => !isFinished(f))
+          .sort((a, b) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime())[0]
+      : null;
 
   const featured = liveGame ?? nextGame;
   if (!featured) return null;
 
   const live = isLive(featured);
   const matchDate = parseISO(featured.fixture.date);
+  const dateShort = format(matchDate, "dd/MM · HH'h'mm", { locale: ptBR });
 
   return (
     <Box
-      onClick={() => router.push(`/pages/user/jogos/${featured.fixture.id}`)}
+      role="button"
+      tabIndex={0}
+      onClick={() => goToBolao(featured.fixture.id)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          goToBolao(featured.fixture.id);
+        }
+      }}
+      aria-label={`Bolão: palpite ${featured.teams.home.name} x ${featured.teams.away.name}`}
       sx={{
         position: "relative",
-        borderRadius: "16px",
-        overflow: "hidden",
-        mb: 2,
+        display: "flex",
+        alignItems: "center",
+        width: "100%",
+        minHeight: BANNER_MIN_HEIGHT,
+        pl: 1.25,
+        pr: 0.75,
+        py: 0.75,
+        borderRadius: CAZE_RADIUS.md,
         cursor: "pointer",
+        border: "none",
         background: live
-          ? "linear-gradient(135deg, rgba(230,57,70,0.2) 0%, #0A0A0A 60%)"
-          : "linear-gradient(135deg, #0055B8 0%, #000000 70%)",
-        border: live ? "1.5px solid #E63946" : "1px solid rgba(245,201,0,0.2)",
-        boxShadow: live
-          ? "0 4px 24px rgba(230,57,70,0.3)"
-          : "0 4px 16px rgba(0,0,0,0.5)",
-        minHeight: 156,
-        padding: "16px",
+          ? "rgba(229, 37, 84, 0.12)"
+          : "rgba(40, 40, 40, 0.42)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
       }}
     >
-      {/* Tag: próximo jogo ou fase */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 0.25,
+          flexShrink: 0,
+          textAlign: "left",
+          minWidth: 0,
+          zIndex: 1,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 0.5 }}>
+          <Typography
+            noWrap
+            sx={{
+              fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
+              fontWeight: 800,
+              fontSize: "0.625rem",
+              color: COLORS.yellow,
+              letterSpacing: "0.02em",
+              lineHeight: 1.1,
+            }}
+          >
+            Bolão Cazé TV
+          </Typography>
+          {live && <LiveBadge variant="compact" />}
+        </Box>
         <Typography
+          noWrap
           sx={{
-            fontFamily: 'var(--font-inter), Inter, sans-serif',
-            fontWeight: 600,
-            fontSize: "0.7rem",
-            color: live ? "#E63946" : "#F5C900",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
+            fontSize: "0.625rem",
+            color: COLORS.textSecondary,
+            lineHeight: 1.1,
           }}
         >
-          {live ? "Jogando agora" : "Próximo jogo 🇧🇷"}
+          {live ? "Ao vivo" : dateShort}
         </Typography>
-        {live ? (
-          <LiveBadge variant="compact" />
-        ) : (
-          <Typography sx={{ fontSize: "0.7rem", color: "#9E9E9E" }}>
-            {format(matchDate, "dd 'de' MMMM · HH'h'mm", { locale: ptBR })}
-          </Typography>
-        )}
       </Box>
 
-      {/* Teams row */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
-        <Typography
-          sx={{
-            fontFamily: 'var(--font-syne), Syne, sans-serif',
-            fontWeight: 900,
-            fontSize: "1.125rem",
-            color: "#FFFFFF",
-            flex: 1,
-          }}
-        >
-          {featured.teams.home.name}
-        </Typography>
+      <Box
+        sx={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 0.75,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <TeamFlag
+          name={featured.teams.home.name}
+          width={FLAG_SIZE}
+          fallbackLogo={featured.teams.home.logo}
+        />
 
         {live ? (
-          <Box sx={{ mx: 1.5, textAlign: "center" }}>
-            <Typography
-              sx={{
-                fontFamily: 'var(--font-syne), Syne',
-                fontWeight: 900,
-                fontSize: "2rem",
-                color: "#E63946",
-                lineHeight: 1,
-              }}
-            >
-              {featured.goals.home ?? 0} – {featured.goals.away ?? 0}
-            </Typography>
-            {featured.fixture.status.elapsed != null && (
-              <Typography sx={{ fontSize: "0.65rem", color: "#E63946", fontWeight: 700 }}>
-                {featured.fixture.status.short === "HT" ? "Intervalo" : `${featured.fixture.status.elapsed}'`}
-              </Typography>
-            )}
-          </Box>
+          <Typography
+            sx={{
+              fontFamily: 'var(--font-syne), Syne, sans-serif',
+              fontWeight: 900,
+              fontSize: "1rem",
+              color: COLORS.red,
+              lineHeight: 1,
+              flexShrink: 0,
+            }}
+          >
+            {featured.goals.home ?? 0}–{featured.goals.away ?? 0}
+          </Typography>
         ) : (
           <Typography
             sx={{
-              mx: 2,
-              fontFamily: 'var(--font-syne), Syne',
+              fontFamily: 'var(--font-syne), Syne, sans-serif',
               fontWeight: 900,
-              fontSize: "1.25rem",
-              color: "#F5C900",
+              fontSize: "0.6875rem",
+              color: COLORS.muted,
+              flexShrink: 0,
             }}
           >
             VS
           </Typography>
         )}
 
-        <Typography
-          sx={{
-            fontFamily: 'var(--font-syne), Syne, sans-serif',
-            fontWeight: 900,
-            fontSize: "1.125rem",
-            color: "#FFFFFF",
-            flex: 1,
-            textAlign: "right",
-          }}
-        >
-          {featured.teams.away.name}
-        </Typography>
+        <TeamFlag
+          name={featured.teams.away.name}
+          width={FLAG_SIZE}
+          fallbackLogo={featured.teams.away.logo}
+        />
       </Box>
 
-      {/* Round + CTA */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Typography sx={{ fontSize: "0.7rem", color: "#9E9E9E" }}>
-          {featured.league.round}
-        </Typography>
-        <CazeButton
-          variant="primary"
-          onClick={(e) => {
-            e?.stopPropagation();
-            router.push(`/pages/user/bolao/${featured.fixture.id}`);
-          }}
-        >
-          Apostar agora ⚽
-        </CazeButton>
+      <Box
+        sx={{
+          flexShrink: 0,
+          ml: "auto",
+          alignSelf: "stretch",
+          display: "flex",
+          alignItems: "center",
+          zIndex: 1,
+        }}
+      >
+        <PalpiteButton onClick={(e) => goToBolao(featured.fixture.id, e)} />
       </Box>
     </Box>
   );

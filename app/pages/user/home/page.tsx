@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Box, Skeleton, Typography } from "@mui/material";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import HomeScreenHeader from "@/app/components/home/HomeScreenHeader";
+import HeroMatchBanner from "@/app/components/home/HeroMatchBanner";
+import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
+import { LAYOUT, PAGE_GLASS_SURFACE, SPACING } from "@/app/constants/designTokens";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
@@ -17,7 +20,10 @@ import NewsFeed from "@/app/components/home/NewsFeed";
 import { useAuth } from "@/app/context/AuthContext";
 import WorldCupGames from "@/app/components/home/WorldCupGames";
 import EventIndisponivel from "@/app/components/event/EventIndisponivel";
-import { getProfile } from "@/app/services/profile/profileService";
+import {
+  getProfile,
+  type ProfileResponse,
+} from "@/app/services/profile/profileService";
 
 const STORAGE_KEY = "selectedEventId";
 const SCROLL_KEY = "homeScrollY";
@@ -36,6 +42,7 @@ const HomeContent: React.FC = () => {
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const currentEventIdRef = useRef<number | null>(null);
   const isCheckingRef = useRef(false);
   const router = useRouter();
@@ -156,7 +163,8 @@ const HomeContent: React.FC = () => {
 
     const fetchProfile = async () => {
       try {
-        await getProfile();
+        const data = await getProfile();
+        setProfile(data);
         setProfileLoaded(true);
       } catch (error) {
         console.error("Erro ao buscar perfil:", error);
@@ -276,13 +284,22 @@ const HomeContent: React.FC = () => {
   // Skeleton enquanto carrega evento + perfil
   if (!currentEvent || !profileLoaded) {
     return (
-      <Box sx={{ minHeight: "100vh", backgroundColor: "#282828", pb: "100px" }}>
+      <Box sx={{ position: "relative", minHeight: "100vh", pb: "100px" }}>
+        <PageAmbientBackground />
         <Sidebar />
-        <Box sx={{ ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` } }}>
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
+            minHeight: "100vh",
+            ...PAGE_GLASS_SURFACE,
+          }}
+        >
           <Skeleton
             variant="rectangular"
             width="100%"
-            height={84}
+            height={128}
             sx={{ bgcolor: "rgba(255,255,255,0.06)" }}
           />
           <Box sx={{ p: 2 }}>
@@ -318,46 +335,83 @@ const HomeContent: React.FC = () => {
 
   return (
     <>
-      <Box sx={{ minHeight: "100vh", backgroundColor: "#282828" }}>
+      <Box sx={{ position: "relative", minHeight: "100vh" }}>
+        <PageAmbientBackground />
         <Sidebar />
 
         <Box
           component="main"
           sx={{
+            position: "relative",
+            zIndex: 1,
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
-            pb: "100px",
+            minHeight: "100vh",
+            pb: `${LAYOUT.bottomNavClearance}px`,
+            ...PAGE_GLASS_SURFACE,
           }}
         >
           <HomeScreenHeader
             events={events}
             currentEvent={currentEvent}
             onSelectEvent={handleSelectEvent}
+            profile={profile}
           />
 
           <SponsorCarousel banners={getMockSponsors()} edgeToEdge />
+          <BrazilDivider />
 
           <Box
             sx={{
-              backgroundColor: "#282828",
+              px: `${LAYOUT.pagePaddingX}px`,
+              maxWidth: LAYOUT.feedMaxWidth,
+              mx: "auto",
+              width: "100%",
+              mt: `${SPACING.xxl}px`,
+            }}
+          >
+            <HeroMatchBanner />
+          </Box>
+
+          <Box
+            sx={{
+              pl: `${LAYOUT.pagePaddingX}px`,
+              pr: 0,
+              maxWidth: LAYOUT.feedMaxWidth,
+              mx: "auto",
+              width: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "stretch",
-              justifyContent: "center",
-              gap: "12px",
-              py: "14px",
-              mb: "24px",
+              gap: `${SPACING.lg}px`,
+              pt: `${SPACING.lg}px`,
+              pb: `${SPACING.sm}px`,
+              mb: `${SPACING.md}px`,
             }}
           >
-            <FeedTabs active={activeTab} onChange={handleTabChange} />
-            <motion.div
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{ transformOrigin: "left" }}
+            <Box
+              sx={{
+                mr: `-${LAYOUT.pagePaddingX}px`,
+                width: `calc(100% + ${LAYOUT.pagePaddingX}px)`,
+              }}
             >
-              <RainbowDivider />
-            </motion.div>
+              <FeedTabs active={activeTab} onChange={handleTabChange} />
+            </Box>
+            <Box
+              sx={{
+                ml: `-${LAYOUT.pagePaddingX}px`,
+                width: `calc(100% + ${LAYOUT.pagePaddingX}px)`,
+              }}
+            >
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                style={{ transformOrigin: "left", width: "100%" }}
+              >
+                <RainbowDivider />
+              </motion.div>
+            </Box>
           </Box>
 
           {/* Conteúdo da aba */}
