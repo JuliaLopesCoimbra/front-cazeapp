@@ -13,6 +13,9 @@ import {
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import PostGlassCard from "@/app/components/feed/PostGlassCard";
+import { motion } from "framer-motion";
 import { useAuth } from "@/app/context/AuthContext";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import { getEventNews, NewsResponse } from "@/app/services/news/newsService";
@@ -20,6 +23,7 @@ import { EventResponse } from "@/app/services/events/eventAppService";
 import EmptyNews from "./EmptyNews";
 import { useRouter } from "next/navigation";
 import AdBanner from "../ads/AdBanner";
+import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import { getEventBrandKey } from "@/app/utils/eventBranding";
 
 interface Props {
@@ -362,87 +366,213 @@ export default function NewsFeed({ eventId, event }: Props) {
         <Box display="flex" flexDirection="column">
           {news.map((item, index) => (
             <Box key={item.id}>
-              <Card
-                onClick={() => handleNewsClick(item.id)}
-                sx={{
-                  backgroundColor: "transparent",
-                  boxShadow: "none",
-                  color: "#fff",
-                  cursor: "pointer",
-                  transition: "opacity 0.2s",
-                  maxWidth: "100%",
-                  boxSizing: "border-box",
-                  "&:hover": { opacity: 0.8 },
-                }}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
               >
-                {/* Header: avatar + nome + data */}
-                <Box display="flex" alignItems="center" gap={1.5} sx={{ px: 0.5, py: 1 }}>
-                  <Avatar
-                    src={item.author?.profile_photo || undefined}
-                    alt={item.author?.name || "Autor"}
-                    sx={{ width: 34, height: 34, bgcolor: "rgba(255,255,255,0.2)" }}
-                  />
-                  <Box>
-                    <Typography sx={{ color: "#fff", fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>
-                      {item.author?.name || "Autor desconhecido"}
-                    </Typography>
-                    <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: 11 }}>
-                      {formatDate(item.created_at)}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {item.images && item.images.length > 0 && (
-                  <Box sx={{ position: "relative" }}>
-                    <CardMedia
-                      component="img"
-                      image={item.images[0].image_url}
-                      alt={item.title}
-                      sx={{ width: "100%", aspectRatio: "1 / 1", objectFit: "cover" }}
-                    />
-                    {/* Likes e comentários — overlay lado direito */}
-                    <Box sx={{
-                      position: "absolute",
-                      right: 10,
-                      bottom: 12,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 1.5,
-                    }}>
-                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.3 }}>
-                        <FavoriteBorderIcon sx={{ fontSize: 26, color: "#fff", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))" }} />
-                        <Typography sx={{ fontSize: 12, color: "#fff", fontWeight: 700, lineHeight: 1, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
-                          {item.likes_count ?? 0}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.3 }}>
-                        <ChatBubbleOutlineIcon sx={{ fontSize: 24, color: "#fff", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))" }} />
-                        <Typography sx={{ fontSize: 12, color: "#fff", fontWeight: 700, lineHeight: 1, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
-                          {item.comments_count ?? 0}
-                        </Typography>
-                      </Box>
+                <Card
+                  onClick={() => handleNewsClick(item.id)}
+                  sx={{
+                    backgroundColor: "transparent",
+                    boxShadow: "none",
+                    color: "#fff",
+                    cursor: "pointer",
+                    transition: "opacity 0.2s",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                    "&:hover": { opacity: 0.85 },
+                  }}
+                >
+                  {/* Header: avatar + @nome + menu (Liquid Glass com borda gradiente Brasil) */}
+                  <PostGlassCard className="mx-2 mt-2">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.25,
+                        px: 1.75,
+                        py: 1,
+                      }}
+                    >
+                      <Avatar
+                        src={item.author?.profile_photo || undefined}
+                        alt={item.author?.name || "Autor"}
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          bgcolor: "rgba(255,255,255,0.2)",
+                          border: "2px solid #009440",
+                        }}
+                      />
+                      <Typography
+                        sx={{
+                          color: "#fff",
+                          fontFamily: '"Montserrat", sans-serif',
+                          fontWeight: 800,
+                          fontSize: 12,
+                          letterSpacing: 0.2,
+                          flex: 1,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {item.author?.name || "@casacazetv"}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          color: "rgba(255,255,255,0.55)",
+                          fontSize: 10,
+                          fontFamily: '"Roboto", sans-serif',
+                          flexShrink: 0,
+                          mr: 0.5,
+                        }}
+                      >
+                        {formatDate(item.created_at)}
+                      </Typography>
+                      <MoreHorizIcon sx={{ color: "#fff", fontSize: 18, opacity: 0.85 }} />
                     </Box>
-                  </Box>
-                )}
-                <CardContent sx={{ px: 0.5, pt: 1.5, pb: 1, maxWidth: "100%", boxSizing: "border-box" }}>
-                  <Typography
-                    fontWeight={700}
-                    sx={{
-                      color: "#fff",
-                      fontSize: { xs: "1.1rem", md: "1.35rem" },
-                      wordWrap: "break-word",
-                      overflowWrap: "break-word",
-                      maxWidth: "100%",
-                      hyphens: "auto",
-                    }}
-                  >
-                    {item.title}
-                  </Typography>
-                </CardContent>
-              </Card>
+                  </PostGlassCard>
 
-              <Divider sx={{ borderColor: "rgba(255,255,255,0.15)", marginY: 1.5 }} />
+                  {item.images && item.images.length > 0 ? (
+                    <Box sx={{ position: "relative", mt: 1.5, mx: 1 }}>
+                      <CardMedia
+                        component="img"
+                        image={item.images[0].image_url}
+                        alt={item.title}
+                        sx={{
+                          width: "100%",
+                          aspectRatio: "1 / 1",
+                          objectFit: "cover",
+                          borderRadius: "15px",
+                          border: "1px solid rgba(0,148,64,0.4)",
+                        }}
+                      />
+
+                      {/* Likes e comentários — overlay lado direito */}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          right: 12,
+                          bottom: 16,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 1.5,
+                          zIndex: 2,
+                        }}
+                      >
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.3 }}>
+                          <FavoriteBorderIcon
+                            sx={{ fontSize: 26, color: "#fff", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.8))" }}
+                          />
+                          <Typography
+                            sx={{
+                              fontSize: 12,
+                              color: "#fff",
+                              fontWeight: 700,
+                              lineHeight: 1,
+                              textShadow: "0 1px 3px rgba(0,0,0,0.9)",
+                            }}
+                          >
+                            {item.likes_count ?? 0}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.3 }}>
+                          <ChatBubbleOutlineIcon
+                            sx={{ fontSize: 24, color: "#fff", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.8))" }}
+                          />
+                          <Typography
+                            sx={{
+                              fontSize: 12,
+                              color: "#fff",
+                              fontWeight: 700,
+                              lineHeight: 1,
+                              textShadow: "0 1px 3px rgba(0,0,0,0.9)",
+                            }}
+                          >
+                            {item.comments_count ?? 0}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Caption overlay com título — Liquid Glass + borda gradiente Brasil */}
+                      <PostGlassCard className="absolute bottom-3 left-3 max-w-[68%]">
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.25,
+                            px: 1.5,
+                            py: 1.25,
+                          }}
+                        >
+                          <Avatar
+                            src={item.author?.profile_photo || undefined}
+                            alt=""
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              bgcolor: "rgba(255,255,255,0.2)",
+                              border: "2px solid #009440",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <Typography
+                            sx={{
+                              color: "#fff",
+                              fontFamily: '"Montserrat", sans-serif',
+                              fontWeight: 800,
+                              fontSize: 12,
+                              lineHeight: 1.3,
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                        </Box>
+                      </PostGlassCard>
+                    </Box>
+                  ) : (
+                    /* Sem imagem: título em card glass standalone */
+                    <PostGlassCard className="mx-2 mt-2 mb-2">
+                      <Box sx={{ px: 2, py: 2 }}>
+                        <Typography
+                          sx={{
+                            color: "#fff",
+                            fontFamily: '"Montserrat", sans-serif',
+                            fontWeight: 800,
+                            fontSize: { xs: "1rem", md: "1.15rem" },
+                            lineHeight: 1.35,
+                            wordWrap: "break-word",
+                          }}
+                        >
+                          {item.title}
+                        </Typography>
+                      </Box>
+                    </PostGlassCard>
+                  )}
+                </Card>
+              </motion.div>
+
+              {index < news.length - 1 && (
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  style={{ transformOrigin: "left", margin: "12px 0" }}
+                >
+                  <RainbowDivider />
+                </motion.div>
+              )}
 
               {/* Ad a cada 3 posts */}
               {(index + 1) % 3 === 0 && index !== news.length - 1 && (

@@ -19,7 +19,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EventIcon from "@mui/icons-material/Event";
 import { useAuth } from "@/app/context/AuthContext";
 import BottomNav from "@/app/components/layout/BottomNav";
-import HomeHeader from "@/app/components/home/HeaderHome";
+import TopBar from "@/app/components/layout/TopBar";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import { getProductsByEvent, ProductEventResponse } from "@/app/services/productsEvent/productEventService";
 import { useToast } from "@/app/context/ToastContext";
@@ -289,7 +289,7 @@ export default function StorePage() {
       <Box
         sx={{
           minHeight: "100vh",
-          ...pageBackgroundSx,
+          backgroundColor: "#282828",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -308,20 +308,13 @@ export default function StorePage() {
     <>
       <Box
         sx={{
-          ...pageBackgroundSx,
           minHeight: "100vh",
+          backgroundColor: "#282828",
           paddingBottom: "72px",
         }}
       >
-        {/* Header */}
-        <Box className={shouldAnimate ? "slide-up-animation" : ""}>
-          <HomeHeader
-            event={currentEvent}
-            events={events}
-            currentEvent={currentEvent}
-            onSelectEvent={handleSelectEvent}
-          />
-        </Box>
+        {/* TopBar Casa CazéTV — TODO: re-add event selector if needed */}
+        <TopBar showBack title="Loja" />
 
         {/* Conteúdo */}
         <Box

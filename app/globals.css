@@ -11,15 +11,18 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Cazé TV Design System */
-  --color-caze-yellow: #F5C900;
-  --color-caze-yellow-dark: #D4A800;
-  --color-caze-blue: #0055B8;
-  --color-caze-blue-dark: #003E8A;
-  --color-caze-red: #E63946;
-  --color-caze-black: #000000;
-  --color-caze-surface: #1A1A1A;
-  --color-caze-muted: #9E9E9E;
+  /* Cazé TV Design System — extraído do Figma (VZ2fPhIG5zVt0XUlzaYyFm) */
+  --color-caze-bg:          #282828;
+  --color-caze-surface:     #363636;
+  --color-caze-green:       #009440;
+  --color-caze-green-light: #31E46A;
+  --color-caze-yellow:      #FFCB00;
+  --color-caze-yellow-alt:  #F7B521;
+  --color-caze-blue-copa:   #0055B8;
+  --color-caze-red:         #E52554;
+  --color-caze-cyan:        #29BAEB;
+  --color-caze-purple:      #432B9D;
+  --color-caze-muted:       #9E9E9E;
 
   --font-heading: 'Montserrat', Arial, sans-serif;
   --font-sub: 'Poppins', Arial, sans-serif;
@@ -31,6 +34,56 @@
 @keyframes live-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+/* --- Liquid Glass (Apple WWDC 2025) --- */
+.glass {
+  backdrop-filter: blur(20px) saturate(1.8) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8) brightness(1.05);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.glass-green {
+  backdrop-filter: blur(20px) saturate(2) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(2) brightness(1.05);
+  background: rgba(0, 148, 64, 0.12);
+  border: 1px solid rgba(0, 148, 64, 0.35);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(0, 148, 64, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.glass-dark {
+  backdrop-filter: blur(16px) saturate(1.5) brightness(0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5) brightness(0.85);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-caption {
+  backdrop-filter: blur(12px) saturate(1.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  background: rgba(217, 217, 217, 0.20);
+  border: 2px solid #009440;
+  border-radius: 15px;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass,
+  .glass-green,
+  .glass-dark,
+  .glass-caption {
+    background: rgba(40, 40, 40, 0.92);
+  }
 }
 
 @media (prefers-color-scheme: dark) {

@@ -2,22 +2,23 @@ import { createTheme } from '@mui/material/styles';
 
 export const cazeTheme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#F5C900',
+      main: '#009440',          // Verde Brasil — acentos, bordas, tabs ativas
+      dark: '#007132',
+      contrastText: '#FFFFFF',
+    },
+    secondary: {
+      main: '#FFCB00',          // Amarelo Brasil — destaques, CTAs
       dark: '#D4A800',
       contrastText: '#000000',
     },
-    secondary: {
-      main: '#0055B8',
-      dark: '#003E8A',
-      contrastText: '#FFFFFF',
-    },
     error: {
-      main: '#E63946',
+      main: '#E52554',
     },
     background: {
-      default: '#000000',
-      paper: '#1A1A1A',
+      default: '#282828',       // Fundo base de todas as telas
+      paper: '#363636',         // Surface de cards e componentes elevados
     },
     text: {
       primary: '#FFFFFF',
@@ -29,38 +30,43 @@ export const cazeTheme = createTheme({
     h1: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 900, fontSize: '1.75rem', lineHeight: 1.2 },
     h2: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 700, fontSize: '1.375rem', lineHeight: 1.3 },
     h3: { fontFamily: '"Poppins", Arial, sans-serif', fontWeight: 600, fontSize: '1.125rem', lineHeight: 1.4 },
+    h4: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 900, fontSize: '2rem', lineHeight: 1.1 },
     body1: { fontSize: '1rem', fontWeight: 400, lineHeight: 1.6 },
     body2: { fontSize: '0.875rem', fontWeight: 400, lineHeight: 1.6 },
     button: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 700, textTransform: 'none' },
     caption: { fontSize: '0.75rem', fontWeight: 500, lineHeight: 1.5 },
   },
-  shape: { borderRadius: 12 },
+  shape: { borderRadius: 15 },
   components: {
     MuiButton: {
       styleOverrides: {
         containedPrimary: {
-          backgroundColor: '#F5C900',
-          color: '#000000',
-          '&:hover': { backgroundColor: '#D4A800' },
+          backgroundColor: '#009440',
+          color: '#FFFFFF',
+          '&:hover': { backgroundColor: '#007132' },
           '&:disabled': { backgroundColor: '#9E9E9E', color: '#1A1A1A' },
         },
         outlinedSecondary: {
-          borderColor: '#0055B8',
-          color: '#0055B8',
-          '&:hover': { borderColor: '#003E8A', color: '#003E8A' },
+          borderColor: '#FFCB00',
+          color: '#FFCB00',
+          '&:hover': { borderColor: '#D4A800', color: '#D4A800' },
         },
       },
     },
     MuiBottomNavigation: {
       styleOverrides: {
-        root: { backgroundColor: '#000000', height: '60px' },
+        root: {
+          backgroundColor: '#363636',
+          height: '60px',
+          borderTop: '1px solid rgba(0, 148, 64, 0.3)',
+        },
       },
     },
     MuiBottomNavigationAction: {
       styleOverrides: {
         root: {
           color: '#9E9E9E',
-          '&.Mui-selected': { color: '#F5C900' },
+          '&.Mui-selected': { color: '#009440' },
           minWidth: 0,
           padding: '6px 0',
         },

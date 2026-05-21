@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, IconButton, Badge } from "@mui/material";
+import { Box, Badge } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
@@ -13,6 +13,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 interface BottomNavProps {
   bolaoHasPendingBets?: boolean;
@@ -23,7 +24,7 @@ interface BottomNavProps {
   eventId?: number;
 }
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   {
     label: "Home",
     path: "/pages/user/home",
@@ -97,20 +98,20 @@ export default function BottomNav({
         maxWidth: 480,
         minWidth: 240,
         height: shrunk ? 48 : 60,
-        backgroundColor: shrunk ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.92)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        display: "flex",
+        backgroundColor: shrunk ? "rgba(40,40,40,0.85)" : "rgba(40,40,40,0.92)",
+        backdropFilter: "blur(20px) saturate(1.8)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.8)",
+        display: { xs: "flex", md: "none" },
         justifyContent: "space-around",
         alignItems: "center",
         borderRadius: "999px",
-        border: "1px solid rgba(245,201,0,0.15)",
+        border: "1px solid rgba(0,148,64,0.25)",
         boxShadow: shrunk
           ? "0 2px 12px rgba(0,0,0,0.4)"
-          : "0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,201,0,0.08)",
+          : "0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,148,64,0.15)",
         zIndex: 9999,
         transition:
-          "bottom 0.3s ease, width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease",
+          "bottom 0.3s ease, width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
         touchAction: "none",
         overflow: "hidden",
       }}
@@ -120,13 +121,15 @@ export default function BottomNav({
         const badgeCount = getBadge(item.path);
         const Icon = isActive ? item.IconActive : item.IconInactive;
 
+        const iconSize = isActive ? (shrunk ? 22 : 26) : shrunk ? 18 : 22;
+
         return (
           <Badge
             key={item.path}
             badgeContent={badgeCount || undefined}
             sx={{
               "& .MuiBadge-badge": {
-                backgroundColor: "#E63946",
+                backgroundColor: "#E52554",
                 color: "#fff",
                 fontSize: "10px",
                 minWidth: "16px",
@@ -136,23 +139,26 @@ export default function BottomNav({
               },
             }}
           >
-            <IconButton
+            <motion.button
+              type="button"
               aria-label={item.label}
               onClick={() => router.push(item.path)}
-              sx={{
-                color: isActive ? "#F5C900" : "#9E9E9E",
+              whileTap={{ scale: 0.85 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
                 padding: shrunk ? "6px" : "10px",
-                "& svg": {
-                  fontSize: isActive
-                    ? shrunk ? 22 : 26
-                    : shrunk ? 18 : 22,
-                  transition: "font-size 0.3s ease, color 0.2s ease",
-                },
-                transition: "all 0.3s ease",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: isActive ? "#009440" : "#9E9E9E",
+                transition: "color 0.2s ease, padding 0.3s ease",
               }}
             >
-              <Icon />
-            </IconButton>
+              <Icon style={{ fontSize: iconSize, transition: "font-size 0.3s ease" }} />
+            </motion.button>
           </Badge>
         );
       })}

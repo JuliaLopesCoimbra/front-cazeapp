@@ -6,7 +6,7 @@ import { Box, Typography, Skeleton, IconButton } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { useAuth } from "@/app/context/AuthContext";
 import BottomNav from "@/app/components/layout/BottomNav";
-import HomeHeader from "@/app/components/home/HeaderHome";
+import TopBar from "@/app/components/layout/TopBar";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import MyPosts from "@/app/components/my-posts/MyPosts";
 import MyPhotos from "@/app/components/my-photos/MyPhotos";
@@ -360,8 +360,8 @@ export default function MyPhotosPage() {
     return (
       <Box
         sx={{
-          ...pageBgSx,
           minHeight: "100vh",
+          backgroundColor: "#282828",
           paddingBottom: "72px",
         }}
       >
@@ -454,8 +454,8 @@ export default function MyPhotosPage() {
     return (
       <Box
         sx={{
-          ...pageBgSx,
           minHeight: "100vh",
+          backgroundColor: "#282828",
           paddingBottom: "72px",
         }}
       >
@@ -548,20 +548,13 @@ export default function MyPhotosPage() {
     <>
       <Box
         sx={{
-          ...pageBgSx,
           minHeight: "100vh",
+          backgroundColor: "#282828",
           paddingBottom: "72px",
         }}
       >
-        {/* Header com nome, foto e data */}
-        <Box className={shouldAnimate ? "slide-up-animation" : ""}>
-          <HomeHeader
-            event={currentEvent}
-            events={events}
-            currentEvent={currentEvent}
-            onSelectEvent={handleSelectEvent}
-          />
-        </Box>
+        {/* TopBar Casa CazéTV — TODO: re-add event selector if needed */}
+        <TopBar showBack title="Minhas Fotos" />
 
         {/* Conteúdo baseado no tipo de usuário */}
         {renderContent()}
