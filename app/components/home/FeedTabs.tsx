@@ -1,10 +1,13 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { motion } from "framer-motion";
 import type { FeedTab } from "@/app/components/home/FeedTabs.types";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
+import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/app/constants/designTokens";
 
 export type { FeedTab } from "@/app/components/home/FeedTabs.types";
+
+const TAB_HEIGHT = 32;
 
 interface FeedTabsProps {
   active: FeedTab;
@@ -15,7 +18,6 @@ type TabEntry =
   | { kind: "tab"; label: string; value: FeedTab }
   | { kind: "soon"; label: string };
 
-/** Categorias scrolláveis — alinhado ao Figma (Home, Evento, …) + abas do app */
 const TAB_ENTRIES: TabEntry[] = [
   { kind: "tab", label: "Home", value: "all" },
   { kind: "tab", label: "Evento", value: "games" },
@@ -25,24 +27,39 @@ const TAB_ENTRIES: TabEntry[] = [
   { kind: "soon", label: "Mapa" },
 ];
 
+function activeTabSx() {
+  return {
+    backgroundColor: COLORS.yellow,
+    color: COLORS.black,
+    border: "none",
+    boxShadow: "0 2px 8px rgba(246, 196, 0, 0.35)",
+  };
+}
+
+function inactiveTabSx() {
+  return {
+    backgroundColor: "#f5efde",
+    color: COLORS.textSecondary,
+    border: "1px solid #e4d2b7",
+  };
+}
+
 export default function FeedTabs({ active, onChange }: FeedTabsProps) {
   return (
     <Box
       role="tablist"
       aria-label="Categorias do feed"
       sx={{
-        backgroundColor: "#282828",
-        px: "14px",
-        pt: 0,
-        pb: 0,
         display: "flex",
-        gap: "16px",
+        gap: `${SPACING.sm}px`,
         overflowX: "auto",
         overflowY: "hidden",
         WebkitOverflowScrolling: "touch",
         scrollSnapType: "x proximity",
         scrollbarWidth: "none",
         "&::-webkit-scrollbar": { display: "none" },
+        /** Respiro só após o último chip ao rolar até o fim */
+        pr: `${LAYOUT.pagePaddingX}px`,
       }}
     >
       {TAB_ENTRIES.map((entry) => {
@@ -54,19 +71,18 @@ export default function FeedTabs({ active, onChange }: FeedTabsProps) {
               sx={{
                 flexShrink: 0,
                 scrollSnapAlign: "start",
-                minWidth: 93,
-                height: 29,
-                px: 2,
-                borderRadius: "15px",
-                backgroundColor: "#363636",
-                color: "#9E9E9E",
+                minWidth: 72,
+                height: TAB_HEIGHT,
+                px: `${SPACING.md}px`,
+                borderRadius: CAZE_RADIUS.md,
+                ...inactiveTabSx(),
                 fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                fontWeight: 700,
-                fontSize: 12,
+                fontWeight: 600,
+                fontSize: TYPOGRAPHY.caption.fontSize,
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                opacity: 0.65,
+                opacity: 0.5,
               }}
             >
               {entry.label}
@@ -87,58 +103,26 @@ export default function FeedTabs({ active, onChange }: FeedTabsProps) {
               position: "relative",
               flexShrink: 0,
               scrollSnapAlign: "start",
-              minWidth: 93,
-              height: 29,
-              px: 2,
-              border: "none",
-              borderRadius: "15px",
-              backgroundColor: "#363636",
+              minWidth: 72,
+              height: TAB_HEIGHT,
+              px: `${SPACING.md}px`,
+              borderRadius: CAZE_RADIUS.md,
               cursor: "pointer",
-              color: isActive ? "#FFFFFF" : "#9E9E9E",
               fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-              fontWeight: 800,
-              fontSize: 12,
+              fontWeight: isActive ? 700 : 600,
+              fontSize: TYPOGRAPHY.caption.fontSize,
+              lineHeight: TYPOGRAPHY.caption.lineHeight,
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              overflow: "visible",
+              transition: "color 0.2s ease, background-color 0.2s ease",
+              ...(isActive ? activeTabSx() : inactiveTabSx()),
             }}
           >
-            {isActive && (
-              <>
-                <Box
-                  aria-hidden
-                  sx={{
-                    position: "absolute",
-                    inset: -3,
-                    borderRadius: "16px",
-                    background:
-                      "linear-gradient(90deg, rgba(0,148,64,0.22) 0%, rgba(255,203,0,0.16) 76.923%)",
-                    filter: "blur(4px)",
-                    zIndex: 0,
-                    pointerEvents: "none",
-                  }}
-                />
-                <motion.span
-                  layoutId="feedTabBorder"
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: 15,
-                    border: "1px solid #009440",
-                    pointerEvents: "none",
-                    zIndex: 1,
-                  }}
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
-              </>
-            )}
-            <span style={{ position: "relative", zIndex: 2 }}>{entry.label}</span>
+            {entry.label}
           </Box>
         );
       })}
-      <Box sx={{ flexShrink: 0, width: 8 }} aria-hidden />
     </Box>
   );
 }

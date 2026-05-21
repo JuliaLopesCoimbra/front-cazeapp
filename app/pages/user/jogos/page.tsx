@@ -140,7 +140,7 @@ export default function JogosPage() {
             "& .MuiTabs-indicator": { backgroundColor: "#F5C900" },
             "& .MuiTab-root": {
               color: "#9E9E9E",
-              fontFamily: '"Montserrat", Arial, sans-serif',
+              fontFamily: 'var(--font-syne), Syne, sans-serif',
               fontWeight: 700,
               fontSize: "0.75rem",
               textTransform: "none",

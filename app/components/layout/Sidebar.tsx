@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { NAV_ITEMS } from "./BottomNav";
 import BrazilDivider from "./BrazilDivider";
+import LogoutButton from "@/app/components/auth/LogoutButton";
 import RainbowGradientDefs from "@/app/components/shared/RainbowGradientDefs";
 import { RAINBOW_GRADIENT_CSS } from "@/app/constants/rainbowGradient";
 
@@ -14,7 +15,7 @@ interface SidebarProps {
   stickersHasUnopened?: number;
 }
 
-const SIDEBAR_WIDTH = 240;
+const SIDEBAR_WIDTH = 200;
 
 export default function Sidebar({
   bolaoHasPendingBets = false,
@@ -53,9 +54,9 @@ export default function Sidebar({
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 1.5,
-            px: 3,
-            py: 3,
+            gap: 1,
+            px: 2,
+            py: 2.5,
           }}
         >
           <Image
@@ -70,7 +71,7 @@ export default function Sidebar({
           sx={{
             fontFamily: '"Montserrat", Arial, sans-serif',
             fontWeight: 900,
-            fontSize: "1rem",
+            fontSize: "0.875rem",
             color: "#FFFFFF",
             letterSpacing: "0.01em",
           }}
@@ -82,7 +83,14 @@ export default function Sidebar({
       <BrazilDivider />
 
       {/* Lista de itens */}
-      <Box sx={{ display: "flex", flexDirection: "column", py: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          py: 2.5,
+          gap: 1.5,
+        }}
+      >
         {NAV_ITEMS.map((item, index) => {
           const isActive = pathname?.startsWith(item.path) ?? false;
           const Icon = isActive ? item.IconActive : item.IconInactive;
@@ -103,9 +111,9 @@ export default function Sidebar({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 16,
-                padding: "14px 20px",
-                margin: "4px 12px",
+                gap: 14,
+                padding: "14px 16px",
+                margin: "0 10px",
                 borderRadius: 12,
                 borderLeft: isActive ? "3px solid #009440" : "3px solid transparent",
                 background: isActive
@@ -120,7 +128,7 @@ export default function Sidebar({
                 borderTop: "none",
                 borderBottom: "none",
                 textAlign: "left",
-                width: "calc(100% - 24px)",
+                width: "calc(100% - 20px)",
                 transition: "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
               }}
             >
@@ -173,11 +181,15 @@ export default function Sidebar({
         })}
       </Box>
 
+      <Box sx={{ mt: "auto", pt: 1 }}>
+        <LogoutButton variant="sidebar" />
+      </Box>
+
       <Box
         sx={{
-          mt: "auto",
           mx: 2,
           mb: 2,
+          mt: 1.5,
           height: 2,
           borderRadius: 1,
           backgroundImage: RAINBOW_GRADIENT_CSS,

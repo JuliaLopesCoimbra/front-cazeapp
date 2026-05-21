@@ -108,7 +108,7 @@ export function PrizeCard({ prize, userPoints, onRedeem, isRedeeming }: PrizeCar
           <Typography
             sx={{
               color: "#F5C900",
-              fontFamily: '"Montserrat", Arial, sans-serif',
+              fontFamily: 'var(--font-syne), Syne, sans-serif',
               fontWeight: 900,
               fontSize: "1.1rem",
             }}

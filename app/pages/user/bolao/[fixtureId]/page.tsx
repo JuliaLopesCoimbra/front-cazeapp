@@ -208,6 +208,75 @@ export default function BolaoFixturePage({ params }: Props) {
       <TopBar title="Apostar" showBack />
 
       <Box sx={{ px: 2, pt: 2 }}>
+        {/* Match header */}
+        <Box
+          sx={{
+            backgroundColor: "#1A1A1A",
+            borderRadius: "16px",
+            p: 3,
+            mb: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-around",
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+            <TeamLogo src={fixture.home_logo} name={fixture.home_team} />
+            <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.8rem", textAlign: "center", maxWidth: 80 }}>
+              {fixture.home_team}
+            </Typography>
+          </Box>
+
+          <Box sx={{ textAlign: "center" }}>
+            <Typography sx={{ color: "#9E9E9E", fontSize: "0.7rem", mb: 0.5 }}>
+              {new Date(fixture.match_date).toLocaleString("pt-BR", {
+                day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+              })}
+            </Typography>
+            <Typography sx={{ color: "#9E9E9E", fontFamily: 'var(--font-syne), Syne, sans-serif', fontWeight: 800, fontSize: "1.5rem" }}>
+              VS
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+            <TeamLogo src={fixture.away_logo} name={fixture.away_team} />
+            <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.8rem", textAlign: "center", maxWidth: 80 }}>
+              {fixture.away_team}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Scoring guide */}
+        <Box
+          sx={{
+            backgroundColor: "#1A1A1A",
+            borderRadius: "12px",
+            p: 2,
+            mb: 3,
+            display: "flex",
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          {[
+            { pts: "10pts", label: "Placar exato", color: "#F5C900" },
+            { pts: "5pts",  label: "Resultado certo", color: "#0055B8" },
+            { pts: "0pts",  label: "Errou", color: "#9E9E9E" },
+          ].map(({ pts, label, color }, i, arr) => (
+            <Box key={pts} sx={{ display: "flex", alignItems: "center", gap: 0 }}>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography sx={{ color, fontFamily: 'var(--font-space-mono), "Space Mono", monospace', fontWeight: 700, fontSize: "1.5rem", lineHeight: 1 }}>
+                  {pts}
+                </Typography>
+                <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", mt: 0.5 }}>{label}</Typography>
+              </Box>
+              {i < arr.length - 1 && (
+                <Box sx={{ width: 1, height: 36, backgroundColor: "#2A2A2A", mx: 2 }} />
+              )}
+            </Box>
+          ))}
+        </Box>
+
         <MatchHero fixture={fixture} />
         <ScoringGuide />
         <PredictionInput

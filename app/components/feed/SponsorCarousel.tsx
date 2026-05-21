@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 
 export interface SponsorBanner {
   id: string;
@@ -24,7 +25,6 @@ interface SponsorCarouselProps {
 }
 
 const BANNER_HEIGHT = 98;
-const SIDEBAR_WIDTH_PX = 240;
 
 export default function SponsorCarousel({
   banners,
@@ -99,9 +99,10 @@ export default function SponsorCarousel({
             }}
           >
             <Image
-              src={current.image_url}
+              src={encodeURI(current.image_url)}
               alt={`Patrocinador ${current.sponsor_name}`}
               fill
+              unoptimized
               sizes="100vw"
               style={{ objectFit: "cover" }}
               priority={index === 0}
@@ -138,7 +139,7 @@ export default function SponsorCarousel({
                   borderRadius: "50%",
                   border: "none",
                   cursor: "pointer",
-                  backgroundColor: dotActive ? "#009440" : "rgba(255,255,255,0.3)",
+                  backgroundColor: dotActive ? "#F6C400" : "rgba(255,255,255,0.40)",
                   transition: "background-color 0.2s ease",
                   padding: 0,
                 }}
@@ -151,26 +152,27 @@ export default function SponsorCarousel({
   );
 }
 
+/** Banners em public/assets/casa-cazetv (encodeURI no src por espaços no nome) */
+export const SPONSOR_BANNER_ASSETS = {
+  cocaCola: "/assets/casa-cazetv/coca cola - banner.png",
+  cazetvAnuncio: "/assets/casa-cazetv/anuncio 2 - banner.png",
+} as const;
+
 /**
- * Mock para desenvolvimento. Substituir por consumo da API quando endpoint estiver pronto.
+ * Patrocinadores do carrossel no topo da Home — só os 2 assets reais, alternância automática.
  */
 export function getMockSponsors(): SponsorBanner[] {
   return [
     {
       id: "sponsor-coca-cola",
-      image_url: "/assets/figma/sponsor-banner.png",
+      image_url: SPONSOR_BANNER_ASSETS.cocaCola,
       sponsor_name: "Coca-Cola Zero",
       link_url: "https://www.coca-cola.com.br",
     },
     {
-      id: "sponsor-placeholder-2",
-      image_url: "/assets/figma/sponsor-banner.png",
-      sponsor_name: "Patrocinador 2",
-    },
-    {
-      id: "sponsor-placeholder-3",
-      image_url: "/assets/figma/sponsor-banner.png",
-      sponsor_name: "Patrocinador 3",
+      id: "sponsor-cazetv-anuncio-2",
+      image_url: SPONSOR_BANNER_ASSETS.cazetvAnuncio,
+      sponsor_name: "Casa CazéTV",
     },
   ];
 }

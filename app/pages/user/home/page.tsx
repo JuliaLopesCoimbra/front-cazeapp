@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 import { Box, Skeleton, Typography } from "@mui/material";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import HomeScreenHeader from "@/app/components/home/HomeScreenHeader";
+import HeroMatchBanner from "@/app/components/home/HeroMatchBanner";
+import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
+import { COLORS, LAYOUT, PAGE_GLASS_SURFACE, SPACING } from "@/app/constants/designTokens";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import FeedTabs, { type FeedTab } from "@/app/components/home/FeedTabs";
 import { motion } from "framer-motion";
+import StickerBubble from "@/app/components/shared/StickerBubble";
 import SponsorCarousel, { getMockSponsors } from "@/app/components/feed/SponsorCarousel";
 import BottomNav from "@/app/components/layout/BottomNav";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
@@ -17,7 +21,10 @@ import NewsFeed from "@/app/components/home/NewsFeed";
 import { useAuth } from "@/app/context/AuthContext";
 import WorldCupGames from "@/app/components/home/WorldCupGames";
 import EventIndisponivel from "@/app/components/event/EventIndisponivel";
-import { getProfile } from "@/app/services/profile/profileService";
+import {
+  getProfile,
+  type ProfileResponse,
+} from "@/app/services/profile/profileService";
 
 const STORAGE_KEY = "selectedEventId";
 const SCROLL_KEY = "homeScrollY";
@@ -36,6 +43,7 @@ const HomeContent: React.FC = () => {
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const currentEventIdRef = useRef<number | null>(null);
   const isCheckingRef = useRef(false);
   const router = useRouter();
@@ -156,7 +164,8 @@ const HomeContent: React.FC = () => {
 
     const fetchProfile = async () => {
       try {
-        await getProfile();
+        const data = await getProfile();
+        setProfile(data);
         setProfileLoaded(true);
       } catch (error) {
         console.error("Erro ao buscar perfil:", error);
@@ -276,17 +285,26 @@ const HomeContent: React.FC = () => {
   // Skeleton enquanto carrega evento + perfil
   if (!currentEvent || !profileLoaded) {
     return (
-      <Box sx={{ minHeight: "100vh", backgroundColor: "#282828", pb: "100px" }}>
+      <Box sx={{ position: "relative", minHeight: "100vh", pb: "100px" }}>
+        <PageAmbientBackground />
         <Sidebar />
-        <Box sx={{ ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` } }}>
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
+            minHeight: "100vh",
+            ...PAGE_GLASS_SURFACE,
+          }}
+        >
           <Skeleton
             variant="rectangular"
             width="100%"
-            height={84}
-            sx={{ bgcolor: "rgba(255,255,255,0.06)" }}
+            height={128}
+            sx={{ bgcolor: "rgba(0,0,0,0.06)" }}
           />
           <Box sx={{ p: 2 }}>
-            <Skeleton variant="rectangular" width="100%" height={98} sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: 0 }} />
+            <Skeleton variant="rectangular" width="100%" height={98} sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: 0 }} />
             <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
               {[1, 2, 3, 4].map((i) => (
                 <Skeleton
@@ -294,7 +312,7 @@ const HomeContent: React.FC = () => {
                   variant="rectangular"
                   width={93}
                   height={29}
-                  sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px" }}
+                  sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px" }}
                 />
               ))}
             </Box>
@@ -302,13 +320,13 @@ const HomeContent: React.FC = () => {
               variant="rectangular"
               width="100%"
               height={200}
-              sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px", mt: 2 }}
+              sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px", mt: 2 }}
             />
             <Skeleton
               variant="rectangular"
               width="100%"
               height={150}
-              sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px", mt: 2 }}
+              sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px", mt: 2 }}
             />
           </Box>
         </Box>
@@ -318,46 +336,83 @@ const HomeContent: React.FC = () => {
 
   return (
     <>
-      <Box sx={{ minHeight: "100vh", backgroundColor: "#282828" }}>
+      <Box sx={{ position: "relative", minHeight: "100vh" }}>
+        <PageAmbientBackground />
         <Sidebar />
 
         <Box
           component="main"
           sx={{
+            position: "relative",
+            zIndex: 1,
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
-            pb: "100px",
+            minHeight: "100vh",
+            pb: `${LAYOUT.bottomNavClearance}px`,
+            ...PAGE_GLASS_SURFACE,
           }}
         >
           <HomeScreenHeader
             events={events}
             currentEvent={currentEvent}
             onSelectEvent={handleSelectEvent}
+            profile={profile}
           />
 
           <SponsorCarousel banners={getMockSponsors()} edgeToEdge />
+          <BrazilDivider />
 
           <Box
             sx={{
-              backgroundColor: "#282828",
+              px: `${LAYOUT.pagePaddingX}px`,
+              maxWidth: LAYOUT.feedMaxWidth,
+              mx: "auto",
+              width: "100%",
+              mt: `${SPACING.xxl}px`,
+            }}
+          >
+            <HeroMatchBanner />
+          </Box>
+
+          <Box
+            sx={{
+              pl: `${LAYOUT.pagePaddingX}px`,
+              pr: 0,
+              maxWidth: LAYOUT.feedMaxWidth,
+              mx: "auto",
+              width: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "stretch",
-              justifyContent: "center",
-              gap: "12px",
-              py: "14px",
-              mb: "24px",
+              gap: `${SPACING.lg}px`,
+              pt: `${SPACING.lg}px`,
+              pb: `${SPACING.sm}px`,
+              mb: `${SPACING.md}px`,
             }}
           >
-            <FeedTabs active={activeTab} onChange={handleTabChange} />
-            <motion.div
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{ transformOrigin: "left" }}
+            <Box
+              sx={{
+                mr: `-${LAYOUT.pagePaddingX}px`,
+                width: `calc(100% + ${LAYOUT.pagePaddingX}px)`,
+              }}
             >
-              <RainbowDivider />
-            </motion.div>
+              <FeedTabs active={activeTab} onChange={handleTabChange} />
+            </Box>
+            <Box
+              sx={{
+                ml: `-${LAYOUT.pagePaddingX}px`,
+                width: `calc(100% + ${LAYOUT.pagePaddingX}px)`,
+              }}
+            >
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                style={{ transformOrigin: "left", width: "100%" }}
+              >
+                <RainbowDivider />
+              </motion.div>
+            </Box>
           </Box>
 
           {/* Conteúdo da aba */}
@@ -380,35 +435,57 @@ const HomeContent: React.FC = () => {
                   style={{ width: "100%", maxWidth: 480 }}
                 >
                   <Box
-                    className="glass-green"
                     sx={{
                       mx: 0,
                       mt: 4,
                       mb: 4,
                       p: 4,
                       borderRadius: "15px",
+                      background: "#f5efde",
+                      border: "1.5px solid #e4d2b7",
+                      borderLeft: `3px solid ${COLORS.green}`,
+                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
                       textAlign: "center",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
                       gap: 2,
+                      position: "relative",
+                      overflow: "hidden",
                     }}
                   >
-                    <SportsSoccerOutlinedIcon sx={{ fontSize: 56, color: "#009440" }} />
+                    <StickerBubble color="yellow" size={96} sx={{ position: "absolute", top: -24, right: -24, opacity: 0.12 }} />
+                    <StickerBubble color="pink"   size={64} sx={{ position: "absolute", bottom: -16, left: -16, opacity: 0.10 }} />
+                    <SportsSoccerOutlinedIcon sx={{ fontSize: 56, color: COLORS.green }} />
                     <Typography
                       sx={{
-                        color: "#FFFFFF",
-                        fontFamily: '"Montserrat", sans-serif',
-                        fontWeight: 700,
-                        fontSize: "1.125rem",
+                        fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+                        fontWeight: 400,
+                        fontSize: "1.5rem",
+                        letterSpacing: "0.04em",
+                        lineHeight: 1,
+                        color: COLORS.blue,
                       }}
                     >
-                      Em breve.
+                      COPA 2026
                     </Typography>
                     <Typography
                       sx={{
-                        color: "rgba(255,255,255,0.7)",
-                        fontFamily: '"Roboto", sans-serif',
+                        fontFamily: 'var(--font-headline), Anton, sans-serif',
+                        fontWeight: 400,
+                        fontSize: "1.5rem",
+                        letterSpacing: "0.02em",
+                        lineHeight: 1,
+                        color: COLORS.green,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      EM BREVE
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: COLORS.muted,
+                        fontFamily: 'var(--font-body), Inter, sans-serif',
                         fontSize: "0.875rem",
                       }}
                     >

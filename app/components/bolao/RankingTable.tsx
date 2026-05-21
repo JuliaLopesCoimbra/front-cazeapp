@@ -56,9 +56,10 @@ const RankingRow = React.memo(function RankingRow({ entry, currentUserId }: Rank
           <Typography
             sx={{
               color: "#9E9E9E",
-              fontFamily: '"Montserrat", Arial, sans-serif',
+              fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
               fontWeight: 700,
               fontSize: "0.875rem",
+              fontVariantNumeric: "tabular-nums",
             }}
           >
             {entry.rank}
@@ -97,10 +98,11 @@ const RankingRow = React.memo(function RankingRow({ entry, currentUserId }: Rank
       <Typography
         sx={{
           color: "#F5C900",
-          fontFamily: '"Montserrat", Arial, sans-serif',
-          fontWeight: 900,
+          fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
+          fontWeight: 700,
           fontSize: "1rem",
           flexShrink: 0,
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {entry.total_points}

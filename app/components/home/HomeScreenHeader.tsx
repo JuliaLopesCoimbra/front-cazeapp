@@ -1,29 +1,40 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
+import HeaderMatchStrip from "@/app/components/home/HeaderMatchStrip";
+import BrazilGradientAvatar from "@/app/components/shared/BrazilGradientAvatar";
 import { EventResponse } from "@/app/services/events/eventAppService";
+import type { ProfileResponse } from "@/app/services/profile/profileService";
+import { COLORS, LAYOUT, SPACING } from "@/app/constants/designTokens";
 
-const MASCOT_WIDTH = 89;
-const MASCOT_HEIGHT = 50;
+const HEADER_AVATAR_SRC = "/assets/figma/avatar-header.png";
+const MASCOT_WIDTH = 76;
+const MASCOT_HEIGHT = 42;
+const MASCOT_ZONE = 28;
+const AVATAR_SIZE = 32;
 
 interface HomeScreenHeaderProps {
   events: EventResponse[];
   currentEvent: EventResponse;
   onSelectEvent: (event: EventResponse) => void;
+  profile?: ProfileResponse | null;
 }
 
-/**
- * Cabeçalho da home — Figma: logo + hamburger, mascote sobre a linha Brasil, sem divider duplicado abaixo.
- */
 export default function HomeScreenHeader({
   events,
   currentEvent,
   onSelectEvent,
+  profile,
 }: HomeScreenHeaderProps) {
+  const router = useRouter();
+  const displayName = profile?.name?.trim() || profile?.email || "Visitante";
+  const firstName = displayName.split(" ")[0];
+
   return (
     <Box
       component={motion.div}
@@ -34,52 +45,103 @@ export default function HomeScreenHeader({
         position: "sticky",
         top: 0,
         zIndex: 1100,
-        backgroundColor: "#282828",
+        isolation: "isolate",
+        pt: `${SPACING.xl}px`,
+        backgroundColor: COLORS.bg,
       }}
     >
-      {/* Linha superior: logo | hamburger (mobile) */}
+      {/* ── Linha única: avatar+saudação | placar | hambúrguer ── */}
       <Box
         component="header"
         sx={{
-          height: 56,
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
           alignItems: "center",
-          justifyContent: "space-between",
-          px: "22px",
+          px: `${LAYOUT.pagePaddingX}px`,
+          minHeight: 52,
+          mb: `${SPACING.sm}px`,
         }}
       >
-        <Image
-          src="/assets/figma/logo-top.png"
-          alt="Casa CazéTV"
-          width={32}
-          height={30}
-          priority
-          style={{ objectFit: "contain" }}
-        />
-
+        {/* Coluna esquerda — Avatar + "Olá, nome" */}
         <Box
+          role="button"
+          tabIndex={0}
+          aria-label="Ir para perfil"
+          onClick={() => router.push("/pages/user/profile")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") router.push("/pages/user/profile");
+          }}
           sx={{
-            display: { xs: "flex", md: "none" },
+            display: "flex",
+            flexDirection: "column",
             alignItems: "center",
+            gap: 0.75,
+            cursor: "pointer",
+            width: "fit-content",
+            background: "none",
+            border: "none",
+            p: 0,
           }}
         >
-          <HamburgerMenu
-            events={events}
-            currentEvent={currentEvent}
-            onSelectEvent={onSelectEvent}
-            triggerVariant="caze"
+          <BrazilGradientAvatar
+            size={AVATAR_SIZE}
+            src={HEADER_AVATAR_SRC}
+            alt={firstName}
           />
+          <Typography
+            sx={{
+              fontFamily: "var(--font-inter), Inter, sans-serif",
+              fontSize: 11,
+              fontWeight: 500,
+              color: COLORS.muted,
+              lineHeight: 1,
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+            }}
+          >
+            Olá, {firstName}
+          </Typography>
         </Box>
 
-        {/* Espaço simétrico no desktop (sidebar cobre navegação) */}
-        <Box sx={{ width: 32, display: { xs: "none", md: "block" } }} aria-hidden />
+        {/* Coluna central — placar absolutamente centrado na página */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            transform: "scale(0.9)",
+            transformOrigin: "center",
+          }}
+        >
+          <HeaderMatchStrip embedded />
+        </Box>
+
+        {/* Coluna direita — hambúrguer (mobile) / logo (desktop) */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+          <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center" }}>
+            <HamburgerMenu
+              events={events}
+              currentEvent={currentEvent}
+              onSelectEvent={onSelectEvent}
+              triggerVariant="caze"
+            />
+          </Box>
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}>
+            <Image
+              src="/assets/figma/logo-top.png"
+              alt="Casa CazéTV"
+              width={24}
+              height={22}
+              style={{ objectFit: "contain" }}
+            />
+          </Box>
+        </Box>
       </Box>
 
-      {/* Mascote centralizado sobre a linha divisória Brasil */}
+      {/* Mascote + BrazilDivider */}
       <Box
         sx={{
           position: "relative",
-          height: 28,
+          height: MASCOT_ZONE,
           display: "flex",
           justifyContent: "center",
           pointerEvents: "none",

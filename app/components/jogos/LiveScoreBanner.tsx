@@ -27,7 +27,7 @@ export default function LiveScoreBanner({ fixture }: LiveScoreBannerProps) {
       onClick={() => router.push(`/pages/user/jogos/${fixture.fixture.id}`)}
     >
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-        <Typography sx={{ fontSize: "0.7rem", color: "#9E9E9E", fontFamily: '"Roboto"' }}>
+        <Typography sx={{ fontSize: "0.7rem", color: "#9E9E9E", fontFamily: 'var(--font-inter), Inter' }}>
           {fixture.league.round}
         </Typography>
         <LiveBadge variant="compact" />
@@ -36,7 +36,7 @@ export default function LiveScoreBanner({ fixture }: LiveScoreBannerProps) {
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {/* Home team */}
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", flex: 1 }}>
-          <Typography sx={{ fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.875rem", color: "#FFF", textAlign: "center" }}>
+          <Typography sx={{ fontFamily: 'var(--font-syne), Syne', fontWeight: 700, fontSize: "0.875rem", color: "#FFF", textAlign: "center" }}>
             {fixture.teams.home.name}
           </Typography>
         </Box>
@@ -56,7 +56,7 @@ export default function LiveScoreBanner({ fixture }: LiveScoreBannerProps) {
 
         {/* Away team */}
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", flex: 1 }}>
-          <Typography sx={{ fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.875rem", color: "#FFF", textAlign: "center" }}>
+          <Typography sx={{ fontFamily: 'var(--font-syne), Syne', fontWeight: 700, fontSize: "0.875rem", color: "#FFF", textAlign: "center" }}>
             {fixture.teams.away.name}
           </Typography>
         </Box>

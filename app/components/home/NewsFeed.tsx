@@ -365,7 +365,7 @@ export default function NewsFeed({ eventId, event }: Props) {
       {!loading && news.length === 0 && <EmptyNews />}
 
       {news.length > 0 && (
-        <Box display="flex" flexDirection="column" sx={{ gap: "16px" }}>
+        <Box display="flex" flexDirection="column" sx={{ gap: "12px" }}>
           {news.map((item, index) => (
             <Box key={item.id}>
               <motion.div
@@ -406,7 +406,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                   }}
                 >
                   {/* Header: avatar + @nome + menu (Liquid Glass com borda gradiente Brasil) */}
-                  <PostGlassCard className="mx-[14px] mt-2" border="green">
+                  <PostGlassCard className="mx-[14px] mt-2" variant="header" border="green">
                     <Box
                       sx={{
                         display: "flex",
@@ -428,8 +428,8 @@ export default function NewsFeed({ eventId, event }: Props) {
                       />
                       <Typography
                         sx={{
-                          color: "#fff",
-                          fontFamily: '"Montserrat", sans-serif',
+                          color: "#0A0A0A",
+                          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
                           fontWeight: 800,
                           fontSize: 12,
                           letterSpacing: 0.2,
@@ -444,16 +444,16 @@ export default function NewsFeed({ eventId, event }: Props) {
                       </Typography>
                       <Typography
                         sx={{
-                          color: "rgba(255,255,255,0.55)",
+                          color: "rgba(0,0,0,0.68)",
                           fontSize: 10,
-                          fontFamily: '"Roboto", sans-serif',
+                          fontFamily: 'var(--font-inter), Inter, sans-serif',
                           flexShrink: 0,
                           mr: 0.5,
                         }}
                       >
                         {formatDate(item.created_at)}
                       </Typography>
-                      <MoreHorizIcon sx={{ color: "#fff", fontSize: 18, opacity: 0.85 }} />
+                      <MoreHorizIcon sx={{ color: "rgba(0,0,0,0.55)", fontSize: 18 }} />
                     </Box>
                   </PostGlassCard>
 
@@ -465,7 +465,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                         alt={item.title}
                         sx={{
                           width: "100%",
-                          aspectRatio: "1 / 1",
+                          aspectRatio: "9 / 16",
                           objectFit: "cover",
                           borderRadius: "15px",
                           border: "1px solid rgba(0,148,64,0.4)",
@@ -544,7 +544,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                           <Typography
                             sx={{
                               color: "#fff",
-                              fontFamily: '"Montserrat", sans-serif',
+                              fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
                               fontWeight: 800,
                               fontSize: 12,
                               lineHeight: 1.3,
@@ -567,7 +567,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                         <Typography
                           sx={{
                             color: "#fff",
-                            fontFamily: '"Montserrat", sans-serif',
+                            fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
                             fontWeight: 800,
                             fontSize: { xs: "1rem", md: "1.15rem" },
                             lineHeight: 1.35,
@@ -616,8 +616,8 @@ export default function NewsFeed({ eventId, event }: Props) {
 }
 
 function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
-  const cardBg = isTorcida ? "#123b6b" : "#0f0f0f";
-  const skeletonBg = isTorcida ? "#2f5f96" : "#2a2a2a";
+  const cardBg = isTorcida ? "#123b6b" : "rgba(0,0,0,0.04)";
+  const skeletonBg = isTorcida ? "#2f5f96" : "rgba(0,0,0,0.08)";
   return (
     <Card
       sx={{
@@ -630,7 +630,7 @@ function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
         variant="rectangular"
         sx={{
           width: "100%",
-          aspectRatio: "1 / 1",
+          aspectRatio: "9 / 16",
           bgcolor: skeletonBg,
         }}
       />
@@ -649,8 +649,8 @@ function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
 }
 
 function NewsItemSkeleton({ isTorcida }: { isTorcida: boolean }) {
-  const cardBg = isTorcida ? "#123b6b" : "#0f0f0f";
-  const skeletonBg = isTorcida ? "#2f5f96" : "#2a2a2a";
+  const cardBg = isTorcida ? "#123b6b" : "rgba(0,0,0,0.04)";
+  const skeletonBg = isTorcida ? "#2f5f96" : "rgba(0,0,0,0.08)";
   return (
     <Card
       sx={{

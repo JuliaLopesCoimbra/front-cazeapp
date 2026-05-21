@@ -33,7 +33,7 @@ function TeamLogo({ name, logo }: { name: string; logo: string }) {
       />
       <Typography
         sx={{
-          fontFamily: '"Roboto", Arial, sans-serif',
+          fontFamily: 'var(--font-inter), Inter, sans-serif',
           fontWeight: 500,
           fontSize: "0.7rem",
           color: "#FFFFFF",
@@ -56,7 +56,7 @@ function ScoreDisplay({ fixture }: { fixture: BrazilFixture }) {
     return (
       <Typography
         sx={{
-          fontFamily: '"Montserrat", Arial, sans-serif',
+          fontFamily: 'var(--font-syne), Syne, sans-serif',
           fontWeight: 900,
           fontSize: "1.25rem",
           color: "#9E9E9E",
@@ -71,17 +71,26 @@ function ScoreDisplay({ fixture }: { fixture: BrazilFixture }) {
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
       <Typography
         sx={{
-          fontFamily: '"Montserrat", Arial, sans-serif',
-          fontWeight: 900,
+          fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
+          fontWeight: 700,
           fontSize: "1.75rem",
           color: live ? "#E63946" : "#F5C900",
           lineHeight: 1,
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {fixture.goals.home ?? 0} – {fixture.goals.away ?? 0}
       </Typography>
       {live && fixture.fixture.status.elapsed != null && (
-        <Typography sx={{ fontSize: "0.65rem", color: "#E63946", fontWeight: 700 }}>
+        <Typography
+          sx={{
+            fontSize: "0.65rem",
+            color: "#E63946",
+            fontWeight: 700,
+            fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
           {fixture.fixture.status.elapsed}&apos;
         </Typography>
       )}
@@ -119,7 +128,7 @@ export default function MatchCard({ fixture, compact = false, href }: MatchCardP
     >
       {/* Header: round + badge */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-        <Typography sx={{ fontSize: "0.7rem", color: "#9E9E9E", fontFamily: '"Roboto"' }}>
+        <Typography sx={{ fontSize: "0.7rem", color: "#9E9E9E", fontFamily: 'var(--font-inter), Inter' }}>
           {fixture.league.round}
         </Typography>
         {live ? (
@@ -133,7 +142,7 @@ export default function MatchCard({ fixture, compact = false, href }: MatchCardP
               color: "#9E9E9E",
               fontSize: "0.6rem",
               height: 18,
-              fontFamily: '"Montserrat"',
+              fontFamily: 'var(--font-syne), Syne',
               fontWeight: 700,
             }}
           />
@@ -159,7 +168,7 @@ export default function MatchCard({ fixture, compact = false, href }: MatchCardP
             color: "#9E9E9E",
             textAlign: "center",
             mt: 1.5,
-            fontFamily: '"Roboto"',
+            fontFamily: 'var(--font-inter), Inter',
           }}
         >
           {fixture.fixture.venue.name}, {fixture.fixture.venue.city}

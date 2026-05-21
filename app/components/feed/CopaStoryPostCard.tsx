@@ -18,9 +18,17 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SendIcon from "@mui/icons-material/Send";
-import LiquidGlass from "@/app/components/shared/LiquidGlass";
+import FrostedGlass from "@/app/components/shared/FrostedGlass";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
+import {
+  COLORS,
+  LAYOUT,
+  NAV_DOCK_GLASS,
+  NAV_DOCK_GLASS_SX,
+} from "@/app/constants/designTokens";
+
+const POST_MEDIA_ASPECT = LAYOUT.postMediaAspectRatio;
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
-import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import { useAuth } from "@/app/context/AuthContext";
 import {
   listComments,
@@ -32,8 +40,8 @@ import { formatDate } from "@/app/utils/dateUtils";
 
 const FIGMA_POST_ART = "/assets/figma/post-copa-art.png";
 const POST_HEADER_HEIGHT = 52;
-
-const POST_IMAGE_HEIGHT = { xs: 580, sm: 600 } as const;
+/** Barra recolhida do bloco de comentários — alinhada ao header do post */
+const COMMENTS_TOGGLE_MIN_HEIGHT = 40;
 
 const FIGMA_AVATAR_HEADER = "/assets/figma/avatar-header.png";
 
@@ -63,26 +71,25 @@ export interface CopaStoryPostCardProps {
   commentsCount?: number;
   onClick?: () => void;
   postArtUrl?: string;
-  eyebrowLabel?: string;
 }
 
 function CopaCommentRow({ comment }: { comment: CommentResponse }) {
   return (
-    <Box sx={{ display: "flex", gap: 1, mb: 1.25 }}>
+    <Box sx={{ display: "flex", gap: 0.75, mb: 0.75 }}>
       <Avatar
         src={comment.user.profile_photo}
         alt={comment.user.name}
-        sx={{ width: 28, height: 28, flexShrink: 0, fontSize: 12 }}
+        sx={{ width: 24, height: 24, flexShrink: 0, fontSize: 11 }}
       >
         {comment.user.name[0]?.toUpperCase()}
       </Avatar>
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Typography
           sx={{
-            color: "#FFFFFF",
+            color: COLORS.text,
             fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-            fontWeight: 700,
-            fontSize: 12,
+            fontWeight: 600,
+            fontSize: 11,
             lineHeight: 1.2,
           }}
         >
@@ -90,69 +97,16 @@ function CopaCommentRow({ comment }: { comment: CommentResponse }) {
         </Typography>
         <Typography
           sx={{
-            color: "rgba(255,255,255,0.88)",
-            fontFamily: "var(--font-roboto), Roboto, sans-serif",
-            fontSize: 12,
-            lineHeight: 1.45,
-            mt: 0.25,
+            color: COLORS.textSecondary,
+            fontFamily: "var(--font-inter), Inter, sans-serif",
+            fontSize: 11,
+            lineHeight: 1.4,
+            mt: 0.15,
             wordBreak: "break-word",
           }}
         >
           {comment.content}
         </Typography>
-        <Typography
-          sx={{
-            color: "rgba(255,255,255,0.45)",
-            fontSize: 10,
-            mt: 0.35,
-            fontFamily: "var(--font-roboto), Roboto, sans-serif",
-          }}
-        >
-          {formatDate(comment.created_at)}
-        </Typography>
-      </Box>
-    </Box>
-  );
-}
-
-function AuthorRow({
-  avatarSrc,
-  authorName,
-  createdAtLabel,
-  size = 36,
-}: {
-  avatarSrc: string;
-  authorName: string;
-  createdAtLabel?: string;
-  size?: number;
-}) {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-      <Avatar src={avatarSrc} alt={authorName} sx={{ width: size, height: size, flexShrink: 0 }} />
-      <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography
-          sx={{
-            color: "#FFFFFF",
-            fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-            fontWeight: 700,
-            fontSize: 13,
-            lineHeight: 1.2,
-          }}
-        >
-          {authorName}
-        </Typography>
-        {createdAtLabel ? (
-          <Typography
-            sx={{
-              color: "rgba(255,255,255,0.65)",
-              fontFamily: "var(--font-roboto), Roboto, sans-serif",
-              fontSize: 11,
-              mt: 0.25,
-            }}
-          >
-            {createdAtLabel}
-          </Typography>
-        ) : null}
       </Box>
     </Box>
   );
@@ -168,7 +122,6 @@ export default function CopaStoryPostCard({
   commentsCount = 0,
   onClick,
   postArtUrl = FIGMA_POST_ART,
-  eyebrowLabel = "POST EM DESTAQUE",
   newsId,
 }: CopaStoryPostCardProps) {
   const { isAuthenticated, authReady } = useAuth();
@@ -182,7 +135,6 @@ export default function CopaStoryPostCard({
   const [currentUser, setCurrentUser] = useState<ProfileResponse | null>(null);
 
   const headerAvatar = authorPhoto || FIGMA_AVATAR_HEADER;
-  const fullText = (body?.trim() || caption).trim();
   const totalComments = commentsCount > 0 ? commentsCount : comments.length;
   const commentsHeading =
     totalComments === 0
@@ -263,8 +215,9 @@ export default function CopaStoryPostCard({
       onClick={onClick}
       sx={{
         cursor: onClick ? "pointer" : "default",
-        px: "14px",
-        maxWidth: 393,
+        boxSizing: "border-box",
+        px: `${LAYOUT.postCardMarginX}px`,
+        maxWidth: LAYOUT.feedMaxWidth,
         mx: "auto",
         width: "100%",
         transition: "opacity 0.2s",
@@ -273,89 +226,106 @@ export default function CopaStoryPostCard({
     >
       <Box
         sx={{
-          borderRadius: "15px",
+          borderRadius: CAZE_RADIUS.md,
           overflow: "hidden",
-          bgcolor: "#282828",
+          bgcolor: "transparent",
         }}
       >
-        <LiquidGlass
-          border="none"
-          borderRadius="15px 15px 0 0"
-          brazilGlow={false}
-          blurPx={10}
-          glassAlpha={0.1}
-          noPadding
-          minHeight={POST_HEADER_HEIGHT}
+        {/* Cabeçalho transparente — fica acima da mídia; divisão arco-íris abaixo */}
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: 4,
+            isolation: "isolate",
+          }}
         >
-          <Box
+          <FrostedGlass
+            borderRadius={`${CAZE_RADIUS.md} ${CAZE_RADIUS.md} 0 0`}
+            blurPx={NAV_DOCK_GLASS.blurPx}
+            fillAlpha={NAV_DOCK_GLASS.fillAlpha}
+            noPadding
             sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              height: POST_HEADER_HEIGHT,
-              px: "14px",
+              ...NAV_DOCK_GLASS_SX,
+              borderBottom: "none",
             }}
           >
-            <Avatar
-              src={headerAvatar}
-              alt={authorName}
-              sx={{ width: 32, height: 32, flexShrink: 0 }}
-            />
-            <Typography
-              component="span"
+            <Box
               sx={{
-                flex: 1,
-                color: "#FFFFFF",
-                fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                fontWeight: 600,
-                fontSize: 12,
-                letterSpacing: "0.01em",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                height: POST_HEADER_HEIGHT,
+                px: "14px",
               }}
             >
-              {authorName}
-            </Typography>
-            {createdAtLabel ? (
+              <Avatar
+                src={headerAvatar}
+                alt={authorName}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  flexShrink: 0,
+                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                }}
+              />
               <Typography
                 component="span"
                 sx={{
-                  color: "rgba(255,255,255,0.55)",
-                  fontSize: 10,
-                  fontFamily: "var(--font-roboto), Roboto, sans-serif",
-                  flexShrink: 0,
+                  flex: 1,
+                  color: COLORS.text,
+                  fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
+                  fontWeight: 700,
+                  fontSize: 12,
+                  letterSpacing: "0.01em",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {createdAtLabel}
+                {authorName}
               </Typography>
-            ) : null}
-            <MoreHorizIcon
-              sx={{
-                fontSize: 18,
-                color: "rgba(255,255,255,0.45)",
-                flexShrink: 0,
-              }}
-            />
+              {createdAtLabel ? (
+                <Typography
+                  component="span"
+                  sx={{
+                    color: COLORS.muted,
+                    fontSize: 10,
+                    fontFamily: "var(--font-inter), Inter, sans-serif",
+                    flexShrink: 0,
+                  }}
+                >
+                  {createdAtLabel}
+                </Typography>
+              ) : null}
+              <MoreHorizIcon
+                sx={{
+                  fontSize: 18,
+                  color: COLORS.muted,
+                  flexShrink: 0,
+                }}
+              />
+            </Box>
+          </FrostedGlass>
+          <Box sx={{ position: "relative", zIndex: 5 }}>
+            <RainbowDivider />
           </Box>
-        </LiquidGlass>
-
-        <RainbowDivider />
+        </Box>
 
         <Box
           sx={{
             position: "relative",
+            zIndex: 1,
             width: "100%",
-            height: { xs: POST_IMAGE_HEIGHT.xs, sm: POST_IMAGE_HEIGHT.sm },
-            minHeight: { xs: POST_IMAGE_HEIGHT.xs, sm: POST_IMAGE_HEIGHT.sm },
+            aspectRatio: POST_MEDIA_ASPECT,
             overflow: "hidden",
+            mt: -0.25,
           }}
         >
           <Image
             src={postArtUrl}
             alt=""
             fill
-            sizes="(max-width: 393px) 100vw, 357px"
+            sizes={`(max-width: ${LAYOUT.feedMaxWidth}px) calc(100vw - ${LAYOUT.postCardMarginX * 2}px), 100vw`}
             style={{ objectFit: "cover", objectPosition: "center top" }}
             priority
           />
@@ -386,36 +356,19 @@ export default function CopaStoryPostCard({
               pointerEvents: "none",
             }}
           >
-            {eyebrowLabel ? (
-              <Typography
-                component="p"
-                sx={{
-                  m: 0,
-                  mb: 0.75,
-                  color: "rgba(196, 172, 120, 0.95)",
-                  fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                  fontWeight: 600,
-                  fontSize: 10,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  lineHeight: 1.2,
-                }}
-              >
-                {eyebrowLabel}
-              </Typography>
-            ) : null}
             <Typography
               component="h2"
               sx={{
                 m: 0,
                 color: "#FFFFFF",
-                fontFamily: 'var(--font-playfair), "Playfair Display", Georgia, serif',
-                fontWeight: 500,
-                fontSize: { xs: "1.5rem", sm: "1.625rem" },
-                lineHeight: 1.28,
-                letterSpacing: "0.01em",
+                fontFamily: 'var(--font-headline), Anton, sans-serif',
+                fontWeight: 400,
+                fontSize: { xs: "1.875rem", sm: "2rem" },
+                lineHeight: 1.05,
+                letterSpacing: "-0.01em",
+                textTransform: "uppercase",
                 display: "-webkit-box",
-                WebkitLineClamp: 4,
+                WebkitLineClamp: 3,
                 WebkitBoxOrient: "vertical",
                 overflow: "hidden",
               }}
@@ -452,7 +405,7 @@ export default function CopaStoryPostCard({
                   fontWeight: 600,
                   color: "rgba(255,255,255,0.9)",
                   lineHeight: 1.2,
-                  fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                  fontFamily: "var(--font-inter), Inter, sans-serif",
                 }}
               >
                 {formatMetricCount(likesCount)}
@@ -478,7 +431,7 @@ export default function CopaStoryPostCard({
                   fontWeight: 600,
                   color: "rgba(255,255,255,0.9)",
                   lineHeight: 1.2,
-                  fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                  fontFamily: "var(--font-inter), Inter, sans-serif",
                 }}
               >
                 {formatMetricCount(commentsCount)}
@@ -488,52 +441,22 @@ export default function CopaStoryPostCard({
           </Box>
         </Box>
 
-        <Box onClick={stopCardNav} sx={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-          <LiquidGlass
-            border="none"
-            borderRadius="0 0 15px 15px"
-            brazilGlow={false}
-            blurPx={8}
-            glassAlpha={0.04}
+        <RainbowDivider />
+
+        <Box onClick={stopCardNav} sx={{ position: "relative", zIndex: 2, bgcolor: "transparent" }}>
+          <FrostedGlass
+            borderRadius={`0 0 ${CAZE_RADIUS.md} ${CAZE_RADIUS.md}`}
+            blurPx={NAV_DOCK_GLASS.blurPx}
+            fillAlpha={NAV_DOCK_GLASS.fillAlpha}
             noPadding
+            sx={{
+              ...NAV_DOCK_GLASS_SX,
+              borderTop: "none",
+              transition:
+                "background-color 0.22s ease, backdrop-filter 0.22s ease, -webkit-backdrop-filter 0.22s ease",
+            }}
           >
-            <Box sx={{ px: 2, py: 1.5 }}>
-              <AuthorRow
-                avatarSrc={headerAvatar}
-                authorName={authorName}
-                createdAtLabel={createdAtLabel}
-              />
-              <Typography
-                component="h3"
-                sx={{
-                  mt: 1.25,
-                  mb: 0.5,
-                  color: "#FFCB00",
-                  fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                  fontWeight: 800,
-                  fontSize: 14,
-                  lineHeight: 1.3,
-                }}
-              >
-                {caption}
-              </Typography>
-              <Typography
-                sx={{
-                  color: "rgba(255,255,255,0.9)",
-                  fontFamily: "var(--font-roboto), Roboto, sans-serif",
-                  fontSize: 13,
-                  lineHeight: 1.55,
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}
-              >
-                {fullText}
-              </Typography>
-
-              <Box sx={{ my: 1 }}>
-                <BrazilDivider />
-              </Box>
-
+            <Box sx={{ px: 1.25, py: commentsExpanded ? 1 : 1.125 }}>
               <Box ref={commentsSectionRef}>
                 <Box
                   component="button"
@@ -545,64 +468,48 @@ export default function CopaStoryPostCard({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    gap: 1,
+                    gap: 0.5,
                     border: "none",
                     background: "transparent",
                     cursor: "pointer",
                     p: 0,
-                    py: 0.25,
+                    minHeight: COMMENTS_TOGGLE_MIN_HEIGHT,
                     textAlign: "left",
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}>
-                    <ChatBubbleOutlineIcon sx={{ fontSize: 16, color: "#9E9E9E", flexShrink: 0 }} />
-                    <Typography
-                      sx={{
-                        color: "rgba(255,255,255,0.75)",
-                        fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                        fontWeight: 700,
-                        fontSize: 11,
-                        letterSpacing: "0.04em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {commentsHeading}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
-                    <Typography
-                      sx={{
-                        color: "#9E9E9E",
-                        fontSize: 10,
-                        fontFamily: "var(--font-roboto), Roboto, sans-serif",
-                      }}
-                    >
-                      {commentsExpanded ? "Recolher" : "Expandir"}
-                    </Typography>
-                    {commentsExpanded ? (
-                      <ExpandLessIcon sx={{ fontSize: 20, color: "#9E9E9E" }} />
-                    ) : (
-                      <ExpandMoreIcon sx={{ fontSize: 20, color: "#9E9E9E" }} />
-                    )}
-                  </Box>
+                  <Typography
+                    sx={{
+                      color: COLORS.text,
+                      fontFamily: "var(--font-inter), Inter, sans-serif",
+                      fontWeight: 500,
+                      fontSize: 11,
+                    }}
+                  >
+                    {commentsHeading}
+                  </Typography>
+                  {commentsExpanded ? (
+                    <ExpandLessIcon sx={{ fontSize: 18, color: "#9E9E9E" }} />
+                  ) : (
+                    <ExpandMoreIcon sx={{ fontSize: 18, color: "#9E9E9E" }} />
+                  )}
                 </Box>
 
-                <Collapse in={commentsExpanded} timeout={280} unmountOnExit>
-                  <Box sx={{ pt: 1 }}>
+                <Collapse in={commentsExpanded} timeout={220} unmountOnExit>
+                  <Box sx={{ pt: 0.75, pb: 0.5 }}>
                     {commentsLoading ? (
-                      <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-                        <CircularProgress size={22} sx={{ color: "#009440" }} />
+                      <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }}>
+                        <CircularProgress size={18} sx={{ color: "#009440" }} />
                       </Box>
                     ) : comments.length === 0 ? (
                       <Typography
                         sx={{
-                          color: "rgba(255,255,255,0.5)",
-                          fontSize: 12,
-                          py: 1,
-                          fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                          color: COLORS.muted,
+                          fontSize: 11,
+                          py: 0.5,
+                          fontFamily: "var(--font-inter), Inter, sans-serif",
                         }}
                       >
-                        Seja o primeiro a comentar! ⚽
+                        Seja o primeiro a comentar
                       </Typography>
                     ) : (
                       comments.map((comment) => (
@@ -619,18 +526,17 @@ export default function CopaStoryPostCard({
                           onClick();
                         }}
                         sx={{
-                          mt: 0.5,
+                          mt: 0.25,
                           border: "none",
                           background: "none",
                           cursor: "pointer",
                           color: "#009440",
-                          fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                          fontWeight: 700,
-                          fontSize: 11,
+                          fontFamily: "var(--font-inter), Inter, sans-serif",
+                          fontSize: 10,
                           p: 0,
                         }}
                       >
-                        Ver todos os comentários
+                        Ver todos
                       </Box>
                     ) : null}
 
@@ -638,71 +544,67 @@ export default function CopaStoryPostCard({
                       <Box
                         sx={{
                           display: "flex",
-                          gap: 1,
-                          alignItems: "flex-start",
-                          mt: 1.25,
-                          pt: 1,
-                          borderTop: "1px solid rgba(255,255,255,0.06)",
+                          gap: 0.5,
+                          alignItems: "center",
+                          mt: 0.75,
+                          pt: 0.75,
+                          borderTop: "1px solid rgba(0,0,0,0.08)",
                         }}
                       >
                         <Avatar
-                          src={currentUser?.profile_photo}
-                          sx={{ width: 28, height: 28, flexShrink: 0 }}
+                          src={currentUser?.profile_photo ?? undefined}
+                          sx={{ width: 22, height: 22, flexShrink: 0, fontSize: 10 }}
                         >
                           {currentUser?.name?.[0]?.toUpperCase() ?? "U"}
                         </Avatar>
-                        <Box sx={{ flex: 1, display: "flex", gap: 0.5, alignItems: "flex-end" }}>
-                          <TextField
-                            fullWidth
-                            size="small"
-                            placeholder="Comente..."
-                            value={commentDraft}
-                            onChange={(e) => setCommentDraft(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSubmitComment();
-                              }
-                            }}
-                            disabled={submittingComment}
-                            multiline
-                            maxRows={3}
-                            sx={{
-                              "& .MuiOutlinedInput-root": {
-                                color: "#fff",
-                                fontSize: 13,
-                                backgroundColor: "rgba(255,255,255,0.05)",
-                                borderRadius: "10px",
-                                "& fieldset": { borderColor: "rgba(255,255,255,0.1)" },
-                                "&:hover fieldset": { borderColor: "rgba(0,148,64,0.35)" },
-                                "&.Mui-focused fieldset": { borderColor: "#009440" },
-                              },
-                            }}
-                          />
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              stopCardNav(e);
+                        <TextField
+                          fullWidth
+                          size="small"
+                          placeholder="Comentar..."
+                          value={commentDraft}
+                          onChange={(e) => setCommentDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
                               handleSubmitComment();
-                            }}
-                            disabled={submittingComment || !commentDraft.trim()}
-                            aria-label="Enviar comentário"
-                            sx={{ color: "#009440", mb: 0.25 }}
-                          >
-                            {submittingComment ? (
-                              <CircularProgress size={18} color="inherit" />
-                            ) : (
-                              <SendIcon sx={{ fontSize: 20 }} />
-                            )}
-                          </IconButton>
-                        </Box>
+                            }
+                          }}
+                          disabled={submittingComment}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              color: COLORS.text,
+                              fontSize: 12,
+                              minHeight: 32,
+                              backgroundColor: "rgba(0,0,0,0.04)",
+                              borderRadius: "8px",
+                              "& fieldset": { borderColor: "rgba(0,0,0,0.12)" },
+                              "&.Mui-focused fieldset": { borderColor: "rgba(0,148,64,0.55)" },
+                            },
+                          }}
+                        />
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            stopCardNav(e);
+                            handleSubmitComment();
+                          }}
+                          disabled={submittingComment || !commentDraft.trim()}
+                          aria-label="Enviar"
+                          sx={{ color: "#009440", p: 0.5 }}
+                        >
+                          {submittingComment ? (
+                            <CircularProgress size={16} color="inherit" />
+                          ) : (
+                            <SendIcon sx={{ fontSize: 18 }} />
+                          )}
+                        </IconButton>
                       </Box>
                     ) : null}
                   </Box>
                 </Collapse>
               </Box>
             </Box>
-          </LiquidGlass>
+          </FrostedGlass>
         </Box>
       </Box>
     </Box>

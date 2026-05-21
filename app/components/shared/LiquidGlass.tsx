@@ -3,86 +3,421 @@
 import { Box, type SxProps, type Theme } from "@mui/material";
 import { ReactNode } from "react";
 
-export type LiquidGlassBorder = "none" | "green" | "gradient-brazil";
+/**
+ * LiquidGlass — Casa CazéTV
+ *
+ * Calibração v2 (Apple iOS 26 / WWDC 2025).
+ * Diferenças vs. v1:
+ *  - drop-shadow direcional (luz vinda do upper-left)
+ *  - innerHighlight "apple" (cantilever de luz + ring glow + sombra de volume)
+ *  - blur baixo (2–12px) + saturate alto (1.3–1.5) + brightness leve (1.0–1.1)
+ *  - specular highlight opt-in (pseudo `::before` com gradiente diagonal)
+ *  - easing Apple exportado como APPLE_EASE
+ *  - "breathing" animation opt-in, respeitando prefers-reduced-motion
+ *
+ * Fonte: deep-research-report.md §§3.2, 3.3, 7 + Apple HIG "Materials" (iOS 26).
+ * Spec de presets: docs/liquid-glass-spec.md §8.
+ */
+
+export type LiquidGlassBorder = "none" | "green" | "gradient-brazil" | "left-only";
+export type LiquidGlassInnerHighlight = "none" | "soft" | "normal" | "strong" | "apple";
+export type LiquidGlassDropShadow = "none" | "sm" | "md" | "lg" | "xl";
+export type LiquidGlassDisplacement =
+  | false
+  | { baseFrequency: number; numOctaves: number; scale: number };
+
+export type LiquidGlassPreset =
+  | "post-header"
+  | "post-caption-overlay"
+  | "dock-bottom-nav"
+  | "sidebar-active-item"
+  | "modal-sheet";
 
 interface LiquidGlassProps {
   children: ReactNode;
   className?: string;
   sx?: SxProps<Theme>;
-  /** Borda conforme Figma: verde 2px (caption) ou gradiente Brasil (tab ativa / destaque) */
+  /** Preset Apple-calibrated. Props individuais sobrescrevem o preset. */
+  preset?: LiquidGlassPreset;
+  /** Borda do painel. `left-only`: faixa 4px à esquerda (sidebar item ativo). */
   border?: LiquidGlassBorder;
+  /** Espessura da borda em px. Default por preset. */
+  borderWidth?: number;
+  /** Aceita number (px) ou string ("15px 15px 0 0"). */
   borderRadius?: string | number;
-  /** Blobs verde/amarelo desfocados atrás do vidro — tema Copa Brasil */
+  /** Força borderRadius 24px (look Apple). Default false — opt-in por componente. */
+  appleRound?: boolean;
+  /** Blobs verde/amarelo desfocados atrás do vidro (Brasil). */
   brazilGlow?: boolean;
-  /** Intensidade do blur (px) */
+  /** Intensidade do blur do backdrop em px. */
   blurPx?: number;
-  /** Altura mínima do painel de vidro */
+  /** Saturação do backdrop (multiplicador). Apple usa 1.3–1.5. */
+  saturate?: number;
+  /** Brightness do backdrop. Apple usa 1.0–1.1. */
+  brightness?: number;
+  /** Filtro SVG de displacement aplicado no backdrop-filter. */
+  displacement?: LiquidGlassDisplacement;
+  /** Altura mínima do painel. */
   minHeight?: number | string;
-  /** Padding interno; omitir quando children controlam layout */
+  /** Omitir padding interno (quando children controlam layout). */
   noPadding?: boolean;
-  /** Opacidade do fundo vidro (0–1). Padrão Figma: 0.2 */
+  /** Opacidade do fill (0–1). */
   glassAlpha?: number;
+  /** Cor base do fill antes do alpha. */
+  bgTint?: string;
+  /** Receita de luz interna. `apple` reproduz o look polidario/iOS 26. */
+  innerHighlight?: LiquidGlassInnerHighlight;
+  /** Drop shadow direcional (luz upper-left). Aplicado via filter no wrapper. */
+  dropShadow?: LiquidGlassDropShadow;
+  /** Specular highlight (gota de luz diagonal no canto superior-esquerdo). */
+  specular?: boolean;
+  /** Respiração sutil do highlight (6s). Respeita prefers-reduced-motion. */
+  breathing?: boolean;
+  /** contain: paint para isolar repaint (presets dock/modal). */
+  containPaint?: boolean;
 }
 
 const GLOW_GREEN = "#009440";
 const GLOW_YELLOW = "#FFCB00";
 const GLOW_GREEN_LIGHT = "#31E46A";
 
+/** Easing oficial Apple (WWDC). Usar em transitions de componentes glass. */
+export const APPLE_EASE = "cubic-bezier(0.6, 0.05, 0.1, 0.95)";
+
+const PRESETS: Record<LiquidGlassPreset, Required<Pick<
+  LiquidGlassProps,
+  | "border"
+  | "borderWidth"
+  | "borderRadius"
+  | "blurPx"
+  | "saturate"
+  | "brightness"
+  | "displacement"
+  | "glassAlpha"
+  | "bgTint"
+  | "innerHighlight"
+  | "dropShadow"
+  | "specular"
+  | "brazilGlow"
+  | "containPaint"
+>>> = {
+  "post-header": {
+    border: "gradient-brazil",
+    borderWidth: 1.5,
+    borderRadius: "15px 15px 0 0",
+    blurPx: 6,
+    saturate: 1.35,
+    brightness: 1.08,
+    displacement: false,
+    glassAlpha: 0.07,
+    bgTint: "#FFFFFF",
+    innerHighlight: "normal",
+    dropShadow: "sm",
+    specular: false,
+    brazilGlow: false,
+    containPaint: true,
+  },
+  "post-caption-overlay": {
+    border: "gradient-brazil",
+    borderWidth: 2,
+    borderRadius: 15,
+    blurPx: 4,
+    saturate: 1.4,
+    brightness: 1.05,
+    displacement: false,
+    glassAlpha: 0.07,
+    bgTint: "#FFFFFF",
+    innerHighlight: "apple",
+    dropShadow: "lg",
+    specular: true,
+    brazilGlow: false,
+    containPaint: true,
+  },
+  "dock-bottom-nav": {
+    border: "none",
+    borderWidth: 0,
+    borderRadius: 9999,
+    blurPx: 12,
+    saturate: 1.5,
+    brightness: 1.1,
+    displacement: false,
+    glassAlpha: 0.12,
+    bgTint: "#FFFFFF",
+    innerHighlight: "apple",
+    dropShadow: "xl",
+    specular: true,
+    brazilGlow: true,
+    containPaint: true,
+  },
+  "sidebar-active-item": {
+    border: "left-only",
+    borderWidth: 4,
+    borderRadius: 0,
+    blurPx: 8,
+    saturate: 1.3,
+    brightness: 1.05,
+    displacement: false,
+    glassAlpha: 0.12,
+    bgTint: "#009440",
+    innerHighlight: "soft",
+    dropShadow: "none",
+    specular: false,
+    brazilGlow: false,
+    containPaint: false,
+  },
+  "modal-sheet": {
+    border: "none",
+    borderWidth: 0,
+    borderRadius: 20,
+    blurPx: 20,
+    saturate: 1.4,
+    brightness: 1.0,
+    displacement: { baseFrequency: 0.008, numOctaves: 2, scale: 40 },
+    glassAlpha: 0.15,
+    bgTint: "#D9D9D9",
+    innerHighlight: "apple",
+    dropShadow: "xl",
+    specular: true,
+    brazilGlow: false,
+    containPaint: true,
+  },
+};
+
+/** Drop-shadow direcional Apple (luz vinda do upper-left, sombra projetada bottom-right). */
+function buildDropShadowFilter(level: LiquidGlassDropShadow): string {
+  switch (level) {
+    case "sm":
+      return "drop-shadow(-2px 3px 8px rgba(0,0,0,0.20))";
+    case "md":
+      return "drop-shadow(-4px 6px 16px rgba(0,0,0,0.30))";
+    case "lg":
+      return "drop-shadow(-6px 8px 24px rgba(0,0,0,0.35))";
+    case "xl":
+      return "drop-shadow(-8px 10px 46px rgba(0,0,0,0.40))";
+    case "none":
+    default:
+      return "";
+  }
+}
+
+/** Box-shadow de inner highlight (camadas que simulam o cantilever de luz Apple). */
+function buildInnerHighlight(level: LiquidGlassInnerHighlight): string {
+  switch (level) {
+    case "soft":
+      return "inset 0 1px 0 rgba(255,255,255,0.18)";
+    case "normal":
+      return [
+        "inset 2px 2px 0 -2px rgba(255,255,255,0.55)",
+        "inset 0 0 6px 1px rgba(255,255,255,0.18)",
+      ].join(", ");
+    case "strong":
+      return [
+        "inset 4px 4px 0 -4px rgba(255,255,255,0.65)",
+        "inset 0 0 8px 1px rgba(255,255,255,0.35)",
+      ].join(", ");
+    case "apple":
+      // Receita iOS 26 / polidario:
+      // 1) cantilever upper-left (gota de luz refletida)
+      // 2) ring glow interno (luz que invade toda a borda)
+      // 3) sombra interna bottom-right (volume / espessura)
+      return [
+        "inset 6px 6px 0 -6px rgba(255,255,255,0.7)",
+        "inset 0 0 8px 1px rgba(255,255,255,0.55)",
+        "inset -3px -3px 6px -3px rgba(0,0,0,0.15)",
+      ].join(", ");
+    case "none":
+    default:
+      return "";
+  }
+}
+
+/** Versão atenuada do highlight (usado no keyframe de respiração). */
+function buildInnerHighlightWeak(level: LiquidGlassInnerHighlight): string {
+  switch (level) {
+    case "soft":
+      return "inset 0 1px 0 rgba(255,255,255,0.10)";
+    case "normal":
+      return [
+        "inset 2px 2px 0 -2px rgba(255,255,255,0.40)",
+        "inset 0 0 6px 1px rgba(255,255,255,0.12)",
+      ].join(", ");
+    case "strong":
+      return [
+        "inset 4px 4px 0 -4px rgba(255,255,255,0.50)",
+        "inset 0 0 8px 1px rgba(255,255,255,0.22)",
+      ].join(", ");
+    case "apple":
+      return [
+        "inset 6px 6px 0 -6px rgba(255,255,255,0.55)",
+        "inset 0 0 8px 1px rgba(255,255,255,0.38)",
+        "inset -3px -3px 6px -3px rgba(0,0,0,0.10)",
+      ].join(", ");
+    case "none":
+    default:
+      return "";
+  }
+}
+
+function hexWithAlpha(hex: string, alpha: number): string {
+  // hex "#RRGGBB" ou "#RGB" → rgba()
+  const clean = hex.replace("#", "");
+  const full = clean.length === 3
+    ? clean.split("").map((c) => c + c).join("")
+    : clean;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 /**
- * Liquid Glass — Figma node 1:2 (rgba(217,217,217,0.2) + backdrop blur + blobs Brasil).
+ * Liquid Glass — Apple iOS 26 calibration.
  */
 export default function LiquidGlass({
   children,
   className = "",
   sx,
-  border = "green",
-  borderRadius = "15px",
-  brazilGlow = false,
-  blurPx = 20,
+  preset,
+  border,
+  borderWidth,
+  borderRadius,
+  appleRound = false,
+  brazilGlow,
+  blurPx,
+  saturate,
+  brightness,
+  displacement,
   minHeight,
   noPadding = false,
-  glassAlpha = 0.2,
+  glassAlpha,
+  bgTint,
+  innerHighlight,
+  dropShadow,
+  specular,
+  breathing = false,
+  containPaint,
 }: LiquidGlassProps) {
-  const radius = typeof borderRadius === "number" ? `${borderRadius}px` : borderRadius;
-  const insetHighlight = Math.min(0.2, glassAlpha + 0.06);
+  const p = preset ? PRESETS[preset] : null;
 
+  // Resolve cada prop: explícita > preset > default fallback.
+  const resolvedBorder: LiquidGlassBorder = border ?? p?.border ?? "green";
+  const resolvedBorderWidth = borderWidth ?? p?.borderWidth ?? 1.5;
+  const resolvedRadiusRaw = borderRadius ?? p?.borderRadius ?? "15px";
+  const resolvedBlur = blurPx ?? p?.blurPx ?? 12;
+  const resolvedSaturate = saturate ?? p?.saturate ?? 1.4;
+  const resolvedBrightness = brightness ?? p?.brightness ?? 1.05;
+  const resolvedDisplacement: LiquidGlassDisplacement =
+    displacement ?? p?.displacement ?? false;
+  const resolvedGlassAlpha = glassAlpha ?? p?.glassAlpha ?? 0.07;
+  const resolvedBgTint = bgTint ?? p?.bgTint ?? "#FFFFFF";
+  const resolvedInnerHighlight: LiquidGlassInnerHighlight =
+    innerHighlight ?? p?.innerHighlight ?? "normal";
+  const resolvedDropShadow: LiquidGlassDropShadow =
+    dropShadow ?? p?.dropShadow ?? "none";
+  const resolvedSpecular = specular ?? p?.specular ?? false;
+  const resolvedBrazilGlow = brazilGlow ?? p?.brazilGlow ?? false;
+  const resolvedContain = containPaint ?? p?.containPaint ?? false;
+
+  // appleRound força radius generoso (24px) — opt-in por componente.
+  const effectiveRadius = appleRound
+    ? "24px"
+    : typeof resolvedRadiusRaw === "number"
+      ? `${resolvedRadiusRaw}px`
+      : resolvedRadiusRaw;
+
+  // Compõe backdrop-filter conforme spec §3.
+  const displacementUrl =
+    resolvedDisplacement === false
+      ? ""
+      : resolvedDisplacement.scale >= 60
+        ? " url(#lg-displace-strong)"
+        : resolvedDisplacement.scale >= 30
+          ? " url(#lg-displace-medium)"
+          : " url(#lg-displace-soft)";
+  const backdrop = `blur(${resolvedBlur}px) saturate(${resolvedSaturate}) brightness(${resolvedBrightness})${displacementUrl}`;
+
+  // Inner highlight + breathing animation.
+  const baseHighlight = buildInnerHighlight(resolvedInnerHighlight);
+  const weakHighlight = buildInnerHighlightWeak(resolvedInnerHighlight);
+
+  // SX do painel interno (com o backdrop-filter aplicado).
   const innerSx: SxProps<Theme> = {
     position: "relative",
     zIndex: 1,
-    borderRadius: border === "gradient-brazil" ? `calc(${radius} - 1px)` : radius,
+    borderRadius:
+      resolvedBorder === "gradient-brazil"
+        ? `calc(${effectiveRadius} - ${resolvedBorderWidth}px)`
+        : effectiveRadius,
     minHeight,
     padding: noPadding ? 0 : undefined,
-    backgroundColor: `rgba(217, 217, 217, ${glassAlpha})`,
-    backdropFilter: `blur(${blurPx}px) saturate(1.8) brightness(1.05)`,
-    WebkitBackdropFilter: `blur(${blurPx}px) saturate(1.8) brightness(1.05)`,
-    boxShadow:
-      glassAlpha <= 0.12
-        ? `inset 0 1px 0 rgba(255, 255, 255, ${insetHighlight})`
-        : [
-            `inset 0 1px 0 rgba(255, 255, 255, ${insetHighlight})`,
-            "0 4px 24px rgba(0, 0, 0, 0.25)",
-          ].join(", "),
+    backgroundColor: hexWithAlpha(resolvedBgTint, resolvedGlassAlpha),
+    backdropFilter: backdrop,
+    WebkitBackdropFilter: backdrop,
+    boxShadow: baseHighlight || undefined,
     overflow: "hidden",
-    ...(border === "green"
-      ? { border: "2px solid #009440" }
-      : border === "none"
-        ? { border: "none" }
-        : {}),
+    transition: `box-shadow 240ms ${APPLE_EASE}, transform 160ms ${APPLE_EASE}`,
+    ...(resolvedBorder === "green"
+      ? { border: `${resolvedBorderWidth}px solid ${GLOW_GREEN}` }
+      : resolvedBorder === "left-only"
+        ? { borderLeft: `${resolvedBorderWidth}px solid ${GLOW_GREEN}` }
+        : resolvedBorder === "none"
+          ? { border: "none" }
+          : {}),
+    ...(resolvedContain ? { contain: "paint" } : {}),
+    // Specular highlight (gota de luz diagonal canto superior-esquerdo).
+    ...(resolvedSpecular
+      ? {
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            borderRadius: "inherit",
+            background:
+              "linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 35%)",
+            pointerEvents: "none",
+            mixBlendMode: "overlay",
+            zIndex: 1,
+          },
+        }
+      : {}),
+    // Breathing animation — só se solicitada e sem reduce-motion.
+    ...(breathing && baseHighlight
+      ? {
+          animation: `lg-breathe 6s ${APPLE_EASE} infinite`,
+          "@media (prefers-reduced-motion: reduce)": {
+            animation: "none",
+          },
+          "@keyframes lg-breathe": {
+            "0%, 100%": { boxShadow: baseHighlight },
+            "50%": { boxShadow: weakHighlight || baseHighlight },
+          },
+        }
+      : {}),
+    // Acessibilidade: fallback opaco quando o usuário pediu reduced-transparency.
+    "@media (prefers-reduced-transparency: reduce)": {
+      backgroundColor: "rgba(54, 54, 54, 0.92)",
+      backdropFilter: "none",
+      WebkitBackdropFilter: "none",
+    },
   };
 
-  if (border === "gradient-brazil") {
+  // Wrapper externo — recebe o drop-shadow (filter) para respeitar o recorte do glass.
+  const wrapperFilter = buildDropShadowFilter(resolvedDropShadow);
+
+  if (resolvedBorder === "gradient-brazil") {
     return (
       <Box
         className={className}
         sx={{
           position: "relative",
-          borderRadius: radius,
-          p: "1.5px",
+          borderRadius: effectiveRadius,
+          padding: `${resolvedBorderWidth}px`,
           background: `linear-gradient(90deg, ${GLOW_GREEN} 0%, ${GLOW_YELLOW} 76.923%)`,
+          filter: wrapperFilter || undefined,
           ...sx,
         }}
       >
-        {brazilGlow && <BrazilGlowLayer borderRadius={radius} />}
+        {resolvedBrazilGlow && <BrazilGlowLayer borderRadius={effectiveRadius} />}
         <Box sx={innerSx}>{children}</Box>
       </Box>
     );
@@ -93,12 +428,13 @@ export default function LiquidGlass({
       className={className}
       sx={{
         position: "relative",
-        borderRadius: radius,
+        borderRadius: effectiveRadius,
         overflow: "hidden",
+        filter: wrapperFilter || undefined,
         ...sx,
       }}
     >
-      {brazilGlow && <BrazilGlowLayer borderRadius={radius} />}
+      {resolvedBrazilGlow && <BrazilGlowLayer borderRadius={effectiveRadius} />}
       <Box sx={innerSx}>{children}</Box>
     </Box>
   );
