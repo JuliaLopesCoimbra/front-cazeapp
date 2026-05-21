@@ -46,7 +46,7 @@ function PalpiteButton({
       <Typography
         component="span"
         sx={{
-          fontFamily: 'var(--font-roboto), Roboto, sans-serif',
+          fontFamily: 'var(--font-inter), Inter, sans-serif',
           fontWeight: 600,
           fontSize: "0.75rem",
           lineHeight: 1,
@@ -193,7 +193,7 @@ export default function HeroMatchBanner() {
         {live ? (
           <Typography
             sx={{
-              fontFamily: 'var(--font-syne), Syne, sans-serif',
+              fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif',
               fontWeight: 900,
               fontSize: "1rem",
               color: COLORS.red,
@@ -206,7 +206,7 @@ export default function HeroMatchBanner() {
         ) : (
           <Typography
             sx={{
-              fontFamily: 'var(--font-syne), Syne, sans-serif',
+              fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif',
               fontWeight: 900,
               fontSize: "0.6875rem",
               color: COLORS.muted,

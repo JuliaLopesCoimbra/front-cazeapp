@@ -20,7 +20,12 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SendIcon from "@mui/icons-material/Send";
 import FrostedGlass from "@/app/components/shared/FrostedGlass";
 import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
-import { COLORS, LAYOUT } from "@/app/constants/designTokens";
+import {
+  COLORS,
+  LAYOUT,
+  NAV_DOCK_GLASS,
+  NAV_DOCK_GLASS_SX,
+} from "@/app/constants/designTokens";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import { useAuth } from "@/app/context/AuthContext";
 import {
@@ -235,16 +240,12 @@ export default function CopaStoryPostCard({
         >
           <FrostedGlass
             borderRadius={`${CAZE_RADIUS.md} ${CAZE_RADIUS.md} 0 0`}
-            blurPx={12}
-            fillAlpha={0}
+            blurPx={NAV_DOCK_GLASS.blurPx}
+            fillAlpha={NAV_DOCK_GLASS.fillAlpha}
             noPadding
             sx={{
-              backgroundColor: "rgba(40, 40, 40, 0.28)",
-              backdropFilter: "blur(14px) saturate(1.2)",
-              WebkitBackdropFilter: "blur(14px) saturate(1.2)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              ...NAV_DOCK_GLASS_SX,
               borderBottom: "none",
-              boxShadow: "none",
             }}
           >
             <Box
@@ -272,13 +273,12 @@ export default function CopaStoryPostCard({
                   flex: 1,
                   color: COLORS.text,
                   fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                  fontWeight: 600,
+                  fontWeight: 700,
                   fontSize: 12,
                   letterSpacing: "0.01em",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  textShadow: "0 1px 8px rgba(0, 0, 0, 0.45)",
                 }}
               >
                 {authorName}
@@ -291,7 +291,6 @@ export default function CopaStoryPostCard({
                     fontSize: 10,
                     fontFamily: "var(--font-roboto), Roboto, sans-serif",
                     flexShrink: 0,
-                    textShadow: "0 1px 6px rgba(0, 0, 0, 0.4)",
                   }}
                 >
                   {createdAtLabel}
@@ -300,7 +299,7 @@ export default function CopaStoryPostCard({
               <MoreHorizIcon
                 sx={{
                   fontSize: 18,
-                  color: "rgba(255, 255, 255, 0.55)",
+                  color: COLORS.textSecondary,
                   flexShrink: 0,
                 }}
               />
@@ -446,22 +445,12 @@ export default function CopaStoryPostCard({
         <Box onClick={stopCardNav} sx={{ position: "relative", zIndex: 2, bgcolor: "transparent" }}>
           <FrostedGlass
             borderRadius={`0 0 ${CAZE_RADIUS.md} ${CAZE_RADIUS.md}`}
-            blurPx={commentsExpanded ? 18 : 14}
-            fillAlpha={commentsExpanded ? 0.08 : 0}
+            blurPx={NAV_DOCK_GLASS.blurPx}
+            fillAlpha={NAV_DOCK_GLASS.fillAlpha}
             noPadding
             sx={{
-              backgroundColor: commentsExpanded
-                ? "rgba(40, 40, 40, 0.9)"
-                : "rgba(40, 40, 40, 0.28)",
-              backdropFilter: commentsExpanded
-                ? "blur(18px) saturate(1.25)"
-                : "blur(14px) saturate(1.2)",
-              WebkitBackdropFilter: commentsExpanded
-                ? "blur(18px) saturate(1.25)"
-                : "blur(14px) saturate(1.2)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              ...NAV_DOCK_GLASS_SX,
               borderTop: "none",
-              boxShadow: "none",
               transition:
                 "background-color 0.22s ease, backdrop-filter 0.22s ease, -webkit-backdrop-filter 0.22s ease",
             }}

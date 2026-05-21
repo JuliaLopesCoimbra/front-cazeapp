@@ -81,19 +81,49 @@ export const TYPOGRAPHY = {
 
 /** Superfície vidro fosco — header e corpo da home */
 export const PAGE_GLASS_SURFACE = {
-  backgroundColor: "rgba(40, 40, 40, 0.22)",
-  backdropFilter: "blur(10px) saturate(1.1)",
-  WebkitBackdropFilter: "blur(10px) saturate(1.1)",
+  backgroundColor: "rgba(255, 255, 255, 0.08)",
+  backdropFilter: "blur(12px) saturate(1.15)",
+  WebkitBackdropFilter: "blur(12px) saturate(1.15)",
+  borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+  boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.65)",
+} as const;
+
+/** Vidro da BottomNav — reutilizar em header/comentários do post */
+export const NAV_DOCK_GLASS = {
+  blurPx: 20,
+  fillAlpha: 0.32,
+  fillRgb: "255, 255, 255",
+  saturate: 1.1,
+  border: "1px solid rgba(0, 0, 0, 0.08)",
+  shadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+} as const;
+
+/** `sx` do FrostedGlass alinhado à navbar */
+export const NAV_DOCK_GLASS_SX = {
+  backgroundColor: `rgba(${NAV_DOCK_GLASS.fillRgb}, ${NAV_DOCK_GLASS.fillAlpha})`,
+  backdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(${NAV_DOCK_GLASS.saturate})`,
+  WebkitBackdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(${NAV_DOCK_GLASS.saturate})`,
+  border: NAV_DOCK_GLASS.border,
+  boxShadow: NAV_DOCK_GLASS.shadow,
+} as const;
+
+/** Alphas do liquid glass (LiquidGlass.tsx — presets distintos da navbar) */
+export const LIQUID_GLASS_ALPHA = {
+  postHeader: 0.07,
+  postCaption: 0.07,
+  postCommentsCollapsed: 0.08,
+  postCommentsExpanded: 0.4,
+  dock: NAV_DOCK_GLASS.fillAlpha,
 } as const;
 
 export const COLORS = {
-  bg: "#282828",
-  surface: "#363636",
+  bg: "#FFF6E8",
+  surface: "#FFFFFF",
   green: "#009440",
-  yellow: "#FFCB00",
+  yellow: "#F6C400",
   red: "#E52554",
   blue: "#0055B8",
-  muted: "#9E9E9E",
-  text: "#FFFFFF",
-  textSecondary: "rgba(255, 255, 255, 0.55)",
+  muted: "#6B6B6B",
+  text: "#0A0A0A",
+  textSecondary: "rgba(0, 0, 0, 0.68)",
 } as const;

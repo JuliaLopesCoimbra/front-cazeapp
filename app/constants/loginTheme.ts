@@ -57,7 +57,7 @@ export const loginPageSx = {
   },
 } as const;
 
-export const LOGIN_PANEL_CLASS = "glass-dark liquid-glass-brazil";
+export const LOGIN_PANEL_CLASS = "glass-dark";
 
 export const loginFieldSx = {
   "& .MuiOutlinedInput-root": {

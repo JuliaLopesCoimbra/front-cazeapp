@@ -109,8 +109,8 @@ const PRESETS: Record<LiquidGlassPreset, Required<Pick<
     saturate: 1.35,
     brightness: 1.08,
     displacement: false,
-    glassAlpha: 0.2,
-    bgTint: "#D9D9D9",
+    glassAlpha: 0.07,
+    bgTint: "#FFFFFF",
     innerHighlight: "normal",
     dropShadow: "sm",
     specular: false,
@@ -125,8 +125,8 @@ const PRESETS: Record<LiquidGlassPreset, Required<Pick<
     saturate: 1.4,
     brightness: 1.05,
     displacement: false,
-    glassAlpha: 0.2,
-    bgTint: "#D9D9D9",
+    glassAlpha: 0.07,
+    bgTint: "#FFFFFF",
     innerHighlight: "apple",
     dropShadow: "lg",
     specular: true,
@@ -141,8 +141,8 @@ const PRESETS: Record<LiquidGlassPreset, Required<Pick<
     saturate: 1.5,
     brightness: 1.1,
     displacement: false,
-    glassAlpha: 0.2,
-    bgTint: "#D9D9D9",
+    glassAlpha: 0.12,
+    bgTint: "#FFFFFF",
     innerHighlight: "apple",
     dropShadow: "xl",
     specular: true,
@@ -308,8 +308,8 @@ export default function LiquidGlass({
   const resolvedBrightness = brightness ?? p?.brightness ?? 1.05;
   const resolvedDisplacement: LiquidGlassDisplacement =
     displacement ?? p?.displacement ?? false;
-  const resolvedGlassAlpha = glassAlpha ?? p?.glassAlpha ?? 0.2;
-  const resolvedBgTint = bgTint ?? p?.bgTint ?? "#D9D9D9";
+  const resolvedGlassAlpha = glassAlpha ?? p?.glassAlpha ?? 0.07;
+  const resolvedBgTint = bgTint ?? p?.bgTint ?? "#FFFFFF";
   const resolvedInnerHighlight: LiquidGlassInnerHighlight =
     innerHighlight ?? p?.innerHighlight ?? "normal";
   const resolvedDropShadow: LiquidGlassDropShadow =

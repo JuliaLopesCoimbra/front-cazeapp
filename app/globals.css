@@ -12,11 +12,11 @@
   --font-mono: var(--font-geist-mono);
 
   /* Cazé TV Design System — extraído do Figma (VZ2fPhIG5zVt0XUlzaYyFm) */
-  --color-caze-bg:          #282828;
-  --color-caze-surface:     #363636;
+  --color-caze-bg:          #FFF6E8;
+  --color-caze-surface:     #FFFFFF;
   --color-caze-green:       #009440;
   --color-caze-green-light: #31E46A;
-  --color-caze-yellow:      #FFCB00;
+  --color-caze-yellow:      #F6C400;
   --color-caze-yellow-alt:  #F7B521;
   --color-caze-blue-copa:   #0055B8;
   --color-caze-red:         #E52554;
@@ -36,9 +36,11 @@
   --caze-radius-sm: 8px;
   --caze-radius-md: 15px;
 
-  --font-heading: 'Montserrat', Arial, sans-serif;
-  --font-sub: 'Poppins', Arial, sans-serif;
-  --font-body: 'Roboto', Arial, sans-serif;
+  /* Tipografia — 4 fontes do sistema */
+  --font-headline: var(--font-anton),      'Anton',      Arial, sans-serif; /* Super headlines CAPS */
+  --font-sports:   var(--font-bebas),      'Bebas Neue', Arial, sans-serif; /* Placares, timers, AO VIVO */
+  --font-ui:       var(--font-montserrat), 'Montserrat', Arial, sans-serif; /* Botões, nav, CTAs */
+  --font-body:     var(--font-inter),      'Inter',      Arial, sans-serif; /* Texto geral, feed */
 
   --animate-live-pulse: live-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -52,8 +54,8 @@
 .glass {
   backdrop-filter: blur(20px) saturate(1.8) brightness(1.05);
   -webkit-backdrop-filter: blur(20px) saturate(1.8) brightness(1.05);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
@@ -63,8 +65,8 @@
 .glass-green {
   backdrop-filter: blur(14px) saturate(1.4) brightness(1.02);
   -webkit-backdrop-filter: blur(14px) saturate(1.4) brightness(1.02);
-  background: rgba(0, 148, 64, 0.08);
-  border: 1px solid rgba(0, 148, 64, 0.22);
+  background: rgba(0, 148, 64, 0.05);
+  border: 1px solid rgba(0, 148, 64, 0.18);
   box-shadow:
     0 2px 12px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(0, 148, 64, 0.12);
@@ -83,41 +85,9 @@
 .glass-caption {
   backdrop-filter: blur(12px) saturate(1.6);
   -webkit-backdrop-filter: blur(12px) saturate(1.6);
-  background: rgba(217, 217, 217, 0.20);
+  background: rgba(255, 255, 255, 0.12);
   border: 2px solid #009440;
   border-radius: 15px;
-}
-
-/* Liquid glass Copa — blobs Brasil atrás do painel (complementa LiquidGlass.tsx) */
-.liquid-glass-brazil {
-  position: relative;
-  overflow: hidden;
-}
-.liquid-glass-brazil::before {
-  content: "";
-  position: absolute;
-  left: -15%;
-  top: 10%;
-  width: 50%;
-  height: 80%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 148, 64, 0.28) 0%, transparent 70%);
-  filter: blur(18px);
-  pointer-events: none;
-  z-index: 0;
-}
-.liquid-glass-brazil::after {
-  content: "";
-  position: absolute;
-  right: -10%;
-  top: 0;
-  width: 45%;
-  height: 75%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 203, 0, 0.22) 0%, transparent 72%);
-  filter: blur(20px);
-  pointer-events: none;
-  z-index: 0;
 }
 
 @supports not (backdrop-filter: blur(1px)) {
@@ -172,7 +142,7 @@ html *::after {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-roboto), Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   width: 100%;
   max-width: 100vw;

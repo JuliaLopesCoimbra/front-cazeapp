@@ -33,20 +33,24 @@ const TAB_ENTRIES: TabEntry[] = [
 
 function activeTabSx() {
   return {
-    backgroundColor: COLORS.bg,
+    backgroundColor: COLORS.surface,
     color: COLORS.text,
     border: `${TAB_BORDER_WIDTH}px solid transparent`,
-    backgroundImage: `linear-gradient(${COLORS.bg}, ${COLORS.bg}), ${BRASIL_BORDER_GRADIENT}`,
+    backgroundImage: `linear-gradient(${COLORS.surface}, ${COLORS.surface}), ${BRASIL_BORDER_GRADIENT}`,
     backgroundOrigin: "border-box",
     backgroundClip: "padding-box, border-box",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
   };
 }
 
 function inactiveTabSx() {
   return {
-    backgroundColor: COLORS.surface,
+    backgroundColor: "rgba(255, 255, 255, 0.72)",
     color: COLORS.textSecondary,
-    border: `1px solid rgba(255, 255, 255, 0.08)`,
+    border: `1px solid rgba(0, 0, 0, 0.1)`,
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
   };
 }
 

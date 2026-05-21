@@ -15,6 +15,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import FrostedGlass from "@/app/components/shared/FrostedGlass";
+import { NAV_DOCK_GLASS, NAV_DOCK_GLASS_SX } from "@/app/constants/designTokens";
 import { useMobileMenu } from "@/app/context/MobileMenuContext";
 
 /** Abaixo do Drawer do menu (1400) e da sidebar desktop (1200) */
@@ -59,15 +60,6 @@ export const NAV_ITEMS = [
     IconInactive: PersonOutlinedIcon,
   },
 ] as const;
-
-/** Pill escuro — referência SVG (vidro sobre #282828) */
-const NAV_DOCK_GLASS = {
-  blurPx: 20,
-  fillAlpha: 0.72,
-  fillColor: "40, 40, 40",
-  border: "1px solid rgba(255, 255, 255, 0.12)",
-  shadow: "0 8px 32px rgba(0, 0, 0, 0.35)",
-} as const;
 
 /** Scroll (px) até compactação total */
 const SCROLL_COMPACT_RANGE = 120;
@@ -163,11 +155,7 @@ export default function BottomNav({
         noPadding
         sx={{
           width: "100%",
-          backgroundColor: `rgba(${NAV_DOCK_GLASS.fillColor}, ${NAV_DOCK_GLASS.fillAlpha})`,
-          backdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.1)`,
-          WebkitBackdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.1)`,
-          border: NAV_DOCK_GLASS.border,
-          boxShadow: NAV_DOCK_GLASS.shadow,
+          ...NAV_DOCK_GLASS_SX,
         }}
       >
         <motion.div

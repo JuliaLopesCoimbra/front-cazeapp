@@ -7,17 +7,21 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        // Títulos e chamadas agressivas (brutalismo digital)
-        display: ['var(--font-syne)', 'Syne', 'sans-serif'],
-        heading: ['var(--font-syne)', 'Syne', 'sans-serif'],
-        // Leitura principal e componentes de UI
-        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
-        // Números, cronômetros, placares e dados do bolão
-        mono: ['var(--font-space-mono)', 'Space Mono', 'monospace'],
+        // Anton — super headlines, hero, match day, live now (sempre CAPS LOCK)
+        headline: ['var(--font-anton)', 'Anton', 'sans-serif'],
+        // Bebas Neue — placares, cronômetros, AO VIVO, estatísticas, rankings
+        sports:   ['var(--font-bebas)', 'Bebas Neue', 'sans-serif'],
+        // Montserrat — botões, cards, nav, CTAs, tabs, títulos menores
+        ui:       ['var(--font-montserrat)', 'Montserrat', 'sans-serif'],
+        // Inter — feed, comentários, texto corrido, comunidade, settings
+        sans:     ['var(--font-inter)', 'Inter', 'sans-serif'],
+        // Aliases de compatibilidade
+        heading:  ['var(--font-montserrat)', 'Montserrat', 'sans-serif'],
+        display:  ['var(--font-anton)', 'Anton', 'sans-serif'],
       },
       fontWeight: {
         brutal: '800',
-        heavy: '900',
+        heavy:  '900',
       },
     },
   },

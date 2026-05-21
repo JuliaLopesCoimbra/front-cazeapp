@@ -29,7 +29,7 @@ const islandSurfaceSx = {
   backgroundImage: `linear-gradient(${COLORS.bg}, ${COLORS.bg}), ${BRASIL_BORDER_GRADIENT}`,
   backgroundOrigin: "border-box",
   backgroundClip: "padding-box, border-box",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+  boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
 } as const;
 
 interface HeaderMatchStripProps {
@@ -64,7 +64,7 @@ export default function HeaderMatchStrip({ embedded = false }: HeaderMatchStripP
           variant="rounded"
           width={168}
           height={ISLAND_HEIGHT}
-          sx={{ borderRadius: ISLAND_RADIUS, bgcolor: "rgba(255,255,255,0.08)" }}
+          sx={{ borderRadius: ISLAND_RADIUS, bgcolor: "rgba(0,0,0,0.06)" }}
         />
       </Box>
     );
@@ -156,7 +156,7 @@ export default function HeaderMatchStrip({ embedded = false }: HeaderMatchStripP
             component="span"
             noWrap
             sx={{
-              fontFamily: "var(--font-roboto), Roboto, sans-serif",
+              fontFamily: "var(--font-inter), Inter, sans-serif",
               fontSize: 10,
               fontWeight: 500,
               color: COLORS.textSecondary,

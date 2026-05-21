@@ -58,7 +58,7 @@ export default function HomeScreenHeader({
         isolation: "isolate",
         pt: `${SPACING.md}px`,
         ...PAGE_GLASS_SURFACE,
-        borderBottom: `1px solid rgba(255, 255, 255, 0.03)`,
+        borderBottom: `1px solid rgba(0, 0, 0, 0.08)`,
         boxShadow: "0 1px 0 rgba(0, 148, 64, 0.06)",
         "&::after": {
           content: '""',
@@ -123,7 +123,7 @@ export default function HomeScreenHeader({
                 fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
                 ...TYPOGRAPHY.bodyStrong,
                 fontSize: 15,
-                color: "#FFFFFF",
+                color: COLORS.text,
                 cursor: "pointer",
                 lineHeight: 1.25,
                 minWidth: 0,

@@ -300,10 +300,10 @@ const HomeContent: React.FC = () => {
             variant="rectangular"
             width="100%"
             height={128}
-            sx={{ bgcolor: "rgba(255,255,255,0.06)" }}
+            sx={{ bgcolor: "rgba(0,0,0,0.06)" }}
           />
           <Box sx={{ p: 2 }}>
-            <Skeleton variant="rectangular" width="100%" height={98} sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: 0 }} />
+            <Skeleton variant="rectangular" width="100%" height={98} sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: 0 }} />
             <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
               {[1, 2, 3, 4].map((i) => (
                 <Skeleton
@@ -311,7 +311,7 @@ const HomeContent: React.FC = () => {
                   variant="rectangular"
                   width={93}
                   height={29}
-                  sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px" }}
+                  sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px" }}
                 />
               ))}
             </Box>
@@ -319,13 +319,13 @@ const HomeContent: React.FC = () => {
               variant="rectangular"
               width="100%"
               height={200}
-              sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px", mt: 2 }}
+              sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px", mt: 2 }}
             />
             <Skeleton
               variant="rectangular"
               width="100%"
               height={150}
-              sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px", mt: 2 }}
+              sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px", mt: 2 }}
             />
           </Box>
         </Box>
@@ -451,8 +451,8 @@ const HomeContent: React.FC = () => {
                     <SportsSoccerOutlinedIcon sx={{ fontSize: 56, color: "#009440" }} />
                     <Typography
                       sx={{
-                        color: "#FFFFFF",
-                        fontFamily: '"Montserrat", sans-serif',
+                        color: "#0A0A0A",
+                        fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
                         fontWeight: 700,
                         fontSize: "1.125rem",
                       }}
@@ -461,8 +461,8 @@ const HomeContent: React.FC = () => {
                     </Typography>
                     <Typography
                       sx={{
-                        color: "rgba(255,255,255,0.7)",
-                        fontFamily: '"Roboto", sans-serif',
+                        color: "rgba(0,0,0,0.55)",
+                        fontFamily: 'var(--font-inter), Inter, sans-serif',
                         fontSize: "0.875rem",
                       }}
                     >

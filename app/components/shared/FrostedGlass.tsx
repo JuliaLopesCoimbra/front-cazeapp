@@ -25,7 +25,7 @@ export default function FrostedGlass({
   sx,
   borderRadius = 15,
   blurPx = 18,
-  fillAlpha = 0.08,
+  fillAlpha = 0.05,
   noPadding = false,
 }: FrostedGlassProps) {
   const radius =

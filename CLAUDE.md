@@ -163,9 +163,13 @@ theme: {
       'caze-muted':      '#9E9E9E',
     },
     fontFamily: {
-      heading: ['"Montserrat"', 'Arial', 'sans-serif'],
-      sub:     ['"Poppins"',    'Arial', 'sans-serif'],
-      body:    ['"Roboto"',     'Arial', 'sans-serif'],
+      headline: ['var(--font-anton)',      'Anton',      'sans-serif'], // Super headlines CAPS
+      sports:   ['var(--font-bebas)',      'Bebas Neue', 'sans-serif'], // Placares, timers, AO VIVO
+      ui:       ['var(--font-montserrat)', 'Montserrat', 'sans-serif'], // Botões, nav, CTAs
+      sans:     ['var(--font-inter)',      'Inter',      'sans-serif'], // Texto geral, feed
+      // Aliases
+      heading:  ['var(--font-montserrat)', 'Montserrat', 'sans-serif'],
+      display:  ['var(--font-anton)',      'Anton',      'sans-serif'],
     },
     borderRadius: {
       'caze-sm':   '8px',    /* botões pequenos, inputs */
@@ -210,16 +214,16 @@ export const cazeTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Roboto", Arial, sans-serif',
-    h1: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 900, fontSize: '28px', lineHeight: 1.2 },
-    h2: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 700, fontSize: '22px', lineHeight: 1.3 },
-    h3: { fontFamily: '"Poppins", Arial, sans-serif',    fontWeight: 600, fontSize: '18px', lineHeight: 1.4 },
-    h4: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 900, fontSize: '32px', lineHeight: 1.1 }, // Posts impactantes
-    body1: { fontFamily: '"Roboto", Arial, sans-serif',  fontWeight: 400, fontSize: '16px', lineHeight: 1.6 },
-    body2: { fontFamily: '"Roboto", Arial, sans-serif',  fontWeight: 400, fontSize: '14px', lineHeight: 1.6 },
-    caption: { fontFamily: '"Roboto", Arial, sans-serif', fontWeight: 500, fontSize: '12px' },
+    fontFamily: 'var(--font-inter), Inter, Arial, sans-serif',
+    h1: { fontFamily: 'var(--font-anton), Anton, sans-serif',      fontWeight: 400, fontSize: '28px', lineHeight: 1.1 }, // Anton — super headline
+    h2: { fontFamily: 'var(--font-anton), Anton, sans-serif',      fontWeight: 400, fontSize: '22px', lineHeight: 1.2 },
+    h3: { fontFamily: 'var(--font-montserrat), Montserrat, sans-serif', fontWeight: 700, fontSize: '18px', lineHeight: 1.4 },
+    h4: { fontFamily: 'var(--font-anton), Anton, sans-serif',      fontWeight: 400, fontSize: '32px', lineHeight: 1.0 }, // Posts impactantes
+    body1: { fontFamily: 'var(--font-inter), Inter, Arial, sans-serif', fontWeight: 400, fontSize: '16px', lineHeight: 1.6 },
+    body2: { fontFamily: 'var(--font-inter), Inter, Arial, sans-serif', fontWeight: 400, fontSize: '14px', lineHeight: 1.6 },
+    caption: { fontFamily: 'var(--font-inter), Inter, Arial, sans-serif', fontWeight: 500, fontSize: '12px' },
     button: {
-      fontFamily: '"Montserrat", Arial, sans-serif',
+      fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
       fontWeight: 700,
       fontSize: '14px',
       textTransform: 'none',
@@ -244,7 +248,7 @@ export const cazeTheme = createTheme({
           minWidth: 'unset',
         },
         label: {
-          fontFamily: '"Montserrat", Arial, sans-serif',
+          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           fontWeight: 700,
           fontSize: '10px',
         },
@@ -256,7 +260,7 @@ export const cazeTheme = createTheme({
           backgroundColor: '#363636',
           borderRadius: '15px',
           color: '#9E9E9E',
-          fontFamily: '"Montserrat", Arial, sans-serif',
+          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           fontWeight: 700,
           fontSize: '12px',
           minHeight: '29px',
@@ -661,7 +665,7 @@ function injectSponsors(posts: NewsPost[], sponsors: SponsorBanner[]): FeedItem[
 ```
 ┌─────────────────────────────────────┐
 │ [glass-caption] Header              │  h: 42px, radius-top: 15px
-│  [Avatar 28px]  @casacazetv  [···]  │  Montserrat ExtraBold 12px
+│  [Avatar 28px]  @casacazetv  [···]  │  Montserrat 800 12px (font-ui)
 ├─────────────────────────────────────┤
 │ RainbowDivider (2px)                 │
 ├─────────────────────────────────────┤
@@ -669,7 +673,7 @@ function injectSponsors(posts: NewsPost[], sponsors: SponsorBanner[]): FeedItem[
 │                                      │
 │  [Logo Casa CazéTV]  [CazéTV|tm1]   │  logos sobre a imagem, topo
 │                                      │
-│  TEXTO IMPACTANTE                    │  Montserrat 900, amarelo #FFCB00
+│  TEXTO IMPACTANTE                    │  Anton (font-headline), amarelo #FFCB00
 │  (tipografia grande, copa)           │  sobre fundo azul copa #0055B8
 │                                      │
 │ [glass-caption] Caption             │  absolute bottom-3 left-3
@@ -683,7 +687,7 @@ function injectSponsors(posts: NewsPost[], sponsors: SponsorBanner[]): FeedItem[
 - Altura: `74px`
 - Estilo: `glass-caption` (Liquid Glass verde)
 - Avatar: 28x27px, círculo
-- Texto: Montserrat ExtraBold 12px, branco, max 2 linhas
+- Texto: Montserrat 800 12px (font-ui), branco, max 2 linhas
 
 ### 7.2 BottomNav (todas as telas)
 
@@ -699,7 +703,7 @@ const navItems = [
 
 - Ícone inativo: `outlined`, cor `#9E9E9E`
 - Ícone ativo: `filled`, cor `#009440`
-- Label ativo: `#009440`, Montserrat 700 10px
+- Label ativo: `#009440`, Montserrat 700 10px (font-ui)
 - Badge numérico em `Bolão` quando há apostas abertas (MUI Badge, cor `#E52554`)
 - Badge numérico em `Figurinhas` quando há pacotes não abertos
 
@@ -1002,7 +1006,7 @@ export function LiveBadge() {
   return (
     <div className="flex items-center gap-1.5 bg-caze-red rounded-[100px] px-2 py-0.5">
       <span className="size-1.5 rounded-full bg-white animate-pulse" />
-      <span className="font-heading font-bold text-[10px] text-white tracking-wider">AO VIVO</span>
+      <span className="font-sports text-[10px] text-white tracking-wider">AO VIVO</span>
     </div>
   );
 }

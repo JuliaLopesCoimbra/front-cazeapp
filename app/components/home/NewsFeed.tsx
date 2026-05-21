@@ -406,7 +406,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                   }}
                 >
                   {/* Header: avatar + @nome + menu (Liquid Glass com borda gradiente Brasil) */}
-                  <PostGlassCard className="mx-[14px] mt-2" border="green">
+                  <PostGlassCard className="mx-[14px] mt-2" variant="header" border="green">
                     <Box
                       sx={{
                         display: "flex",
@@ -428,8 +428,8 @@ export default function NewsFeed({ eventId, event }: Props) {
                       />
                       <Typography
                         sx={{
-                          color: "#fff",
-                          fontFamily: '"Montserrat", sans-serif',
+                          color: "#0A0A0A",
+                          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
                           fontWeight: 800,
                           fontSize: 12,
                           letterSpacing: 0.2,
@@ -444,16 +444,16 @@ export default function NewsFeed({ eventId, event }: Props) {
                       </Typography>
                       <Typography
                         sx={{
-                          color: "rgba(255,255,255,0.55)",
+                          color: "rgba(0,0,0,0.68)",
                           fontSize: 10,
-                          fontFamily: '"Roboto", sans-serif',
+                          fontFamily: 'var(--font-inter), Inter, sans-serif',
                           flexShrink: 0,
                           mr: 0.5,
                         }}
                       >
                         {formatDate(item.created_at)}
                       </Typography>
-                      <MoreHorizIcon sx={{ color: "#fff", fontSize: 18, opacity: 0.85 }} />
+                      <MoreHorizIcon sx={{ color: "rgba(0,0,0,0.55)", fontSize: 18 }} />
                     </Box>
                   </PostGlassCard>
 
@@ -544,7 +544,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                           <Typography
                             sx={{
                               color: "#fff",
-                              fontFamily: '"Montserrat", sans-serif',
+                              fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
                               fontWeight: 800,
                               fontSize: 12,
                               lineHeight: 1.3,
@@ -567,7 +567,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                         <Typography
                           sx={{
                             color: "#fff",
-                            fontFamily: '"Montserrat", sans-serif',
+                            fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
                             fontWeight: 800,
                             fontSize: { xs: "1rem", md: "1.15rem" },
                             lineHeight: 1.35,
