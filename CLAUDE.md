@@ -2,23 +2,54 @@
 
 > Guia autoritativo para o Claude Code CLI no projeto **front-end/front-cazeapp**.
 > Leia por completo antes de tocar em qualquer arquivo. Regras são não-negociáveis.
+>
+> **REGRA DE CONFIANÇA**: Antes de implementar qualquer componente visual, tela ou lógica de produto,
+> avalie internamente sua confiança (0–100%). Se estiver abaixo de 85%, PARE e abra uma caixa de
+> perguntas ao usuário antes de escrever código. Nunca assuma — pergunte.
 
 ---
 
 ## Índice
 
 1. [Stack e Dependências](#1-stack-e-dependências)
-2. [Design System — Regras de Implementação](#2-design-system--regras-de-implementação)
-3. [Arquitetura de Estado](#3-arquitetura-de-estado)
-4. [Estrutura de Pastas e Convenções de Arquivo](#4-estrutura-de-pastas-e-convenções-de-arquivo)
-5. [Padrões de Componentes](#5-padrões-de-componentes)
-6. [Padrões de Serviços e API](#6-padrões-de-serviços-e-api)
-7. [Performance e Escalabilidade](#7-performance-e-escalabilidade)
-8. [Animações](#8-animações)
-9. [Roteamento e Navegação](#9-roteamento-e-navegação)
-10. [TypeScript — Regras Estritas](#10-typescript--regras-estritas)
-11. [Regras de Qualidade](#11-regras-de-qualidade)
-12. [Variáveis de Ambiente](#12-variáveis-de-ambiente)
+2. [Design System — Fonte da Verdade](#2-design-system--fonte-da-verdade)
+3. [Liquid Glass — Implementação Apple WWDC 2025](#3-liquid-glass--implementação-apple-wwdc-2025)
+4. [Sistema de Gradientes](#4-sistema-de-gradientes)
+5. [Sistema de Border Radius](#5-sistema-de-border-radius)
+6. [Carrossel de Patrocinadores](#6-carrossel-de-patrocinadores)
+7. [Anatomia das Telas Confirmadas](#7-anatomia-das-telas-confirmadas)
+8. [Arquitetura de Estado](#8-arquitetura-de-estado)
+9. [Estrutura de Pastas e Convenções](#9-estrutura-de-pastas-e-convenções)
+10. [Padrões de Componentes](#10-padrões-de-componentes)
+11. [Padrões de Serviços e API](#11-padrões-de-serviços-e-api)
+12. [Performance e Escalabilidade](#12-performance-e-escalabilidade)
+13. [Animações — Framer Motion](#13-animações--framer-motion)
+14. [Ícones — Regras Absolutas](#14-ícones--regras-absolutas)
+15. [Roteamento e Navegação](#15-roteamento-e-navegação)
+16. [TypeScript — Regras Estritas](#16-typescript--regras-estritas)
+17. [Regras de Qualidade e Tom Visual](#17-regras-de-qualidade-e-tom-visual)
+18. [Variáveis de Ambiente](#18-variáveis-de-ambiente)
+
+---
+
+## 0. Protocolo de Confiança (Leia Primeiro)
+
+Antes de implementar qualquer coisa, responda internamente:
+
+| Pergunta | Se a resposta for NÃO → |
+|---|---|
+| Sei exatamente quais cores usar neste componente? | Perguntar ao usuário |
+| Sei o comportamento exato desta interação? | Perguntar ao usuário |
+| Tenho o design desta tela no Figma ou descrito aqui? | Perguntar ao usuário |
+| Sei qual dado vem da API e qual é local? | Perguntar ao usuário |
+| A tela tem estado de loading/empty/error definido? | Perguntar ao usuário |
+
+**Formato obrigatório de pergunta** quando confiança < 85%:
+```
+Antes de implementar [nome do componente/tela], preciso confirmar:
+1. [Pergunta objetiva 1]
+2. [Pergunta objetiva 2]
+```
 
 ---
 
@@ -34,37 +65,36 @@
 ### UI e Estilização
 | Lib | Versão | Propósito |
 |---|---|---|
-| Material UI (MUI) | v7.x | Componentes (inputs, modais, botões, tabelas) |
+| Material UI (MUI) | v7.x | Componentes estruturais |
 | Emotion | latest | CSS-in-JS para MUI theme |
-| Tailwind CSS | 4.x | Layout, espaçamento, cores custom, responsividade |
+| Tailwind CSS | 4.x | Layout, espaçamento, classes utilitárias |
 
 ### Estado e Dados
 | Lib | Versão | Propósito |
 |---|---|---|
-| **TanStack Query v5** | ^5.x | **Estado de servidor — OBRIGATÓRIO para toda chamada de API** |
-| React Context API | — | Estado de UI local e global (auth, tema) |
+| TanStack Query v5 | ^5.x | Estado de servidor — OBRIGATÓRIO para toda chamada de API |
+| React Context API | — | Estado global de UI (auth, preferências) |
 
-### Mapa e Geolocalização
+### Mapa
 | Lib | Versão | Propósito |
 |---|---|---|
-| react-map-gl | ^7.x | Wrapper React para Mapbox GL JS |
+| react-map-gl | ^7.x | Wrapper Mapbox GL JS |
 | mapbox-gl | latest | Engine do mapa |
 
 ### Animações
 | Lib | Versão | Propósito |
 |---|---|---|
-| **Framer Motion** | ^11.x | Animações declarativas (pack opening, transições de página, stagger) |
+| Framer Motion | ^11.x | Animações declarativas (pack opening, transições, stagger) |
 
 ### Utilitários
 | Lib | Versão | Propósito |
 |---|---|---|
 | Axios | latest | HTTP client (sempre via `/services/`) |
 | date-fns | 4.x | Formatação de datas |
-| html5-qrcode | 2.x | Scanner de QR code |
-| jwt-decode | latest | Decode de tokens JWT no cliente |
+| html5-qrcode | 2.x | Scanner QR code |
+| jwt-decode | latest | Decode de JWT no cliente |
 
 ### Instalação das novas dependências
-
 ```bash
 cd front-end/front-cazeapp
 npm install @tanstack/react-query@5 @tanstack/react-query-devtools framer-motion react-map-gl mapbox-gl
@@ -72,85 +102,45 @@ npm install @tanstack/react-query@5 @tanstack/react-query-devtools framer-motion
 
 ---
 
-## 2. Design System — Regras de Implementação
+## 2. Design System — Fonte da Verdade
 
-### Divisão de responsabilidade MUI vs Tailwind
+> Valores extraídos diretamente do Figma (arquivo `VZ2fPhIG5zVt0XUlzaYyFm`).
+> Estes valores SUBSTITUEM qualquer referência anterior. O Figma é a fonte da verdade visual.
 
-**REGRA ABSOLUTA:**
-- **MUI** → componentes interativos: `Button`, `TextField`, `Dialog`, `Drawer`, `Snackbar`, `Table`, `Card`, `Chip`, `Avatar`, `Skeleton`
-- **Tailwind** → layout, espaçamento, grid, cores Cazé TV custom, responsividade, posicionamento
+### Paleta de Cores — Valores Exatos do Figma
 
-**NUNCA MISTURAR:** Não usar `sx={{ margin: '16px' }}` quando Tailwind resolve (`className="m-4"`). Não usar `className="bg-yellow-400"` quando MUI theme já tem a cor.
+```css
+/* Backgrounds */
+--color-bg-base:      #282828;   /* Fundo principal de todas as telas */
+--color-bg-card:      #363636;   /* Surface de cards, tabs, bottom nav */
+--color-bg-overlay:   rgba(217, 217, 217, 0.20); /* Overlay de headers de post */
+--color-bg-black:     #000000;   /* Fundo de banners de patrocinador */
 
-```tsx
-// CORRETO
-<Button variant="contained" className="w-full mt-4">
-  Apostar agora
-</Button>
+/* Primária — Verde Brasil */
+--color-green:        #009440;   /* Bordas de cards, tab ativa, dividers, acentos */
+--color-green-light:  #31E46A;   /* Usado no gradiente arco-íris */
 
-// ERRADO — duplicando responsabilidades
-<Button sx={{ width: '100%', marginTop: '16px' }}>
-  Apostar agora
-</Button>
-```
+/* Secundária — Amarelo Brasil */
+--color-yellow:       #FFCB00;   /* Ponto final do gradiente Brasil, destaques */
+--color-yellow-alt:   #F7B521;   /* Usado no gradiente arco-íris */
 
-### MUI Theme — Configuração obrigatória
+/* Accent — Copa */
+--color-blue-copa:    #0055B8;   /* Fundo de posts Copa (ex: "Qual seleção vai levantar a taça?") */
+--color-red-accent:   #E52554;   /* Início do gradiente arco-íris, alertas */
 
-Criar e importar o tema centralizado em `lib/theme.ts`. **Todo** componente MUI deve herdar as cores Cazé TV via theme — nunca sobreescrever cor em component level.
+/* Texto */
+--color-text-primary: #FFFFFF;   /* Texto principal sobre fundos escuros */
+--color-text-muted:   #9E9E9E;   /* Placeholder, texto desabilitado */
 
-```typescript
-// lib/theme.ts
-import { createTheme } from '@mui/material/styles';
-
-export const cazeTheme = createTheme({
-  palette: {
-    primary: {
-      main: '#F5C900',        // Amarelo Cazé
-      dark: '#D4A800',
-      contrastText: '#000000',
-    },
-    secondary: {
-      main: '#0055B8',        // Azul Royal
-      dark: '#003E8A',
-      contrastText: '#FFFFFF',
-    },
-    error: {
-      main: '#E63946',        // Vermelho Tomate
-    },
-    background: {
-      default: '#000000',
-      paper: '#1A1A1A',
-    },
-    text: {
-      primary: '#FFFFFF',
-      secondary: '#9E9E9E',
-    },
-  },
-  typography: {
-    fontFamily: '"Roboto", Arial, sans-serif',
-    h1: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 900 },
-    h2: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 700 },
-    h3: { fontFamily: '"Poppins", Arial, sans-serif', fontWeight: 600 },
-    button: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 700, textTransform: 'none' },
-  },
-  shape: { borderRadius: 12 },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        containedPrimary: {
-          backgroundColor: '#F5C900',
-          color: '#000000',
-          '&:hover': { backgroundColor: '#D4A800' },
-        },
-      },
-    },
-    MuiBottomNavigation: {
-      styleOverrides: {
-        root: { backgroundColor: '#000000', height: '60px' },
-      },
-    },
-  },
-});
+/* Gradiente arco-íris (separador decorativo) */
+--gradient-rainbow: linear-gradient(
+  90deg,
+  #E52554  24.519%,
+  #F7B521  38.462%,
+  #31E46A  58.173%,
+  #29BAEB  62.981%,
+  #432B9D  76.923%
+);
 ```
 
 ### Tokens Tailwind — obrigatórios em `tailwind.config.ts`
@@ -160,70 +150,592 @@ export const cazeTheme = createTheme({
 theme: {
   extend: {
     colors: {
-      'caze-yellow':  '#F5C900',
-      'caze-yellow-dark': '#D4A800',
-      'caze-blue':    '#0055B8',
-      'caze-blue-dark': '#003E8A',
-      'caze-red':     '#E63946',
-      'caze-black':   '#000000',
-      'caze-surface': '#1A1A1A',  // fundo de cards em tema escuro
-      'caze-muted':   '#9E9E9E',  // texto desabilitado
+      'caze-bg':         '#282828',
+      'caze-surface':    '#363636',
+      'caze-green':      '#009440',
+      'caze-green-light':'#31E46A',
+      'caze-yellow':     '#FFCB00',
+      'caze-yellow-alt': '#F7B521',
+      'caze-blue-copa':  '#0055B8',
+      'caze-red':        '#E52554',
+      'caze-cyan':       '#29BAEB',
+      'caze-purple':     '#432B9D',
+      'caze-muted':      '#9E9E9E',
     },
     fontFamily: {
-      heading: ['Montserrat', 'Arial', 'sans-serif'],
-      sub:     ['Poppins', 'Arial', 'sans-serif'],
-      body:    ['Roboto', 'Arial', 'sans-serif'],
+      heading: ['"Montserrat"', 'Arial', 'sans-serif'],
+      sub:     ['"Poppins"',    'Arial', 'sans-serif'],
+      body:    ['"Roboto"',     'Arial', 'sans-serif'],
     },
-    animation: {
-      'live-pulse': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+    borderRadius: {
+      'caze-sm':   '8px',    /* botões pequenos, inputs */
+      'caze-md':   '15px',   /* cards, tabs, posts, modais */
+      'caze-lg':   '20px',   /* bottom sheet, modais grandes */
+      'caze-pill': '100px',  /* chips, badges, pills de status */
+    },
+    backdropBlur: {
+      'glass': '20px',
     },
   },
 }
 ```
 
-### Regras de cores por contexto
+### MUI Theme — Configuração obrigatória
 
-| Contexto | Classe Tailwind |
+```typescript
+// lib/theme.ts
+import { createTheme } from '@mui/material/styles';
+
+export const cazeTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#009440',          // Verde Brasil — acentos, bordas, tabs ativas
+      contrastText: '#FFFFFF',
+    },
+    secondary: {
+      main: '#FFCB00',          // Amarelo Brasil — destaques, CTAs
+      contrastText: '#000000',
+    },
+    error: {
+      main: '#E52554',
+    },
+    background: {
+      default: '#282828',       // Fundo base de todas as telas
+      paper:   '#363636',       // Surface de cards e components elevados
+    },
+    text: {
+      primary:   '#FFFFFF',
+      secondary: '#9E9E9E',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", Arial, sans-serif',
+    h1: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 900, fontSize: '28px', lineHeight: 1.2 },
+    h2: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 700, fontSize: '22px', lineHeight: 1.3 },
+    h3: { fontFamily: '"Poppins", Arial, sans-serif',    fontWeight: 600, fontSize: '18px', lineHeight: 1.4 },
+    h4: { fontFamily: '"Montserrat", Arial, sans-serif', fontWeight: 900, fontSize: '32px', lineHeight: 1.1 }, // Posts impactantes
+    body1: { fontFamily: '"Roboto", Arial, sans-serif',  fontWeight: 400, fontSize: '16px', lineHeight: 1.6 },
+    body2: { fontFamily: '"Roboto", Arial, sans-serif',  fontWeight: 400, fontSize: '14px', lineHeight: 1.6 },
+    caption: { fontFamily: '"Roboto", Arial, sans-serif', fontWeight: 500, fontSize: '12px' },
+    button: {
+      fontFamily: '"Montserrat", Arial, sans-serif',
+      fontWeight: 700,
+      fontSize: '14px',
+      textTransform: 'none',
+    },
+  },
+  shape: { borderRadius: 15 }, // Border radius base do Figma
+  components: {
+    MuiBottomNavigation: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#363636',
+          height: '60px',
+          borderTop: '1px solid rgba(0, 148, 64, 0.3)',
+        },
+      },
+    },
+    MuiBottomNavigationAction: {
+      styleOverrides: {
+        root: {
+          color: '#9E9E9E',
+          '&.Mui-selected': { color: '#009440' },
+          minWidth: 'unset',
+        },
+        label: {
+          fontFamily: '"Montserrat", Arial, sans-serif',
+          fontWeight: 700,
+          fontSize: '10px',
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#363636',
+          borderRadius: '15px',
+          color: '#9E9E9E',
+          fontFamily: '"Montserrat", Arial, sans-serif',
+          fontWeight: 700,
+          fontSize: '12px',
+          minHeight: '29px',
+          padding: '0 16px',
+          '&.Mui-selected': {
+            color: '#FFFFFF',
+            border: '1px solid #009440',
+          },
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        indicator: { display: 'none' }, // A borda do tab é o indicador, não a linha padrão
+        root: { gap: '8px', minHeight: 'unset' },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#363636',
+          borderRadius: '15px',
+          border: '1px solid #009440',
+        },
+      },
+    },
+  },
+});
+```
+
+### Divisão de responsabilidade MUI vs Tailwind
+
+| Responsabilidade | Use |
 |---|---|
-| Botão primário | `bg-caze-yellow text-caze-black hover:bg-caze-yellow-dark` |
-| Badge "AO VIVO" | `bg-caze-red text-white animate-live-pulse` |
-| Nav item ativo | `text-caze-yellow` |
-| Nav item inativo | `text-caze-muted` |
-| Card/surface | `bg-caze-surface` ou `bg-white` (modo claro) |
-| Score destaque bolão | `text-caze-yellow font-heading font-bold` |
+| Componentes interativos (Button, TextField, Dialog, Tab, BottomNav, Card) | **MUI + theme** |
+| Layout, grid, flexbox, margens, paddings | **Tailwind** |
+| Cores custom e tokens do Design System | **Tailwind** (`text-caze-green`, `bg-caze-bg`) |
+| Responsividade | **Tailwind** (`md:`, `lg:`) |
+| Liquid Glass, gradientes, efeitos visuais | **Tailwind** + classes custom |
 
-### Tipografia — regras de uso
+**NUNCA** usar `style={{}}` inline para valores estáticos.
+**NUNCA** usar `sx={{ margin: '16px' }}` quando Tailwind resolve (`className="m-4"`).
+
+---
+
+## 3. Liquid Glass — Implementação Apple WWDC 2025
+
+### O que é e onde usar
+
+Liquid Glass é o efeito de material translúcido introduzido pela Apple no WWDC 2025. Combina:
+- **Blur de fundo** (`backdrop-filter: blur`)
+- **Saturação aumentada** (cores do conteúdo por baixo ficam mais vivas)
+- **Borda de luz** (borda superior/lateral com branco translúcido simulando reflexo de luz)
+- **Sombra interna** (efeito de profundidade)
+
+### Onde APLICAR no app
+- Headers de posts do feed (overlay `@casacazetv` + caption)
+- Modais e bottom sheets
+- Cards de bolão sobrepostos a imagens
+- POI popup no mapa
+- Overlay de check-in gate
+- Badge de pontos flutuante no perfil
+
+### Onde NÃO aplicar
+- Telas com fundo `#282828` sólido sem imagem por baixo (o efeito não funciona sem conteúdo para borrar)
+- Bottom navigation (usar `#363636` sólido conforme Figma)
+- Tabs de filtro do feed (usar `#363636` sólido conforme Figma)
+
+### Classes Tailwind customizadas — adicionar em `globals.css`
+
+```css
+/* globals.css */
+
+/* --- Liquid Glass Base --- */
+.glass {
+  backdrop-filter: blur(20px) saturate(1.8) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8) brightness(1.05);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* --- Liquid Glass com tint verde (cards de destaque Copa) --- */
+.glass-green {
+  backdrop-filter: blur(20px) saturate(2) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(2) brightness(1.05);
+  background: rgba(0, 148, 64, 0.12);
+  border: 1px solid rgba(0, 148, 64, 0.35);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(0, 148, 64, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* --- Liquid Glass escuro (overlays sobre imagens de jogo) --- */
+.glass-dark {
+  backdrop-filter: blur(16px) saturate(1.5) brightness(0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5) brightness(0.85);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* --- Post caption overlay (extraído do Figma) --- */
+.glass-caption {
+  backdrop-filter: blur(12px) saturate(1.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  background: rgba(217, 217, 217, 0.20);
+  border: 2px solid #009440;
+  border-radius: 15px;
+}
+
+/* --- Fallback para browsers sem suporte a backdrop-filter --- */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass, .glass-green, .glass-dark, .glass-caption {
+    background: rgba(40, 40, 40, 0.92);
+  }
+}
+```
+
+### Uso no JSX
 
 ```tsx
-// Título de seção
-<Typography variant="h2" className="font-heading">Bolão da Copa</Typography>
+// Header de post (extraído do Figma)
+<div className="glass-caption rounded-t-[15px] px-4 py-2 flex items-center gap-2">
+  <Avatar src={avatarUrl} sx={{ width: 28, height: 28 }} />
+  <span className="font-heading font-extrabold text-xs text-white">@casacazetv</span>
+  <MoreHorizIcon className="ml-auto text-white" sx={{ fontSize: 16 }} />
+</div>
 
-// Subtítulo / label
-<Typography variant="h3" className="font-sub">Próximos Jogos</Typography>
+// Modal / Bottom sheet
+<div className="glass rounded-[20px] p-4">
+  {children}
+</div>
 
-// Corpo de texto
-<Typography variant="body1" className="font-body">...</Typography>
-
-// Badge/chip pequeno
-<Typography variant="caption" className="font-body font-medium">...</Typography>
+// Card de bolão sobre imagem de jogo
+<div className="glass-green rounded-[15px] p-4">
+  {children}
+</div>
 ```
 
 ---
 
-## 3. Arquitetura de Estado
+## 4. Sistema de Gradientes
+
+### Gradiente 1 — Brasil (divider principal)
+
+Extraído do Figma. Usado como linha divisória entre seções.
+
+```css
+/* 4px de altura, full-width */
+background: linear-gradient(90deg, #009440 0%, #FFCB00 76.923%);
+```
+
+```tsx
+// Componente reutilizável
+export function BrazilDivider() {
+  return <div className="h-[4px] w-full bg-gradient-to-r from-caze-green to-caze-yellow" />;
+}
+```
+
+### Gradiente 2 — Arco-íris (separador decorativo de posts)
+
+Extraído do Figma. Linha de 2px entre cards do feed.
+
+```css
+background: linear-gradient(
+  90deg,
+  #E52554  24.519%,
+  #F7B521  38.462%,
+  #31E46A  58.173%,
+  #29BAEB  62.981%,
+  #432B9D  76.923%
+);
+```
+
+```tsx
+export function RainbowDivider() {
+  return (
+    <div
+      className="h-[2px] w-full"
+      style={{
+        backgroundImage: 'linear-gradient(90deg, #E52554 24.519%, #F7B521 38.462%, #31E46A 58.173%, #29BAEB 62.981%, #432B9D 76.923%)',
+      }}
+    />
+  );
+}
+```
+
+### Gradiente 3 — Hero Banner Copa
+
+Apenas em banners hero e backgrounds de telas full-bleed.
+
+```css
+background: linear-gradient(135deg, #F5C900 0%, #0055B8 100%);
+```
+
+### Gradiente 4 — Overlay de imagem (fanzone)
+
+Overlay escuro sobre fotos de estádio/evento. Cria profundidade e legibilidade do texto.
+
+```css
+background: linear-gradient(
+  to bottom,
+  rgba(0, 0, 0, 0)    0%,
+  rgba(0, 0, 0, 0.3)  40%,
+  rgba(0, 0, 0, 0.75) 100%
+);
+```
+
+### Gradiente 5 — Glow verde (elementos ao vivo)
+
+Halo sutil em cards com jogo ao vivo.
+
+```css
+box-shadow: 0 0 20px rgba(0, 148, 64, 0.4), 0 0 40px rgba(0, 148, 64, 0.15);
+```
+
+### Regras de uso de gradientes
+
+| Gradiente | Onde usar | Onde NUNCA usar |
+|---|---|---|
+| Brasil (1) | Divisor entre header e feed, entre seções | Como fundo de tela inteira |
+| Arco-íris (2) | Entre posts do feed, entre tabs | Como cor de texto |
+| Hero Copa (3) | Banner hero da home, splash screens | Cards pequenos |
+| Overlay (4) | Sobre qualquer imagem de fundo | Sobre fundo sólido |
+| Glow verde (5) | Card de jogo ao vivo, badge live | Elementos estáticos |
+
+---
+
+## 5. Sistema de Border Radius
+
+Todos os valores extraídos do Figma. Usar **sempre** os tokens — nunca valores arbitrários.
+
+| Token | Valor | Onde usar |
+|---|---|---|
+| `rounded-[8px]` | 8px | Inputs, botões pequenos, tooltips |
+| `rounded-[15px]` | 15px | **Padrão** — cards de post, tabs, modais, bottom sheets, cards de bolão, figurinhas |
+| `rounded-[20px]` | 20px | Modais grandes, drawers, full-screen overlays |
+| `rounded-[100px]` | 100px | Chips de status, badges de raridade, pills de pontos, avatares pequenos |
+| `rounded-full` | 50% | Avatares circulares, ícones em círculo |
+
+### Padrão de card (extraído do Figma)
+
+```tsx
+// Card de post — padrão exato do Figma
+<div className="rounded-t-[15px] rounded-b-[15px] border border-caze-green overflow-hidden">
+  {/* Header com Liquid Glass */}
+  <div className="glass-caption rounded-t-[15px] px-4 h-[42px] flex items-center gap-2">
+    ...
+  </div>
+  {/* Conteúdo do post */}
+  <div className="relative">
+    <img className="w-full object-cover" />
+    {/* Caption na base */}
+    <div className="glass-caption absolute bottom-3 left-3 px-3 py-2 rounded-[15px] w-[247px]">
+      ...
+    </div>
+  </div>
+</div>
+```
+
+---
+
+## 6. Carrossel de Patrocinadores
+
+### Comportamento: dois pontos de inserção
+
+**Ponto 1 — Banner fixo no topo da Home** (acima das tabs do feed)
+- Full-width, altura fixa `98px` (extraído do Figma)
+- Auto-play a cada `5000ms`
+- Sem pause no hover (mobile-first, sem hover state)
+- Dots de paginação embaixo do banner
+- Transição: slide horizontal suave (`300ms ease-in-out`)
+- Bounded com `BrazilDivider` acima e abaixo
+
+**Ponto 2 — Inserção automática no scroll do feed**
+- A cada 5 posts, injetar 1 `SponsorCard`
+- `SponsorCard` tem altura similar ao card de post mas layout horizontal
+- Label "Patrocinado" (ícone `CampaignOutlined` + texto `caption`) no canto superior direito
+- Não é clicável como post — abre link externo em nova aba
+
+### Componente `SponsorCarousel`
+
+```tsx
+// components/feed/SponsorCarousel.tsx
+interface SponsorBanner {
+  id: string;
+  image_url: string;
+  sponsor_name: string;
+  link_url: string;
+  link_label?: string; // ex: "Saiba mais"
+}
+
+interface SponsorCarouselProps {
+  banners: SponsorBanner[];
+  autoPlayInterval?: number; // default 5000
+}
+```
+
+**Estrutura visual do banner (extraído do Figma — Coca-Cola):**
+```
+┌─────────────────────────────────────┐  ← altura 98px, fundo preto
+│  [Texto esquerda]   [Imagem]  [Texto direita]  │
+│  "Coca-Cola         [garrafa]  "Zero calorias   │
+│   Sem açúcar"                  e Zero açúcar"   │
+└─────────────────────────────────────┘
+        ●  ○  ○   ← dots de paginação
+```
+
+### Componente `SponsorCard` (intercalado no feed)
+
+```tsx
+// components/feed/SponsorCard.tsx
+// Card horizontal dentro do feed — NÃO confundir com o banner do topo
+interface SponsorCardProps {
+  banner: SponsorBanner;
+}
+// Layout: imagem à esquerda (80x80), texto à direita, label "Patrocinado" no topo direito
+```
+
+### Lógica de injeção no feed
+
+```tsx
+// hooks/useNewsFeed.ts
+function injectSponsors(posts: NewsPost[], sponsors: SponsorBanner[]): FeedItem[] {
+  const result: FeedItem[] = [];
+  let sponsorIndex = 0;
+  posts.forEach((post, index) => {
+    result.push({ type: 'post', data: post });
+    if ((index + 1) % 5 === 0 && sponsors.length > 0) {
+      result.push({
+        type: 'sponsor',
+        data: sponsors[sponsorIndex % sponsors.length],
+      });
+      sponsorIndex++;
+    }
+  });
+  return result;
+}
+```
+
+---
+
+## 7. Anatomia das Telas Confirmadas
+
+> Telas com design validado no Figma. Para telas ainda não visualizadas, abrir caixa de perguntas
+> antes de implementar.
+
+### 7.1 Home / Feed (`/home`)
+
+**Estrutura vertical (de cima para baixo):**
+
+```
+┌─────────────────────────────────────┐
+│ TopBar (56px)                        │  bg: #282828
+│  [Logo Casa CazéTV]  [Mascote]       │  logo: canto esquerdo, mascote: centro
+├─────────────────────────────────────┤
+│ BrazilDivider (4px)                  │  gradiente verde → amarelo
+├─────────────────────────────────────┤
+│ SponsorCarousel (98px + 12px dots)   │  banner patrocinador auto-play
+├─────────────────────────────────────┤
+│ BrazilDivider (4px)                  │
+├─────────────────────────────────────┤
+│ FeedTabs (29px + 8px padding)        │  bg: #282828, pills: #363636
+│  [Tudo]  [Jogos]  [Bolão]  [Figur.]  │  ativa: border #009440
+├─────────────────────────────────────┤
+│ RainbowDivider (2px)                 │
+├─────────────────────────────────────┤
+│ Feed de Posts (scroll infinito)      │  gap: 8px entre posts
+│  ├── PostCard (@casacazetv)          │  border: 1px #009440, radius: 15px
+│  ├── PostCard                        │
+│  ├── PostCard                        │
+│  ├── PostCard                        │
+│  ├── PostCard                        │
+│  ├── SponsorCard                     │  a cada 5 posts
+│  └── ...                             │
+└─────────────────────────────────────┘
+│ BottomNav (60px)                     │  bg: #363636, ativo: #009440
+```
+
+**Regras visuais da `TopBar`:**
+- `height: 56px`, `background: #282828`
+- Logo Casa CazéTV: círculo 32x30px, canto esquerdo, `margin-left: 22px`
+- Mascote centralizado: 89x50px — imagem asset
+- Sem título de texto na top bar da home
+
+**Regras visuais das `FeedTabs`:**
+- Container: `background: #282828`, `padding: 8px 14px`
+- Cada pill: `background: #363636`, `border-radius: 15px`, `height: 29px`, `min-width: 93px`
+- Tab ativa: `border: 1px solid #009440`, texto `#FFFFFF`
+- Tab inativa: sem borda, texto `#9E9E9E`
+- Tabs: `Tudo`, `Jogos`, `Bolão`, `Figurinhas`
+- Scroll horizontal se não couber (sem overflow visible)
+
+**Regras visuais do `PostCard`:**
+```
+┌─────────────────────────────────────┐
+│ [glass-caption] Header              │  h: 42px, radius-top: 15px
+│  [Avatar 28px]  @casacazetv  [···]  │  Montserrat ExtraBold 12px
+├─────────────────────────────────────┤
+│ RainbowDivider (2px)                 │
+├─────────────────────────────────────┤
+│ Imagem do post (496px altura)        │  object-cover, radius-bottom: 15px
+│                                      │
+│  [Logo Casa CazéTV]  [CazéTV|tm1]   │  logos sobre a imagem, topo
+│                                      │
+│  TEXTO IMPACTANTE                    │  Montserrat 900, amarelo #FFCB00
+│  (tipografia grande, copa)           │  sobre fundo azul copa #0055B8
+│                                      │
+│ [glass-caption] Caption             │  absolute bottom-3 left-3
+│  [Avatar] Valendo um total de...     │  w: 247px, border: 2px #009440
+└─────────────────────────────────────┘
+```
+
+**Regras do rodapé do `PostCard` (caption):**
+- Posição: `absolute`, `bottom: 12px`, `left: 12px`
+- Largura: `247px` fixo (extraído do Figma)
+- Altura: `74px`
+- Estilo: `glass-caption` (Liquid Glass verde)
+- Avatar: 28x27px, círculo
+- Texto: Montserrat ExtraBold 12px, branco, max 2 linhas
+
+### 7.2 BottomNav (todas as telas)
+
+```tsx
+const navItems = [
+  { label: 'Home',       href: '/home',       icon: 'HomeOutlined',        iconActive: 'Home'        },
+  { label: 'Jogos',      href: '/jogos',       icon: 'SportsSoccerOutlined', iconActive: 'SportsSoccer'},
+  { label: 'Bolão',      href: '/bolao',       icon: 'EmojiEventsOutlined', iconActive: 'EmojiEvents' },
+  { label: 'Figurinhas', href: '/figurinhas',  icon: 'CollectionsOutlined', iconActive: 'Collections' },
+  { label: 'Perfil',     href: '/perfil',      icon: 'PersonOutlined',      iconActive: 'Person'      },
+];
+```
+
+- Ícone inativo: `outlined`, cor `#9E9E9E`
+- Ícone ativo: `filled`, cor `#009440`
+- Label ativo: `#009440`, Montserrat 700 10px
+- Badge numérico em `Bolão` quando há apostas abertas (MUI Badge, cor `#E52554`)
+- Badge numérico em `Figurinhas` quando há pacotes não abertos
+
+### 7.3 Telas ainda sem design visualizado no Figma
+
+Para estas telas, **PARAR e perguntar** antes de implementar detalhes visuais:
+- `/jogos` e `/jogos/[id]`
+- `/bolao` e sub-rotas
+- `/figurinhas` e `/figurinhas/trocas`
+- `/mapa`
+- `/perfil`
+
+**Pergunta padrão** ao iniciar uma dessas telas:
+```
+Antes de implementar a tela [nome], preciso confirmar:
+1. Existe design no Figma para essa tela? Se sim, me envie o link do frame.
+2. Quais são os elementos obrigatórios na tela?
+3. Tem alguma interação específica que devo implementar?
+```
+
+---
+
+## 8. Arquitetura de Estado
 
 ### Princípio fundamental
 
-| Tipo de estado | Onde fica | Por quê |
-|---|---|---|
-| Dados do servidor (API) | **TanStack Query** | Cache, revalidation, deduplicação, retry automático |
-| Estado de UI local | `useState` / `useReducer` | Simples, scoped no componente |
-| Estado global de UI | React Context | Auth, toast/snackbar, preferências do usuário |
-| Formulários | `useState` local | Sem lib extra — manter simples |
+| Tipo de estado | Onde fica |
+|---|---|
+| Dados do servidor (API) | **TanStack Query v5** |
+| Estado de UI local | `useState` / `useReducer` |
+| Estado global de UI | React Context (auth, toast) |
+| Formulários | `useState` local |
 
-**NUNCA** armazenar resposta de API em `useState` — isso é exatamente o que React Query resolve.
+**NUNCA** armazenar resposta de API em `useState`.
 
-### Configuração do QueryClient — obrigatória
+### Configuração do QueryClient
 
 ```typescript
 // lib/queryClient.ts
@@ -232,115 +744,67 @@ import { QueryClient } from '@tanstack/react-query';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,        // 30s — dados ficam frescos por 30s
-      gcTime: 5 * 60_000,       // 5min — cache persiste 5min sem uso
-      retry: 2,                 // 2 retries automáticos em falha
-      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000), // exponential backoff
-      refetchOnWindowFocus: false, // não revalidar no foco (evita requests desnecessários)
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
+      refetchOnWindowFocus: false,
     },
-    mutations: {
-      retry: 0, // mutations não fazem retry automático
-    },
+    mutations: { retry: 0 },
   },
 });
 ```
 
-Envolver o app com `<QueryClientProvider client={queryClient}>` no `layout.tsx` raiz.
-
-### Query Keys — convenção obrigatória
-
-Todas as query keys definidas em `lib/queryKeys.ts`. Nunca escrever string inline.
+### Query Keys centralizadas
 
 ```typescript
 // lib/queryKeys.ts
 export const QueryKeys = {
-  // Jogos
-  fixtures:         ['fixtures'] as const,
-  fixtureById:      (id: number) => ['fixtures', id] as const,
-  liveFixtures:     ['fixtures', 'live'] as const,
-
-  // Bolão
-  bolaoFixtures:    ['bolao', 'fixtures'] as const,
-  bolaoRanking:     ['bolao', 'ranking'] as const,
-  bolaoMyPoints:    ['bolao', 'my-points'] as const,
-  bolaoPrizes:      ['bolao', 'prizes'] as const,
+  fixtures:          ['fixtures'] as const,
+  fixtureById:       (id: number) => ['fixtures', id] as const,
+  liveFixtures:      ['fixtures', 'live'] as const,
+  bolaoFixtures:     ['bolao', 'fixtures'] as const,
+  bolaoRanking:      ['bolao', 'ranking'] as const,
+  bolaoMyPoints:     ['bolao', 'my-points'] as const,
+  bolaoPrizes:       ['bolao', 'prizes'] as const,
   bolaoMyPrediction: (fixtureId: number) => ['bolao', 'prediction', fixtureId] as const,
-
-  // Figurinhas
-  stickerAlbum:     ['stickers', 'album'] as const,
-  stickerPacks:     ['stickers', 'packs'] as const,
-  stickerTrades:    ['stickers', 'trades'] as const,
-
-  // Feed
-  newsFeed:         (page: number) => ['news', page] as const,
-
-  // Mapa
-  venuePOIs:        (city: 'SP' | 'RJ') => ['venue-map', city] as const,
-
-  // Perfil
-  myProfile:        ['auth', 'profile'] as const,
+  stickerAlbum:      ['stickers', 'album'] as const,
+  stickerPacks:      ['stickers', 'packs'] as const,
+  stickerTrades:     ['stickers', 'trades'] as const,
+  newsFeed:          (tab: string, page: number) => ['news', tab, page] as const,
+  sponsorBanners:    ['sponsors', 'banners'] as const,
+  venuePOIs:         (city: 'SP' | 'RJ') => ['venue-map', city] as const,
+  myProfile:         ['auth', 'profile'] as const,
 } as const;
-```
-
-### Hooks por módulo — padrão
-
-Cada módulo tem seu próprio hook file em `hooks/`. O componente nunca chama `useQuery` diretamente — sempre usa o hook do módulo.
-
-```typescript
-// hooks/useBolao.ts — exemplo de padrão
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { QueryKeys } from '@/lib/queryKeys';
-import * as bolaoService from '@/services/bolao.service';
-
-export function useBolaoRanking() {
-  return useQuery({
-    queryKey: QueryKeys.bolaoRanking,
-    queryFn: bolaoService.getRanking,
-    staleTime: 60_000, // ranking atualiza a cada 1min
-  });
-}
-
-export function useCreatePrediction() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: bolaoService.createPrediction,
-    onSuccess: (_, variables) => {
-      qc.invalidateQueries({ queryKey: QueryKeys.bolaoMyPrediction(variables.fixture_id) });
-      qc.invalidateQueries({ queryKey: QueryKeys.bolaoMyPoints });
-    },
-  });
-}
 ```
 
 ### Polling para dados ao vivo
 
-Placar ao vivo usa polling a cada 30s. **Nunca** usar `setInterval` nos componentes.
-
 ```typescript
-// hooks/useLiveScore.ts
+// hooks/useLiveScore.ts — polling só durante jogo ao vivo
 export function useLiveScore(fixtureId: number) {
   return useQuery({
     queryKey: QueryKeys.fixtureById(fixtureId),
     queryFn: () => footballService.getFixtureById(fixtureId),
     refetchInterval: (query) => {
-      // Só pollar se o jogo estiver ao vivo
       const isLive = ['1H', '2H', 'ET', 'P', 'HT'].includes(query.state.data?.status ?? '');
       return isLive ? 30_000 : false;
     },
-    staleTime: 0, // dados ao vivo nunca ficam em stale
+    staleTime: 0,
   });
 }
 ```
 
 ---
 
-## 4. Estrutura de Pastas e Convenções de Arquivo
+## 9. Estrutura de Pastas e Convenções
 
 ```
 front-end/front-cazeapp/
 ├── app/
-│   ├── layout.tsx                 # ThemeProvider + QueryClientProvider + fontes
-│   ├── (auth)/                    # Reutilizar sem alteração
+│   ├── layout.tsx              # ThemeProvider + QueryClientProvider + fontes Google
+│   ├── globals.css             # Classes Liquid Glass + tokens CSS + base Tailwind
+│   ├── (auth)/                 # Reutilizar sem alteração
 │   └── (user)/
 │       ├── home/page.tsx
 │       ├── jogos/
@@ -355,425 +819,334 @@ front-end/front-cazeapp/
 │       │   ├── page.tsx
 │       │   └── trocas/page.tsx
 │       ├── mapa/page.tsx
-│       ├── feed/page.tsx
-│       ├── foto/page.tsx          # Reutilizar
+│       ├── feed/page.tsx       # mesma que home mas sem sponsor no topo
+│       ├── foto/page.tsx       # Reutilizar
 │       └── perfil/page.tsx
 ├── components/
-│   ├── layout/                    # BottomNav, TopBar, LiveBadge
-│   ├── home/                      # HeroMatchBanner, FeatureCards
-│   ├── jogos/                     # MatchCard, LiveScoreBanner, MatchEvents
-│   ├── bolao/                     # PredictionInput, PredictionCard, RankingTable, PrizeCard, PointsBadge
-│   ├── stickers/                  # StickerCard, AlbumGrid, PackOpening, TradeOfferCard, StickerRarityBadge
-│   ├── map/                       # VenueMap, POIMarker, POIPopup
-│   ├── feed/                      # NewsCard, SponsorBanner
-│   └── shared/                    # CazeButton, CheckInGate, LoadingSkeleton, EmptyState
+│   ├── layout/
+│   │   ├── TopBar.tsx          # Logo + mascote, sem texto
+│   │   ├── BottomNav.tsx       # 5 tabs, ícones MUI, badges
+│   │   └── BrazilDivider.tsx   # Linha 4px gradiente verde-amarelo
+│   │   └── RainbowDivider.tsx  # Linha 2px gradiente arco-íris
+│   ├── home/
+│   │   ├── FeedTabs.tsx        # Pills: Tudo, Jogos, Bolão, Figurinhas
+│   │   ├── PostCard.tsx        # Card de post com Liquid Glass
+│   │   └── PostFeed.tsx        # Lista infinita com injeção de sponsors
+│   ├── feed/
+│   │   ├── SponsorCarousel.tsx # Banner auto-play topo
+│   │   └── SponsorCard.tsx     # Card intercalado no feed
+│   ├── jogos/
+│   │   ├── MatchCard.tsx
+│   │   ├── LiveScoreBanner.tsx
+│   │   └── MatchEvents.tsx
+│   ├── bolao/
+│   │   ├── PredictionInput.tsx
+│   │   ├── PredictionCard.tsx
+│   │   ├── RankingTable.tsx
+│   │   ├── PointsBreakdown.tsx
+│   │   └── PrizeCard.tsx
+│   ├── stickers/
+│   │   ├── StickerCard.tsx
+│   │   ├── AlbumGrid.tsx
+│   │   ├── PackOpening.tsx
+│   │   ├── TradeOfferCard.tsx
+│   │   └── StickerRarityBadge.tsx
+│   ├── map/
+│   │   ├── VenueMap.tsx
+│   │   ├── POIMarker.tsx
+│   │   └── POIPopup.tsx
+│   └── shared/
+│       ├── CazeButton.tsx      # Botão primário padrão
+│       ├── CheckInGate.tsx     # Gate de feature presencial
+│       ├── LoadingSkeleton.tsx # Skeleton de cards (nunca spinner)
+│       ├── EmptyState.tsx      # Estado vazio padronizado
+│       ├── LiveBadge.tsx       # Badge "AO VIVO" pulsante
+│       └── PointsBadge.tsx     # Pontos do usuário
 ├── hooks/
 │   ├── useBolao.ts
 │   ├── useStickers.ts
 │   ├── useFixtures.ts
 │   ├── useLiveScore.ts
 │   ├── useVenueMap.ts
-│   ├── useNewsFeed.ts
-│   └── useAuth.ts                 # Reutilizar
+│   ├── useNewsFeed.ts          # inclui lógica de injeção de sponsors
+│   └── useAuth.ts
 ├── services/
+│   ├── api.ts                  # Instância Axios configurada
 │   ├── bolao.service.ts
 │   ├── stickers.service.ts
 │   ├── venueMap.service.ts
-│   ├── football.service.ts        # Atualizar para 2026
+│   ├── football.service.ts
 │   └── news.service.ts
 ├── types/
 │   ├── bolao.ts
 │   ├── sticker.ts
 │   ├── venueMap.ts
 │   ├── fixture.ts
-│   └── auth.ts                    # Reutilizar
-├── lib/
-│   ├── theme.ts                   # MUI theme Cazé TV
-│   ├── queryClient.ts             # TanStack Query config
-│   ├── queryKeys.ts               # Todas as query keys
-│   └── formatters.ts              # formatDate, formatScore, formatPoints
-└── public/
-    └── assets/
-        ├── cazetv-logo-white.svg
-        ├── cazetv-logo-color.svg
-        └── stickers/              # Imagens base das figurinhas
+│   ├── feed.ts                 # NewsPost, SponsorBanner, FeedItem
+│   └── auth.ts
+└── lib/
+    ├── theme.ts
+    ├── queryClient.ts
+    ├── queryKeys.ts
+    └── formatters.ts
 ```
-
-### Convenções de nomeação de arquivo
-
-| Item | Convenção | Exemplo |
-|---|---|---|
-| Componente | `PascalCase.tsx` | `PredictionInput.tsx` |
-| Hook | `camelCase` com prefixo `use` | `useBolao.ts` |
-| Service | `camelCase.service.ts` | `bolao.service.ts` |
-| Types | `camelCase.ts` | `bolao.ts` |
-| Lib/util | `camelCase.ts` | `formatters.ts` |
-| Page (App Router) | `page.tsx` | `page.tsx` |
 
 ---
 
-## 5. Padrões de Componentes
+## 10. Padrões de Componentes
 
-### Anatomia obrigatória de um componente
+### Anatomia obrigatória
 
 ```tsx
-// components/bolao/PredictionInput.tsx
+// 1. Imports externos primeiro, internos depois
+// 2. Interface [ComponentName]Props
+// 3. Export named (não default)
+// 4. Loading + error states obrigatórios se consome query
 
-// 1. Imports — externos primeiro, internos depois
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import IconButton from '@mui/material/IconButton';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import { useCreatePrediction } from '@/hooks/useBolao';
-import type { Fixture } from '@/types/fixture';
-
-// 2. Interface de props — sempre [ComponentName]Props
-interface PredictionInputProps {
-  fixture: Fixture;
-  existingPrediction?: { homeScore: number; awayScore: number } | null;
-  disabled?: boolean;
-}
-
-// 3. Componente — export named, não default quando possível
-export function PredictionInput({ fixture, existingPrediction, disabled = false }: PredictionInputProps) {
-  const [homeScore, setHomeScore] = useState(existingPrediction?.homeScore ?? 0);
-  const [awayScore, setAwayScore] = useState(existingPrediction?.awayScore ?? 0);
-  const { mutate: createPrediction, isPending } = useCreatePrediction();
-
-  // lógica aqui...
-
-  return (
-    // JSX aqui
-  );
+export function PostCard({ post }: PostCardProps) {
+  // ...
 }
 ```
 
-### Regras de componentes
+### Regras
 
-1. **Máx 150 linhas** — se passar, dividir em sub-componentes
-2. **Um único propósito** — `PredictionInput` só gerencia o input, não submete nem exibe resultados
-3. **Props explícitas** — nunca `{...props}` spread em componentes custom
-4. **Sem lógica de negócio nos componentes** — lógica vai no hook, componente só renderiza
-5. **Loading e error states obrigatórios** — todo componente que consome query mostra skeleton e erro
+1. **Máx 150 linhas** — se passar, dividir
+2. **Sem lógica de negócio** — componente só renderiza, hook cuida da lógica
+3. **Loading obrigatório** — `<LoadingSkeleton />` nunca spinner centralizado
+4. **Error obrigatório** — `<EmptyState message="..." onRetry={refetch} />`
+5. **`React.memo`** em componentes de lista (PostCard, StickerCard, RankingRow)
 
-```tsx
-// OBRIGATÓRIO em todo componente que usa useQuery
-const { data, isLoading, isError } = useBolaoRanking();
-
-if (isLoading) return <RankingTableSkeleton />;
-if (isError) return <EmptyState message="Não foi possível carregar o ranking 😅" onRetry={refetch} />;
-```
-
-### Componentes compartilhados obrigatórios
-
-**`CazeButton`** — Único botão primário do app. Nunca usar `<Button variant="contained">` diretamente nos módulos novos.
+### `CazeButton` — único botão primário
 
 ```tsx
-// components/shared/CazeButton.tsx
 interface CazeButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
   loading?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  startIcon?: React.ReactNode; // Sempre ícone MUI, nunca emoji
+  size?: 'sm' | 'md' | 'lg';
 }
 ```
-
-**`EmptyState`** — Toda lista vazia usa este componente com tom de voz Cazé TV.
-
-**`LoadingSkeleton`** — Todo estado de carregamento usa skeleton, nunca spinner centralizado.
-
-**`CheckInGate`** — Wrapper para features de visitantes presenciais.
 
 ---
 
-## 6. Padrões de Serviços e API
+## 11. Padrões de Serviços e API
 
-### Service layer — regras absolutas
+### Regras absolutas
 
-1. **Zero chamadas de `axios` fora de `/services/`** — componentes e hooks importam de services
-2. **Todo service retorna tipo explícito** — nunca `Promise<any>`
-3. **Service não faz tratamento de erro** — lança o erro, o hook/React Query trata
-
-```typescript
-// services/bolao.service.ts
-import api from './api'; // instância Axios configurada
-import type { BolaoRankingEntry, CreatePredictionPayload, BolaoMyPoints } from '@/types/bolao';
-
-export async function getRanking(): Promise<BolaoRankingEntry[]> {
-  const { data } = await api.get<BolaoRankingEntry[]>('/bolao/ranking');
-  return data;
-}
-
-export async function createPrediction(payload: CreatePredictionPayload): Promise<void> {
-  await api.post('/bolao/predictions', payload);
-}
-
-export async function getMyPoints(): Promise<BolaoMyPoints> {
-  const { data } = await api.get<BolaoMyPoints>('/bolao/my-points');
-  return data;
-}
-```
-
-### Instância Axios — configuração
+1. Zero chamadas de `axios` fora de `/services/`
+2. Todo service retorna tipo explícito — nunca `Promise<any>`
+3. Service não trata erro — lança, hook/React Query captura
 
 ```typescript
-// services/api.ts
-import axios from 'axios';
-
+// services/api.ts — instância configurada
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 15_000,
-  headers: { 'Content-Type': 'application/json' },
 });
 
-// Interceptor: injetar JWT em todo request autenticado
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-
-// Interceptor: refresh token em 401
-api.interceptors.response.use(
-  (res) => res,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Lógica de refresh existente — não alterar
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;
 ```
 
 ---
 
-## 7. Performance e Escalabilidade
-
-Dado que o app terá **muitos usuários simultâneos**, estas regras são obrigatórias:
+## 12. Performance e Escalabilidade
 
 ### Lazy loading obrigatório para módulos pesados
 
 ```tsx
-// Mapbox, PackOpening com Framer Motion e álbum de figurinhas são pesados
-const VenueMap = dynamic(() => import('@/components/map/VenueMap'), {
-  ssr: false,              // Mapbox não funciona no SSR
-  loading: () => <MapSkeleton />,
-});
-
-const PackOpening = dynamic(() => import('@/components/stickers/PackOpening'), {
-  loading: () => <PackOpeningSkeleton />,
-});
+const VenueMap = dynamic(() => import('@/components/map/VenueMap'), { ssr: false });
+const PackOpening = dynamic(() => import('@/components/stickers/PackOpening'));
+const SponsorCarousel = dynamic(() => import('@/components/feed/SponsorCarousel'));
 ```
-
-### Memoização — quando usar
-
-```tsx
-// useCallback para callbacks passados como prop a componentes filho
-const handlePrediction = useCallback((score: { home: number; away: number }) => {
-  createPrediction({ fixture_id: fixture.id, ...score });
-}, [fixture.id, createPrediction]);
-
-// useMemo para cálculos pesados
-const sortedRanking = useMemo(
-  () => ranking?.sort((a, b) => b.total_points - a.total_points) ?? [],
-  [ranking]
-);
-
-// React.memo para listas longas (ranking, álbum)
-export const StickerCard = React.memo(function StickerCard({ sticker }: StickerCardProps) {
-  // ...
-});
-```
-
-### Regras de re-render
-
-- Não criar objetos/arrays inline nas props — causam re-render desnecessário
-- Componentes de lista (ranking, álbum) **devem** usar `React.memo`
-- Evitar Context que muda frequentemente — não colocar dados de API no Context
 
 ### Imagens
 
-- Usar sempre `next/image` com `width` e `height` explícitos
-- Domínios de S3 e CloudFront já configurados em `next.config.ts` — não alterar
-- Figurinhas: usar `loading="lazy"` quando fora do viewport
-- Nunca usar `<img>` diretamente
+- `next/image` com `width` e `height` explícitos — sempre
+- Domínios S3/CloudFront já configurados em `next.config.ts`
+- Figurinhas fora do viewport: `loading="lazy"`
+- Nunca `<img>` diretamente
 
-### Paginação e listas longas
+### Listas longas
 
-- Feed de notícias: infinite scroll com `useInfiniteQuery`
-- Ranking: paginação por offset (50 por vez)
-- Álbum de figurinhas: virtual scroll se > 100 itens (usar `react-window` se necessário)
+- Feed: `useInfiniteQuery`
+- Ranking: paginação por offset (50/página)
+- Álbum: virtual scroll se > 100 figurinhas (`react-window`)
 
 ---
 
-## 8. Animações
+## 13. Animações — Framer Motion
 
-### Biblioteca: Framer Motion 11
+### Quando usar Framer Motion vs CSS
 
-**Quando usar Framer Motion:**
-- Abertura de pacote de figurinhas (flip de cartas, reveal)
-- Entrada de figurinha lendária (partículas, glow)
-- Transições de página
-- Aparecimento de modais/sheets
-- Stagger de listas (ranking, feed)
+| Usar Framer Motion | Usar CSS/Tailwind |
+|---|---|
+| Pack opening (flip de cartas) | Badge "AO VIVO" pulsante (`animate-pulse`) |
+| Entrada de figurinha lendária | Hover states de botões |
+| Transições de página | Loading skeletons |
+| Stagger de listas (ranking) | Transições de cor |
+| Modais e bottom sheets | |
 
-**Quando usar CSS/Tailwind:**
-- Badge "AO VIVO" pulsante → `animate-live-pulse` (Tailwind)
-- Hover states em botões → `transition-colors duration-150`
-- Loading skeletons → `animate-pulse` (Tailwind)
-
-### Padrão de animação de pacote (PackOpening)
+### Badge "AO VIVO" — implementação
 
 ```tsx
-// components/stickers/PackOpening.tsx
+// Usar CSS puro — nunca Framer Motion para este
+export function LiveBadge() {
+  return (
+    <div className="flex items-center gap-1.5 bg-caze-red rounded-[100px] px-2 py-0.5">
+      <span className="size-1.5 rounded-full bg-white animate-pulse" />
+      <span className="font-heading font-bold text-[10px] text-white tracking-wider">AO VIVO</span>
+    </div>
+  );
+}
+```
+
+### Pack Opening — variantes
+
+```tsx
 const cardVariants = {
-  hidden: { rotateY: 180, opacity: 0 },
+  hidden: { rotateY: 180, opacity: 0, scale: 0.8 },
   visible: (i: number) => ({
-    rotateY: 0,
-    opacity: 1,
-    transition: { delay: i * 0.4, duration: 0.6, type: 'spring' },
+    rotateY: 0, opacity: 1, scale: 1,
+    transition: { delay: i * 0.4, duration: 0.6, type: 'spring', bounce: 0.3 },
   }),
 };
 
-// Lendária — variante especial
 const legendaryVariants = {
   hidden: { scale: 0, opacity: 0 },
   visible: {
-    scale: [1, 1.2, 1],
-    opacity: 1,
-    transition: { duration: 0.8, type: 'spring', bounce: 0.5 },
+    scale: [1, 1.3, 1], opacity: 1,
+    transition: { duration: 0.9, type: 'spring', bounce: 0.6 },
   },
 };
 ```
 
-### Regras de animação
+### Regras
 
-1. **Não animar em `useEffect`** — usar `AnimatePresence` e variantes declarativas
-2. **Respeitar `prefers-reduced-motion`** — Framer Motion faz isso automaticamente via `useReducedMotion`
-3. **Duração máxima: 600ms** para ações de usuário, 1000ms para reveals especiais (lendária)
-4. **Não bloquear interação** — usar `pointer-events: none` apenas durante a animação de reveal
+1. Sem animações em `useEffect` — usar `AnimatePresence` e variantes
+2. Respeitar `prefers-reduced-motion` (Framer Motion faz automaticamente)
+3. Duração máx: 600ms para ações de usuário, 1000ms para reveals especiais
 
 ---
 
-## 9. Roteamento e Navegação
+## 14. Ícones — Regras Absolutas
 
-### Estrutura de rotas (App Router)
+### Biblioteca: Material Icons (MUI) — única fonte de ícones
+
+```tsx
+// CORRETO
+import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
+import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined';
+
+// ERRADO — nunca usar
+<span>⚽</span>   // emoji
+<span>🏆</span>   // emoji
+```
+
+### Convenção de estilo
+
+| Contexto | Estilo | Tamanho |
+|---|---|---|
+| BottomNav inativo | `Outlined` | `28px` |
+| BottomNav ativo | `Filled` | `28px` |
+| Dentro de botões | `Filled` ou `Outlined` | `18px` |
+| TopBar / Header | `Outlined` | `24px` |
+| Cards e listas | `Outlined` | `20px` |
+| Badges e chips | `Filled` | `14px` |
+
+### Proibições
+
+- **Zero emojis** em qualquer texto renderizado na UI — sem exceção
+- **Zero emojis** em notificações push exibidas no app
+- Notificações push podem ter emoji no payload do OneSignal (fora do código), mas o app não exibe emoji diretamente
+- Textos de copy da UI: tom Cazé TV mas sem emoji — usar ícone inline quando precisar de elemento visual
+
+---
+
+## 15. Roteamento e Navegação
+
+### Estrutura de rotas
 
 ```
 /              → redirect → /home
-/home          → Home com HeroMatchBanner
-/jogos         → Lista de jogos da Copa
+/home          → Home + Feed com sponsor carousel
+/jogos         → Lista jogos da Copa
 /jogos/[id]    → Detalhe + placar ao vivo
-/bolao         → Lista de jogos para apostar
-/bolao/[id]    → Fazer/ver aposta do jogo
+/bolao         → Lista jogos para apostar
+/bolao/[id]    → Fazer/ver aposta
 /bolao/ranking → Leaderboard
 /bolao/premios → Catálogo de prêmios
-/figurinhas    → Álbum de figurinhas
+/figurinhas    → Álbum + abrir pacotes
 /figurinhas/trocas → Mercado de trocas
 /mapa          → Mapbox venue map
-/feed          → Feed de notícias + patrocínios
+/feed          → Feed editorial completo
 /foto          → Photo Finder (reutilizar)
 /perfil        → Perfil + pontos + coleção
 ```
 
-### BottomNav — 5 tabs fixas
+### Proteção de rotas
 
-```tsx
-const navItems = [
-  { label: 'Home',       href: '/home',       icon: 'house' },
-  { label: 'Jogos',      href: '/jogos',       icon: 'sports_soccer' },
-  { label: 'Bolão',      href: '/bolao',       icon: 'emoji_events' },
-  { label: 'Figurinhas', href: '/figurinhas',  icon: 'collections' },
-  { label: 'Perfil',     href: '/perfil',      icon: 'person' },
-];
-```
-
-### Proteção de rotas autenticadas
-
-Todas as rotas em `/(user)/` requerem autenticação. Usar o middleware existente — não recriar.
+Todas as rotas em `/(user)/` requerem autenticação. Usar middleware existente — não recriar.
 
 ---
 
-## 10. TypeScript — Regras Estritas
+## 16. TypeScript — Regras Estritas
 
-- `"strict": true` no `tsconfig.json` — nunca desabilitar
-- Sem `any` — usar `unknown` com type guard se shape é desconhecida
-- Sem `@ts-ignore` ou `@ts-expect-error` sem comentário explicando o motivo
-- Todos os tipos de API response definidos em `types/` — nunca inline
-- Interface para objeto shapes, `type` para unions e tipos computados
-- Generics explícitos em `useQuery<TipoRetorno>` — não inferir de função anônima
-
-```typescript
-// types/bolao.ts — exemplo de estrutura
-export interface BolaoRankingEntry {
-  rank: number;
-  user_id: string;
-  display_name: string;
-  avatar_url: string | null;
-  total_points: number;
-  exact_predictions: number;
-  correct_outcomes: number;
-}
-
-export interface CreatePredictionPayload {
-  fixture_id: number;
-  home_score_prediction: number;
-  away_score_prediction: number;
-}
-
-export interface BolaoMyPoints {
-  total_points: number;
-  rank: number;
-  exact_predictions: number;
-  correct_outcomes: number;
-}
-```
+- `"strict": true` — nunca desabilitar
+- Sem `any` — usar `unknown` com type guard
+- Sem `@ts-ignore` sem comentário explicativo
+- Todos os tipos de API em `types/` — nunca inline
+- `interface` para objetos, `type` para unions
+- Generics explícitos em `useQuery<TipoRetorno>`
 
 ---
 
-## 11. Regras de Qualidade
+## 17. Regras de Qualidade e Tom Visual
 
-### Tom de voz na UI — obrigatório
+### Filosofia visual — "Fanzone íntimo"
 
-Todos os textos visíveis ao usuário seguem o tom Cazé TV: informal, empolgante, emojis em notificações.
+O app deve sempre transmitir:
+- **Proximidade** com o torcedor — não é um app corporativo, é a Casa CazéTV
+- **Energia** de estádio — tipografia grande, cores vibrantes, movimento
+- **Profundidade** — Liquid Glass cria camadas, não telas planas
+- **Legibilidade** — texto sempre legível sobre qualquer fundo (usar overlay quando necessário)
+
+### Tom de voz na UI — sem emojis, sempre icons
 
 | Contexto | Texto ERRADO | Texto CORRETO |
 |---|---|---|
-| Empty state bolão | "Nenhuma aposta encontrada." | "Você ainda não apostou. Vai ficar de fora? ⚽" |
-| Erro genérico | "Erro ao processar solicitação." | "Algo deu errado. Tenta de novo! 😅" |
-| Sucesso aposta | "Aposta registrada com sucesso." | "Aposta feita! Agora é torcer 🤞🇧🇷" |
-| Pack aberto | "Você recebeu 3 figurinhas." | "3 figurinhas novas! Abre aí 🎴" |
-| Figurinha lendária | "Figurinha rara obtida." | "LENDÁRIO! Você tirou o Vini Jr.! 🔥" |
+| Empty state bolão | "Nenhuma aposta encontrada. ⚽" | "Você ainda não apostou. Vai ficar de fora?" + `<SportsSoccer />` |
+| Erro genérico | "Algo deu errado! 😅" | "Algo deu errado. Tenta de novo." + `<ErrorOutline />` |
+| Sucesso aposta | "Aposta feita! 🤞🇧🇷" | "Aposta registrada. Agora é torcer." + `<CheckCircleOutline />` |
+| Pack aberto | "Você ganhou 3 figurinhas! 🎴" | "3 figurinhas novas desbloqueadas" + `<CollectionsOutlined />` |
+| Figurinha lendária | "LENDÁRIO! 🔥" | "LENDÁRIO" + animação Framer Motion + glow verde |
 
 ### Acessibilidade mínima
 
-- Todo botão de ação tem `aria-label` descritivo
-- Imagens decorativas têm `alt=""`; imagens de conteúdo têm `alt` descritivo
-- Contraste mínimo 4.5:1 (WCAG AA) — verificar especialmente amarelo sobre branco
-- Bottom nav: `role="navigation"` e `aria-label="Navegação principal"`
-
-### Regras de comentários
-
-- **Sem comentários** que explicam o que o código faz — nomes de variáveis/funções devem ser autoexplicativos
-- Comentário só quando o **POR QUÊ** é não-óbvio: contornos de bugs, invariantes, decisões de produto
-- Sem docstrings multi-linha em funções simples
+- `aria-label` em todo botão sem texto visível
+- Imagens decorativas: `alt=""`; conteúdo: `alt` descritivo
+- Contraste mínimo 4.5:1 (WCAG AA)
+- BottomNav: `role="navigation"` + `aria-label="Navegação principal"`
 
 ### Proibições absolutas
 
-- `console.log` em código commitado — usar em dev, remover antes de PR
-- `debugger` em código commitado
-- Chamadas de API diretas nos componentes (sem passar por service + hook)
-- Hardcode de URLs — sempre usar `process.env.NEXT_PUBLIC_API_URL`
-- Hardcode de cores fora do theme e tailwind config
+- `console.log` em código commitado
+- Emojis em qualquer texto da UI
+- Chamadas de API diretas em componentes
+- Hardcode de URLs — sempre `process.env.NEXT_PUBLIC_API_URL`
+- Hardcode de cores fora dos tokens Tailwind e MUI theme
+- Valores de border-radius arbitrários — sempre usar os tokens definidos
 
 ---
 
-## 12. Variáveis de Ambiente
+## 18. Variáveis de Ambiente
 
 ```bash
 # front-end/front-cazeapp/.env.local
@@ -781,18 +1154,15 @@ Todos os textos visíveis ao usuário seguem o tom Cazé TV: informal, empolgant
 # Existente
 NEXT_PUBLIC_API_URL=http://localhost:8000
 
-# NOVO — obrigatório para o mapa
+# Novos
 NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ...
-
-# NOVO — apenas para build/CI se necessário
 NEXT_PUBLIC_ENV=development
 ```
 
 **Regras de env:**
-- Variáveis com `NEXT_PUBLIC_` são expostas no browser — nunca colocar secrets aqui
-- Sem Supabase keys, sem JWT secrets, sem service keys no frontend
-- Validar presença das env vars no start do app se forem críticas
+- `NEXT_PUBLIC_` é exposto no browser — nunca colocar secrets
+- Sem Supabase keys, JWT secrets ou service keys no frontend
 
 ---
 
-*Última atualização: 2026-05-21 | Parte integrante do guia principal em `../../CLAUDE.md`*
+*Última atualização: 2026-05-21 | Figma: `VZ2fPhIG5zVt0XUlzaYyFm` | Parte integrante do guia em `../../CLAUDE.md`*
