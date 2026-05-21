@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 
 export interface SponsorBanner {
   id: string;
@@ -24,7 +25,6 @@ interface SponsorCarouselProps {
 }
 
 const BANNER_HEIGHT = 98;
-const SIDEBAR_WIDTH_PX = 240;
 
 export default function SponsorCarousel({
   banners,

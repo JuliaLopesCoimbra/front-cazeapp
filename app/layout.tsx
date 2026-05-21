@@ -11,6 +11,7 @@ import QueryProvider from './lib/query-provider';
 import ScrollRestorer from './components/layout/ScrollRestorer';
 import PageTracker from './components/layout/PageTracker';
 import OneSignalInit from './components/onesignal/OneSignalInit';
+import LiquidGlassFilters from './components/shared/LiquidGlassFilters';
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -66,6 +67,7 @@ export default function RootLayout({
         className={`${roboto.variable} ${montserrat.variable} ${poppins.variable} ${playfair.variable} antialiased`}
         style={{ fontFamily: 'var(--font-roboto), Roboto, -apple-system, sans-serif' }}
       >
+        <LiquidGlassFilters />
         <EmotionCacheProvider>
           <ThemeProvider>
             <QueryProvider>

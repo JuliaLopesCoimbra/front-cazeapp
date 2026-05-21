@@ -112,8 +112,22 @@
   .glass,
   .glass-green,
   .glass-dark,
-  .glass-caption {
-    background: rgba(40, 40, 40, 0.92);
+  .glass-caption,
+  .liquid-glass {
+    background: rgba(54, 54, 54, 0.85);
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-green,
+  .glass-dark,
+  .glass-caption,
+  .liquid-glass {
+    background-color: rgba(54, 54, 54, 0.92);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
