@@ -20,7 +20,7 @@ import { useToast } from "@/app/context/ToastContext";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 import BottomNav from "@/app/components/layout/BottomNav";
 import { CircularProgress } from "@mui/material";
-import HomeHeader from "@/app/components/home/HeaderHome";
+import TopBar from "@/app/components/layout/TopBar";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import {
   EventBrandKey,
@@ -554,7 +554,6 @@ export default function LikedPostsPage() {
 
   const iconAccent = getBrandIconColor(currentEvent);
   const isTorcida = getEventBrandKey(currentEvent) === "n1_torcida";
-  const pageBackgroundSx = currentEvent ? getEventBackgroundSx(currentEvent) : getEventBackgroundSxByKey(storedBrandKey);
 
   // Evita problemas de hidratação: só renderiza conteúdo específico do cliente após montagem
   if (!mounted) {
@@ -562,7 +561,7 @@ export default function LikedPostsPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          ...pageBackgroundSx,
+          backgroundColor: "#282828",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -578,12 +577,13 @@ export default function LikedPostsPage() {
     return (
       <>
         <Box
-          style={{
+          sx={{
             minHeight: "100vh",
-            ...pageBackgroundSx,
+            backgroundColor: "#282828",
             paddingBottom: "72px",
           }}
         >
+          <TopBar showBack title="Curtidos" />
           <Box
             sx={{
               display: "flex",
@@ -629,23 +629,14 @@ export default function LikedPostsPage() {
   return (
     <>
       <Box
-        style={{
+        sx={{
           minHeight: "100vh",
-          ...pageBackgroundSx,
+          backgroundColor: "#282828",
           paddingBottom: "72px",
         }}
       >
-        {/* Header com nome, foto e data */}
-        {currentEvent && (
-          <Box className={shouldAnimate ? "slide-up-animation" : ""}>
-            <HomeHeader
-              event={currentEvent}
-              events={events}
-              currentEvent={currentEvent}
-              onSelectEvent={handleSelectEvent}
-            />
-          </Box>
-        )}
+        {/* TopBar Casa CazéTV — TODO: re-add event selector if needed */}
+        <TopBar showBack title="Curtidos" />
 
         {/* Container centralizado para desktop */}
         <Box

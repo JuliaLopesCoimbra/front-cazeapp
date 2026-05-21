@@ -2,68 +2,44 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Box,
-  Button,
-  // Checkbox,        // CAMISETAS - comentado temporariamente
-  // Dialog,          // CAMISETAS - comentado temporariamente
-  // DialogActions,   // CAMISETAS - comentado temporariamente
-  // DialogContent,   // CAMISETAS - comentado temporariamente
-  // DialogTitle,     // CAMISETAS - comentado temporariamente
-  // FormControlLabel, // CAMISETAS - comentado temporariamente
-  Skeleton,
-  Typography,
-} from "@mui/material";
-import HomeHeader from "@/app/components/home/HeaderHome";
-import HomeTabs from "@/app/components/home/HomeTabs";
+import { Box, Skeleton, Typography } from "@mui/material";
+import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
+import HomeScreenHeader from "@/app/components/home/HomeScreenHeader";
+import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
+import BrazilDivider from "@/app/components/layout/BrazilDivider";
+import RainbowDivider from "@/app/components/layout/RainbowDivider";
+import FeedTabs, { type FeedTab } from "@/app/components/home/FeedTabs";
+import { motion } from "framer-motion";
+import SponsorCarousel, { getMockSponsors } from "@/app/components/feed/SponsorCarousel";
 import BottomNav from "@/app/components/layout/BottomNav";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import NewsFeed from "@/app/components/home/NewsFeed";
-import AdBanner from "@/app/components/ads/AdBanner";
-import EventDetails from "@/app/components/home/EventDetails";
 import { useAuth } from "@/app/context/AuthContext";
-import PhotoAI from "@/app/components/home/PhotoAI";
-import Enredo from "@/app/components/home/Enredo";
 import WorldCupGames from "@/app/components/home/WorldCupGames";
-import EventMap from "@/app/components/home/EventMap";
-import LineUp from "@/app/components/home/LineUp";
 import EventIndisponivel from "@/app/components/event/EventIndisponivel";
-import { getProfile, ProfileResponse } from "@/app/services/profile/profileService";
-import {
-  EventBrandKey,
-  getEventBackgroundSx,
-  getEventBackgroundSxByKey,
-  getEventTheme,
-  getStoredEventBrandKey,
-  setStoredEventBrandKey,
-} from "@/app/utils/eventBranding";
+import { getProfile } from "@/app/services/profile/profileService";
 
 const STORAGE_KEY = "selectedEventId";
 const SCROLL_KEY = "homeScrollY";
 const TAB_KEY = "homeActiveTab";
 
-type Tab = "home" | "eventos" | "mapa" | "lineup" | "foto" | "enredo";
+const VALID_TABS: FeedTab[] = ["all", "games", "bolao", "stickers"];
+
+function isFeedTab(value: string): value is FeedTab {
+  return (VALID_TABS as string[]).includes(value);
+}
 
 const HomeContent: React.FC = () => {
-  // Inicializa sempre "home" para evitar hydration mismatch (server vs client).
-  // A aba é sincronizada da URL/sessionStorage no useEffect.
-  const [activeTab, setActiveTab] = useState<Tab>("home");
+  // Inicializa sempre "all" para evitar hydration mismatch (server vs client).
+  const [activeTab, setActiveTab] = useState<FeedTab>("all");
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [currentEvent, setCurrentEvent] = useState<EventResponse | null>(null);
-  const [storedBrandKey, setStoredBrandKeyState] = useState<EventBrandKey>(
-    () => getStoredEventBrandKey() ?? "default"
-  );
   const [eventsLoaded, setEventsLoaded] = useState(false);
-  const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(true);
-  // const [shirtReserveOpen, setShirtReserveOpen] = useState(false);
-  // const [shirtTicketAck, setShirtTicketAck] = useState(false);
   const currentEventIdRef = useRef<number | null>(null);
-  const isCheckingRef = useRef(false); // Previne múltiplas verificações simultâneas
-  const scrollExecutedRef = useRef(false);
+  const isCheckingRef = useRef(false);
   const router = useRouter();
-  const { isAdmin, authReady, isAuthenticated } = useAuth();
+  const { isAdmin, authReady } = useAuth();
 
   // Persist tab selection
   useEffect(() => {
@@ -72,40 +48,20 @@ const HomeContent: React.FC = () => {
     }
   }, [activeTab]);
 
-  useEffect(() => {
-    if (currentEvent) {
-      setStoredEventBrandKey(currentEvent);
-      setStoredBrandKeyState(currentEvent.brand_key === "n1_torcida" ? "n1_torcida" : "default");
-    }
-  }, [currentEvent]);
-
-  // Controla animações quando a aba muda
-  useEffect(() => {
-    setShouldAnimate(true);
-    // Reset animação após um tempo para permitir nova animação na próxima mudança
-    const timer = setTimeout(() => {
-      setShouldAnimate(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [activeTab]);
-
-  // Monitora mudanças na URL e atualiza a aba e evento se necessário
+  // Sincroniza aba via URL (?tab=) e sessionStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const urlParams = new URLSearchParams(window.location.search);
-    
     const urlTab = urlParams.get("tab");
-    const urlEventId = urlParams.get("eventId") || urlParams.get("event"); // Suporta ambos "eventId" e "event"
+    const urlEventId = urlParams.get("eventId") || urlParams.get("event");
 
-    // Define aba: URL tem prioridade, senão sessionStorage, senão "home"
-    const validTabs: Tab[] = ["home", "eventos", "mapa", "lineup", "foto", "enredo"];
-    const targetTab: Tab =
-      urlTab && validTabs.includes(urlTab as Tab)
-        ? (urlTab as Tab)
+    const targetTab: FeedTab =
+      urlTab && isFeedTab(urlTab)
+        ? urlTab
         : (() => {
             const saved = sessionStorage.getItem(TAB_KEY);
-            return saved && validTabs.includes(saved as Tab) ? (saved as Tab) : "home";
+            return saved && isFeedTab(saved) ? saved : "all";
           })();
     if (activeTab !== targetTab) {
       setActiveTab(targetTab);
@@ -119,131 +75,28 @@ const HomeContent: React.FC = () => {
         setCurrentEvent(urlEvent);
         currentEventIdRef.current = urlEvent.id;
         localStorage.setItem(STORAGE_KEY, urlEvent.id.toString());
-        
-        // Limpa o parâmetro event/eventId da URL após processar, mas mantém tab se existir
+
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete("event");
         newUrl.searchParams.delete("eventId");
-        // Mantém outros parâmetros como "tab" e "post" se existirem
         window.history.replaceState({}, "", newUrl.toString());
       }
     }
-  }, [events, currentEvent]); // Removido activeTab das dependências para evitar loop
+  }, [events, currentEvent, activeTab]);
 
-  // Scroll para o line up quando houver o parâmetro scrollToLineup na URL
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const scrollToLineup = urlParams.get("scrollToLineup");
-    const eventIdParam = urlParams.get("eventId");
-    
-    if (!scrollToLineup || !currentEvent || !currentEvent.line_up || scrollExecutedRef.current || activeTab !== "eventos") {
-      return;
-    }
-    
-    // Verifica se é o evento correto
-    if (eventIdParam && parseInt(eventIdParam) !== currentEvent.id) {
-      return;
-    }
-
-    const tryScrollToLineup = () => {
-      const lineupElement = document.getElementById("event-lineup-section");
-      
-      if (!lineupElement) {
-        // Tenta novamente após um delay se o elemento ainda não estiver renderizado
-        setTimeout(tryScrollToLineup, 200);
-        return;
-      }
-
-      scrollExecutedRef.current = true;
-
-      // Encontra o container scrollável
-      let scrollContainer: HTMLElement | null = null;
-      
-      // Procura pelo elemento scrollável mais próximo
-      let parent = lineupElement.parentElement;
-      while (parent && parent !== document.body) {
-        const hasScroll = parent.scrollHeight > parent.clientHeight;
-        if (hasScroll || getComputedStyle(parent).overflowY !== "visible") {
-          scrollContainer = parent;
-          break;
-        }
-        parent = parent.parentElement;
-      }
-
-      // Se não encontrou, usa window
-      if (!scrollContainer) {
-        scrollContainer = document.documentElement;
-      }
-
-      // Função para fazer scroll e destacar
-      const highlightAndScroll = () => {
-        const rect = lineupElement.getBoundingClientRect();
-        const containerRect = scrollContainer === document.documentElement 
-          ? { top: 0, left: 0 } 
-          : scrollContainer!.getBoundingClientRect();
-        
-        const scrollTop = scrollContainer === document.documentElement
-          ? window.pageYOffset || document.documentElement.scrollTop
-          : scrollContainer!.scrollTop;
-        
-        const targetScroll = scrollTop + rect.top - containerRect.top - 100; // 100px de margem
-
-        // Aplica destaque visual
-        lineupElement.style.borderLeft = "4px solid white";
-        lineupElement.style.transition = "border-left 0.3s ease";
-
-        // Faz scroll
-        if (scrollContainer === document.documentElement) {
-          window.scrollTo({
-            top: targetScroll,
-            behavior: "smooth",
-          });
-        } else {
-          scrollContainer!.scrollTo({
-            top: targetScroll,
-            behavior: "smooth",
-          });
-        }
-
-        // Remove o destaque após 3 segundos
-        setTimeout(() => {
-          lineupElement.style.borderLeft = "";
-        }, 3000);
-
-        // Remove o parâmetro da URL após 4.5 segundos
-        setTimeout(() => {
-          const url = new URL(window.location.href);
-          url.searchParams.delete("scrollToLineup");
-          url.searchParams.delete("eventId");
-          url.searchParams.delete("tab");
-          window.history.replaceState({}, "", url.toString());
-          scrollExecutedRef.current = false; // Permite scroll novamente se necessário
-        }, 4500);
-      };
-
-      // Aguarda um pouco para garantir que o layout está estável
-      setTimeout(highlightAndScroll, 100);
-    };
-
-    // Aguarda um pouco antes de tentar fazer scroll
-    setTimeout(tryScrollToLineup, 300);
-  }, [currentEvent, activeTab]);
-
-  // Função para verificar e atualizar eventos
+  // Verifica e atualiza eventos
   const checkAndUpdateEvents = useCallback(async () => {
-    // Previne múltiplas chamadas simultâneas
     if (isCheckingRef.current) return;
     isCheckingRef.current = true;
 
     try {
       const data = await getEvents();
       setEvents(data);
-      
+
       const currentId = currentEventIdRef.current;
       if (currentId) {
         const updatedEvent = data.find((event) => event.id === currentId);
-          
-        // Se o evento não foi encontrado (foi deletado), troca para um ativo
+
         if (!updatedEvent) {
           const activeEvent = data.find((event) => event.is_active);
           if (activeEvent) {
@@ -251,26 +104,21 @@ const HomeContent: React.FC = () => {
             currentEventIdRef.current = activeEvent.id;
             localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
           } else {
-            // Não há eventos disponíveis
             setCurrentEvent(null);
             currentEventIdRef.current = null;
             localStorage.removeItem(STORAGE_KEY);
           }
-        }
-        // Se o evento atual foi desativado e o usuário NÃO é admin/subadmin, troca para um ativo
-        else if (!updatedEvent.is_active && !isAdmin) {
+        } else if (!updatedEvent.is_active && !isAdmin) {
           const activeEvent = data.find((event) => event.is_active);
           if (activeEvent) {
             setCurrentEvent(activeEvent);
             currentEventIdRef.current = activeEvent.id;
             localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
           } else {
-            // Não há eventos ativos disponíveis para usuário não-admin
             setCurrentEvent(null);
             currentEventIdRef.current = null;
           }
         } else if (updatedEvent) {
-          // Atualiza o evento atual com os dados mais recentes
           setCurrentEvent(updatedEvent);
         }
       }
@@ -281,28 +129,9 @@ const HomeContent: React.FC = () => {
     }
   }, [isAdmin]);
 
-  // Função para salvar evento selecionado no localStorage
-  const handleSelectEvent = (event: EventResponse) => {
-    localStorage.setItem(STORAGE_KEY, event.id.toString());
-    setCurrentEvent(event);
-    currentEventIdRef.current = event.id;
-    
-    // Limpa parâmetros event/eventId da URL para permitir troca livre
-    const url = new URL(window.location.href);
-    url.searchParams.delete("event");
-    url.searchParams.delete("eventId");
-    window.history.replaceState({}, "", url.toString());
-    
-    // Verifica eventos quando o usuário troca manualmente
-    checkAndUpdateEvents();
-  };
-
   useEffect(() => {
-    // restaura scroll salvo apenas se não estiver na aba "home" (NewsFeed cuida disso)
-    // ou se não houver cache do feed
     const savedScroll = sessionStorage.getItem(SCROLL_KEY);
-    if (savedScroll && activeTab !== "home") {
-      // Aguarda um pouco para garantir que o conteúdo está renderizado
+    if (savedScroll && activeTab !== "all") {
       setTimeout(() => {
         requestAnimationFrame(() => {
           window.scrollTo(0, parseInt(savedScroll, 10) || 0);
@@ -310,34 +139,28 @@ const HomeContent: React.FC = () => {
       }, 100);
     }
     const onScroll = () => {
-      // Só salva scroll se não estiver na aba "home" (NewsFeed cuida disso)
-      if (activeTab !== "home") {
+      if (activeTab !== "all") {
         sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
       }
     };
     window.addEventListener("scroll", onScroll);
 
-    // Se BottomNav marcou para restaurar home (volta da my-photos/liked), não mudar aba
-    // Caso contrário, deixar aba conforme saved/default
     const forceRestore = sessionStorage.getItem("forceHomeRestore");
     if (forceRestore) {
       sessionStorage.removeItem("forceHomeRestore");
     }
 
-    // Aguarda o contexto de autenticação estar pronto
     if (!authReady) {
       return () => window.removeEventListener("scroll", onScroll);
     }
 
-    // Carrega o perfil do usuário
     const fetchProfile = async () => {
       try {
-        const profileData = await getProfile();
-        setProfile(profileData);
+        await getProfile();
         setProfileLoaded(true);
       } catch (error) {
         console.error("Erro ao buscar perfil:", error);
-        setProfileLoaded(true); // Marca como carregado mesmo em caso de erro para não travar a tela
+        setProfileLoaded(true);
       }
     };
 
@@ -346,9 +169,8 @@ const HomeContent: React.FC = () => {
         const data = await getEvents();
         setEvents(data);
         setEventsLoaded(true);
-        
+
         if (data.length > 0) {
-          // Verifica se há eventId ou event na URL (vindo de notificação)
           const urlParams = new URLSearchParams(window.location.search);
           const urlEventId = urlParams.get("eventId") || urlParams.get("event");
           if (urlEventId) {
@@ -358,30 +180,25 @@ const HomeContent: React.FC = () => {
               setCurrentEvent(urlEvent);
               currentEventIdRef.current = urlEvent.id;
               localStorage.setItem(STORAGE_KEY, urlEvent.id.toString());
-              // Se houver tab na URL, atualiza a aba
               const urlTab = urlParams.get("tab");
-              if (urlTab === "home" || urlTab === "eventos" || urlTab === "mapa" || urlTab === "lineup" || urlTab === "foto" || urlTab === "enredo") {
-                setActiveTab(urlTab as Tab);
+              if (urlTab && isFeedTab(urlTab)) {
+                setActiveTab(urlTab);
               }
-              
-              // Limpa o parâmetro event/eventId da URL após processar para permitir troca manual
+
               const newUrl = new URL(window.location.href);
               newUrl.searchParams.delete("event");
               newUrl.searchParams.delete("eventId");
-              // Mantém outros parâmetros como "tab" e "post" se existirem
               window.history.replaceState({}, "", newUrl.toString());
-              
+
               return;
             }
           }
-          
-          // Tenta carregar o evento salvo do localStorage
+
           const savedEventId = localStorage.getItem(STORAGE_KEY);
           if (savedEventId) {
             const savedId = parseInt(savedEventId, 10);
             const savedEvent = data.find((event) => event.id === savedId);
             if (savedEvent) {
-              // Se o evento salvo foi desativado e o usuário NÃO é admin/subadmin, troca para um ativo
               if (!savedEvent.is_active && !isAdmin) {
                 const activeEvent = data.find((event) => event.is_active);
                 if (activeEvent) {
@@ -389,19 +206,16 @@ const HomeContent: React.FC = () => {
                   currentEventIdRef.current = activeEvent.id;
                   localStorage.setItem(STORAGE_KEY, activeEvent.id.toString());
                 } else {
-                  // Não há eventos ativos, mas mantém o evento salvo para admin
                   setCurrentEvent(savedEvent);
                   currentEventIdRef.current = savedEvent.id;
                 }
               } else {
-                // Admin/subadmin podem permanecer em eventos desativados
                 setCurrentEvent(savedEvent);
                 currentEventIdRef.current = savedEvent.id;
               }
               return;
             }
           }
-          // Se não encontrou evento salvo ou não existe mais, usa o primeiro ativo ou o primeiro disponível
           const activeEvent = data.find((event) => event.is_active);
           const selectedEvent = activeEvent || (isAdmin ? data[0] : null);
           if (selectedEvent) {
@@ -409,7 +223,6 @@ const HomeContent: React.FC = () => {
             currentEventIdRef.current = selectedEvent.id;
           }
         } else {
-          // Não há eventos disponíveis
           setEventsLoaded(true);
         }
       } catch {
@@ -418,34 +231,28 @@ const HomeContent: React.FC = () => {
       }
     };
 
-    // Carrega eventos e perfil em paralelo
     Promise.all([fetchEvents(), fetchProfile()]);
 
-    // Verifica quando a página/aba fica visível
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible") {
         checkAndUpdateEvents();
       }
     };
-
-    // Verifica quando a janela ganha foco
     const handleFocus = () => {
       checkAndUpdateEvents();
     };
 
-    // Adiciona listeners
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
 
-    // Cleanup
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
       window.removeEventListener("scroll", onScroll);
     };
   }, [router, isAdmin, authReady, checkAndUpdateEvents, activeTab]);
 
-  // Se não há eventos ativos disponíveis para usuário não-admin, mostra Evento Indisponível
+  // Se não há eventos ativos para usuário não-admin, mostra Evento Indisponível
   if (eventsLoaded && !currentEvent) {
     const hasActiveEvents = events.some((event) => event.is_active);
     if (!isAdmin && !hasActiveEvents) {
@@ -453,110 +260,57 @@ const HomeContent: React.FC = () => {
     }
   }
 
-  // Todas as abas usam fundo por tema de evento.
-  const pageBackgroundSx = currentEvent
-    ? getEventBackgroundSx(currentEvent)
-    : getEventBackgroundSxByKey(storedBrandKey);
-  const currentTheme = getEventTheme(currentEvent);
+  const handleTabChange = (newTab: FeedTab) => {
+    setActiveTab(newTab);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", newTab);
+    window.history.replaceState({}, "", url.toString());
+  };
 
-  // Mostra skeleton até que tanto o evento quanto o perfil estejam carregados
+  const handleSelectEvent = (event: EventResponse) => {
+    setCurrentEvent(event);
+    currentEventIdRef.current = event.id;
+    localStorage.setItem(STORAGE_KEY, event.id.toString());
+  };
+
+  // Skeleton enquanto carrega evento + perfil
   if (!currentEvent || !profileLoaded) {
     return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          ...pageBackgroundSx,
-          paddingBottom: "72px",
-        }}
-      >
-        {/* Header Skeleton */}
-        <Box
-          sx={{
-            padding: 2,
-            borderBottom: "solid 1px rgba(255,255,255,0.2)",
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box display="flex" alignItems="center" gap={1}>
-              <Skeleton
-                variant="rectangular"
-                width={40}
-                height={40}
-                sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 1 }}
-              />
-              <Skeleton
-                variant="text"
-                width={150}
-                height={32}
-                sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-              />
+      <Box sx={{ minHeight: "100vh", backgroundColor: "#282828", pb: "100px" }}>
+        <Sidebar />
+        <Box sx={{ ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` } }}>
+          <Skeleton
+            variant="rectangular"
+            width="100%"
+            height={84}
+            sx={{ bgcolor: "rgba(255,255,255,0.06)" }}
+          />
+          <Box sx={{ p: 2 }}>
+            <Skeleton variant="rectangular" width="100%" height={98} sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: 0 }} />
+            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton
+                  key={i}
+                  variant="rectangular"
+                  width={93}
+                  height={29}
+                  sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px" }}
+                />
+              ))}
             </Box>
             <Skeleton
-              variant="circular"
-              width={40}
-              height={40}
-              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-            />
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 0.4,
-            }}
-          >
-            <Skeleton
-              variant="text"
-              width={200}
-              height={24}
-              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-            />
-            <Skeleton
-              variant="text"
-              width={120}
-              height={20}
-              sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
-            />
-          </Box>
-        </Box>
-
-        {/* Tabs Skeleton */}
-        <Box sx={{ display: "flex", gap: 1, padding: 2 }}>
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton
-              key={i}
               variant="rectangular"
-              width={100}
-              height={36}
-              sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: "999px" }}
+              width="100%"
+              height={200}
+              sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px", mt: 2 }}
             />
-          ))}
-        </Box>
-
-        {/* Content Skeleton */}
-        <Box padding={2}>
-          <Skeleton
-            variant="rectangular"
-            width="100%"
-            height={200}
-            sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2, mb: 2 }}
-          />
-          <Skeleton
-            variant="rectangular"
-            width="100%"
-            height={150}
-            sx={{ bgcolor: "rgba(255,255,255,0.1)", borderRadius: 2 }}
-          />
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height={150}
+              sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px", mt: 2 }}
+            />
+          </Box>
         </Box>
       </Box>
     );
@@ -564,131 +318,112 @@ const HomeContent: React.FC = () => {
 
   return (
     <>
-      <Box
-        sx={{
-          minHeight: "100vh",
-          ...pageBackgroundSx,
-          paddingBottom: "72px", // espaço pro rodapé
-        }}
-      >
-        {/* Header com nome, foto e data */}
-        <Box className={shouldAnimate ? "slide-up-animation" : ""}>
-          <HomeHeader
-            event={currentEvent}
+      <Box sx={{ minHeight: "100vh", backgroundColor: "#282828" }}>
+        <Sidebar />
+
+        <Box
+          component="main"
+          sx={{
+            ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
+            pb: "100px",
+          }}
+        >
+          <HomeScreenHeader
             events={events}
             currentEvent={currentEvent}
             onSelectEvent={handleSelectEvent}
-            profile={profile}
           />
-        </Box>
 
-        {/* Tabs */}
-        <Box className={shouldAnimate ? "slide-up-delay-1" : ""}>
-          <HomeTabs
-            active={activeTab}
-            onChange={(newTab) => {
-              setActiveTab(newTab);
-              // Atualiza a URL para refletir a aba selecionada, mas não força navegação
-              const url = new URL(window.location.href);
-              url.searchParams.set("tab", newTab);
-              window.history.replaceState({}, "", url.toString());
+          <SponsorCarousel banners={getMockSponsors()} edgeToEdge />
+
+          <Box
+            sx={{
+              backgroundColor: "#282828",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "stretch",
+              justifyContent: "center",
+              gap: "12px",
+              py: "14px",
+              mb: "24px",
             }}
-            eventType={currentEvent?.event_type}
-            activeColor={currentTheme.tabActiveColor}
-          />
-        </Box>
-
-        {/* Conteúdo baseado na aba selecionada */}
-        {activeTab === "home" && currentEvent && (
-          <>
-            <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-              <AdBanner isFirst={true} eventId={currentEvent.id} />
-            </Box>
-            <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
-              <NewsFeed eventId={currentEvent.id} event={currentEvent} />
-            </Box>
-          </>
-        )}
-        {activeTab === "eventos" && currentEvent && (
-          <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <EventDetails event={currentEvent} />
-          </Box>
-        )}
-
-        {activeTab === "mapa" && currentEvent && (
-          <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <EventMap event={currentEvent} />
-          </Box>
-        )}
-
-        {activeTab === "lineup" && currentEvent && (
-          <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <LineUp eventId={currentEvent.id} event={currentEvent} />
-          </Box>
-        )}
-
-        {activeTab === "foto" && currentEvent && (
-          <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            <PhotoAI eventId={currentEvent.id} event={currentEvent} />
-          </Box>
-        )}
-
-        {activeTab === "enredo" && currentEvent && (
-          <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-            {currentEvent.event_type === "world_cup" || currentEvent.brand_key === "n1_torcida" ? (
-              <WorldCupGames eventId={currentEvent.id} />
-            ) : (
-              <Enredo eventId={currentEvent.id} spotifyPlaylistUrl={currentEvent.spotify_playlist_url} event={currentEvent} />
-            )}
-          </Box>
-        )}
-      </Box>
-      <BottomNav activeColor={currentTheme.footerActiveColor} eventId={currentEvent?.id} />
-
-      {/* CAMISETAS - comentado temporariamente, reativar quando necessário
-      <Dialog
-        open={shirtReserveOpen}
-        onClose={() => setShirtReserveOpen(false)}
-        PaperProps={{ sx: { borderRadius: 3, maxWidth: 420, mx: 2 } }}
-      >
-        <DialogTitle sx={{ fontWeight: 800, pr: 4 }}>
-          Reserva de camiseta
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2, lineHeight: 1.6 }}>
-            A reserva de camisetas é somente para quem comprou o ingresso para participar do evento
-            N1. Ao continuar, você confirma que está elegível para reservar conforme as regras do
-            evento.
-          </Typography>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={shirtTicketAck}
-                onChange={(_, c) => setShirtTicketAck(c)}
-                color="success"
-              />
-            }
-            label="Li e comprovo que comprei o ingresso para o evento N1"
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setShirtReserveOpen(false)} color="inherit">
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            disabled={!shirtTicketAck}
-            onClick={() => {
-              setShirtReserveOpen(false);
-              router.push("/pages/user/tshirt-reservation");
-            }}
-            sx={{ fontWeight: 700 }}
           >
-            Continuar
-          </Button>
-        </DialogActions>
-      </Dialog>
-      */}
+            <FeedTabs active={activeTab} onChange={handleTabChange} />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              style={{ transformOrigin: "left" }}
+            >
+              <RainbowDivider />
+            </motion.div>
+          </Box>
+
+          {/* Conteúdo da aba */}
+          {activeTab === "all" && currentEvent && (
+            <NewsFeed eventId={currentEvent.id} event={currentEvent} />
+          )}
+
+          {activeTab === "games" && currentEvent && (
+            <WorldCupGames eventId={currentEvent.id} />
+          )}
+
+          {(activeTab === "bolao" || activeTab === "stickers") && (
+            <>
+              <BrazilDivider />
+              <Box sx={{ display: "flex", justifyContent: "center", px: 2 }}>
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.4, type: "spring", bounce: 0.3 }}
+                  style={{ width: "100%", maxWidth: 480 }}
+                >
+                  <Box
+                    className="glass-green"
+                    sx={{
+                      mx: 0,
+                      mt: 4,
+                      mb: 4,
+                      p: 4,
+                      borderRadius: "15px",
+                      textAlign: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 2,
+                    }}
+                  >
+                    <SportsSoccerOutlinedIcon sx={{ fontSize: 56, color: "#009440" }} />
+                    <Typography
+                      sx={{
+                        color: "#FFFFFF",
+                        fontFamily: '"Montserrat", sans-serif',
+                        fontWeight: 700,
+                        fontSize: "1.125rem",
+                      }}
+                    >
+                      Em breve.
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: "rgba(255,255,255,0.7)",
+                        fontFamily: '"Roboto", sans-serif',
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      Aguarde a Copa 2026.
+                    </Typography>
+                  </Box>
+                </motion.div>
+              </Box>
+              <BrazilDivider />
+            </>
+          )}
+        </Box>
+      </Box>
+
+      <BottomNav />
     </>
   );
 };

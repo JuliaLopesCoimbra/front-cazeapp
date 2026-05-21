@@ -25,13 +25,13 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "media.api-sports.io",
+        hostname: "d49vg2iyw85wb.cloudfront.net",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "flagcdn.com",
-        pathname: "/**",
+        hostname: "www.figma.com",
+        pathname: "/api/mcp/asset/**",
       },
     ],
     unoptimized: false,

@@ -45,17 +45,21 @@ import { deactivateEvent } from "@/app/services/events/eventAppService";
 import { getEventBrandKey, getEventTheme } from "@/app/utils/eventBranding";
 import ActivateEventModal from "@/app/components/admin/events/ActivateEventModal";
 import DeactivateEventModal from "@/app/components/admin/events/DeactivateEventModal";
+import CazeMenuButton from "@/app/components/layout/CazeMenuButton";
 
 interface Props {
   events: EventResponse[];
   currentEvent: EventResponse | null;
   onSelectEvent: (event: EventResponse) => void;
+  /** "caze" = botão com borda arco-íris (home); "default" = ícone simples */
+  triggerVariant?: "default" | "caze";
 }
 
 export default function HamburgerMenu({
   events,
   currentEvent,
   onSelectEvent,
+  triggerVariant = "default",
 }: Props) {
   const { isAdmin, isAdminMaster, isSubadmin, logout } = useAuth();
   const [open, setOpen] = useState(false);
@@ -135,9 +139,13 @@ export default function HamburgerMenu({
 
   return (
     <>
-      <IconButton onClick={() => setOpen(true)}>
-        <MenuIcon sx={{ color: "white" }} />
-      </IconButton>
+      {triggerVariant === "caze" ? (
+        <CazeMenuButton onClick={() => setOpen(true)} />
+      ) : (
+        <IconButton onClick={() => setOpen(true)} aria-label="Abrir menu">
+          <MenuIcon sx={{ color: "white" }} />
+        </IconButton>
+      )}
       <Drawer
         open={open}
         onClose={() => setOpen(false)}

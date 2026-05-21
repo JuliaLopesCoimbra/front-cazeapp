@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, IconButton, Badge } from "@mui/material";
+import { Box, Badge } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
@@ -13,17 +13,19 @@ import PersonIcon from "@mui/icons-material/Person";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { RAINBOW_GRADIENT_CSS } from "@/app/constants/rainbowGradient";
+import RainbowGradientDefs from "@/app/components/shared/RainbowGradientDefs";
+import { RAINBOW_ICON_GRADIENT_ID } from "@/app/constants/rainbowGradient";
 
 interface BottomNavProps {
   bolaoHasPendingBets?: boolean;
   stickersHasUnopened?: number;
-  /** @deprecated — ignorado, mantido para compatibilidade com páginas legadas */
   activeColor?: string;
-  /** @deprecated — ignorado, mantido para compatibilidade com páginas legadas */
   eventId?: number;
 }
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   {
     label: "Home",
     path: "/pages/user/home",
@@ -56,6 +58,7 @@ const NAV_ITEMS = [
   },
 ] as const;
 
+/** Navbar flutuante com borda arco-íris e ícone ativo em gradiente */
 export default function BottomNav({
   bolaoHasPendingBets = false,
   stickersHasUnopened = 0,
@@ -82,80 +85,102 @@ export default function BottomNav({
     return 0;
   };
 
-  return (
-    <Box
-      role="navigation"
-      aria-label="Navegação principal"
-      sx={{
-        position: "fixed",
-        bottom: shrunk
-          ? "calc(env(safe-area-inset-bottom) + 20px)"
-          : "calc(env(safe-area-inset-bottom) + 32px)",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: shrunk ? "55%" : "74%",
-        maxWidth: 480,
-        minWidth: 240,
-        height: shrunk ? 48 : 60,
-        backgroundColor: shrunk ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.92)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        display: "flex",
-        justifyContent: "space-around",
-        alignItems: "center",
-        borderRadius: "999px",
-        border: "1px solid rgba(245,201,0,0.15)",
-        boxShadow: shrunk
-          ? "0 2px 12px rgba(0,0,0,0.4)"
-          : "0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,201,0,0.08)",
-        zIndex: 9999,
-        transition:
-          "bottom 0.3s ease, width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease",
-        touchAction: "none",
-        overflow: "hidden",
-      }}
-    >
-      {NAV_ITEMS.map((item) => {
-        const isActive = pathname?.startsWith(item.path) ?? false;
-        const badgeCount = getBadge(item.path);
-        const Icon = isActive ? item.IconActive : item.IconInactive;
+  const dockWidth = shrunk ? "min(72%, 320px)" : "min(74%, 360px)";
+  const dockHeight = shrunk ? 48 : 60;
 
-        return (
-          <Badge
-            key={item.path}
-            badgeContent={badgeCount || undefined}
-            sx={{
-              "& .MuiBadge-badge": {
-                backgroundColor: "#E63946",
-                color: "#fff",
-                fontSize: "10px",
-                minWidth: "16px",
-                height: "16px",
-                top: 4,
-                right: 4,
-              },
-            }}
-          >
-            <IconButton
-              aria-label={item.label}
-              onClick={() => router.push(item.path)}
-              sx={{
-                color: isActive ? "#F5C900" : "#9E9E9E",
-                padding: shrunk ? "6px" : "10px",
-                "& svg": {
-                  fontSize: isActive
-                    ? shrunk ? 22 : 26
-                    : shrunk ? 18 : 22,
-                  transition: "font-size 0.3s ease, color 0.2s ease",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              <Icon />
-            </IconButton>
-          </Badge>
-        );
-      })}
-    </Box>
+  return (
+    <>
+      <RainbowGradientDefs />
+      <Box
+        role="navigation"
+        aria-label="Navegação principal"
+        sx={{
+          position: "fixed",
+          bottom: shrunk
+            ? "calc(env(safe-area-inset-bottom) + 20px)"
+            : "calc(env(safe-area-inset-bottom) + 32px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: dockWidth,
+          maxWidth: 480,
+          minWidth: 240,
+          p: "2px",
+          borderRadius: "999px",
+          background: RAINBOW_GRADIENT_CSS,
+          boxShadow: "0 4px 24px rgba(0, 0, 0, 0.45)",
+          zIndex: 9999,
+          touchAction: "none",
+          transition: "bottom 0.3s ease, width 0.3s ease",
+          display: { xs: "block", md: "none" },
+        }}
+      >
+        <Box
+          sx={{
+            height: dockHeight,
+            borderRadius: "999px",
+            backgroundColor: "#363636",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-around",
+            px: 1,
+          }}
+        >
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname?.startsWith(item.path) ?? false;
+            const badgeCount = getBadge(item.path);
+            const Icon = isActive ? item.IconActive : item.IconInactive;
+            const iconSize = isActive ? (shrunk ? 22 : 26) : shrunk ? 18 : 22;
+
+            return (
+              <Badge
+                key={item.path}
+                badgeContent={badgeCount || undefined}
+                sx={{
+                  "& .MuiBadge-badge": {
+                    backgroundColor: "#E52554",
+                    color: "#fff",
+                    fontSize: "10px",
+                    minWidth: "16px",
+                    height: "16px",
+                    top: 4,
+                    right: 4,
+                  },
+                }}
+              >
+                <motion.button
+                  type="button"
+                  aria-label={item.label}
+                  aria-current={isActive ? "page" : undefined}
+                  onClick={() => router.push(item.path)}
+                  whileTap={{ scale: 0.85 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: shrunk ? "6px" : "10px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon
+                    sx={{
+                      fontSize: iconSize,
+                      color: isActive ? "transparent" : "#9E9E9E",
+                      ...(isActive && {
+                        "& path": {
+                          fill: `url(#${RAINBOW_ICON_GRADIENT_ID})`,
+                        },
+                      }),
+                    }}
+                  />
+                </motion.button>
+              </Badge>
+            );
+          })}
+        </Box>
+      </Box>
+    </>
   );
 }

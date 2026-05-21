@@ -22,11 +22,6 @@ const MOCK_ADS: AdPlacement[] = [
     alt_text: "Maturatta - Oferta Exclusiva N1",
   },
   {
-    image_url: "/ads/3.png",
-    redirect_url: "https://www.pernod-ricard.com",
-    alt_text: "Brahma",
-  },
-  {
     image_url: "/ads/5.png",
     redirect_url: "https://www.pernod-ricard.com/pt/locations/brasil",
     alt_text: "Ballantines",
@@ -39,7 +34,7 @@ const getRandomMockAd = (): AdPlacement => {
 };
 
 const getFirstAd = (): AdPlacement => {
-  return MOCK_ADS.find(ad => ad.image_url === "/ads/3.png") || MOCK_ADS[2];
+  return MOCK_ADS[0];
 };
 
 interface AdBannerProps {
