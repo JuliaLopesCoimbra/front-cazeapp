@@ -158,18 +158,18 @@ export function getMockSponsors(): SponsorBanner[] {
   return [
     {
       id: "sponsor-coca-cola",
-      image_url: "/assets/casa-cazetv/sponsor-cocacola.png",
+      image_url: "/assets/figma/sponsor-banner.png",
       sponsor_name: "Coca-Cola Zero",
       link_url: "https://www.coca-cola.com.br",
     },
     {
       id: "sponsor-placeholder-2",
-      image_url: "/assets/casa-cazetv/sponsor-cocacola.png",
+      image_url: "/assets/figma/sponsor-banner.png",
       sponsor_name: "Patrocinador 2",
     },
     {
       id: "sponsor-placeholder-3",
-      image_url: "/assets/casa-cazetv/sponsor-cocacola.png",
+      image_url: "/assets/figma/sponsor-banner.png",
       sponsor_name: "Patrocinador 3",
     },
   ];

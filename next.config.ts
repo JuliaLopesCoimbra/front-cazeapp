@@ -23,6 +23,16 @@ const nextConfig: NextConfig = {
         hostname: "d2dbwpuqh2i6wo.cloudfront.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "d49vg2iyw85wb.cloudfront.net",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.figma.com",
+        pathname: "/api/mcp/asset/**",
+      },
     ],
     unoptimized: false,
   },

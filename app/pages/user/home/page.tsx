@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Box, Skeleton, Typography } from "@mui/material";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
-import TopBar from "@/app/components/layout/TopBar";
+import HomeScreenHeader from "@/app/components/home/HomeScreenHeader";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
@@ -267,14 +267,24 @@ const HomeContent: React.FC = () => {
     window.history.replaceState({}, "", url.toString());
   };
 
+  const handleSelectEvent = (event: EventResponse) => {
+    setCurrentEvent(event);
+    currentEventIdRef.current = event.id;
+    localStorage.setItem(STORAGE_KEY, event.id.toString());
+  };
+
   // Skeleton enquanto carrega evento + perfil
   if (!currentEvent || !profileLoaded) {
     return (
       <Box sx={{ minHeight: "100vh", backgroundColor: "#282828", pb: "100px" }}>
         <Sidebar />
         <Box sx={{ ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` } }}>
-          <TopBar />
-          <BrazilDivider />
+          <Skeleton
+            variant="rectangular"
+            width="100%"
+            height={84}
+            sx={{ bgcolor: "rgba(255,255,255,0.06)" }}
+          />
           <Box sx={{ p: 2 }}>
             <Skeleton variant="rectangular" width="100%" height={98} sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: 0 }} />
             <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
@@ -318,23 +328,37 @@ const HomeContent: React.FC = () => {
             pb: "100px",
           }}
         >
-          <TopBar hideDivider={false} />
+          <HomeScreenHeader
+            events={events}
+            currentEvent={currentEvent}
+            onSelectEvent={handleSelectEvent}
+          />
 
           <SponsorCarousel banners={getMockSponsors()} edgeToEdge />
 
-          <BrazilDivider />
-
-          <FeedTabs active={activeTab} onChange={handleTabChange} />
-
-          <motion.div
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            style={{ transformOrigin: "left" }}
+          <Box
+            sx={{
+              backgroundColor: "#282828",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "stretch",
+              justifyContent: "center",
+              gap: "12px",
+              py: "14px",
+              mb: "24px",
+            }}
           >
-            <RainbowDivider />
-          </motion.div>
+            <FeedTabs active={activeTab} onChange={handleTabChange} />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              style={{ transformOrigin: "left" }}
+            >
+              <RainbowDivider />
+            </motion.div>
+          </Box>
 
           {/* Conteúdo da aba */}
           {activeTab === "all" && currentEvent && (

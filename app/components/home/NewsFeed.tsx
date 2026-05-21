@@ -15,6 +15,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PostGlassCard from "@/app/components/feed/PostGlassCard";
+import CopaStoryPostCard from "@/app/components/feed/CopaStoryPostCard";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/context/AuthContext";
 import { useFeedCache } from "@/app/context/FeedCacheContext";
@@ -23,7 +24,6 @@ import { EventResponse } from "@/app/services/events/eventAppService";
 import EmptyNews from "./EmptyNews";
 import { useRouter } from "next/navigation";
 import AdBanner from "../ads/AdBanner";
-import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import { getEventBrandKey } from "@/app/utils/eventBranding";
 
 interface Props {
@@ -79,6 +79,7 @@ export default function NewsFeed({ eventId, event }: Props) {
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   const isTorcida = getEventBrandKey(event) === "n1_torcida";
+  const isWorldCup = event?.event_type === "world_cup";
 
   const loadNews = async (reset = false) => {
     if (loading) return;
@@ -349,13 +350,14 @@ export default function NewsFeed({ eventId, event }: Props) {
   };
 
   return (
-    <Box 
-      padding={{ xs: 2, md: 3, lg: 4 }}
+    <Box
       key={authVersion}
       sx={{
         maxWidth: { xs: "100%", md: "800px", lg: "900px" },
         margin: { xs: 0, md: "0 auto" },
-        width: { xs: "100%", md: "100%" },
+        width: "100%",
+        pt: 0,
+        pb: 2,
       }}
     >
       {loading && news.length === 0 && <FeaturedNewsSkeleton isTorcida={isTorcida} />}
@@ -363,7 +365,7 @@ export default function NewsFeed({ eventId, event }: Props) {
       {!loading && news.length === 0 && <EmptyNews />}
 
       {news.length > 0 && (
-        <Box display="flex" flexDirection="column">
+        <Box display="flex" flexDirection="column" sx={{ gap: "16px" }}>
           {news.map((item, index) => (
             <Box key={item.id}>
               <motion.div
@@ -372,6 +374,24 @@ export default function NewsFeed({ eventId, event }: Props) {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
+                {isWorldCup ? (
+                  <CopaStoryPostCard
+                    newsId={item.id}
+                    authorName={item.author?.name || "@casacazetv"}
+                    authorPhoto={item.author?.profile_photo}
+                    caption={item.title}
+                    body={item.content}
+                    createdAtLabel={formatDate(item.created_at)}
+                    likesCount={item.likes_count ?? 0}
+                    commentsCount={item.comments_count ?? 0}
+                    onClick={() => handleNewsClick(item.id)}
+                    postArtUrl={
+                      item.images && item.images.length > 0
+                        ? item.images[0].image_url
+                        : undefined
+                    }
+                  />
+                ) : (
                 <Card
                   onClick={() => handleNewsClick(item.id)}
                   sx={{
@@ -386,7 +406,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                   }}
                 >
                   {/* Header: avatar + @nome + menu (Liquid Glass com borda gradiente Brasil) */}
-                  <PostGlassCard className="mx-2 mt-2">
+                  <PostGlassCard className="mx-[14px] mt-2" border="green">
                     <Box
                       sx={{
                         display: "flex",
@@ -500,7 +520,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                       </Box>
 
                       {/* Caption overlay com título — Liquid Glass + borda gradiente Brasil */}
-                      <PostGlassCard className="absolute bottom-3 left-3 max-w-[68%]">
+                      <PostGlassCard className="absolute bottom-3 left-3 max-w-[68%]" blurPx={8}>
                         <Box
                           sx={{
                             display: "flex",
@@ -560,19 +580,8 @@ export default function NewsFeed({ eventId, event }: Props) {
                     </PostGlassCard>
                   )}
                 </Card>
+                )}
               </motion.div>
-
-              {index < news.length - 1 && (
-                <motion.div
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
-                  style={{ transformOrigin: "left", margin: "12px 0" }}
-                >
-                  <RainbowDivider />
-                </motion.div>
-              )}
 
               {/* Ad a cada 3 posts */}
               {(index + 1) % 3 === 0 && index !== news.length - 1 && (

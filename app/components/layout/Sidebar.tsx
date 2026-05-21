@@ -6,6 +6,8 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { NAV_ITEMS } from "./BottomNav";
 import BrazilDivider from "./BrazilDivider";
+import RainbowGradientDefs from "@/app/components/shared/RainbowGradientDefs";
+import { RAINBOW_GRADIENT_CSS } from "@/app/constants/rainbowGradient";
 
 interface SidebarProps {
   bolaoHasPendingBets?: boolean;
@@ -28,40 +30,42 @@ export default function Sidebar({
   };
 
   return (
-    <Box
-      component="nav"
-      aria-label="Navegação principal"
-      sx={{
-        display: { xs: "none", md: "flex" },
-        position: "fixed",
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: `${SIDEBAR_WIDTH}px`,
-        backgroundColor: "#282828",
-        borderRight: "1px solid rgba(0,148,64,0.25)",
-        flexDirection: "column",
-        zIndex: 1200,
-      }}
-    >
-      {/* Logo + título no topo */}
+    <>
+      <RainbowGradientDefs />
       <Box
+        component="nav"
+        aria-label="Navegação principal"
         sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          px: 3,
-          py: 3,
+          display: { xs: "none", md: "flex" },
+          position: "fixed",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: `${SIDEBAR_WIDTH}px`,
+          backgroundColor: "#282828",
+          borderRight: "1px solid rgba(0, 148, 64, 0.2)",
+          flexDirection: "column",
+          zIndex: 1200,
         }}
       >
-        <Image
-          src="/assets/casa-cazetv/logo-circle.png"
-          alt="Casa CazéTV"
-          width={36}
-          height={34}
-          priority
-          style={{ objectFit: "contain" }}
-        />
+        {/* Logo + título no topo */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            px: 3,
+            py: 3,
+          }}
+        >
+          <Image
+            src="/assets/figma/logo-top.png"
+            alt="Casa CazéTV"
+            width={36}
+            height={34}
+            priority
+            style={{ objectFit: "contain" }}
+          />
         <Typography
           sx={{
             fontFamily: '"Montserrat", Arial, sans-serif',
@@ -91,32 +95,44 @@ export default function Sidebar({
               onClick={() => router.push(item.path)}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
-              className={isActive ? "glass-green" : undefined}
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05, duration: 0.25, ease: "easeOut" }}
-              whileHover={isActive ? undefined : { backgroundColor: "rgba(0,148,64,0.08)" }}
+              whileHover={isActive ? undefined : { backgroundColor: "rgba(0, 148, 64, 0.08)" }}
               whileTap={{ scale: 0.98 }}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 16,
-                padding: "16px 24px",
-                borderLeft: isActive ? "4px solid #009440" : "4px solid transparent",
+                padding: "14px 20px",
+                margin: "4px 12px",
+                borderRadius: 12,
+                borderLeft: isActive ? "3px solid #009440" : "3px solid transparent",
+                background: isActive
+                  ? "linear-gradient(90deg, rgba(0,148,64,0.08) 0%, rgba(255,203,0,0.04) 76.923%)"
+                  : "transparent",
+                boxShadow: isActive
+                  ? "inset 0 0 0 1px rgba(0,148,64,0.22)"
+                  : "none",
                 color: isActive ? "#FFFFFF" : "#9E9E9E",
                 cursor: "pointer",
                 borderRight: "none",
                 borderTop: "none",
                 borderBottom: "none",
                 textAlign: "left",
-                width: "100%",
-                transition: "background 0.2s ease, color 0.2s ease",
+                width: "calc(100% - 24px)",
+                transition: "background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease",
               }}
             >
               <Icon
-                style={{
+                sx={{
                   fontSize: 24,
-                  color: isActive ? "#009440" : "#9E9E9E",
+                  color: isActive ? "transparent" : "#9E9E9E",
+                  ...(isActive && {
+                    "& path": {
+                      fill: "url(#caze-rainbow-icon)",
+                    },
+                  }),
                 }}
               />
               <Typography
@@ -156,7 +172,21 @@ export default function Sidebar({
           );
         })}
       </Box>
+
+      <Box
+        sx={{
+          mt: "auto",
+          mx: 2,
+          mb: 2,
+          height: 2,
+          borderRadius: 1,
+          backgroundImage: RAINBOW_GRADIENT_CSS,
+          opacity: 0.85,
+        }}
+        aria-hidden
+      />
     </Box>
+    </>
   );
 }
 

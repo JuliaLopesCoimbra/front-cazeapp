@@ -74,7 +74,7 @@ export default function TopBar({
             </IconButton>
           ) : (
             <Image
-              src="/assets/casa-cazetv/logo-circle.png"
+              src="/assets/figma/logo-top.png"
               alt="Casa CazéTV"
               width={32}
               height={30}
@@ -107,7 +107,7 @@ export default function TopBar({
             </Typography>
           ) : (
             <Image
-              src="/assets/casa-cazetv/mascot-center.png"
+              src="/assets/figma/mascot-center.png"
               alt="Mascote Casa CazéTV"
               width={89}
               height={50}
