@@ -15,7 +15,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import FrostedGlass from "@/app/components/shared/FrostedGlass";
-import { NAV_DOCK_GLASS, NAV_DOCK_GLASS_SX } from "@/app/constants/designTokens";
+import { NAV_DOCK_GLASS, COLORS } from "@/app/constants/designTokens";
 import { useMobileMenu } from "@/app/context/MobileMenuContext";
 
 /** Abaixo do Drawer do menu (1400) e da sidebar desktop (1200) */
@@ -64,7 +64,7 @@ export const NAV_ITEMS = [
 /** Scroll (px) até compactação total */
 const SCROLL_COMPACT_RANGE = 120;
 
-const SPRING = { stiffness: 520, damping: 36, mass: 0.32 };
+const SPRING = { stiffness: 400, damping: 32, mass: 0.32 };
 
 function easeOutCubic(t: number): number {
   return 1 - (1 - t) ** 3;
@@ -151,11 +151,15 @@ export default function BottomNav({
       <FrostedGlass
         borderRadius={999}
         blurPx={NAV_DOCK_GLASS.blurPx}
-        fillAlpha={NAV_DOCK_GLASS.fillAlpha}
+        fillAlpha={0.04}
         noPadding
         sx={{
           width: "100%",
-          ...NAV_DOCK_GLASS_SX,
+          backgroundColor: "rgba(245, 239, 222, 0.86)",
+          backdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.4)`,
+          WebkitBackdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.4)`,
+          border: "1px solid #e4d2b7",
+          boxShadow: "0 -2px 12px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.08)",
         }}
       >
         <motion.div
@@ -193,7 +197,7 @@ export default function BottomNav({
                   borderRadius: "50%",
                   top: 5,
                   right: 5,
-                  border: "1.5px solid rgba(40, 40, 40, 0.85)",
+                  border: "1.5px solid #e4d2b7",
                 },
               }}
             >
@@ -216,7 +220,7 @@ export default function BottomNav({
                   height: activeSlot,
                   borderRadius: activeRadius,
                   background: isActive
-                    ? "rgba(255, 255, 255, 0.14)"
+                    ? COLORS.yellow
                     : "transparent",
                 }}
               >
@@ -230,7 +234,7 @@ export default function BottomNav({
                   <Icon
                     sx={{
                       fontSize: 24,
-                      color: isActive ? "#FFFFFF" : "rgba(255, 255, 255, 0.5)",
+                      color: isActive ? COLORS.black : COLORS.muted,
                     }}
                   />
                 </motion.span>

@@ -7,12 +7,13 @@ import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import HomeScreenHeader from "@/app/components/home/HomeScreenHeader";
 import HeroMatchBanner from "@/app/components/home/HeroMatchBanner";
 import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
-import { LAYOUT, PAGE_GLASS_SURFACE, SPACING } from "@/app/constants/designTokens";
+import { COLORS, LAYOUT, PAGE_GLASS_SURFACE, SPACING } from "@/app/constants/designTokens";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import FeedTabs, { type FeedTab } from "@/app/components/home/FeedTabs";
 import { motion } from "framer-motion";
+import StickerBubble from "@/app/components/shared/StickerBubble";
 import SponsorCarousel, { getMockSponsors } from "@/app/components/feed/SponsorCarousel";
 import BottomNav from "@/app/components/layout/BottomNav";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
@@ -434,35 +435,57 @@ const HomeContent: React.FC = () => {
                   style={{ width: "100%", maxWidth: 480 }}
                 >
                   <Box
-                    className="glass-green"
                     sx={{
                       mx: 0,
                       mt: 4,
                       mb: 4,
                       p: 4,
                       borderRadius: "15px",
+                      background: "#f5efde",
+                      border: "1.5px solid #e4d2b7",
+                      borderLeft: `3px solid ${COLORS.green}`,
+                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
                       textAlign: "center",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
                       gap: 2,
+                      position: "relative",
+                      overflow: "hidden",
                     }}
                   >
-                    <SportsSoccerOutlinedIcon sx={{ fontSize: 56, color: "#009440" }} />
+                    <StickerBubble color="yellow" size={96} sx={{ position: "absolute", top: -24, right: -24, opacity: 0.12 }} />
+                    <StickerBubble color="pink"   size={64} sx={{ position: "absolute", bottom: -16, left: -16, opacity: 0.10 }} />
+                    <SportsSoccerOutlinedIcon sx={{ fontSize: 56, color: COLORS.green }} />
                     <Typography
                       sx={{
-                        color: "#0A0A0A",
-                        fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-                        fontWeight: 700,
-                        fontSize: "1.125rem",
+                        fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+                        fontWeight: 400,
+                        fontSize: "1.5rem",
+                        letterSpacing: "0.04em",
+                        lineHeight: 1,
+                        color: COLORS.blue,
                       }}
                     >
-                      Em breve.
+                      COPA 2026
                     </Typography>
                     <Typography
                       sx={{
-                        color: "rgba(0,0,0,0.55)",
-                        fontFamily: 'var(--font-inter), Inter, sans-serif',
+                        fontFamily: 'var(--font-headline), Anton, sans-serif',
+                        fontWeight: 400,
+                        fontSize: "1.5rem",
+                        letterSpacing: "0.02em",
+                        lineHeight: 1,
+                        color: COLORS.green,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      EM BREVE
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: COLORS.muted,
+                        fontFamily: 'var(--font-body), Inter, sans-serif',
                         fontSize: "0.875rem",
                       }}
                     >

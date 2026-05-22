@@ -7,11 +7,7 @@ import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/app/constants/designToken
 
 export type { FeedTab } from "@/app/components/home/FeedTabs.types";
 
-const BRASIL_BORDER_GRADIENT =
-  "linear-gradient(90deg, #009440 0%, #FFCB00 76.923%)";
-
-const TAB_HEIGHT = 30;
-const TAB_BORDER_WIDTH = 1;
+const TAB_HEIGHT = 32;
 
 interface FeedTabsProps {
   active: FeedTab;
@@ -33,24 +29,18 @@ const TAB_ENTRIES: TabEntry[] = [
 
 function activeTabSx() {
   return {
-    backgroundColor: COLORS.surface,
-    color: COLORS.text,
-    border: `${TAB_BORDER_WIDTH}px solid transparent`,
-    backgroundImage: `linear-gradient(${COLORS.surface}, ${COLORS.surface}), ${BRASIL_BORDER_GRADIENT}`,
-    backgroundOrigin: "border-box",
-    backgroundClip: "padding-box, border-box",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+    backgroundColor: COLORS.yellow,
+    color: COLORS.black,
+    border: "none",
+    boxShadow: "0 2px 8px rgba(246, 196, 0, 0.35)",
   };
 }
 
 function inactiveTabSx() {
   return {
-    backgroundColor: "rgba(255, 255, 255, 0.72)",
+    backgroundColor: "#f5efde",
     color: COLORS.textSecondary,
-    border: `1px solid rgba(0, 0, 0, 0.1)`,
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+    border: "1px solid #e4d2b7",
   };
 }
 

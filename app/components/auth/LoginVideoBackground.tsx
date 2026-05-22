@@ -1,27 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { Box } from "@mui/material";
-import { LOGIN_BG_VIDEO } from "@/app/constants/loginTheme";
+import { LOGIN_BG_IMAGE, LOGIN_BG_SIZE } from "@/app/constants/loginTheme";
 
+const { width: BG_W, height: BG_H } = LOGIN_BG_SIZE;
+
+const BG_SRC = encodeURI(LOGIN_BG_IMAGE);
+
+const LOGIN_BG_FILL = "#F6C400";
+
+/**
+ * Fundo da login — PNG 9∶19,5. `contain` + dimensões da arte: encaixa em ~390×844 sem cortar.
+ */
 export default function LoginVideoBackground() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const play = () => {
-      video.play().catch(() => {
-        /* autoplay blocked — poster/overlay still visible */
-      });
-    };
-
-    play();
-    video.addEventListener("loadeddata", play);
-    return () => video.removeEventListener("loadeddata", play);
-  }, []);
-
   return (
     <Box
       aria-hidden
@@ -30,31 +21,31 @@ export default function LoginVideoBackground() {
         inset: 0,
         zIndex: 0,
         overflow: "hidden",
-        backgroundColor: "#000000",
+        backgroundColor: LOGIN_BG_FILL,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100dvh",
       }}
     >
       <Box
-        component="video"
-        ref={videoRef}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
+        component="img"
+        src={BG_SRC}
+        alt=""
+        decoding="async"
+        fetchPriority="high"
         sx={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
+          display: "block",
+          width: `min(100vw, calc(100dvh * ${BG_W} / ${BG_H}))`,
+          height: `min(100dvh, calc(100vw * ${BG_H} / ${BG_W}))`,
+          maxWidth: "100%",
+          maxHeight: "100dvh",
+          objectFit: "contain",
           objectPosition: "center center",
-          "@media (prefers-reduced-motion: reduce)": {
-            display: "none",
-          },
+          flexShrink: 0,
         }}
-      >
-        <source src={LOGIN_BG_VIDEO} type="video/mp4" />
-      </Box>
+      />
 
-      {/* Overlay — legibilidade do formulário + cores discretas Brasil / Cazé */}
       <Box
         sx={{
           position: "absolute",
@@ -63,48 +54,12 @@ export default function LoginVideoBackground() {
           background: `
             linear-gradient(
               180deg,
-              rgba(0, 0, 0, 0.35) 0%,
-              rgba(0, 0, 0, 0.25) 40%,
-              rgba(0, 0, 0, 0.4) 70%,
-              rgba(0, 0, 0, 0.65) 100%
+              rgba(0, 0, 0, 0.08) 0%,
+              rgba(0, 0, 0, 0.03) 45%,
+              rgba(0, 0, 0, 0.12) 75%,
+              rgba(0, 0, 0, 0.25) 100%
             )
           `,
-        }}
-      />
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background: `
-            radial-gradient(ellipse 80% 50% at 15% 40%, rgba(0, 148, 64, 0.12) 0%, transparent 70%),
-            radial-gradient(ellipse 70% 45% at 88% 25%, rgba(255, 203, 0, 0.1) 0%, transparent 72%),
-            radial-gradient(ellipse 60% 40% at 50% 100%, rgba(0, 85, 184, 0.08) 0%, transparent 65%)
-          `,
-        }}
-      />
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          boxShadow: "inset 0 0 120px rgba(0, 0, 0, 0.65)",
-        }}
-      />
-
-      {/* Fallback estático quando movimento reduzido */}
-      <Box
-        sx={{
-          display: "none",
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "#000000",
-          backgroundImage: "url(/background/fundo-copa.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          "@media (prefers-reduced-motion: reduce)": {
-            display: "block",
-          },
         }}
       />
     </Box>

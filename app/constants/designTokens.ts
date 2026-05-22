@@ -23,7 +23,7 @@ export const LAYOUT = {
   /** Barra superior (logo / menu) — compacta */
   headerToolbar: 40,
   /** Zona mascote + linha Brasil */
-  headerMascotZone: 20,
+  headerMascotZone: 28,
   /** Faixa compacta de jogo no header */
   matchStripHeight: 56,
   /** Padding horizontal padrão */
@@ -34,8 +34,14 @@ export const LAYOUT = {
   feedMaxWidth: 480,
   /** Patrocinador */
   sponsorHeight: 96,
+  /** Mídia do post no feed (story / vertical) */
+  postMediaAspectRatio: "9 / 16",
+  /** Margem lateral mínima do card de post */
+  postCardMarginX: 8,
   /** Touch target mínimo */
   touchTarget: 44,
+  /** Banner HeroMatchBanner */
+  heroMatchBannerHeight: 96,
 } as const;
 
 export const TYPOGRAPHY = {
@@ -117,13 +123,28 @@ export const LIQUID_GLASS_ALPHA = {
 } as const;
 
 export const COLORS = {
-  bg: "#FFF6E8",
-  surface: "#FFFFFF",
-  green: "#009440",
-  yellow: "#F6C400",
-  red: "#E52554",
-  blue: "#0055B8",
-  muted: "#6B6B6B",
-  text: "#0A0A0A",
-  textSecondary: "rgba(0, 0, 0, 0.68)",
+  // Backgrounds
+  bg:          "#FFF6E8",
+  bgDark:      "#282828",
+  surface:     "#FFFFFF",
+  surfaceDark: "#363636",
+
+  // Marca
+  green:    "#009440",
+  yellow:   "#F6C400",
+  red:      "#E52554",
+  blue:     "#173BFF",    // broadcast blue — headlines, banners, match day
+  blueCopa: "#0055B8",    // fundo de posts Copa (mantido separado)
+  pink:     "#FF6FAE",    // stickers CTA, meme bubbles
+  black:    "#000000",
+
+  // Texto — contexto claro (sobre #FFF6E8 / #FFFFFF)
+  muted:         "#6B6B6B",
+  text:          "#0A0A0A",
+  textSecondary: "rgba(0, 0, 0, 0.72)",
+
+  // Texto — contexto escuro (sobre imagens, overlays, fundos sólidos #282828+)
+  textOnDark:          "#FFFFFF",
+  textSecondaryOnDark: "rgba(255, 255, 255, 0.70)",
+  mutedOnDark:         "rgba(255, 255, 255, 0.45)",
 } as const;

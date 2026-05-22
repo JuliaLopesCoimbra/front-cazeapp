@@ -10,21 +10,13 @@ import HeaderMatchStrip from "@/app/components/home/HeaderMatchStrip";
 import BrazilGradientAvatar from "@/app/components/shared/BrazilGradientAvatar";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import type { ProfileResponse } from "@/app/services/profile/profileService";
-import {
-  COLORS,
-  LAYOUT,
-  PAGE_GLASS_SURFACE,
-  SPACING,
-  TYPOGRAPHY,
-} from "@/app/constants/designTokens";
+import { COLORS, LAYOUT, SPACING } from "@/app/constants/designTokens";
 
 const HEADER_AVATAR_SRC = "/assets/figma/avatar-header.png";
 const MASCOT_WIDTH = 76;
 const MASCOT_HEIGHT = 42;
-const ISLAND_ROW_HEIGHT = 36;
-const PROFILE_ROW_HEIGHT = 48;
-const MASCOT_ZONE = 22;
-const AVATAR_SIZE = 40;
+const MASCOT_ZONE = 28;
+const AVATAR_SIZE = 32;
 
 interface HomeScreenHeaderProps {
   events: EventResponse[];
@@ -33,9 +25,6 @@ interface HomeScreenHeaderProps {
   profile?: ProfileResponse | null;
 }
 
-/**
- * Cabeçalho — placar (linha 1), avatar + nome completo (linha 2), mascote.
- */
 export default function HomeScreenHeader({
   events,
   currentEvent,
@@ -44,6 +33,7 @@ export default function HomeScreenHeader({
 }: HomeScreenHeaderProps) {
   const router = useRouter();
   const displayName = profile?.name?.trim() || profile?.email || "Visitante";
+  const firstName = displayName.split(" ")[0];
 
   return (
     <Box
@@ -56,94 +46,78 @@ export default function HomeScreenHeader({
         top: 0,
         zIndex: 1100,
         isolation: "isolate",
-        pt: `${SPACING.md}px`,
-        ...PAGE_GLASS_SURFACE,
-        borderBottom: `1px solid rgba(0, 0, 0, 0.08)`,
-        boxShadow: "0 1px 0 rgba(0, 148, 64, 0.06)",
-        "&::after": {
-          content: '""',
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 1,
-          background: `linear-gradient(90deg, transparent 0%, ${COLORS.green}1A 50%, transparent 100%)`,
-          pointerEvents: "none",
-        },
+        pt: `${SPACING.xl}px`,
+        backgroundColor: COLORS.bg,
       }}
     >
+      {/* ── Linha única: avatar+saudação | placar | hambúrguer ── */}
       <Box
         component="header"
         sx={{
-          display: "flex",
-          flexDirection: "column",
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
           px: `${LAYOUT.pagePaddingX}px`,
+          minHeight: 52,
           mb: `${SPACING.sm}px`,
         }}
       >
+        {/* Coluna esquerda — Avatar + "Olá, nome" */}
+        <Box
+          role="button"
+          tabIndex={0}
+          aria-label="Ir para perfil"
+          onClick={() => router.push("/pages/user/profile")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") router.push("/pages/user/profile");
+          }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 0.75,
+            cursor: "pointer",
+            width: "fit-content",
+            background: "none",
+            border: "none",
+            p: 0,
+          }}
+        >
+          <BrazilGradientAvatar
+            size={AVATAR_SIZE}
+            src={HEADER_AVATAR_SRC}
+            alt={firstName}
+          />
+          <Typography
+            sx={{
+              fontFamily: "var(--font-inter), Inter, sans-serif",
+              fontSize: 11,
+              fontWeight: 500,
+              color: COLORS.muted,
+              lineHeight: 1,
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+            }}
+          >
+            Olá, {firstName}
+          </Typography>
+        </Box>
+
+        {/* Coluna central — placar absolutamente centrado na página */}
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
             justifyContent: "center",
-            minHeight: ISLAND_ROW_HEIGHT,
-            flexShrink: 0,
+            transform: "scale(0.9)",
+            transformOrigin: "center",
           }}
         >
           <HeaderMatchStrip embedded />
         </Box>
 
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            minHeight: PROFILE_ROW_HEIGHT,
-            gap: `${SPACING.sm}px`,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: `${SPACING.md}px`,
-              minWidth: 0,
-              flex: 1,
-            }}
-          >
-            <BrazilGradientAvatar
-              size={AVATAR_SIZE}
-              src={HEADER_AVATAR_SRC}
-              alt={displayName}
-              onClick={() => router.push("/pages/user/profile")}
-            />
-            <Typography
-              onClick={() => router.push("/pages/user/profile")}
-              sx={{
-                fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                ...TYPOGRAPHY.bodyStrong,
-                fontSize: 15,
-                color: COLORS.text,
-                cursor: "pointer",
-                lineHeight: 1.25,
-                minWidth: 0,
-                flex: 1,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {displayName}
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              display: { xs: "flex", md: "none" },
-              alignItems: "center",
-              flexShrink: 0,
-            }}
-          >
+        {/* Coluna direita — hambúrguer (mobile) / logo (desktop) */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+          <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center" }}>
             <HamburgerMenu
               events={events}
               currentEvent={currentEvent}
@@ -151,25 +125,19 @@ export default function HomeScreenHeader({
               triggerVariant="caze"
             />
           </Box>
-
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              flexShrink: 0,
-            }}
-          >
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}>
             <Image
               src="/assets/figma/logo-top.png"
               alt="Casa CazéTV"
-              width={28}
-              height={26}
+              width={24}
+              height={22}
               style={{ objectFit: "contain" }}
             />
           </Box>
         </Box>
       </Box>
 
+      {/* Mascote + BrazilDivider */}
       <Box
         sx={{
           position: "relative",
@@ -205,7 +173,6 @@ export default function HomeScreenHeader({
             right: 0,
             bottom: 0,
             zIndex: 2,
-            opacity: 0.5,
           }}
         >
           <BrazilDivider />

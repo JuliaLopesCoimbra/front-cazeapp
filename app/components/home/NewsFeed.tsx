@@ -465,7 +465,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                         alt={item.title}
                         sx={{
                           width: "100%",
-                          aspectRatio: "1 / 1",
+                          aspectRatio: "9 / 16",
                           objectFit: "cover",
                           borderRadius: "15px",
                           border: "1px solid rgba(0,148,64,0.4)",
@@ -616,8 +616,8 @@ export default function NewsFeed({ eventId, event }: Props) {
 }
 
 function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
-  const cardBg = isTorcida ? "#123b6b" : "#0f0f0f";
-  const skeletonBg = isTorcida ? "#2f5f96" : "#2a2a2a";
+  const cardBg = isTorcida ? "#123b6b" : "rgba(0,0,0,0.04)";
+  const skeletonBg = isTorcida ? "#2f5f96" : "rgba(0,0,0,0.08)";
   return (
     <Card
       sx={{
@@ -630,7 +630,7 @@ function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
         variant="rectangular"
         sx={{
           width: "100%",
-          aspectRatio: "1 / 1",
+          aspectRatio: "9 / 16",
           bgcolor: skeletonBg,
         }}
       />
@@ -649,8 +649,8 @@ function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
 }
 
 function NewsItemSkeleton({ isTorcida }: { isTorcida: boolean }) {
-  const cardBg = isTorcida ? "#123b6b" : "#0f0f0f";
-  const skeletonBg = isTorcida ? "#2f5f96" : "#2a2a2a";
+  const cardBg = isTorcida ? "#123b6b" : "rgba(0,0,0,0.04)";
+  const skeletonBg = isTorcida ? "#2f5f96" : "rgba(0,0,0,0.08)";
   return (
     <Card
       sx={{

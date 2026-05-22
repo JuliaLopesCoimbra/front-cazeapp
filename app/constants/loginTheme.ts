@@ -1,6 +1,16 @@
 import { CAZE_RADIUS } from "./cazeRadius";
 
-/** Casa CazéTV — tokens da tela de login (alinhado ao Design System em globals.css) */
+/** Casa CazéTV — fundo da tela de login (9∶19,5 — iPhone / mobile alto) */
+export const LOGIN_BG_IMAGE = "/assets/casa-cazetv/Login Bg - cazépp.png";
+
+/** Proporção alvo 9∶19,5; arquivo atual 704×1520. Export retina: 1170×2532 */
+export const LOGIN_BG_SIZE = {
+  width: 704,
+  height: 1520,
+  aspectRatio: 9 / 19.5,
+} as const;
+
+/** @deprecated Vídeo anterior — mantido só se precisar reverter */
 export const LOGIN_BG_VIDEO = "/assets/casa-cazetv/login_bg.mp4";
 
 export const loginColors = {

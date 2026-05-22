@@ -26,6 +26,8 @@ import {
   NAV_DOCK_GLASS,
   NAV_DOCK_GLASS_SX,
 } from "@/app/constants/designTokens";
+
+const POST_MEDIA_ASPECT = LAYOUT.postMediaAspectRatio;
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import { useAuth } from "@/app/context/AuthContext";
 import {
@@ -40,8 +42,6 @@ const FIGMA_POST_ART = "/assets/figma/post-copa-art.png";
 const POST_HEADER_HEIGHT = 52;
 /** Barra recolhida do bloco de comentários — alinhada ao header do post */
 const COMMENTS_TOGGLE_MIN_HEIGHT = 40;
-
-const POST_IMAGE_HEIGHT = { xs: 580, sm: 600 } as const;
 
 const FIGMA_AVATAR_HEADER = "/assets/figma/avatar-header.png";
 
@@ -86,7 +86,7 @@ function CopaCommentRow({ comment }: { comment: CommentResponse }) {
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Typography
           sx={{
-            color: "rgba(255,255,255,0.95)",
+            color: COLORS.text,
             fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
             fontWeight: 600,
             fontSize: 11,
@@ -97,8 +97,8 @@ function CopaCommentRow({ comment }: { comment: CommentResponse }) {
         </Typography>
         <Typography
           sx={{
-            color: "rgba(255,255,255,0.78)",
-            fontFamily: "var(--font-roboto), Roboto, sans-serif",
+            color: COLORS.textSecondary,
+            fontFamily: "var(--font-inter), Inter, sans-serif",
             fontSize: 11,
             lineHeight: 1.4,
             mt: 0.15,
@@ -215,8 +215,9 @@ export default function CopaStoryPostCard({
       onClick={onClick}
       sx={{
         cursor: onClick ? "pointer" : "default",
-        px: `${LAYOUT.pagePaddingX}px`,
-        maxWidth: 393,
+        boxSizing: "border-box",
+        px: `${LAYOUT.postCardMarginX}px`,
+        maxWidth: LAYOUT.feedMaxWidth,
         mx: "auto",
         width: "100%",
         transition: "opacity 0.2s",
@@ -264,7 +265,7 @@ export default function CopaStoryPostCard({
                   width: 32,
                   height: 32,
                   flexShrink: 0,
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  border: "1px solid rgba(0, 0, 0, 0.12)",
                 }}
               />
               <Typography
@@ -287,9 +288,9 @@ export default function CopaStoryPostCard({
                 <Typography
                   component="span"
                   sx={{
-                    color: COLORS.textSecondary,
+                    color: COLORS.muted,
                     fontSize: 10,
-                    fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                    fontFamily: "var(--font-inter), Inter, sans-serif",
                     flexShrink: 0,
                   }}
                 >
@@ -299,7 +300,7 @@ export default function CopaStoryPostCard({
               <MoreHorizIcon
                 sx={{
                   fontSize: 18,
-                  color: COLORS.textSecondary,
+                  color: COLORS.muted,
                   flexShrink: 0,
                 }}
               />
@@ -315,8 +316,7 @@ export default function CopaStoryPostCard({
             position: "relative",
             zIndex: 1,
             width: "100%",
-            height: { xs: POST_IMAGE_HEIGHT.xs, sm: POST_IMAGE_HEIGHT.sm },
-            minHeight: { xs: POST_IMAGE_HEIGHT.xs, sm: POST_IMAGE_HEIGHT.sm },
+            aspectRatio: POST_MEDIA_ASPECT,
             overflow: "hidden",
             mt: -0.25,
           }}
@@ -325,7 +325,7 @@ export default function CopaStoryPostCard({
             src={postArtUrl}
             alt=""
             fill
-            sizes="(max-width: 393px) 100vw, 357px"
+            sizes={`(max-width: ${LAYOUT.feedMaxWidth}px) calc(100vw - ${LAYOUT.postCardMarginX * 2}px), 100vw`}
             style={{ objectFit: "cover", objectPosition: "center top" }}
             priority
           />
@@ -361,13 +361,14 @@ export default function CopaStoryPostCard({
               sx={{
                 m: 0,
                 color: "#FFFFFF",
-                fontFamily: 'var(--font-playfair), "Playfair Display", Georgia, serif',
-                fontWeight: 500,
-                fontSize: { xs: "1.5rem", sm: "1.625rem" },
-                lineHeight: 1.28,
-                letterSpacing: "0.01em",
+                fontFamily: 'var(--font-headline), Anton, sans-serif',
+                fontWeight: 400,
+                fontSize: { xs: "1.875rem", sm: "2rem" },
+                lineHeight: 1.05,
+                letterSpacing: "-0.01em",
+                textTransform: "uppercase",
                 display: "-webkit-box",
-                WebkitLineClamp: 4,
+                WebkitLineClamp: 3,
                 WebkitBoxOrient: "vertical",
                 overflow: "hidden",
               }}
@@ -404,7 +405,7 @@ export default function CopaStoryPostCard({
                   fontWeight: 600,
                   color: "rgba(255,255,255,0.9)",
                   lineHeight: 1.2,
-                  fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                  fontFamily: "var(--font-inter), Inter, sans-serif",
                 }}
               >
                 {formatMetricCount(likesCount)}
@@ -430,7 +431,7 @@ export default function CopaStoryPostCard({
                   fontWeight: 600,
                   color: "rgba(255,255,255,0.9)",
                   lineHeight: 1.2,
-                  fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                  fontFamily: "var(--font-inter), Inter, sans-serif",
                 }}
               >
                 {formatMetricCount(commentsCount)}
@@ -478,10 +479,8 @@ export default function CopaStoryPostCard({
                 >
                   <Typography
                     sx={{
-                      color: commentsExpanded
-                        ? "rgba(255,255,255,0.85)"
-                        : "rgba(255,255,255,0.75)",
-                      fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                      color: COLORS.text,
+                      fontFamily: "var(--font-inter), Inter, sans-serif",
                       fontWeight: 500,
                       fontSize: 11,
                     }}
@@ -504,10 +503,10 @@ export default function CopaStoryPostCard({
                     ) : comments.length === 0 ? (
                       <Typography
                         sx={{
-                          color: "rgba(255,255,255,0.45)",
+                          color: COLORS.muted,
                           fontSize: 11,
                           py: 0.5,
-                          fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                          fontFamily: "var(--font-inter), Inter, sans-serif",
                         }}
                       >
                         Seja o primeiro a comentar
@@ -532,7 +531,7 @@ export default function CopaStoryPostCard({
                           background: "none",
                           cursor: "pointer",
                           color: "#009440",
-                          fontFamily: "var(--font-roboto), Roboto, sans-serif",
+                          fontFamily: "var(--font-inter), Inter, sans-serif",
                           fontSize: 10,
                           p: 0,
                         }}
@@ -549,7 +548,7 @@ export default function CopaStoryPostCard({
                           alignItems: "center",
                           mt: 0.75,
                           pt: 0.75,
-                          borderTop: "1px solid rgba(255,255,255,0.08)",
+                          borderTop: "1px solid rgba(0,0,0,0.08)",
                         }}
                       >
                         <Avatar
@@ -573,13 +572,13 @@ export default function CopaStoryPostCard({
                           disabled={submittingComment}
                           sx={{
                             "& .MuiOutlinedInput-root": {
-                              color: "#fff",
+                              color: COLORS.text,
                               fontSize: 12,
                               minHeight: 32,
-                              backgroundColor: "rgba(255,255,255,0.04)",
+                              backgroundColor: "rgba(0,0,0,0.04)",
                               borderRadius: "8px",
-                              "& fieldset": { borderColor: "rgba(255,255,255,0.1)" },
-                              "&.Mui-focused fieldset": { borderColor: "rgba(0,148,64,0.45)" },
+                              "& fieldset": { borderColor: "rgba(0,0,0,0.12)" },
+                              "&.Mui-focused fieldset": { borderColor: "rgba(0,148,64,0.55)" },
                             },
                           }}
                         />

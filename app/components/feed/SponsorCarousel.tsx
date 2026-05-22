@@ -139,7 +139,7 @@ export default function SponsorCarousel({
                   borderRadius: "50%",
                   border: "none",
                   cursor: "pointer",
-                  backgroundColor: dotActive ? "#009440" : "rgba(0,0,0,0.2)",
+                  backgroundColor: dotActive ? "#F6C400" : "rgba(255,255,255,0.40)",
                   transition: "background-color 0.2s ease",
                   padding: 0,
                 }}

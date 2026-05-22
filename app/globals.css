@@ -23,6 +23,11 @@
   --color-caze-cyan:        #29BAEB;
   --color-caze-purple:      #432B9D;
   --color-caze-muted:       #9E9E9E;
+  --color-caze-blue:        #173BFF;
+  --color-caze-pink:        #FF6FAE;
+  --color-caze-black:       #000000;
+  --color-caze-bg-dark:     #282828;
+  --color-caze-surface-dark: #363636;
 
   /* Espaçamento — escala 4px (referência feed social) */
   --caze-space-xs: 4px;

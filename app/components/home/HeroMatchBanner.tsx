@@ -1,9 +1,8 @@
 "use client";
 
 import { Box, Typography, Skeleton } from "@mui/material";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useRouter } from "next/navigation";
-import { format, parseISO } from "date-fns";
+import { format, isToday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useBrazilFixtures, useBrazilLive } from "@/app/hooks/useFixtures";
 import { isLive, isFinished } from "@/app/services/football/footballService";
@@ -12,62 +11,13 @@ import TeamFlag from "@/app/components/shared/TeamFlag";
 import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import { COLORS } from "@/app/constants/designTokens";
 
-const FLAG_SIZE = 40;
-const BANNER_MIN_HEIGHT = 52;
-
-function PalpiteButton({
-  onClick,
-}: {
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}) {
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      aria-label="Palpitar no bolão"
-      sx={{
-        flexShrink: 0,
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 0.25,
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        py: 0.5,
-        pl: 0.5,
-        pr: 0,
-        color: "rgba(255, 255, 255, 0.55)",
-        "&:hover": {
-          color: COLORS.yellow,
-        },
-      }}
-    >
-      <Typography
-        component="span"
-        sx={{
-          fontFamily: 'var(--font-inter), Inter, sans-serif',
-          fontWeight: 600,
-          fontSize: "0.75rem",
-          lineHeight: 1,
-        }}
-      >
-        Palpitar
-      </Typography>
-      <ChevronRightIcon sx={{ fontSize: 20 }} />
-    </Box>
-  );
-}
+const FLAG_SIZE = 36;
+const BANNER_MIN_HEIGHT = 80;
 
 export default function HeroMatchBanner() {
   const router = useRouter();
   const { data: fixtures, isLoading } = useBrazilFixtures();
   const { data: liveFixtures } = useBrazilLive();
-
-  const goToBolao = (fixtureId: number, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    router.push(`/pages/user/bolao/${fixtureId}`);
-  };
 
   if (isLoading) {
     return (
@@ -77,7 +27,7 @@ export default function HeroMatchBanner() {
           borderRadius: CAZE_RADIUS.md,
           height: BANNER_MIN_HEIGHT,
           width: "100%",
-          bgcolor: "rgba(255,255,255,0.06)",
+          bgcolor: "rgba(0,0,0,0.06)",
         }}
       />
     );
@@ -97,108 +47,146 @@ export default function HeroMatchBanner() {
   const live = isLive(featured);
   const matchDate = parseISO(featured.fixture.date);
   const dateShort = format(matchDate, "dd/MM · HH'h'mm", { locale: ptBR });
+  const isGameToday = !live && isToday(matchDate);
 
   return (
     <Box
-      role="button"
-      tabIndex={0}
-      onClick={() => goToBolao(featured.fixture.id)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          goToBolao(featured.fixture.id);
-        }
-      }}
-      aria-label={`Bolão: palpite ${featured.teams.home.name} x ${featured.teams.away.name}`}
       sx={{
         position: "relative",
         display: "flex",
-        alignItems: "center",
+        flexDirection: "column",
         width: "100%",
         minHeight: BANNER_MIN_HEIGHT,
-        pl: 1.25,
-        pr: 0.75,
-        py: 0.75,
+        px: 2,
+        pt: 1,
+        pb: 1.25,
+        gap: 0.75,
         borderRadius: CAZE_RADIUS.md,
-        cursor: "pointer",
-        border: "none",
-        background: live
-          ? "rgba(229, 37, 84, 0.12)"
-          : "rgba(40, 40, 40, 0.42)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
+        background: live ? "rgba(229, 37, 84, 0.05)" : "#f5efde",
+        border: `1px solid ${live ? "rgba(229, 37, 84, 0.28)" : "#e4d2b7"}`,
+        boxShadow: live
+          ? "0 2px 16px rgba(229, 37, 84, 0.10), 0 1px 4px rgba(0,0,0,0.04)"
+          : "0 2px 10px rgba(0, 0, 0, 0.06)",
+        overflow: "hidden",
       }}
     >
+      {/* ── Linha 1: status/data + botão palpitar ── */}
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: 0.25,
-          flexShrink: 0,
-          textAlign: "left",
-          minWidth: 0,
+          alignItems: "center",
+          justifyContent: "space-between",
           zIndex: 1,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 0.5 }}>
+        {/* Status + data */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+          {live && <LiveBadge variant="compact" />}
+          {isGameToday && (
+            <Box
+              component="span"
+              sx={{
+                fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+                fontSize: "0.6rem",
+                letterSpacing: "0.06em",
+                lineHeight: 1.2,
+                color: "#000",
+                bgcolor: COLORS.yellow,
+                borderRadius: "100px",
+                px: 0.75,
+                py: 0.15,
+                display: "inline-flex",
+                alignItems: "center",
+                flexShrink: 0,
+              }}
+            >
+              HOJE
+            </Box>
+          )}
           <Typography
-            noWrap
             sx={{
-              fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-              fontWeight: 800,
-              fontSize: "0.625rem",
-              color: COLORS.yellow,
-              letterSpacing: "0.02em",
-              lineHeight: 1.1,
+              fontFamily: 'var(--font-inter), Inter, sans-serif',
+              fontSize: "0.7rem",
+              color: COLORS.muted,
+              lineHeight: 1,
             }}
           >
-            Bolão Cazé TV
+            {live ? "Ao vivo" : dateShort}
           </Typography>
-          {live && <LiveBadge variant="compact" />}
         </Box>
-        <Typography
-          noWrap
+
+        {/* Botão palpitar */}
+        <Box
+          component="button"
+          type="button"
+          aria-label={`Palpitar no jogo ${featured.teams.home.name} x ${featured.teams.away.name}`}
+          onClick={() => router.push(`/pages/user/bolao/${featured.fixture.id}`)}
           sx={{
-            fontSize: "0.625rem",
-            color: COLORS.textSecondary,
-            lineHeight: 1.1,
+            fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+            fontSize: "0.75rem",
+            letterSpacing: "0.06em",
+            lineHeight: 1,
+            color: "#000",
+            bgcolor: COLORS.yellow,
+            border: "none",
+            borderRadius: "100px",
+            px: 1.5,
+            py: 0.6,
+            cursor: "pointer",
+            flexShrink: 0,
+            display: "inline-flex",
+            alignItems: "center",
+            transition: "background-color 0.15s ease",
+            "&:hover": { bgcolor: "#e0b200" },
+            "&:active": { transform: "scale(0.96)" },
           }}
         >
-          {live ? "Ao vivo" : dateShort}
-        </Typography>
+          PALPITAR
+        </Box>
       </Box>
 
+      {/* ── Linha 2: bandeiras + placar/VS ── */}
       <Box
         sx={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 0.75,
-          pointerEvents: "none",
-          zIndex: 0,
+          gap: 1.5,
+          zIndex: 1,
         }}
       >
-        <TeamFlag
-          name={featured.teams.home.name}
-          width={FLAG_SIZE}
-          fallbackLogo={featured.teams.home.logo}
-        />
+        {/* Time casa */}
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.4 }}>
+          <TeamFlag
+            name={featured.teams.home.name}
+            width={FLAG_SIZE}
+            fallbackLogo={featured.teams.home.logo}
+          />
+          <Typography
+            noWrap
+            sx={{
+              fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+              fontSize: "0.6rem",
+              color: COLORS.muted,
+              letterSpacing: "0.05em",
+              lineHeight: 1,
+              maxWidth: 60,
+            }}
+          >
+            {featured.teams.home.name.toUpperCase()}
+          </Typography>
+        </Box>
 
+        {/* Placar / VS */}
         {live ? (
           <Typography
             sx={{
-              fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif',
-              fontWeight: 900,
-              fontSize: "1rem",
+              fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+              fontSize: "2.25rem",
               color: COLORS.red,
               lineHeight: 1,
               flexShrink: 0,
+              letterSpacing: "0.02em",
             }}
           >
             {featured.goals.home ?? 0}–{featured.goals.away ?? 0}
@@ -206,35 +194,39 @@ export default function HeroMatchBanner() {
         ) : (
           <Typography
             sx={{
-              fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif',
-              fontWeight: 900,
-              fontSize: "0.6875rem",
+              fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+              fontSize: "1.5rem",
               color: COLORS.muted,
               flexShrink: 0,
+              lineHeight: 1,
+              letterSpacing: "0.08em",
             }}
           >
             VS
           </Typography>
         )}
 
-        <TeamFlag
-          name={featured.teams.away.name}
-          width={FLAG_SIZE}
-          fallbackLogo={featured.teams.away.logo}
-        />
-      </Box>
-
-      <Box
-        sx={{
-          flexShrink: 0,
-          ml: "auto",
-          alignSelf: "stretch",
-          display: "flex",
-          alignItems: "center",
-          zIndex: 1,
-        }}
-      >
-        <PalpiteButton onClick={(e) => goToBolao(featured.fixture.id, e)} />
+        {/* Time visitante */}
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.4 }}>
+          <TeamFlag
+            name={featured.teams.away.name}
+            width={FLAG_SIZE}
+            fallbackLogo={featured.teams.away.logo}
+          />
+          <Typography
+            noWrap
+            sx={{
+              fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+              fontSize: "0.6rem",
+              color: COLORS.muted,
+              letterSpacing: "0.05em",
+              lineHeight: 1,
+              maxWidth: 60,
+            }}
+          >
+            {featured.teams.away.name.toUpperCase()}
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

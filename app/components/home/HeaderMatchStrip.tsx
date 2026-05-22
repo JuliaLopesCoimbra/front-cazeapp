@@ -122,12 +122,13 @@ export default function HeaderMatchStrip({ embedded = false }: HeaderMatchStripP
             <Typography
               component="span"
               sx={{
-                fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                fontSize: 12,
-                fontWeight: 800,
+                fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
+                fontSize: 14,
+                fontWeight: 400,
                 color: COLORS.text,
                 fontVariantNumeric: "tabular-nums",
                 lineHeight: 1,
+                letterSpacing: "0.02em",
               }}
             >
               {featured.goals.home ?? 0}–{featured.goals.away ?? 0}
