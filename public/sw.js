@@ -4,13 +4,13 @@
  */
 self.addEventListener("push", function (event) {
   if (!event.data) return;
-  let payload = { title: "N1 App", body: "", url: "/pages/user/notifications" };
+  let payload = { title: "CazéApp", body: "", url: "/pages/user/notifications" };
   try {
     payload = event.data.json();
   } catch (_) {
     payload.body = event.data.text();
   }
-  const title = payload.title || "N1 App";
+  const title = payload.title || "CazéApp";
   const options = {
     body: payload.body || "",
     icon: "/logo/logo-android.png",
