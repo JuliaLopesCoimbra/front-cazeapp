@@ -21,8 +21,9 @@ export default function NewsContent({ title, content }: NewsContentProps) {
       <Typography
         variant="h5"
         fontWeight={700}
-        sx={{ 
-          color: "#fff", 
+        sx={{
+          color: "#0A0A0A",
+          fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
           mb: 1,
           wordBreak: "break-word",
           overflowWrap: "break-word",
@@ -33,9 +34,10 @@ export default function NewsContent({ title, content }: NewsContentProps) {
 
       <Typography
         variant="body1"
-        sx={{ 
-          color: "rgba(255,255,255,0.9)", 
-          mb: 2, 
+        sx={{
+          color: "#4A4A4A",
+          fontFamily: "var(--font-inter), Inter, sans-serif",
+          mb: 2,
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
           overflowWrap: "break-word",

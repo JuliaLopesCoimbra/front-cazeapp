@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Drawer, Typography } from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -9,6 +9,7 @@ import BrazilDivider from "./BrazilDivider";
 import LogoutButton from "@/app/components/auth/LogoutButton";
 import RainbowGradientDefs from "@/app/components/shared/RainbowGradientDefs";
 import { RAINBOW_GRADIENT_CSS } from "@/app/constants/rainbowGradient";
+import { useMobileMenu } from "@/app/context/MobileMenuContext";
 
 interface SidebarProps {
   bolaoHasPendingBets?: boolean;
@@ -23,6 +24,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { isMenuOpen, setMenuOpen } = useMobileMenu();
 
   const getBadge = (path: string): number => {
     if (path === "/pages/user/bolao" && bolaoHasPendingBets) return 1;
@@ -30,49 +32,24 @@ export default function Sidebar({
     return 0;
   };
 
-  return (
+  const navContent = (
     <>
-      <RainbowGradientDefs />
-      <Box
-        component="nav"
-        aria-label="Navegação principal"
-        sx={{
-          display: { xs: "none", md: "flex" },
-          position: "fixed",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: `${SIDEBAR_WIDTH}px`,
-          backgroundColor: "#282828",
-          borderRight: "1px solid rgba(0, 148, 64, 0.2)",
-          flexDirection: "column",
-          zIndex: 1200,
-        }}
-      >
-        {/* Logo + título no topo */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            px: 2,
-            py: 2.5,
-          }}
-        >
-          <Image
-            src="/assets/figma/logo-top.png"
-            alt="Casa CazéTV"
-            width={36}
-            height={34}
-            priority
-            style={{ objectFit: "contain" }}
-          />
+      {/* Logo + título no topo */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, py: 2.5 }}>
+        <Image
+          src="/assets/figma/logo-top.png"
+          alt="Casa CazéTV"
+          width={36}
+          height={34}
+          priority
+          style={{ objectFit: "contain" }}
+        />
         <Typography
           sx={{
             fontFamily: '"Montserrat", Arial, sans-serif',
             fontWeight: 900,
             fontSize: "0.875rem",
-            color: "#FFFFFF",
+            color: "#0A0A0A",
             letterSpacing: "0.01em",
           }}
         >
@@ -83,14 +60,7 @@ export default function Sidebar({
       <BrazilDivider />
 
       {/* Lista de itens */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          py: 2.5,
-          gap: 1.5,
-        }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column", py: 2.5, gap: 1.5 }}>
         {NAV_ITEMS.map((item, index) => {
           const isActive = pathname?.startsWith(item.path) ?? false;
           const Icon = isActive ? item.IconActive : item.IconInactive;
@@ -100,7 +70,7 @@ export default function Sidebar({
             <motion.button
               key={item.path}
               type="button"
-              onClick={() => router.push(item.path)}
+              onClick={() => { router.push(item.path); setMenuOpen(false); }}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
               initial={{ opacity: 0, x: -16 }}
@@ -119,10 +89,8 @@ export default function Sidebar({
                 background: isActive
                   ? "linear-gradient(90deg, rgba(0,148,64,0.08) 0%, rgba(255,203,0,0.04) 76.923%)"
                   : "transparent",
-                boxShadow: isActive
-                  ? "inset 0 0 0 1px rgba(0,148,64,0.22)"
-                  : "none",
-                color: isActive ? "#FFFFFF" : "#9E9E9E",
+                boxShadow: isActive ? "inset 0 0 0 1px rgba(0,148,64,0.22)" : "none",
+                color: isActive ? "#0A0A0A" : "#9E9E9E",
                 cursor: "pointer",
                 borderRight: "none",
                 borderTop: "none",
@@ -135,12 +103,7 @@ export default function Sidebar({
               <Icon
                 sx={{
                   fontSize: 24,
-                  color: isActive ? "transparent" : "#9E9E9E",
-                  ...(isActive && {
-                    "& path": {
-                      fill: "url(#caze-rainbow-icon)",
-                    },
-                  }),
+                  color: isActive ? "#FFCB00" : "#9E9E9E",
                 }}
               />
               <Typography
@@ -159,9 +122,7 @@ export default function Sidebar({
                 <Box
                   component="span"
                   sx={{
-                    minWidth: 20,
-                    height: 20,
-                    px: 0.75,
+                    minWidth: 20, height: 20, px: 0.75,
                     borderRadius: "999px",
                     backgroundColor: "#E52554",
                     color: "#FFFFFF",
@@ -187,17 +148,54 @@ export default function Sidebar({
 
       <Box
         sx={{
-          mx: 2,
-          mb: 2,
-          mt: 1.5,
-          height: 2,
-          borderRadius: 1,
-          backgroundImage: RAINBOW_GRADIENT_CSS,
-          opacity: 0.85,
+          mx: 2, mb: 2, mt: 1.5, height: 2, borderRadius: 1,
+          backgroundImage: RAINBOW_GRADIENT_CSS, opacity: 0.85,
         }}
         aria-hidden
       />
-    </Box>
+    </>
+  );
+
+  return (
+    <>
+      <RainbowGradientDefs />
+
+      {/* Desktop sidebar */}
+      <Box
+        component="nav"
+        aria-label="Navegação principal"
+        sx={{
+          display: { xs: "none", md: "flex" },
+          position: "fixed",
+          left: 0, top: 0, bottom: 0,
+          width: `${SIDEBAR_WIDTH}px`,
+          backgroundColor: "#FFFFFF",
+          borderRight: "1px solid rgba(0,0,0,0.08)",
+          flexDirection: "column",
+          zIndex: 1200,
+        }}
+      >
+        {navContent}
+      </Box>
+
+      {/* Mobile drawer */}
+      <Drawer
+        anchor="left"
+        open={isMenuOpen}
+        onClose={() => setMenuOpen(false)}
+        sx={{ display: { xs: "block", md: "none" } }}
+        PaperProps={{
+          sx: {
+            width: `${SIDEBAR_WIDTH}px`,
+            backgroundColor: "#FFFFFF",
+            borderRight: "1px solid rgba(0,0,0,0.08)",
+            display: "flex",
+            flexDirection: "column",
+          },
+        }}
+      >
+        {navContent}
+      </Drawer>
     </>
   );
 }

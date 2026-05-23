@@ -3,22 +3,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Box, Skeleton, Typography } from "@mui/material";
-import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import HomeScreenHeader from "@/app/components/home/HomeScreenHeader";
-import HeroMatchBanner from "@/app/components/home/HeroMatchBanner";
-import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
-import { COLORS, LAYOUT, PAGE_GLASS_SURFACE, SPACING } from "@/app/constants/designTokens";
+import { LAYOUT, SPACING } from "@/app/constants/designTokens";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import FeedTabs, { type FeedTab } from "@/app/components/home/FeedTabs";
 import { motion } from "framer-motion";
-import StickerBubble from "@/app/components/shared/StickerBubble";
 import SponsorCarousel, { getMockSponsors } from "@/app/components/feed/SponsorCarousel";
 import BottomNav from "@/app/components/layout/BottomNav";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import NewsFeed from "@/app/components/home/NewsFeed";
 import { useAuth } from "@/app/context/AuthContext";
+import EventDetail from "@/app/components/home/EventDetail";
 import WorldCupGames from "@/app/components/home/WorldCupGames";
 import EventIndisponivel from "@/app/components/event/EventIndisponivel";
 import {
@@ -30,7 +27,7 @@ const STORAGE_KEY = "selectedEventId";
 const SCROLL_KEY = "homeScrollY";
 const TAB_KEY = "homeActiveTab";
 
-const VALID_TABS: FeedTab[] = ["all", "games", "bolao", "stickers"];
+const VALID_TABS: FeedTab[] = ["all", "games", "brasil"];
 
 function isFeedTab(value: string): value is FeedTab {
   return (VALID_TABS as string[]).includes(value);
@@ -285,8 +282,7 @@ const HomeContent: React.FC = () => {
   // Skeleton enquanto carrega evento + perfil
   if (!currentEvent || !profileLoaded) {
     return (
-      <Box sx={{ position: "relative", minHeight: "100vh", pb: "100px" }}>
-        <PageAmbientBackground />
+      <Box sx={{ position: "relative", minHeight: "100vh", pb: "100px", bgcolor: "#FFFFFF" }}>
         <Sidebar />
         <Box
           sx={{
@@ -294,7 +290,6 @@ const HomeContent: React.FC = () => {
             zIndex: 1,
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
             minHeight: "100vh",
-            ...PAGE_GLASS_SURFACE,
           }}
         >
           <Skeleton
@@ -336,8 +331,7 @@ const HomeContent: React.FC = () => {
 
   return (
     <>
-      <Box sx={{ position: "relative", minHeight: "100vh" }}>
-        <PageAmbientBackground />
+      <Box sx={{ position: "relative", minHeight: "100vh", bgcolor: "#FFFFFF" }}>
         <Sidebar />
 
         <Box
@@ -348,7 +342,6 @@ const HomeContent: React.FC = () => {
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
             minHeight: "100vh",
             pb: `${LAYOUT.bottomNavClearance}px`,
-            ...PAGE_GLASS_SURFACE,
           }}
         >
           <HomeScreenHeader
@@ -360,18 +353,6 @@ const HomeContent: React.FC = () => {
 
           <SponsorCarousel banners={getMockSponsors()} edgeToEdge />
           <BrazilDivider />
-
-          <Box
-            sx={{
-              px: `${LAYOUT.pagePaddingX}px`,
-              maxWidth: LAYOUT.feedMaxWidth,
-              mx: "auto",
-              width: "100%",
-              mt: `${SPACING.xxl}px`,
-            }}
-          >
-            <HeroMatchBanner />
-          </Box>
 
           <Box
             sx={{
@@ -421,82 +402,13 @@ const HomeContent: React.FC = () => {
           )}
 
           {activeTab === "games" && currentEvent && (
+            <EventDetail event={currentEvent} />
+          )}
+
+          {activeTab === "brasil" && currentEvent && (
             <WorldCupGames eventId={currentEvent.id} />
           )}
 
-          {(activeTab === "bolao" || activeTab === "stickers") && (
-            <>
-              <BrazilDivider />
-              <Box sx={{ display: "flex", justifyContent: "center", px: 2 }}>
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.4, type: "spring", bounce: 0.3 }}
-                  style={{ width: "100%", maxWidth: 480 }}
-                >
-                  <Box
-                    sx={{
-                      mx: 0,
-                      mt: 4,
-                      mb: 4,
-                      p: 4,
-                      borderRadius: "15px",
-                      background: "#f5efde",
-                      border: "1.5px solid #e4d2b7",
-                      borderLeft: `3px solid ${COLORS.green}`,
-                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
-                      textAlign: "center",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 2,
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <StickerBubble color="yellow" size={96} sx={{ position: "absolute", top: -24, right: -24, opacity: 0.12 }} />
-                    <StickerBubble color="pink"   size={64} sx={{ position: "absolute", bottom: -16, left: -16, opacity: 0.10 }} />
-                    <SportsSoccerOutlinedIcon sx={{ fontSize: 56, color: COLORS.green }} />
-                    <Typography
-                      sx={{
-                        fontFamily: 'var(--font-sports), "Bebas Neue", sans-serif',
-                        fontWeight: 400,
-                        fontSize: "1.5rem",
-                        letterSpacing: "0.04em",
-                        lineHeight: 1,
-                        color: COLORS.blue,
-                      }}
-                    >
-                      COPA 2026
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontFamily: 'var(--font-headline), Anton, sans-serif',
-                        fontWeight: 400,
-                        fontSize: "1.5rem",
-                        letterSpacing: "0.02em",
-                        lineHeight: 1,
-                        color: COLORS.green,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      EM BREVE
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: COLORS.muted,
-                        fontFamily: 'var(--font-body), Inter, sans-serif',
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      Aguarde a Copa 2026.
-                    </Typography>
-                  </Box>
-                </motion.div>
-              </Box>
-              <BrazilDivider />
-            </>
-          )}
         </Box>
       </Box>
 

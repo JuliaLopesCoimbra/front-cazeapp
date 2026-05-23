@@ -17,6 +17,9 @@ import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BottomNav from "@/app/components/layout/BottomNav";
 import TopBar from "@/app/components/layout/TopBar";
+import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
+import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
+import { LAYOUT } from "@/app/constants/designTokens";
 import CazeButton from "@/app/components/shared/CazeButton";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -85,13 +88,13 @@ const CATEGORIES = [
 // ── mock de posts ─────────────────────────────────────────────────────────────
 
 const MOCK: StickerPost[] = [
-  { id: "1", type: "need", user: { name: "Gabriel M.",     avatar_url: null }, player_name: "Vinicius Jr.", team: "Brasil",     created_at: new Date(Date.now() - 1000*60*30).toISOString() },
-  { id: "2", type: "need", user: { name: "Maria Silva",    avatar_url: null }, player_name: "Endrick",      team: "Brasil",     created_at: new Date(Date.now() - 1000*60*60*2).toISOString() },
-  { id: "3", type: "need", user: { name: "Lucas Ferreira", avatar_url: null }, player_name: "Mbappé",       team: "França",     created_at: new Date(Date.now() - 1000*60*60*5).toISOString() },
-  { id: "4", type: "need", user: { name: "Ana Beatriz",    avatar_url: null }, player_name: "Bellingham",   team: "Inglaterra", created_at: new Date(Date.now() - 1000*60*60*8).toISOString() },
-  { id: "5", type: "sell", user: { name: "Pedro Alves",    avatar_url: null }, player_name: "Neymar Jr.",   team: "Brasil",     created_at: new Date(Date.now() - 1000*60*45).toISOString() },
-  { id: "6", type: "sell", user: { name: "Fernanda C.",    avatar_url: null }, player_name: "Messi",        team: "Argentina",  created_at: new Date(Date.now() - 1000*60*60*3).toISOString() },
-  { id: "7", type: "sell", user: { name: "Rafael S.",      avatar_url: null }, player_name: "Rodrygo",      team: "Brasil",     created_at: new Date(Date.now() - 1000*60*60*6).toISOString() },
+  { id: "1", type: "need", user: { name: "Gabriel M.",     avatar_url: "https://i.pravatar.cc/40?img=3"  }, player_name: "Vinicius Jr.", team: "Brasil",     created_at: new Date(Date.now() - 1000*60*30).toISOString() },
+  { id: "2", type: "need", user: { name: "Maria Silva",    avatar_url: "https://i.pravatar.cc/40?img=5"  }, player_name: "Endrick",      team: "Brasil",     created_at: new Date(Date.now() - 1000*60*60*2).toISOString() },
+  { id: "3", type: "need", user: { name: "Lucas Ferreira", avatar_url: "https://i.pravatar.cc/40?img=11" }, player_name: "Mbappé",       team: "França",     created_at: new Date(Date.now() - 1000*60*60*5).toISOString() },
+  { id: "4", type: "need", user: { name: "Ana Beatriz",    avatar_url: "https://i.pravatar.cc/40?img=9"  }, player_name: "Bellingham",   team: "Inglaterra", created_at: new Date(Date.now() - 1000*60*60*8).toISOString() },
+  { id: "5", type: "sell", user: { name: "Pedro Alves",    avatar_url: "https://i.pravatar.cc/40?img=15" }, player_name: "Neymar Jr.",   team: "Brasil",     created_at: new Date(Date.now() - 1000*60*45).toISOString() },
+  { id: "6", type: "sell", user: { name: "Fernanda C.",    avatar_url: "https://i.pravatar.cc/40?img=20" }, player_name: "Messi",        team: "Argentina",  created_at: new Date(Date.now() - 1000*60*60*3).toISOString() },
+  { id: "7", type: "sell", user: { name: "Rafael S.",      avatar_url: "https://i.pravatar.cc/40?img=7"  }, player_name: "Rodrygo",      team: "Brasil",     created_at: new Date(Date.now() - 1000*60*60*6).toISOString() },
 ];
 
 function timeAgo(iso: string) {
@@ -112,40 +115,86 @@ function PostCard({
   const isNeed = post.type === "need";
   return (
     <Box sx={{
-      backgroundColor: "#1A1A1A", borderRadius: "12px", p: 2,
-      border: `1px solid ${isNeed ? "rgba(230,57,70,0.25)" : "rgba(34,197,94,0.25)"}`,
-      display: "flex", gap: 2, alignItems: "flex-start",
+      bgcolor: "#FFFFFF",
+      borderRadius: "15px",
+      p: 2,
+      border: "1px solid rgba(0,0,0,0.07)",
+      boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
+      display: "flex", gap: 1.5, alignItems: "flex-start",
     }}>
-      <Avatar sx={{ width: 40, height: 40, backgroundColor: "#333", fontSize: "0.875rem", flexShrink: 0 }}>
-        {post.user.name[0]}
+      <Avatar
+        src={post.user.avatar_url ?? undefined}
+        sx={{
+          width: 36, height: 36, flexShrink: 0,
+          bgcolor: isNeed ? "rgba(230,57,70,0.10)" : "rgba(0,148,64,0.10)",
+          color: isNeed ? "#E63946" : "#009440",
+          fontSize: "0.85rem", fontWeight: 700,
+        }}
+      >
+        {!post.user.avatar_url && post.user.name[0]}
       </Avatar>
+
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
-          <Typography sx={{ color: "#FFF", fontWeight: 700, fontSize: "0.875rem" }}>{post.user.name}</Typography>
+          <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.875rem", fontFamily: "var(--font-inter), Inter, sans-serif" }}>
+            {post.user.name}
+          </Typography>
           <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem" }}>{timeAgo(post.created_at)}</Typography>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-          <Chip
-            label={isNeed ? "Preciso" : "Vendendo"}
-            size="small"
-            sx={{
-              backgroundColor: isNeed ? "rgba(230,57,70,0.15)" : "rgba(34,197,94,0.15)",
-              color: isNeed ? "#E63946" : "#22c55e",
-              fontWeight: 700, fontSize: "0.65rem", height: 20,
-            }}
-          />
-          <Typography sx={{ color: "#F5C900", fontWeight: 700, fontSize: "0.875rem" }}>{post.player_name}</Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.5, flexWrap: "wrap" }}>
+          <Box component="span" sx={{
+            display: "inline-flex", alignItems: "center",
+            bgcolor: isNeed ? "rgba(230,57,70,0.08)" : "rgba(0,148,64,0.08)",
+            color: isNeed ? "#E63946" : "#009440",
+            borderRadius: "100px", px: 1, py: 0.2,
+            fontSize: "0.65rem", fontWeight: 700, lineHeight: 1.6,
+          }}>
+            {isNeed ? "Preciso" : "Tenho"}
+          </Box>
+          <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.875rem" }}>
+            {post.player_name}
+          </Typography>
           <Typography sx={{ color: "#9E9E9E", fontSize: "0.75rem" }}>· {post.team}</Typography>
         </Box>
+
         {onContact && (
-          <CazeButton variant="secondary" onClick={() => onContact(post.id)}>
+          <Box
+            component="button"
+            onClick={() => onContact(post.id)}
+            sx={{
+              display: "inline-flex", alignItems: "center",
+              bgcolor: "#009440", color: "#fff",
+              border: "none", borderRadius: "100px",
+              px: 2, py: 0.65,
+              fontSize: "0.75rem", fontWeight: 700,
+              fontFamily: "var(--font-inter), Inter, sans-serif",
+              cursor: "pointer", lineHeight: 1.6,
+              boxShadow: "0 2px 8px rgba(0,148,64,0.25)",
+              "&:active": { opacity: 0.85 },
+            }}
+          >
             Entrar em contato
-          </CazeButton>
+          </Box>
         )}
         {onRemove && (
-          <CazeButton variant="secondary" onClick={() => onRemove(post.id)}>
+          <Box
+            component="button"
+            onClick={() => onRemove(post.id)}
+            sx={{
+              display: "inline-flex", alignItems: "center",
+              bgcolor: "transparent", color: "#E63946",
+              border: "1px solid rgba(230,57,70,0.30)",
+              borderRadius: "100px",
+              px: 2, py: 0.55,
+              fontSize: "0.75rem", fontWeight: 700,
+              fontFamily: "var(--font-inter), Inter, sans-serif",
+              cursor: "pointer", lineHeight: 1.6,
+              "&:active": { opacity: 0.85 },
+            }}
+          >
             Remover anúncio
-          </CazeButton>
+          </Box>
         )}
       </Box>
     </Box>
@@ -261,34 +310,33 @@ function AnnounceDrawer({
       onClose={handleClose}
       PaperProps={{
         sx: {
-          backgroundColor: "#111",
+          backgroundColor: "#FFFFFF",
           borderRadius: "20px 20px 0 0",
           maxHeight: "82vh",
           display: "flex",
           flexDirection: "column",
+          boxShadow: "0 -4px 24px rgba(0,0,0,0.12)",
         },
       }}
     >
       {/* drag handle */}
       <Box sx={{ pt: 2, pb: 0.5, display: "flex", justifyContent: "center", flexShrink: 0 }}>
-        <Box sx={{ width: 40, height: 4, backgroundColor: "#2A2A2A", borderRadius: "2px" }} />
+        <Box sx={{ width: 40, height: 4, backgroundColor: "rgba(0,0,0,0.12)", borderRadius: "2px" }} />
       </Box>
 
       {/* header fixo */}
       <Box sx={{ px: 3, pt: 1.5, pb: 2, flexShrink: 0 }}>
-        {/* título + back */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           {catalogStep !== "category" && (
-            <IconButton onClick={handleBack} size="small" sx={{ color: "#9E9E9E", p: 0.5 }}>
+            <IconButton onClick={handleBack} size="small" sx={{ color: "#6B6B6B", p: 0.5 }}>
               <ArrowBackIosNewIcon sx={{ fontSize: "0.85rem" }} />
             </IconButton>
           )}
-          <Typography sx={{ color: "#FFF", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.95rem", flex: 1 }}>
+          <Typography sx={{ color: "#0A0A0A", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.95rem", flex: 1 }}>
             {catalogStep === "category" ? "Anunciar figurinha" : breadcrumb}
           </Typography>
         </Box>
 
-        {/* toggle tipo */}
         <ToggleButtonGroup
           value={postType}
           exclusive
@@ -298,66 +346,65 @@ function AnnounceDrawer({
           sx={{ mb: 0 }}
         >
           <ToggleButton value="need" sx={{
-            borderColor: "#2A2A2A", color: "#9E9E9E", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
-            "&.Mui-selected": { backgroundColor: "rgba(230,57,70,0.15)", color: "#E63946", borderColor: "#E63946" },
+            borderColor: "rgba(0,0,0,0.12)", color: "#9E9E9E", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
+            "&.Mui-selected": { backgroundColor: "rgba(230,57,70,0.08)", color: "#E63946", borderColor: "#E63946" },
           }}>
             Precisando
           </ToggleButton>
           <ToggleButton value="sell" sx={{
-            borderColor: "#2A2A2A", color: "#9E9E9E", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
-            "&.Mui-selected": { backgroundColor: "rgba(34,197,94,0.15)", color: "#22c55e", borderColor: "#22c55e" },
+            borderColor: "rgba(0,0,0,0.12)", color: "#9E9E9E", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
+            "&.Mui-selected": { backgroundColor: "rgba(0,148,64,0.08)", color: "#009440", borderColor: "#009440" },
           }}>
             Tenho para Vender
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
-      <Box sx={{ height: "1px", backgroundColor: "#1E1E1E", flexShrink: 0 }} />
+      <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.07)", flexShrink: 0 }} />
 
       {/* conteúdo rolável */}
       <Box sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
 
-        {/* step: categoria */}
         {catalogStep === "category" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-            <Typography sx={{ color: "#555", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 0.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+            <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 0.5 }}>
               Categoria
             </Typography>
-            {CATEGORIES.map(({ key, label, Icon }) => (
+            {CATEGORIES.map(({ key, label, Icon, color }) => (
               <Box
                 key={key}
                 onClick={() => handleCategoryClick(key)}
                 sx={{
                   display: "flex", alignItems: "center", gap: 2,
-                  backgroundColor: "#1A1A1A",
-                  border: "1px solid #2A2A2A",
+                  backgroundColor: "rgba(255,255,255,0.6)",
+                  backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(0,0,0,0.08)",
                   borderRadius: "12px",
                   p: "14px 16px",
                   cursor: "pointer",
                   transition: "all 0.15s",
-                  "&:hover": { borderColor: "#F5C900", backgroundColor: "#1E1E1E" },
+                  "&:hover": { borderColor: "#009440", backgroundColor: "rgba(0,148,64,0.04)" },
                 }}
               >
                 <Box sx={{
                   width: 36, height: 36, borderRadius: "10px",
-                  backgroundColor: "rgba(245,201,0,0.1)",
+                  backgroundColor: "rgba(0,148,64,0.08)",
                   display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
-                  <Icon sx={{ color: "#F5C900", fontSize: "1.2rem" }} />
+                  <Icon sx={{ color: color === "#F5C900" ? "#009440" : color, fontSize: "1.2rem" }} />
                 </Box>
-                <Typography sx={{ color: "#FFF", fontWeight: 600, fontSize: "0.875rem", flex: 1 }}>
+                <Typography sx={{ color: "#0A0A0A", fontWeight: 600, fontSize: "0.875rem", flex: 1 }}>
                   {label}
                 </Typography>
-                <ChevronRightIcon sx={{ color: "#444", fontSize: "1.1rem" }} />
+                <ChevronRightIcon sx={{ color: "#C0C0C0", fontSize: "1.1rem" }} />
               </Box>
             ))}
           </Box>
         )}
 
-        {/* step: seleções */}
         {catalogStep === "team" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            <Typography sx={{ color: "#555", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
+            <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
               Escolha a seleção
             </Typography>
             {CATALOG.selecao.map((team, idx) => (
@@ -368,33 +415,32 @@ function AnnounceDrawer({
                     display: "flex", alignItems: "center", gap: 2,
                     py: 1.5, px: 0.5,
                     cursor: "pointer", borderRadius: "10px",
-                    "&:hover": { backgroundColor: "#1A1A1A" },
+                    "&:hover": { backgroundColor: "rgba(0,148,64,0.04)" },
                     transition: "background-color 0.1s",
                   }}
                 >
                   <TeamFlag name={team.name} />
-                  <Typography sx={{ color: "#FFF", fontSize: "0.875rem", fontWeight: 500, flex: 1 }}>
+                  <Typography sx={{ color: "#0A0A0A", fontSize: "0.875rem", fontWeight: 500, flex: 1 }}>
                     {team.name}
                   </Typography>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <Typography sx={{ color: "#444", fontSize: "0.7rem" }}>
+                    <Typography sx={{ color: "#9E9E9E", fontSize: "0.7rem" }}>
                       {team.players.length} fig.
                     </Typography>
-                    <ChevronRightIcon sx={{ color: "#333", fontSize: "1rem" }} />
+                    <ChevronRightIcon sx={{ color: "#C0C0C0", fontSize: "1rem" }} />
                   </Box>
                 </Box>
                 {idx < CATALOG.selecao.length - 1 && (
-                  <Box sx={{ height: "1px", backgroundColor: "#1A1A1A" }} />
+                  <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.05)" }} />
                 )}
               </Box>
             ))}
           </Box>
         )}
 
-        {/* step: jogadores/itens */}
         {catalogStep === "player" && (
           <Box>
-            <Typography sx={{ color: "#555", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
+            <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
               Escolha a figurinha
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
@@ -408,18 +454,18 @@ function AnnounceDrawer({
                         display: "flex", alignItems: "center", gap: 2,
                         py: 1.5, px: 0.5,
                         cursor: "pointer", borderRadius: "10px",
-                        backgroundColor: isSelected ? "rgba(245,201,0,0.08)" : "transparent",
-                        "&:hover": { backgroundColor: isSelected ? "rgba(245,201,0,0.1)" : "#1A1A1A" },
+                        backgroundColor: isSelected ? "rgba(0,148,64,0.06)" : "transparent",
+                        "&:hover": { backgroundColor: isSelected ? "rgba(0,148,64,0.08)" : "rgba(0,0,0,0.03)" },
                         transition: "background-color 0.1s",
                       }}
                     >
-                      <Typography sx={{ color: isSelected ? "#F5C900" : "#FFF", fontSize: "0.875rem", fontWeight: isSelected ? 700 : 400, flex: 1 }}>
+                      <Typography sx={{ color: isSelected ? "#009440" : "#0A0A0A", fontSize: "0.875rem", fontWeight: isSelected ? 700 : 400, flex: 1 }}>
                         {player}
                       </Typography>
-                      {isSelected && <CheckCircleIcon sx={{ color: "#F5C900", fontSize: "1.1rem" }} />}
+                      {isSelected && <CheckCircleIcon sx={{ color: "#009440", fontSize: "1.1rem" }} />}
                     </Box>
                     {idx < players.length - 1 && (
-                      <Box sx={{ height: "1px", backgroundColor: "#1A1A1A" }} />
+                      <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.05)" }} />
                     )}
                   </Box>
                 );
@@ -429,19 +475,18 @@ function AnnounceDrawer({
         )}
       </Box>
 
-      {/* rodapé fixo */}
       {selectedPlayer && (
-        <Box sx={{ px: 3, pt: 1.5, pb: 3, borderTop: "1px solid #1E1E1E", flexShrink: 0 }}>
+        <Box sx={{ px: 3, pt: 1.5, pb: 3, borderTop: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
           <Box sx={{
-            backgroundColor: "rgba(245,201,0,0.08)",
-            border: "1px solid rgba(245,201,0,0.25)",
+            backgroundColor: "rgba(0,148,64,0.06)",
+            border: "1px solid rgba(0,148,64,0.2)",
             borderRadius: "10px",
             px: 2, py: 1,
             mb: 2,
             display: "flex", alignItems: "center", gap: 1,
           }}>
-            <CheckCircleIcon sx={{ color: "#F5C900", fontSize: "1rem" }} />
-            <Typography sx={{ color: "#F5C900", fontSize: "0.8rem", fontWeight: 600 }}>
+            <CheckCircleIcon sx={{ color: "#009440", fontSize: "1rem" }} />
+            <Typography sx={{ color: "#009440", fontSize: "0.8rem", fontWeight: 600 }}>
               {selectedPlayer}
               {selectedTeam && selectedCategory === "selecao" && (
                 <Typography component="span" sx={{ color: "#9E9E9E", fontWeight: 400 }}>
@@ -499,74 +544,82 @@ export default function FigurinhasPage() {
   }
 
   return (
-    <Box sx={{ backgroundColor: "#000", minHeight: "100vh", pb: "120px" }}>
-      <TopBar
-        title="Figurinhas"
-        rightSlot={
-          <IconButton
-            onClick={() => router.push("/pages/user/figurinhas/mensagens")}
-            sx={{ color: "#9E9E9E", "&:hover": { color: "#F5C900" } }}
-            aria-label="Histórico de mensagens"
-          >
-            <Badge badgeContent={1} sx={{ "& .MuiBadge-badge": { backgroundColor: "#F5C900", color: "#000", fontSize: "0.55rem", minWidth: 14, height: 14, p: 0 } }}>
-              <ForumOutlinedIcon sx={{ fontSize: "1.3rem" }} />
-            </Badge>
-          </IconButton>
-        }
-      />
-
-      <Box sx={{ px: 2, pt: 2 }}>
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v as TabValue)}
+    <>
+      <Box sx={{ position: "relative", minHeight: "100vh" }}>
+        <PageAmbientBackground />
+        <Sidebar />
+        <Box
+          component="main"
           sx={{
-            mb: 2,
-            "& .MuiTabs-indicator": { backgroundColor: "#F5C900" },
-            "& .MuiTab-root": { color: "#9E9E9E", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.75rem", textTransform: "none", minWidth: "auto", px: 1.5 },
-            "& .Mui-selected": { color: "#F5C900" },
+            position: "relative",
+            zIndex: 1,
+            ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
+            minHeight: "100vh",
+            pb: `${LAYOUT.bottomNavClearance}px`,
+            backgroundColor: "#FFFFFF",
           }}
         >
-          <Tab value="need"   label={`Precisando (${needCount})`} />
-          <Tab value="sell"   label={`Vendendo (${sellCount})`} />
-          <Tab value="myads"  label={`Meus anúncios${myAdsCount > 0 ? ` (${myAdsCount})` : ""}`} />
-        </Tabs>
+          <TopBar
+            light
+            title="Figurinhas"
+            rightSlot={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <IconButton
+                  onClick={() => setDrawerOpen(true)}
+                  sx={{ color: "#0A0A0A", "&:hover": { color: "#009440" } }}
+                  aria-label="Novo anúncio"
+                >
+                  <AddIcon sx={{ fontSize: "1.3rem" }} />
+                </IconButton>
+                <IconButton
+                  onClick={() => router.push("/pages/user/figurinhas/mensagens")}
+                  sx={{ color: "#0A0A0A", "&:hover": { color: "#009440" } }}
+                  aria-label="Histórico de mensagens"
+                >
+                  <Badge badgeContent={1} sx={{ "& .MuiBadge-badge": { backgroundColor: "#F5C900", color: "#000", fontSize: "0.55rem", minWidth: 14, height: 14, p: 0 } }}>
+                    <ForumOutlinedIcon sx={{ fontSize: "1.3rem" }} />
+                  </Badge>
+                </IconButton>
+              </Box>
+            }
+          />
 
-        {displayed.length === 0 ? (
-          <Typography sx={{ color: "#9E9E9E", textAlign: "center", py: 6 }}>
-            {tab === "need"   && "Ninguém precisando ainda. Seja o primeiro!"}
-            {tab === "sell"   && "Ninguém vendendo ainda. Compartilhe!"}
-            {tab === "myads"  && "Você ainda não fez nenhum anúncio."}
-          </Typography>
-        ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-            {displayed.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                onContact={tab !== "myads" ? handleContact : undefined}
-                onRemove={tab === "myads" ? handleRemove : undefined}
-              />
-            ))}
+          <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
+            <Tabs
+              value={tab}
+              onChange={(_, v) => setTab(v as TabValue)}
+              sx={{
+                mb: 2,
+                "& .MuiTabs-indicator": { backgroundColor: "#009440" },
+                "& .MuiTab-root": { color: "#6B6B6B", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.75rem", textTransform: "none", minWidth: "auto", px: 1.5 },
+                "& .Mui-selected": { color: "#009440" },
+              }}
+            >
+              <Tab value="need"   label={`Precisando (${needCount})`} />
+              <Tab value="sell"   label={`Vendendo (${sellCount})`} />
+              <Tab value="myads"  label={`Meus anúncios${myAdsCount > 0 ? ` (${myAdsCount})` : ""}`} />
+            </Tabs>
+
+            {displayed.length === 0 ? (
+              <Typography sx={{ color: "#6B6B6B", textAlign: "center", py: 6 }}>
+                {tab === "need"   && "Ninguém precisando ainda. Seja o primeiro!"}
+                {tab === "sell"   && "Ninguém vendendo ainda. Compartilhe!"}
+                {tab === "myads"  && "Você ainda não fez nenhum anúncio."}
+              </Typography>
+            ) : (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                {displayed.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    onContact={tab !== "myads" ? handleContact : undefined}
+                    onRemove={tab === "myads" ? handleRemove : undefined}
+                  />
+                ))}
+              </Box>
+            )}
           </Box>
-        )}
-      </Box>
-
-      {/* FAB */}
-      <Box
-        onClick={() => setDrawerOpen(true)}
-        sx={{
-          position: "fixed", bottom: "90px", right: "20px",
-          width: 52, height: 52, borderRadius: "50%",
-          backgroundColor: "#F5C900",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer",
-          boxShadow: "0 4px 16px rgba(245,201,0,0.4)",
-          transition: "transform 0.2s",
-          "&:hover": { transform: "scale(1.08)" },
-          zIndex: 100,
-        }}
-      >
-        <AddIcon sx={{ color: "#000", fontSize: "1.5rem" }} />
+        </Box>
       </Box>
 
       <AnnounceDrawer
@@ -576,6 +629,6 @@ export default function FigurinhasPage() {
       />
 
       {!drawerOpen && <BottomNav />}
-    </Box>
+    </>
   );
 }

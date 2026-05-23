@@ -10,7 +10,7 @@ const MEDAL_COLORS = ["#F5C900", "#C0C0C0", "#CD7F32"] as const;
 interface RankingTableProps {
   entries: BolaoRankingEntry[];
   isLoading?: boolean;
-  currentUserId?: number;
+  currentUserId?: number | string;
 }
 
 function RankingSkeleton() {
@@ -21,7 +21,7 @@ function RankingSkeleton() {
           key={i}
           variant="rectangular"
           height={64}
-          sx={{ borderRadius: "12px", backgroundColor: "#1A1A1A" }}
+          sx={{ borderRadius: "12px", backgroundColor: "rgba(0,0,0,0.07)" }}
         />
       ))}
     </Box>
@@ -30,12 +30,13 @@ function RankingSkeleton() {
 
 interface RankingRowProps {
   entry: BolaoRankingEntry;
-  currentUserId?: number;
+  currentUserId?: number | string;
 }
 
 const RankingRow = React.memo(function RankingRow({ entry, currentUserId }: RankingRowProps) {
   const isMe = currentUserId != null && entry.user_id === currentUserId;
   const medalColor = entry.rank <= 3 ? MEDAL_COLORS[entry.rank - 1] : undefined;
+  const isTop3 = entry.rank <= 3;
 
   return (
     <Box
@@ -43,12 +44,27 @@ const RankingRow = React.memo(function RankingRow({ entry, currentUserId }: Rank
         display: "flex",
         alignItems: "center",
         gap: 2,
-        backgroundColor: isMe ? "rgba(245, 201, 0, 0.08)" : "#1A1A1A",
+        backgroundColor: isMe
+          ? "rgba(0,148,64,0.07)"
+          : isTop3
+          ? "rgba(255,255,255,0.8)"
+          : "rgba(255,255,255,0.55)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
         borderRadius: "12px",
         p: 1.5,
-        border: isMe ? "1px solid rgba(245,201,0,0.3)" : "1px solid transparent",
+        border: isMe
+          ? "1px solid rgba(0,148,64,0.35)"
+          : isTop3
+          ? `1px solid ${medalColor}44`
+          : "1px solid rgba(0,0,0,0.07)",
+        boxShadow: isTop3
+          ? `0 2px 8px ${medalColor}22`
+          : "0 1px 3px rgba(0,0,0,0.04)",
+        transition: "box-shadow 0.15s",
       }}
     >
+      {/* Rank / medal */}
       <Box sx={{ minWidth: 32, textAlign: "center" }}>
         {medalColor ? (
           <EmojiEventsIcon sx={{ color: medalColor, fontSize: "1.25rem" }} />
@@ -72,24 +88,38 @@ const RankingRow = React.memo(function RankingRow({ entry, currentUserId }: Rank
         sx={{
           width: 36,
           height: 36,
-          backgroundColor: "#333",
+          backgroundColor: isTop3 ? `${medalColor}33` : "#E8E8E8",
+          color: isTop3 ? medalColor : "#6B6B6B",
           fontSize: "0.875rem",
+          fontWeight: 700,
         }}
       >
         {(entry.display_name ?? "?")[0]?.toUpperCase()}
       </Avatar>
 
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          noWrap
-          sx={{
-            color: isMe ? "#F5C900" : "#FFFFFF",
-            fontWeight: isMe ? 700 : 500,
-            fontSize: "0.875rem",
-          }}
-        >
-          {entry.display_name ?? "Usuário"}{isMe ? " (você)" : ""}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+          {entry.country_code && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`https://flagcdn.com/w20/${entry.country_code}.png`}
+              width={18}
+              height={13}
+              alt=""
+              style={{ borderRadius: 2, objectFit: "cover", flexShrink: 0 }}
+            />
+          )}
+          <Typography
+            noWrap
+            sx={{
+              color: isMe ? "#009440" : "#0A0A0A",
+              fontWeight: isMe || isTop3 ? 700 : 500,
+              fontSize: "0.875rem",
+            }}
+          >
+            {entry.display_name ?? "Usuário"}{isMe ? " (você)" : ""}
+          </Typography>
+        </Box>
         <Typography sx={{ color: "#9E9E9E", fontSize: "0.7rem" }}>
           {entry.exact_predictions} exatos · {entry.correct_outcomes} certos
         </Typography>
@@ -97,7 +127,7 @@ const RankingRow = React.memo(function RankingRow({ entry, currentUserId }: Rank
 
       <Typography
         sx={{
-          color: "#F5C900",
+          color: isTop3 ? medalColor : "#009440",
           fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
           fontWeight: 700,
           fontSize: "1rem",
@@ -116,8 +146,8 @@ export function RankingTable({ entries, isLoading, currentUserId }: RankingTable
 
   if (entries.length === 0) {
     return (
-      <Typography sx={{ color: "#9E9E9E", textAlign: "center", py: 4 }}>
-        Ranking ainda vazio. Seja o primeiro a apostar! 🏆
+      <Typography sx={{ color: "#6B6B6B", textAlign: "center", py: 4 }}>
+        Ranking ainda vazio. Seja o primeiro a apostar!
       </Typography>
     );
   }

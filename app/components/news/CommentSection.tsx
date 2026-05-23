@@ -115,9 +115,9 @@ export default function CommentSection({
   return (
     <Box mt={2}>
       <Typography
-        fontWeight={600}
+        fontWeight={700}
         fontSize={14}
-        sx={{ color: "#fff", mb: 1.5 }}
+        sx={{ color: "#0A0A0A", mb: 1.5, fontFamily: "var(--font-inter), Inter, sans-serif" }}
       >
         {news.comments_count > 0
           ? `${news.comments_count} ${
@@ -126,7 +126,7 @@ export default function CommentSection({
           : "Nenhum comentário"}
       </Typography>
 
-      <Divider sx={{ borderColor: "rgba(255,255,255,0.1)", mb: 1.5 }} />
+      <Divider sx={{ borderColor: "rgba(0,0,0,0.08)", mb: 1.5 }} />
 
       {/* Campo de input de comentário - ANTES da lista */}
       {isAuthenticated && (
@@ -155,11 +155,11 @@ export default function CommentSection({
             width: "6px",
           },
           "&::-webkit-scrollbar-track": {
-            background: "rgba(255,255,255,0.05)",
+            background: "rgba(0,0,0,0.04)",
             borderRadius: "3px",
           },
           "&::-webkit-scrollbar-thumb": {
-            background: "rgba(255,255,255,0.2)",
+            background: "rgba(0,0,0,0.15)",
             borderRadius: "3px",
           },
         }}
@@ -167,7 +167,7 @@ export default function CommentSection({
         {news.comments.length === 0 ? (
           <Typography
             fontSize={13}
-            sx={{ color: "rgba(255,255,255,0.5)", textAlign: "center", py: 3 }}
+            sx={{ color: "#9E9E9E", textAlign: "center", py: 3 }}
           >
             Nenhum comentário ainda. Seja o primeiro a comentar!
           </Typography>
@@ -201,31 +201,28 @@ export default function CommentSection({
                 <Paper
                   elevation={0}
                   sx={{
-                    backgroundColor: "rgba(255,255,255,0.05)",
+                    backgroundColor: "rgba(0,0,0,0.03)",
                     p: 1.5,
                     borderRadius: 2,
                   }}
                 >
                   <Typography
-                    fontWeight={600}
+                    fontWeight={700}
                     fontSize={13}
                     onClick={() => handleUserClick(comment.user.id)}
                     sx={{
-                      color: "#fff",
+                      color: "#0A0A0A",
                       mb: 0.5,
                       cursor: "pointer",
-                      transition: "opacity 0.2s",
-                      "&:hover": {
-                        opacity: 0.8,
-                      },
+                      "&:hover": { opacity: 0.7 },
                     }}
                   >
                     {comment.user.name}
                   </Typography>
                   <Typography
                     fontSize={14}
-                    sx={{ 
-                      color: "rgba(255,255,255,0.9)",
+                    sx={{
+                      color: "#4A4A4A",
                       wordBreak: "break-word",
                       overflowWrap: "break-word",
                       whiteSpace: "pre-wrap",
@@ -238,7 +235,7 @@ export default function CommentSection({
                   <Typography
                     fontSize={11}
                     sx={{
-                      color: "rgba(255,255,255,0.5)",
+                      color: "#9E9E9E",
                     }}
                   >
                     {formatDate(comment.created_at)}
@@ -250,7 +247,7 @@ export default function CommentSection({
                       onClick={() => onLikeComment(comment.id)}
                       disabled={!isAuthenticated || likingComment[comment.id]}
                       sx={{
-                        color: comment.likes.user_liked ? "#ff3040" : "rgba(255,255,255,0.5)",
+                        color: comment.likes.user_liked ? "#E63946" : "#9E9E9E",
                         padding: "4px",
                       }}
                     >
@@ -261,7 +258,7 @@ export default function CommentSection({
                         fontSize={11}
                         onClick={() => handleLikesClick(comment.id, comment.likes.count)}
                         sx={{
-                          color: "rgba(255,255,255,0.5)",
+                          color: "#9E9E9E",
                           mr: 1,
                           cursor: "pointer",
                           transition: "opacity 0.2s",
@@ -279,7 +276,7 @@ export default function CommentSection({
                       onClick={() => onStartReply(comment.id)}
                       disabled={!isAuthenticated}
                       sx={{
-                        color: "rgba(255,255,255,0.5)",
+                        color: "#9E9E9E",
                         padding: "4px",
                       }}
                     >
@@ -291,7 +288,7 @@ export default function CommentSection({
                           size="small"
                           onClick={() => onToggleReplies(comment.id)}
                           sx={{
-                            color: "rgba(255,255,255,0.5)",
+                            color: "#9E9E9E",
                             padding: "4px",
                           }}
                         >
@@ -303,7 +300,7 @@ export default function CommentSection({
                         </IconButton>
                         <Typography
                           fontSize={11}
-                          sx={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}
+                          sx={{ color: "#9E9E9E", cursor: "pointer" }}
                           onClick={() => onToggleReplies(comment.id)}
                         >
                           {comment.replies_count} {comment.replies_count === 1 ? "resposta" : "respostas"}
@@ -316,7 +313,7 @@ export default function CommentSection({
                         size="small"
                         onClick={() => onDeleteComment(comment.id, comment.content)}
                         sx={{
-                          color: "rgba(255,255,255,0.5)",
+                          color: "#9E9E9E",
                           padding: "4px",
                           ml: 0.5,
                         }}
@@ -367,7 +364,7 @@ export default function CommentSection({
                           helperText={`${(replyTexts[comment.id] || "").length}/500 caracteres`}
                           FormHelperTextProps={{
                             sx: {
-                              color: "rgba(255,255,255,0.5)",
+                              color: "#9E9E9E",
                               fontSize: "0.7rem",
                               mt: 0.5,
                               margin: 0,
@@ -376,21 +373,21 @@ export default function CommentSection({
                           sx={{
                             flex: 1,
                             "& .MuiOutlinedInput-root": {
-                              backgroundColor: "rgba(255,255,255,0.05)",
-                              color: "#fff",
+                              backgroundColor: "rgba(0,0,0,0.03)",
+                              color: "#0A0A0A",
                               borderRadius: 2,
                               "& fieldset": {
-                                borderColor: "rgba(255,255,255,0.1)",
+                                borderColor: "rgba(0,0,0,0.12)",
                               },
                               "&:hover fieldset": {
-                                borderColor: "rgba(255,255,255,0.2)",
+                                borderColor: "rgba(0,0,0,0.22)",
                               },
                               "&.Mui-focused fieldset": {
-                                borderColor: "#ffc91f",
+                                borderColor: "#009440",
                               },
                             },
                             "& .MuiInputBase-input": {
-                              color: "#fff",
+                              color: "#0A0A0A",
                               fontSize: "13px",
                               wordBreak: "break-word",
                               overflowWrap: "break-word",
@@ -398,7 +395,7 @@ export default function CommentSection({
                               overflow: "hidden",
                               resize: "none",
                               "&::placeholder": {
-                                color: "rgba(255,255,255,0.5)",
+                                color: "#9E9E9E",
                                 opacity: 1,
                               },
                             },
@@ -412,30 +409,26 @@ export default function CommentSection({
                           onClick={() => onReplySubmit(comment.id)}
                           disabled={!replyTexts[comment.id]?.trim() || submittingReply[comment.id]}
                           sx={{
-                            color: focusedReplyInput === comment.id
-                              ? "#ffc91f"
-                              : "#fff !important",
+                            color: "#009440",
                             alignSelf: "flex-start",
                             mt: "8px",
-                            opacity: !replyTexts[comment.id]?.trim() && focusedReplyInput !== comment.id ? 0.5 : 1,
+                            opacity: !replyTexts[comment.id]?.trim() ? 0.4 : 1,
                             "&.Mui-disabled": {
-                              color: focusedReplyInput === comment.id
-                                ? "#ffc91f"
-                                : "#fff !important",
-                              opacity: !replyTexts[comment.id]?.trim() && focusedReplyInput !== comment.id ? 0.5 : 1,
+                              color: "#009440",
+                              opacity: 0.4,
                             },
                           }}
                         >
                           {submittingReply[comment.id] ? (
-                            <CircularProgress size={16} sx={{ color: focusedReplyInput === comment.id ? "#ffc91f" : "#fff" }} />
+                            <CircularProgress size={16} sx={{ color: "#009440" }} />
                           ) : (
-                            <SendIcon fontSize="small" sx={{ color: focusedReplyInput === comment.id ? "#ffc91f" : "#fff" }} />
+                            <SendIcon fontSize="small" sx={{ color: "#009440" }} />
                           )}
                         </IconButton>
                         <IconButton
                           onClick={() => onCancelReply(comment.id)}
-                          sx={{ 
-                            color: "rgba(255,255,255,0.5)",
+                          sx={{
+                            color: "#9E9E9E",
                             alignSelf: "flex-start",
                             mt: "8px",
                           }}
@@ -449,10 +442,10 @@ export default function CommentSection({
 
                 {/* Lista de respostas */}
                 {expandedComments.has(comment.id) && (
-                  <Box sx={{ mt: 1, ml: 4, borderLeft: "2px solid rgba(255,255,255,0.1)", pl: 2 }}>
+                  <Box sx={{ mt: 1, ml: 4, borderLeft: "2px solid rgba(0,0,0,0.08)", pl: 2 }}>
                     {loadingReplies[comment.id] ? (
                       <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-                        <CircularProgress size={20} sx={{ color: "#ffc91f" }} />
+                        <CircularProgress size={20} sx={{ color: "#009440" }} />
                       </Box>
                     ) : (
                       <>
@@ -478,7 +471,7 @@ export default function CommentSection({
                         {(!replies[comment.id] || replies[comment.id].length === 0) && (
                           <Typography
                             fontSize={12}
-                            sx={{ color: "rgba(255,255,255,0.5)", py: 1 }}
+                            sx={{ color: "#9E9E9E", py: 1 }}
                           >
                             Nenhuma resposta ainda
                           </Typography>
@@ -493,7 +486,7 @@ export default function CommentSection({
                               variant="text"
                               size="small"
                               sx={{
-                                color: "rgba(255,255,255,0.7)",
+                                color: "#6B6B6B",
                                 textTransform: "none",
                                 fontSize: "0.75rem",
                                 fontWeight: 500,
@@ -501,17 +494,17 @@ export default function CommentSection({
                                 minWidth: "auto",
                                 transition: "all 0.2s ease",
                                 "&:hover": {
-                                  color: "#ffc91f",
-                                  backgroundColor: "rgba(255,201,31,0.1)",
+                                  color: "#009440",
+                                  backgroundColor: "rgba(0,148,64,0.06)",
                                 },
                                 "&:disabled": {
-                                  color: "rgba(255,255,255,0.3)",
+                                  color: "#9E9E9E",
                                 },
                               }}
                             >
                               {loadingMoreReplies[comment.id] ? (
                                 <>
-                                  <CircularProgress size={12} sx={{ color: "#ffc91f", mr: 0.5 }} />
+                                  <CircularProgress size={12} sx={{ color: "#009440", mr: 0.5 }} />
                                   Carregando...
                                 </>
                               ) : (
@@ -538,10 +531,9 @@ export default function CommentSection({
               disabled={loadingMoreComments}
               variant="outlined"
               sx={{
-                color: "rgba(255,255,255,0.9)",
-                borderColor: "rgba(255,255,255,0.3)",
-                backgroundColor: "rgba(255,255,255,0.05)",
-                backdropFilter: "blur(5px)",
+                color: "#0A0A0A",
+                borderColor: "rgba(0,0,0,0.18)",
+                backgroundColor: "transparent",
                 textTransform: "none",
                 fontSize: "0.875rem",
                 fontWeight: 600,
@@ -549,21 +541,21 @@ export default function CommentSection({
                 minWidth: "200px",
                 transition: "all 0.3s ease",
                 "&:hover": {
-                  borderColor: "rgba(255,255,255,0.5)",
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  borderColor: "#009440",
+                  backgroundColor: "rgba(0,148,64,0.04)",
                   transform: "translateY(-2px)",
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.08)",
                 },
                 "&:disabled": {
-                  color: "rgba(255,255,255,0.5)",
-                  borderColor: "rgba(255,255,255,0.2)",
-                  backgroundColor: "rgba(255,255,255,0.03)",
+                  color: "#9E9E9E",
+                  borderColor: "rgba(0,0,0,0.1)",
+                  backgroundColor: "transparent",
                 },
               }}
             >
               {loadingMoreComments ? (
                 <>
-                  <CircularProgress size={16} sx={{ color: "#ffc91f", mr: 1 }} />
+                  <CircularProgress size={16} sx={{ color: "#009440", mr: 1 }} />
                   Carregando...
                 </>
                     ) : (

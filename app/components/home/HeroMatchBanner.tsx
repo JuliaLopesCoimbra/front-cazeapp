@@ -4,9 +4,8 @@ import { Box, Typography, Skeleton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { format, isToday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useBrazilFixtures, useBrazilLive } from "@/app/hooks/useFixtures";
-import { isLive, isFinished } from "@/app/services/football/footballService";
-import LiveBadge from "@/app/components/shared/LiveBadge";
+import { useBrazilFixtures } from "@/app/hooks/useFixtures";
+import { isFinished } from "@/app/services/football/footballService";
 import TeamFlag from "@/app/components/shared/TeamFlag";
 import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import { COLORS } from "@/app/constants/designTokens";
@@ -17,7 +16,6 @@ const BANNER_MIN_HEIGHT = 80;
 export default function HeroMatchBanner() {
   const router = useRouter();
   const { data: fixtures, isLoading } = useBrazilFixtures();
-  const { data: liveFixtures } = useBrazilLive();
 
   if (isLoading) {
     return (
@@ -33,18 +31,15 @@ export default function HeroMatchBanner() {
     );
   }
 
-  const liveGame = liveFixtures && liveFixtures.length > 0 ? liveFixtures[0] : null;
-  const nextGame =
-    !liveGame && fixtures
-      ? fixtures
-          .filter((f) => !isFinished(f))
-          .sort((a, b) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime())[0]
-      : null;
+  const featured = fixtures
+    ? fixtures
+        .filter((f) => !isFinished(f))
+        .sort((a, b) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime())[0] ?? null
+    : null;
 
-  const featured = liveGame ?? nextGame;
   if (!featured) return null;
 
-  const live = isLive(featured);
+  const live = false;
   const matchDate = parseISO(featured.fixture.date);
   const dateShort = format(matchDate, "dd/MM · HH'h'mm", { locale: ptBR });
   const isGameToday = !live && isToday(matchDate);
@@ -81,7 +76,6 @@ export default function HeroMatchBanner() {
       >
         {/* Status + data */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          {live && <LiveBadge variant="compact" />}
           {isGameToday && (
             <Box
               component="span"

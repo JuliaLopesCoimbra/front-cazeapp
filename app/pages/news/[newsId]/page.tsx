@@ -7,10 +7,15 @@ import {
   Typography,
   IconButton,
   Button,
+  Avatar,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import NewsDetailHeader from "@/app/components/news/NewsDetailHeader";
 import NewsImageCarousel from "@/app/components/news/NewsImageCarousel";
+import TopBar from "@/app/components/layout/TopBar";
+import BottomNav from "@/app/components/layout/BottomNav";
+import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
+import { LAYOUT } from "@/app/constants/designTokens";
+import { formatDate } from "@/app/utils/dateUtils";
 import NewsActions from "@/app/components/news/NewsActions";
 import NewsContent from "@/app/components/news/NewsContent";
 import NewsLikeSection from "@/app/components/news/NewsLikeSection";
@@ -890,96 +895,70 @@ export default function NewsDetailPage() {
 
   if (!news) {
     return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          ...pageBackgroundSx,
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        <Typography>Notícia não encontrada.</Typography>
-        <IconButton onClick={() => router.push("/pages/user/home")} sx={{ color: "#fff" }}>
+      <Box sx={{ minHeight: "100vh", backgroundColor: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 2 }}>
+        <Typography sx={{ color: "#0A0A0A" }}>Notícia não encontrada.</Typography>
+        <IconButton onClick={() => router.push("/pages/user/home")} sx={{ color: "#0A0A0A" }}>
           ←
         </IconButton>
       </Box>
     );
   }
 
+  const CONTENT_MAX = { xs: "100%", sm: "600px", md: "700px" };
+
   return (
-    <Box
-      id="news-content-scroll-container"
-      sx={{
-        minHeight: "100vh",
-        ...pageBackgroundSx,
-        color: "#fff",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <NewsActions
-        newsId={newsId}
-        eventId={eventId || news?.event_id || null}
-        isAuthor={isAuthor}
-        isAdmin={isAdmin}
-        isAdminMaster={isAdminMaster}
-        isSubadmin={isSubadmin}
-        isColunista={isColunista}
-        canDelete={Boolean(
-          (isAuthor && (isAdmin || (isColunista && news?.status !== "rejected"))) || 
-          ((isAdminMaster || isSubadmin) && news && news.author && news.approved_by_id && news.approved_by_id === news.author.id) ||
-          // Admin e subadmin podem excluir posts rejeitados
-          ((isAdminMaster || isSubadmin) && news?.status === "rejected")
-        )}
-        canDeactivate={Boolean((isAdminMaster || isSubadmin) && news?.status !== "rejected")}
-        onDelete={() => setDeleteModalOpen(true)}
-        onDeactivate={() => setDeactivateModalOpen(true)}
-        deleting={deleting}
-        deactivating={deactivating}
-        postStatus={news?.status}
-      />
+    <>
+      <Box sx={{ position: "relative", minHeight: "100vh" }}>
+        <Sidebar />
+        <Box
+          id="news-content-scroll-container"
+          component="main"
+          sx={{
+            ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
+            minHeight: "100vh",
+            pb: `${LAYOUT.bottomNavClearance}px`,
+            backgroundColor: "#FFFFFF",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <TopBar light showBack />
 
-      <Box className={shouldAnimate ? "slide-up-delay-1" : ""}>
-        <NewsDetailHeader
-          authorName={news.author?.name}
-          authorPhoto={news.author?.profile_photo}
-          createdAt={news.created_at}
-        />
-      </Box>
-
-      <Box sx={{ pb: 2, flex: 1, overflowY: "auto" }}>
-        {news.images && news.images.length > 0 && (
-          <Box 
-            className={shouldAnimate ? "slide-up-delay-2" : ""}
-            sx={{ 
-              px: { xs: 0, sm: 2 }, 
-              maxWidth: { xs: "100%", sm: "600px", md: "700px" }, 
-              margin: "0 auto", 
-              width: "100%" 
-            }}
-          >
-            <NewsImageCarousel
-              images={news.images}
-              alt={news.title}
-              onDoubleTap={() => {
-                if (isAuthenticated && news && !news.likes.user_liked && news.status !== "pending" && news.status !== "rejected") {
-                  handleLike();
-                }
-              }}
-            />
+          {/* Author row */}
+          <Box sx={{ px: 2, py: 1.5, display: "flex", alignItems: "center", gap: 1.5, borderBottom: "1px solid rgba(0,0,0,0.06)", maxWidth: CONTENT_MAX, mx: "auto", width: "100%" }}>
+            <Avatar src={news.author?.profile_photo || undefined} sx={{ width: 38, height: 38 }}>
+              {news.author?.name?.[0]?.toUpperCase() ?? "?"}
+            </Avatar>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: "0.875rem", color: "#0A0A0A", fontFamily: "var(--font-inter), Inter, sans-serif" }}>
+                {news.author?.name ?? "Casa CazéTV"}
+              </Typography>
+              <Typography sx={{ fontSize: "0.7rem", color: "#9E9E9E" }}>
+                {formatDate(news.created_at)}
+              </Typography>
+            </Box>
           </Box>
-        )}
 
-        <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
+          {/* Image */}
+          {news.images && news.images.length > 0 && (
+            <Box sx={{ px: { xs: 0, sm: 2 }, maxWidth: CONTENT_MAX, mx: "auto", width: "100%", mt: 2 }}>
+              <NewsImageCarousel
+                images={news.images}
+                alt={news.title}
+                onDoubleTap={() => {
+                  if (isAuthenticated && news && !news.likes.user_liked && news.status !== "pending" && news.status !== "rejected") {
+                    handleLike();
+                  }
+                }}
+              />
+            </Box>
+          )}
+
+          {/* Title + content */}
           <NewsContent title={news.title} content={news.content} />
-        </Box>
 
-        <Box sx={{ px: 2, maxWidth: { xs: "100%", sm: "600px", md: "700px" }, margin: "0 auto", width: "100%" }}>
-          <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
+          {/* Actions + comments */}
+          <Box sx={{ px: 2, maxWidth: CONTENT_MAX, mx: "auto", width: "100%" }}>
             <NewsLikeSection
               likesCount={news.likes.count}
               userLiked={news.likes.user_liked}
@@ -988,91 +967,61 @@ export default function NewsDetailPage() {
               newsId={newsId}
               isTorcida={resolvedBrandKey === "n1_torcida"}
             />
+            <CommentSection
+              news={news}
+              isAuthenticated={isAuthenticated}
+              isAdminMaster={isAdminMaster}
+              isSubadmin={isSubadmin}
+              currentUser={currentUser}
+              commentText={commentText}
+              submittingComment={submittingComment}
+              expandedComments={expandedComments}
+              replies={replies}
+              replyingTo={replyingTo}
+              replyTexts={replyTexts}
+              submittingReply={submittingReply}
+              likingComment={likingComment}
+              loadingReplies={loadingReplies}
+              loadingMoreReplies={loadingMoreReplies}
+              repliesOffset={repliesOffset}
+              hasMoreReplies={hasMoreReplies}
+              hasMoreComments={hasMoreComments}
+              loadingMoreComments={loadingMoreComments}
+              onCommentTextChange={setCommentText}
+              onCommentSubmit={handleComment}
+              onLikeComment={handleLikeComment}
+              onToggleReplies={toggleReplies}
+              onStartReply={handleStartReply}
+              onReplyTextChange={(commentId, text) => setReplyTexts(prev => ({ ...prev, [commentId]: text }))}
+              onReplySubmit={handleReply}
+              onCancelReply={(commentId) => {
+                setReplyingTo(null);
+                setReplyTexts(prev => { const t = { ...prev }; delete t[commentId]; return t; });
+              }}
+              onDeleteComment={handleDeleteCommentClick}
+              onLoadMoreReplies={loadMoreReplies}
+              onLoadMoreComments={loadMoreComments}
+              isTorcida={resolvedBrandKey === "n1_torcida"}
+            />
           </Box>
 
-          <Box className={shouldAnimate ? "slide-up-delay-3" : ""}>
-            <CommentSection
-            news={news}
-            isAuthenticated={isAuthenticated}
-            isAdminMaster={isAdminMaster}
-            isSubadmin={isSubadmin}
-            currentUser={currentUser}
-            commentText={commentText}
-            submittingComment={submittingComment}
-            expandedComments={expandedComments}
-            replies={replies}
-            replyingTo={replyingTo}
-            replyTexts={replyTexts}
-            submittingReply={submittingReply}
-            likingComment={likingComment}
-            loadingReplies={loadingReplies}
-            loadingMoreReplies={loadingMoreReplies}
-            repliesOffset={repliesOffset}
-            hasMoreReplies={hasMoreReplies}
-            hasMoreComments={hasMoreComments}
-            loadingMoreComments={loadingMoreComments}
-            onCommentTextChange={setCommentText}
-            onCommentSubmit={handleComment}
-            onLikeComment={handleLikeComment}
-            onToggleReplies={toggleReplies}
-            onStartReply={handleStartReply}
-            onReplyTextChange={(commentId, text) => setReplyTexts(prev => ({ ...prev, [commentId]: text }))}
-            onReplySubmit={handleReply}
-            onCancelReply={(commentId) => {
-              setReplyingTo(null);
-              setReplyTexts(prev => {
-                const newTexts = { ...prev };
-                delete newTexts[commentId];
-                return newTexts;
-              });
-            }}
-            onDeleteComment={handleDeleteCommentClick}
-            onLoadMoreReplies={loadMoreReplies}
-            onLoadMoreComments={loadMoreComments}
-            isTorcida={resolvedBrandKey === "n1_torcida"}
-          />
-          </Box>
+          {/* Reactivate button for rejected posts */}
+          {news.status === "rejected" && (isAdminMaster || isSubadmin) && (
+            <Box sx={{ px: 2, pt: 3, pb: 4, display: "flex", justifyContent: "center", maxWidth: CONTENT_MAX, mx: "auto", width: "100%" }}>
+              <Button
+                variant="contained"
+                onClick={() => setReactivateModalOpen(true)}
+                startIcon={<CheckCircleIcon />}
+                sx={{ backgroundColor: "#009440", color: "#fff", fontWeight: 700, textTransform: "none", borderRadius: "12px", px: 4, py: 1.5, minWidth: "200px", "&:hover": { backgroundColor: "#007a33" } }}
+              >
+                Reativar Post
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
 
-      {/* Botão de reativar para posts rejeitados (apenas admin/subadmin) - no final da página */}
-      {news.status === "rejected" && (isAdminMaster || isSubadmin) && (
-        <Box
-          sx={{
-            px: 2,
-            pt: 3,
-            pb: 4,
-            display: "flex",
-            justifyContent: "center",
-            maxWidth: { xs: "100%", sm: "600px", md: "700px" },
-            margin: "0 auto",
-            width: "100%",
-          }}
-        >
-          <Button
-            variant="contained"
-            onClick={() => setReactivateModalOpen(true)}
-            sx={{
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-              fontWeight: 600,
-              textTransform: "none",
-              borderRadius: 2,
-              px: 4,
-              py: 1.5,
-              minWidth: "200px",
-              "&:hover": {
-                backgroundColor: "#45a049",
-              },
-            }}
-            startIcon={<CheckCircleIcon />}
-          >
-            Reativar Post
-          </Button>
-        </Box>
-      )}
 
-      {/* Modal de Exclusão */}
       {news && (
         <DeleteNewsModal
           open={deleteModalOpen}
@@ -1083,15 +1032,11 @@ export default function NewsDetailPage() {
         />
       )}
 
-      {/* Modal de Exclusão de Comentário */}
       {commentToDelete && (
         <DeleteCommentModal
           open={deleteCommentModalOpen}
           commentContent={commentToDelete.content}
-          onClose={() => {
-            setDeleteCommentModalOpen(false);
-            setCommentToDelete(null);
-          }}
+          onClose={() => { setDeleteCommentModalOpen(false); setCommentToDelete(null); }}
           onConfirm={handleDeleteCommentConfirm}
           loading={deletingComment}
         />
@@ -1110,7 +1055,9 @@ export default function NewsDetailPage() {
         onConfirm={handleReactivate}
         reactivating={reactivating}
       />
-    </Box>
+
+      <BottomNav />
+    </>
   );
 }
 

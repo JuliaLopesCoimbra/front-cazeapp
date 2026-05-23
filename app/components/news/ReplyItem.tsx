@@ -74,31 +74,23 @@ export default function ReplyItem({
           <Paper
             elevation={0}
             sx={{
-              backgroundColor: "rgba(255,255,255,0.03)",
+              backgroundColor: "rgba(0,0,0,0.02)",
               p: 1,
               borderRadius: 1.5,
             }}
           >
             <Typography
-              fontWeight={600}
+              fontWeight={700}
               fontSize={12}
               onClick={handleUserClick}
-              sx={{
-                color: "#fff",
-                mb: 0.3,
-                cursor: "pointer",
-                transition: "opacity 0.2s",
-                "&:hover": {
-                  opacity: 0.8,
-                },
-              }}
+              sx={{ color: "#0A0A0A", mb: 0.3, cursor: "pointer", "&:hover": { opacity: 0.7 } }}
             >
               {reply.user.name}
             </Typography>
             <Typography
               fontSize={13}
-              sx={{ 
-                color: "rgba(255,255,255,0.9)",
+              sx={{
+                color: "#4A4A4A",
                 wordBreak: "break-word",
                 overflowWrap: "break-word",
                 whiteSpace: "pre-wrap",
@@ -108,20 +100,14 @@ export default function ReplyItem({
             </Typography>
           </Paper>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.3, ml: 0.5 }}>
-            <Typography
-              fontSize={10}
-              sx={{ color: "rgba(255,255,255,0.4)" }}
-            >
+            <Typography fontSize={10} sx={{ color: "#9E9E9E" }}>
               {formatDate(reply.created_at)}
             </Typography>
             <IconButton
               size="small"
               onClick={onLike}
               disabled={!isAuthenticated || liking}
-              sx={{
-                color: reply.likes.user_liked ? "#ff3040" : "rgba(255,255,255,0.4)",
-                padding: "2px",
-              }}
+              sx={{ color: reply.likes.user_liked ? "#E63946" : "#9E9E9E", padding: "2px" }}
             >
               <FavoriteIcon fontSize="small" />
             </IconButton>
@@ -130,7 +116,7 @@ export default function ReplyItem({
                 fontSize={10}
                 onClick={handleLikesClick}
                 sx={{
-                  color: "rgba(255,255,255,0.4)",
+                  color: "#9E9E9E",
                   cursor: "pointer",
                   transition: "opacity 0.2s",
                   "&:hover": {
@@ -147,7 +133,7 @@ export default function ReplyItem({
                 size="small"
                 onClick={onDelete}
                 sx={{
-                  color: "rgba(255,255,255,0.4)",
+                  color: "#9E9E9E",
                   padding: "2px",
                   ml: 0.5,
                 }}

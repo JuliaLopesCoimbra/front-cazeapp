@@ -38,15 +38,11 @@ export default function NewsLikeSection({
         <IconButton
           onClick={onLike}
           disabled={disabled}
-          sx={{ color: userLiked ? "#ff3040" : "#fff" }}
+          sx={{ color: userLiked ? "#E63946" : "#6B6B6B" }}
         >
-          {userLiked ? (
-            <FavoriteIcon />
-          ) : (
-            <FavoriteBorderIcon />
-          )}
+          {userLiked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
         </IconButton>
-        <IconButton sx={{ color: "#fff" }}>
+        <IconButton sx={{ color: "#6B6B6B" }}>
           <ChatBubbleOutlineIcon />
         </IconButton>
       </Box>
@@ -56,7 +52,7 @@ export default function NewsLikeSection({
           fontWeight={600}
           fontSize={14}
           sx={{
-            color: "#fff",
+            color: "#0A0A0A",
             mb: 1.5,
             cursor: newsId ? "pointer" : "default",
             "&:hover": newsId

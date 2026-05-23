@@ -1,16 +1,17 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
-import HamburgerMenu from "@/app/components/layout/HamburgerMenu";
 import HeaderMatchStrip from "@/app/components/home/HeaderMatchStrip";
 import BrazilGradientAvatar from "@/app/components/shared/BrazilGradientAvatar";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import type { ProfileResponse } from "@/app/services/profile/profileService";
 import { COLORS, LAYOUT, SPACING } from "@/app/constants/designTokens";
+import { useMobileMenu } from "@/app/context/MobileMenuContext";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const HEADER_AVATAR_SRC = "/assets/figma/avatar-header.png";
 const MASCOT_WIDTH = 76;
@@ -26,12 +27,13 @@ interface HomeScreenHeaderProps {
 }
 
 export default function HomeScreenHeader({
-  events,
-  currentEvent,
-  onSelectEvent,
+  events: _events,
+  currentEvent: _currentEvent,
+  onSelectEvent: _onSelectEvent,
   profile,
 }: HomeScreenHeaderProps) {
   const router = useRouter();
+  const { setMenuOpen } = useMobileMenu();
   const displayName = profile?.name?.trim() || profile?.email || "Visitante";
   const firstName = displayName.split(" ")[0];
 
@@ -47,7 +49,7 @@ export default function HomeScreenHeader({
         zIndex: 1100,
         isolation: "isolate",
         pt: `${SPACING.xl}px`,
-        backgroundColor: COLORS.bg,
+        backgroundColor: COLORS.surface,
       }}
     >
       {/* ── Linha única: avatar+saudação | placar | hambúrguer ── */}
@@ -117,14 +119,13 @@ export default function HomeScreenHeader({
 
         {/* Coluna direita — hambúrguer (mobile) / logo (desktop) */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-          <Box sx={{ display: { xs: "flex", md: "none" }, alignItems: "center" }}>
-            <HamburgerMenu
-              events={events}
-              currentEvent={currentEvent}
-              onSelectEvent={onSelectEvent}
-              triggerVariant="caze"
-            />
-          </Box>
+          <IconButton
+            aria-label="Menu"
+            onClick={() => setMenuOpen(true)}
+            sx={{ color: COLORS.muted, padding: "8px", display: { xs: "flex", md: "none" } }}
+          >
+            <MenuIcon sx={{ fontSize: 22 }} />
+          </IconButton>
           <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}>
             <Image
               src="/assets/figma/logo-top.png"

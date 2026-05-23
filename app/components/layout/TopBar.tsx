@@ -2,10 +2,12 @@
 
 import { Box, IconButton, Typography } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import MenuIcon from "@mui/icons-material/Menu";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import BrazilDivider from "./BrazilDivider";
+import { useMobileMenu } from "@/app/context/MobileMenuContext";
 
 interface TopBarProps {
   /** Quando definido, substitui o mascote central por um título em texto. */
@@ -17,6 +19,8 @@ interface TopBarProps {
   rightSlot?: React.ReactNode;
   /** Quando true, esconde o BrazilDivider abaixo. */
   hideDivider?: boolean;
+  /** Quando true, usa fundo branco com texto/ícones escuros. */
+  light?: boolean;
 }
 
 export default function TopBar({
@@ -25,8 +29,10 @@ export default function TopBar({
   onBack,
   rightSlot,
   hideDivider = false,
+  light = false,
 }: TopBarProps) {
   const router = useRouter();
+  const { setMenuOpen } = useMobileMenu();
 
   const handleBack = () => {
     if (onBack) onBack();
@@ -48,11 +54,12 @@ export default function TopBar({
       <Box
         component="header"
         sx={{
-          backgroundColor: "#282828",
+          backgroundColor: light ? "#FFFFFF" : "#282828",
           height: "56px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          boxShadow: light ? "0 1px 0 rgba(0,0,0,0.08)" : "none",
         }}
       >
         {/* Lado esquerdo: logo Casa CazéTV ou botão voltar */}
@@ -68,7 +75,7 @@ export default function TopBar({
             <IconButton
               aria-label="Voltar"
               onClick={handleBack}
-              sx={{ color: "#FFFFFF", padding: "8px" }}
+              sx={{ color: light ? "#0A0A0A" : "#FFFFFF", padding: "8px" }}
             >
               <ArrowBackIosNewIcon sx={{ fontSize: 20 }} />
             </IconButton>
@@ -99,7 +106,7 @@ export default function TopBar({
                 fontFamily: '"Montserrat", Arial, sans-serif',
                 fontWeight: 700,
                 fontSize: "1rem",
-                color: "#FFFFFF",
+                color: light ? "#0A0A0A" : "#FFFFFF",
                 letterSpacing: "0.02em",
               }}
             >
@@ -117,17 +124,29 @@ export default function TopBar({
           )}
         </Box>
 
-        {/* Lado direito: slot livre */}
+        {/* Lado direito: slot livre + hambúrguer mobile */}
         <Box
           sx={{
             width: 80,
             display: "flex",
             justifyContent: "flex-end",
             alignItems: "center",
-            pr: 1,
+            pr: 0.5,
+            gap: 0.25,
           }}
         >
           {rightSlot}
+          <IconButton
+            aria-label="Menu"
+            onClick={() => setMenuOpen(true)}
+            sx={{
+              color: light ? "#0A0A0A" : "#FFFFFF",
+              padding: "8px",
+              display: { xs: "flex", md: "none" },
+            }}
+          >
+            <MenuIcon sx={{ fontSize: 22 }} />
+          </IconButton>
         </Box>
       </Box>
 

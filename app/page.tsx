@@ -6,8 +6,6 @@ import {
   TextField,
   Typography,
   Box,
-  FormControlLabel,
-  Checkbox,
   InputAdornment,
   IconButton,
   Skeleton,
@@ -41,13 +39,11 @@ import {
 interface LoginData {
   email: string;
   password: string;
-  remember_me?: boolean;
 }
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [keepMeLoggedIn, setKeepMeLoggedIn] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
@@ -106,10 +102,9 @@ const LoginForm: React.FC = () => {
     setShowResendEmail(false);
 
     try {
-      const loginData: LoginData = { 
-        email, 
+      const loginData: LoginData = {
+        email,
         password,
-        remember_me: keepMeLoggedIn
       };
       const response = await loginUser(loginData);
 
@@ -121,14 +116,7 @@ const LoginForm: React.FC = () => {
 
       const { access_token, refresh_token } = response;
 
-      // Persiste preferência para o ciclo de refresh do token
-      if (keepMeLoggedIn) {
-        localStorage.setItem("keep_logged_in", "1");
-      } else {
-        localStorage.removeItem("keep_logged_in");
-      }
-
-      login(access_token, refresh_token, keepMeLoggedIn);
+      login(access_token, refresh_token, false);
 
       router.push("/pages/user/home");
     } catch (err: unknown) {
@@ -457,32 +445,6 @@ const LoginForm: React.FC = () => {
         />
         </Box>
 
-        {/* Checkbox para manter-me conectado */}
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={keepMeLoggedIn}
-              onChange={(e) => setKeepMeLoggedIn(e.target.checked)}
-              sx={{
-                color: loginColors.yellow,
-                "&.Mui-checked": {
-                  color: loginColors.yellow,
-                },
-                "&:hover": {
-                  backgroundColor: "rgba(255, 203, 0, 0.12)",
-                },
-              }}
-            />
-          }
-          label="Mantenha-me conectado"
-          sx={{
-            color: "#fff", // texto branco
-            "& .MuiFormControlLabel-label": {
-              fontSize: 14, // opcional
-            },
-          }}
-        />
-
         <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
           <Button
           fullWidth
@@ -514,35 +476,6 @@ const LoginForm: React.FC = () => {
           disabled={loading}
         >
           {loading ? "Carregando..." : "Continuar"}
-        </Button>
-        </Box>
-
-        {/* Botão Continuar sem login */}
-        <Box className={shouldAnimate ? "slide-up-delay-2" : ""}>
-          <Button
-          fullWidth
-          variant="outlined"
-          sx={{
-            mt: 1,
-            mb: 1,
-            color: "#fff",
-            borderColor: "rgba(255, 255, 255, 0.3)",
-            backgroundColor: "transparent",
-            borderRadius: CAZE_RADIUS.sm,
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: { xs: "14px", md: "15px" },
-            padding: { xs: "12px", md: "14px" },
-            transition: "all 0.2s ease",
-            "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              borderColor: "rgba(255, 255, 255, 0.5)",
-              transform: "translateY(-2px)",
-            },
-          }}
-          onClick={() => router.push("/pages/events")}
-        >
-          Continuar sem login
         </Button>
         </Box>
 

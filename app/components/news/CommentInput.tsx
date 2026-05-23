@@ -69,7 +69,7 @@ export default function CommentInput({
             helperText={`${value.length}/500 caracteres`}
             FormHelperTextProps={{
               sx: {
-                color: "rgba(255,255,255,0.5)",
+                color: "#9E9E9E",
                 fontSize: "0.75rem",
                 mt: 0.5,
                 margin: 0,
@@ -78,30 +78,21 @@ export default function CommentInput({
             sx={{
               flex: 1,
               "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255,255,255,0.05)",
-                color: "#fff",
+                backgroundColor: "rgba(0,0,0,0.03)",
+                color: "#0A0A0A",
                 borderRadius: 2,
-                "& fieldset": {
-                  borderColor: "rgba(255,255,255,0.1)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255,255,255,0.2)",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ffc91f",
-                },
+                "& fieldset": { borderColor: "rgba(0,0,0,0.12)" },
+                "&:hover fieldset": { borderColor: "rgba(0,0,0,0.22)" },
+                "&.Mui-focused fieldset": { borderColor: "#009440" },
               },
               "& .MuiInputBase-input": {
-                color: "#fff",
+                color: "#0A0A0A",
                 wordBreak: "break-word",
                 overflowWrap: "break-word",
                 whiteSpace: "pre-wrap",
                 overflow: "hidden",
                 resize: "none",
-                "&::placeholder": {
-                  color: "rgba(255,255,255,0.5)",
-                  opacity: 1,
-                },
+                "&::placeholder": { color: "#9E9E9E", opacity: 1 },
               },
               "& .MuiInputBase-inputMultiline": {
                 overflow: "hidden !important",
@@ -113,20 +104,17 @@ export default function CommentInput({
             onClick={onSubmit}
             disabled={!value.trim() || submitting || disabled}
             sx={{
-              color: isFocused ? "#ffc91f" : "#fff !important",
+              color: "#009440",
               alignSelf: "flex-start",
               mt: "8px",
-              opacity: !value.trim() && !isFocused ? 0.5 : 1,
-              "&.Mui-disabled": {
-                color: isFocused ? "#ffc91f" : "#fff !important",
-                opacity: !value.trim() && !isFocused ? 0.5 : 1,
-              },
+              opacity: !value.trim() ? 0.4 : 1,
+              "&.Mui-disabled": { color: "#009440", opacity: 0.4 },
             }}
           >
             {submitting ? (
-              <CircularProgress size={20} sx={{ color: isFocused ? "#ffc91f" : "#fff" }} />
+              <CircularProgress size={20} sx={{ color: "#009440" }} />
             ) : (
-              <SendIcon sx={{ color: isFocused ? "#ffc91f" : "#fff" }} />
+              <SendIcon sx={{ color: "#009440" }} />
             )}
           </IconButton>
         </Box>

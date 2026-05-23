@@ -36,9 +36,10 @@ export interface BolaoPredicitionResponse {
 
 export interface BolaoRankingEntry {
   rank: number;
-  user_id: number;
+  user_id: number | string;
   display_name: string | null;
   avatar_url: string | null;
+  country_code?: string;
   total_points: number;
   exact_predictions: number;
   correct_outcomes: number;

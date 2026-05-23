@@ -43,7 +43,7 @@ export const NAV_ITEMS = [
   },
   {
     label: "Bolão",
-    path: "/pages/user/bolao",
+    path: "/pages/user/bolao/ranking",
     IconActive: EmojiEventsIcon,
     IconInactive: EmojiEventsOutlinedIcon,
   },
@@ -115,7 +115,7 @@ export default function BottomNav({
   const width = useTransform(dockWidthPercent, (p) => `${p}%`);
 
   const getBadge = (path: string) => {
-    if (path === "/pages/user/bolao" && bolaoHasPendingBets) return 1;
+    if (path === "/pages/user/bolao/ranking" && bolaoHasPendingBets) return 1;
     if (path === "/pages/user/figurinhas" && stickersHasUnopened > 0)
       return stickersHasUnopened;
     return 0;
@@ -155,10 +155,10 @@ export default function BottomNav({
         noPadding
         sx={{
           width: "100%",
-          backgroundColor: "rgba(245, 239, 222, 0.86)",
-          backdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.4)`,
-          WebkitBackdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.4)`,
-          border: "1px solid #e4d2b7",
+          backgroundColor: "rgba(255, 255, 255, 0.90)",
+          backdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.2)`,
+          WebkitBackdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.2)`,
+          border: "1px solid rgba(0,0,0,0.09)",
           boxShadow: "0 -2px 12px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.08)",
         }}
       >
@@ -174,7 +174,9 @@ export default function BottomNav({
           }}
         >
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname?.startsWith(item.path) ?? false;
+          const isActive = item.path === "/pages/user/bolao/ranking"
+            ? (pathname?.startsWith("/pages/user/bolao") ?? false)
+            : (pathname?.startsWith(item.path) ?? false);
           const badgeCount = getBadge(item.path);
           const Icon = isActive ? item.IconActive : item.IconInactive;
 

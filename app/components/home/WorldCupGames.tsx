@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
-import { Box, Typography, Chip, Skeleton, Drawer, IconButton, CircularProgress } from "@mui/material";
+import { Box, Typography, Chip, Skeleton, Drawer, IconButton } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import CloseIcon from "@mui/icons-material/Close";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -13,10 +13,8 @@ import {
   getBrazilStats,
   getFixtureEvents,
   getWcStandings,
-  getLiveNowGames,
   mockLiveOn,
   mockLiveOff,
-  mockLiveWithFixture,
   isLive,
   isFinished,
   ROUND_TO_PHASE,
@@ -25,7 +23,6 @@ import {
   FixtureEvent,
   StandingTeam,
   FixtureTeam,
-  LiveNowGame,
 } from "@/app/services/football/footballService";
 
 interface Props {
@@ -85,8 +82,8 @@ function FlagImage({ name, size = 48 }: { name: string; size?: number }) {
   const h = Math.round(size * 0.67);
   if (!code) {
     return (
-      <Box sx={{ width: size, height: h, bgcolor: "rgba(255,255,255,0.08)", borderRadius: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <SportsSoccerIcon sx={{ fontSize: size * 0.35, color: "rgba(255,255,255,0.2)" }} />
+      <Box sx={{ width: size, height: h, bgcolor: "rgba(0,0,0,0.06)", borderRadius: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <SportsSoccerIcon sx={{ fontSize: size * 0.35, color: "rgba(0,0,0,0.25)" }} />
       </Box>
     );
   }
@@ -148,8 +145,8 @@ function eventColor(ev: FixtureEvent) {
   const type = (ev.type as string)?.toLowerCase() ?? "";
   const detail = ev.detail?.toLowerCase() ?? "";
   if (type === "gol" || type === "goal") return "#1b5e20";
-  if ((type === "cartão" || type === "card") && (detail.includes("vermelho") || detail.includes("red"))) return "#b71c1c";
-  if (type === "cartão" || type === "card") return "#e65100";
+  if ((type === "cartão" || type === "card") && (detail.includes("vermelho") || detail.includes("red"))) return "#009440";
+  if (type === "cartão" || type === "card") return "#009440";
   return "#111";
 }
 
@@ -162,7 +159,7 @@ function StatusChip({ fixture }: { fixture: BrazilFixture }) {
         label={fixture.fixture.status.elapsed ? `${fixture.fixture.status.elapsed}'` : "AO VIVO"}
         size="small"
         sx={{
-          bgcolor: "#d32f2f", color: "#fff", fontWeight: 800, fontSize: 10, height: 20,
+          bgcolor: "#009440", color: "#fff", fontWeight: 800, fontSize: 10, height: 20,
           animation: "blink 1.4s ease-in-out infinite",
           "@keyframes blink": { "0%": { opacity: 1 }, "50%": { opacity: 0.65 }, "100%": { opacity: 1 } },
         }}
@@ -174,7 +171,7 @@ function StatusChip({ fixture }: { fixture: BrazilFixture }) {
       <Chip
         label="Encerrado"
         size="small"
-        sx={{ bgcolor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", fontWeight: 600, fontSize: 10, height: 20 }}
+        sx={{ bgcolor: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)", fontWeight: 600, fontSize: 10, height: 20 }}
       />
     );
   }
@@ -183,7 +180,7 @@ function StatusChip({ fixture }: { fixture: BrazilFixture }) {
     <Chip
       label={`${date} · ${time}`}
       size="small"
-      sx={{ bgcolor: "rgba(255,201,31,0.15)", color: "#ffc91f", fontWeight: 700, fontSize: 10, height: 20 }}
+      sx={{ bgcolor: "rgba(0,148,64,0.1)", color: "#009440", fontWeight: 700, fontSize: 10, height: 20 }}
     />
   );
 }
@@ -198,16 +195,16 @@ function ScoreDisplay({ fixture }: { fixture: BrazilFixture }) {
   if (live || done) {
     return (
       <Box sx={{ textAlign: "center" }}>
-        <Typography sx={{ fontSize: 30, fontWeight: 900, color: live ? "#d32f2f" : "#fff", letterSpacing: 3 }}>
+        <Typography sx={{ fontSize: 30, fontWeight: 900, color: live ? "#009440" : "#111", letterSpacing: 3 }}>
           {home ?? 0} x {away ?? 0}
         </Typography>
         {live && (
-          <Typography sx={{ fontSize: 9, color: "#d32f2f", fontWeight: 800 }}>
+          <Typography sx={{ fontSize: 9, color: "#009440", fontWeight: 800 }}>
             {fixture.fixture.status.elapsed ? `${fixture.fixture.status.elapsed}'` : "AO VIVO"}
           </Typography>
         )}
         {done && (
-          <Typography sx={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>Encerrado</Typography>
+          <Typography sx={{ fontSize: 9, color: "rgba(0,0,0,0.45)" }}>Encerrado</Typography>
         )}
       </Box>
     );
@@ -216,10 +213,10 @@ function ScoreDisplay({ fixture }: { fixture: BrazilFixture }) {
   const { time } = formatDate(fixture.fixture.date);
   return (
     <Box sx={{ textAlign: "center" }}>
-      <Box sx={{ bgcolor: "rgba(255,201,31,0.15)", borderRadius: 2, px: 1.5, py: 0.8, mb: 0.5 }}>
-        <Typography sx={{ fontSize: 14, fontWeight: 900, color: "#ffc91f", letterSpacing: 2 }}>VS</Typography>
+      <Box sx={{ bgcolor: "rgba(0,148,64,0.1)", borderRadius: 2, px: 1.5, py: 0.8, mb: 0.5 }}>
+        <Typography sx={{ fontSize: 14, fontWeight: 900, color: "#009440", letterSpacing: 2 }}>VS</Typography>
       </Box>
-      <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.45)", fontWeight: 600 }}>{time}</Typography>
+      <Typography sx={{ fontSize: 10, color: "rgba(0,0,0,0.45)", fontWeight: 600 }}>{time}</Typography>
     </Box>
   );
 }
@@ -245,9 +242,9 @@ function GameCard({
       onClick={onClick}
       sx={{
         mb: 2, borderRadius: 3, overflow: "hidden", cursor: "pointer",
-        border: live ? "1.5px solid #d32f2f" : "1px solid rgba(255,255,255,0.1)",
-        boxShadow: live ? "0 4px 20px rgba(211,47,47,0.3)" : "0 2px 10px rgba(0,0,0,0.3)",
-        bgcolor: live ? "rgba(211,47,47,0.06)" : "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(0,0,0,0.1)",
+        boxShadow: "0 1px 6px rgba(0,0,0,0.08)",
+        bgcolor: "#FFFFFF",
         "&:active": { transform: "scale(0.985)" },
         transition: "all 0.15s",
       }}
@@ -256,48 +253,52 @@ function GameCard({
       <Box
         sx={{
           px: 2, py: 0.8,
-          background: live
-            ? "linear-gradient(90deg, #7f0000, #d32f2f)"
-            : index === 0
-            ? "linear-gradient(90deg, #0d2b0d, #1a4a1a)"
-            : "rgba(255,255,255,0.04)",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: index === 0 ? "linear-gradient(90deg, #e8f5e9, #c8e6c9)" : "#f5f5f5",
+          display: "flex", alignItems: "center", justifyContent: live ? "center" : "space-between",
         }}
       >
-        <Typography sx={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.9)", letterSpacing: 0.5 }}>
-          {PHASE_LABEL[phase]}
-        </Typography>
-        <StatusChip fixture={fixture} />
+        {live ? (
+          <Typography sx={{ fontSize: 10, fontWeight: 800, color: "#009440", letterSpacing: 1 }}>
+            JOGO AO VIVO
+          </Typography>
+        ) : (
+          <>
+            <Typography sx={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.7)", letterSpacing: 0.5 }}>
+              {PHASE_LABEL[phase]}
+            </Typography>
+            <StatusChip fixture={fixture} />
+          </>
+        )}
       </Box>
 
       {/* Times */}
       <Box sx={{ px: 2, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0.8 }}>
           <FlagImage name={home.name} size={56} />
-          <Typography sx={{ fontSize: 12, fontWeight: 800, color: "#fff", textAlign: "center" }}>{home.name}</Typography>
+          <Typography sx={{ fontSize: 12, fontWeight: 800, color: "#111", textAlign: "center" }}>{home.name}</Typography>
         </Box>
         <Box sx={{ flex: "0 0 auto", px: 2 }}>
           <ScoreDisplay fixture={fixture} />
         </Box>
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0.8 }}>
           <FlagImage name={away.name} size={56} />
-          <Typography sx={{ fontSize: 12, fontWeight: 800, color: "#fff", textAlign: "center" }}>{away.name}</Typography>
+          <Typography sx={{ fontSize: 12, fontWeight: 800, color: "#111", textAlign: "center" }}>{away.name}</Typography>
         </Box>
       </Box>
 
       {/* Footer */}
-      <Box sx={{ px: 2, py: 0.8, borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Box sx={{ px: 2, py: 0.8, borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.4 }}>
-          <LocationOnIcon sx={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }} />
-          <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.35)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <LocationOnIcon sx={{ fontSize: 11, color: "rgba(0,0,0,0.35)" }} />
+          <Typography sx={{ fontSize: 10, color: "rgba(0,0,0,0.35)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {fixture.fixture.venue.name}, {fixture.fixture.venue.city}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
-          <Typography sx={{ fontSize: 10, color: live ? "#d32f2f" : "#ffc91f", fontWeight: 700 }}>
+          <Typography sx={{ fontSize: 10, color: live ? "#009440" : "#009440", fontWeight: 700 }}>
             {live ? "Ver ao vivo" : "Ver detalhes"}
           </Typography>
-          <ChevronRightIcon sx={{ fontSize: 13, color: live ? "#d32f2f" : "#ffc91f" }} />
+          <ChevronRightIcon sx={{ fontSize: 13, color: live ? "#009440" : "#009440" }} />
         </Box>
       </Box>
     </Box>
@@ -374,10 +375,10 @@ function StandingsTable({
     rowBorder: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
     rank: dark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
     name: dark ? "#fff" : "#111",
-    brazilName: dark ? "#ffc91f" : "#8a6500",
+    brazilName: dark ? "#009440" : "#8a6500",
     val: dark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)",
     pts: dark ? "#fff" : "#111",
-    brazilPts: dark ? "#ffc91f" : "#8a6500",
+    brazilPts: dark ? "#009440" : "#8a6500",
     dash: dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.25)",
   };
 
@@ -416,8 +417,8 @@ function StandingsTable({
                   gridTemplateColumns: "22px 1fr 26px 26px 26px 26px 30px",
                   alignItems: "center",
                   gap: 0.5, px: 1, py: 0.8, mb: 0.3, borderRadius: 1.5,
-                  bgcolor: isBrazil ? "rgba(255,201,31,0.12)" : c.rowBg,
-                  border: `1px solid ${isBrazil ? "rgba(255,201,31,0.3)" : c.rowBorder}`,
+                  bgcolor: isBrazil ? "rgba(0,148,64,0.08)" : c.rowBg,
+                  border: `1px solid ${isBrazil ? "rgba(0,148,64,0.3)" : c.rowBorder}`,
                 }}
               >
                 <Typography sx={{ fontSize: 11, fontWeight: 700, color: c.rank, textAlign: "center" }}>
@@ -490,14 +491,14 @@ function EventsDrawer({
               {live && (
                 <Box sx={{
                   display: "flex", alignItems: "center", gap: 0.5,
-                  bgcolor: "rgba(211,47,47,0.1)", borderRadius: 1, px: 0.8, py: 0.2,
+                  bgcolor: "rgba(0,148,64,0.1)", borderRadius: 1, px: 0.8, py: 0.2,
                 }}>
                   <Box sx={{
-                    width: 6, height: 6, borderRadius: "50%", bgcolor: "#d32f2f",
+                    width: 6, height: 6, borderRadius: "50%", bgcolor: "#009440",
                     animation: "blink 1.2s ease-in-out infinite",
                     "@keyframes blink": { "0%": { opacity: 1 }, "50%": { opacity: 0.2 }, "100%": { opacity: 1 } },
                   }} />
-                  <Typography sx={{ fontSize: 9, color: "#d32f2f", fontWeight: 800 }}>AO VIVO</Typography>
+                  <Typography sx={{ fontSize: 9, color: "#009440", fontWeight: 800 }}>AO VIVO</Typography>
                 </Box>
               )}
             </Box>
@@ -519,7 +520,7 @@ function EventsDrawer({
               ? "linear-gradient(135deg, #fff5f5, #ffe8e8)"
               : "linear-gradient(135deg, #f5f5f5, #eeeeee)",
             borderRadius: 3, p: 2.5, mb: 3,
-            border: `1px solid ${live ? "rgba(211,47,47,0.2)" : "rgba(0,0,0,0.07)"}`,
+            border: `1px solid ${live ? "rgba(0,148,64,0.2)" : "rgba(0,0,0,0.07)"}`,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -528,11 +529,11 @@ function EventsDrawer({
               <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#111" }}>{home.name}</Typography>
             </Box>
             <Box sx={{ textAlign: "center", px: 2 }}>
-              <Typography sx={{ fontSize: 40, fontWeight: 900, color: live ? "#d32f2f" : "#111", letterSpacing: 4 }}>
+              <Typography sx={{ fontSize: 40, fontWeight: 900, color: live ? "#009440" : "#111", letterSpacing: 4 }}>
                 {fixture.goals.home ?? 0} x {fixture.goals.away ?? 0}
               </Typography>
               {live && (
-                <Typography sx={{ fontSize: 11, color: "#d32f2f", fontWeight: 800 }}>
+                <Typography sx={{ fontSize: 11, color: "#009440", fontWeight: 800 }}>
                   AO VIVO · {fixture.fixture.status.elapsed}'
                 </Typography>
               )}
@@ -570,7 +571,7 @@ function EventsDrawer({
         ) : (
           <Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <Box sx={{ width: 4, height: 16, bgcolor: "#ffc91f", borderRadius: 1 }} />
+              <Box sx={{ width: 4, height: 16, bgcolor: "#009440", borderRadius: 1 }} />
               <Typography sx={{ fontSize: 13, fontWeight: 800, color: "#111" }}>Eventos da partida</Typography>
             </Box>
             <Box sx={{ position: "relative" }}>
@@ -637,7 +638,7 @@ function EventsDrawer({
                   {count === 0 ? (
                     <Chip label="Em breve" size="small" sx={{ height: 18, fontSize: 9, bgcolor: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }} />
                   ) : (
-                    <Chip label={`${count} ${count === 1 ? "jogo" : "jogos"}`} size="small" sx={{ height: 18, fontSize: 9, bgcolor: "rgba(255,201,31,0.15)", color: "#8a6500" }} />
+                    <Chip label={`${count} ${count === 1 ? "jogo" : "jogos"}`} size="small" sx={{ height: 18, fontSize: 9, bgcolor: "rgba(0,148,64,0.1)", color: "#8a6500" }} />
                   )}
                 </Box>
                 <ChevronRightIcon sx={{ fontSize: 16, color: "rgba(0,0,0,0.3)" }} />
@@ -664,9 +665,6 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
   const [eventsLoading, setEventsLoading] = useState(false);
   const [mockLoading, setMockLoading] = useState(false);
   const { isAdmin } = useAuth();
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [liveNowGames, setLiveNowGames] = useState<LiveNowGame[]>([]);
-  const [liveNowLoading, setLiveNowLoading] = useState(false);
 
   // Carga inicial — chamadas independentes para que uma falha não bloqueie as outras
   useEffect(() => {
@@ -712,7 +710,7 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
         setLiveFixtures(live);
         setFixtures((prev) => {
           const ids = new Set(prev.map((f) => f.fixture.id));
-          return [...prev, ...live.filter((f) => !ids.has(f.fixture.id))];
+          return [...live.filter((f) => !ids.has(f.fixture.id)), ...prev];
         });
         const phase = ROUND_TO_PHASE[live[0]?.league.round];
         if (phase) setActivePhase(phase);
@@ -724,37 +722,6 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
     }
   }
 
-  async function openPicker() {
-    setPickerOpen(true);
-    setLiveNowLoading(true);
-    try {
-      const games = await getLiveNowGames();
-      setLiveNowGames(games);
-    } catch {
-      setLiveNowGames([]);
-    } finally {
-      setLiveNowLoading(false);
-    }
-  }
-
-  async function selectLiveGame(game: LiveNowGame) {
-    setPickerOpen(false);
-    setMockLoading(true);
-    try {
-      await mockLiveWithFixture(game.id);
-      const live = await getBrazilLive();
-      setLiveFixtures(live);
-      setFixtures((prev) => {
-        const ids = new Set(prev.map((f) => f.fixture.id));
-        return [...prev, ...live.filter((f) => !ids.has(f.fixture.id))];
-      });
-      const phase = ROUND_TO_PHASE[live[0]?.league.round];
-      if (phase) setActivePhase(phase);
-    } catch {
-    } finally {
-      setMockLoading(false);
-    }
-  }
 
   // Poll ao vivo a cada 30s
   useEffect(() => {
@@ -806,17 +773,19 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
 
   // Merge dados ao vivo nos fixtures do painel ativo
   const liveById = Object.fromEntries(liveFixtures.map((f) => [f.fixture.id, f]));
-  const displayFixtures = (fixturesByPhase[activePhase] ?? []).map(
-    (f) => liveById[f.fixture.id] ?? f
-  );
+  const basePhaseFixtures = fixturesByPhase[activePhase] ?? [];
+  const dedupedFixtures = mockActive && activePhase === "grupos" && basePhaseFixtures.length > 1
+    ? [basePhaseFixtures[0], ...basePhaseFixtures.slice(2)]
+    : basePhaseFixtures;
+  const displayFixtures = dedupedFixtures.map((f) => liveById[f.fixture.id] ?? f);
 
   // ─── Loading ───────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <Box sx={{ px: 2, pb: 4 }}>
-        <Skeleton variant="rectangular" height={36} sx={{ bgcolor: "rgba(255,255,255,0.05)", borderRadius: 1, mb: 3, width: "60%" }} />
+        <Skeleton variant="rectangular" height={36} sx={{ bgcolor: "rgba(0,0,0,0.06)", borderRadius: 1, mb: 3, width: "60%" }} />
         {[1, 2, 3].map((i) => (
-          <Skeleton key={i} variant="rectangular" height={130} sx={{ bgcolor: "rgba(255,255,255,0.05)", borderRadius: 2, mb: 2 }} />
+          <Skeleton key={i} variant="rectangular" height={130} sx={{ bgcolor: "rgba(0,0,0,0.06)", borderRadius: 2, mb: 2 }} />
         ))}
       </Box>
     );
@@ -826,8 +795,8 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
   if (fixtures.length === 0) {
     return (
       <Box sx={{ px: 2, pb: 4, textAlign: "center", pt: 8 }}>
-        <SportsSoccerIcon sx={{ fontSize: 52, color: "rgba(255,255,255,0.1)", mb: 1.5 }} />
-        <Typography sx={{ color: "rgba(255,255,255,0.35)", fontSize: 14 }}>
+        <SportsSoccerIcon sx={{ fontSize: 52, color: "rgba(0,0,0,0.1)", mb: 1.5 }} />
+        <Typography sx={{ color: "rgba(0,0,0,0.45)", fontSize: 14 }}>
           Jogos da Copa do Mundo 2026 em breve
         </Typography>
       </Box>
@@ -841,18 +810,18 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
       <Box sx={{ px: 2, mb: 2 }}>
         {/* Título */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-          <SportsSoccerIcon sx={{ color: "#ffc91f", fontSize: 18 }} />
+          <SportsSoccerIcon sx={{ color: "#009440", fontSize: 18 }} />
           <Box>
-            <Typography sx={{ fontSize: 10, color: "#ffc91f", fontWeight: 700, letterSpacing: 1.2 }}>
+            <Typography sx={{ fontSize: 10, color: "#009440", fontWeight: 700, letterSpacing: 1.2 }}>
               COPA DO MUNDO 2026
             </Typography>
-            <Typography sx={{ fontSize: 15, fontWeight: 900, color: "#fff", lineHeight: 1.2 }}>
+            <Typography sx={{ fontSize: 15, fontWeight: 900, color: "#111", lineHeight: 1.2 }}>
               Seleção Brasileira
             </Typography>
           </Box>
           <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1 }}>
             {displayStats && (
-              <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.35)", fontWeight: 600 }}>
+              <Typography sx={{ fontSize: 10, color: "rgba(0,0,0,0.5)", fontWeight: 600 }}>
                 Grupo {displayStats.grupo}
               </Typography>
             )}
@@ -863,41 +832,25 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
                 sx={{
                   display: "flex", alignItems: "center", gap: 0.5,
                   px: 1, py: 0.4, borderRadius: 1.5, cursor: mockLoading ? "default" : "pointer",
-                  bgcolor: "rgba(211,47,47,0.2)", border: "1px solid rgba(211,47,47,0.5)",
+                  bgcolor: "rgba(0,148,64,0.2)", border: "1px solid rgba(0,148,64,0.5)",
                   "&:active": { transform: "scale(0.93)" }, opacity: mockLoading ? 0.5 : 1,
                 }}
               >
-                <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#d32f2f", animation: "blink 1.2s ease-in-out infinite", "@keyframes blink": { "0%": { opacity: 1 }, "50%": { opacity: 0.2 }, "100%": { opacity: 1 } } }} />
-                <Typography sx={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: "#d32f2f" }}>AO VIVO</Typography>
+                <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#009440", animation: "blink 1.2s ease-in-out infinite", "@keyframes blink": { "0%": { opacity: 1 }, "50%": { opacity: 0.2 }, "100%": { opacity: 1 } } }} />
+                <Typography sx={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: "#009440" }}>AO VIVO</Typography>
               </Box>
             ) : isAdmin ? (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                {/* Simular fictício */}
-                <Box
-                  onClick={mockLoading ? undefined : toggleMock}
-                  sx={{
-                    display: "flex", alignItems: "center", gap: 0.5,
-                    px: 1, py: 0.4, borderRadius: 1.5, cursor: mockLoading ? "default" : "pointer",
-                    bgcolor: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
-                    "&:active": { transform: "scale(0.93)" }, opacity: mockLoading ? 0.5 : 1,
-                  }}
-                >
-                  <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.3)" }} />
-                  <Typography sx={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: "rgba(255,255,255,0.35)" }}>SIMULAR</Typography>
-                </Box>
-                {/* Jogo real ao vivo */}
-                <Box
-                  onClick={mockLoading ? undefined : openPicker}
-                  sx={{
-                    display: "flex", alignItems: "center", gap: 0.5,
-                    px: 1, py: 0.4, borderRadius: 1.5, cursor: mockLoading ? "default" : "pointer",
-                    bgcolor: "rgba(255,100,0,0.12)", border: "1px solid rgba(255,100,0,0.3)",
-                    "&:active": { transform: "scale(0.93)" }, opacity: mockLoading ? 0.5 : 1,
-                  }}
-                >
-                  <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#ff6400" }} />
-                  <Typography sx={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: "#ff6400" }}>REAL</Typography>
-                </Box>
+              <Box
+                onClick={mockLoading ? undefined : toggleMock}
+                sx={{
+                  display: "flex", alignItems: "center", gap: 0.5,
+                  px: 1, py: 0.4, borderRadius: 1.5, cursor: mockLoading ? "default" : "pointer",
+                  bgcolor: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.1)",
+                  "&:active": { transform: "scale(0.93)" }, opacity: mockLoading ? 0.5 : 1,
+                }}
+              >
+                <Box sx={{ width: 5, height: 5, borderRadius: "50%", bgcolor: "rgba(0,0,0,0.25)", flexShrink: 0 }} />
+                <Typography sx={{ fontSize: 7, fontWeight: 700, letterSpacing: 0.3, color: "rgba(0,0,0,0.45)", whiteSpace: "nowrap" }}>SIMULAR AO VIVO</Typography>
               </Box>
             ) : null}
           </Box>
@@ -915,13 +868,13 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
               key={s.label}
               sx={{
                 flex: 1, textAlign: "center",
-                bgcolor: "rgba(255,255,255,0.07)",
+                bgcolor: "rgba(0,0,0,0.04)",
                 borderRadius: 2, py: 0.9,
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: "1px solid rgba(0,0,0,0.07)",
               }}
             >
-              <Typography sx={{ fontSize: 18, fontWeight: 900, color: "#ffc91f" }}>{s.value}</Typography>
-              <Typography sx={{ fontSize: 9, color: "rgba(255,255,255,0.4)", fontWeight: 600, mt: 0.1 }}>{s.label}</Typography>
+              <Typography sx={{ fontSize: 18, fontWeight: 900, color: "#009440" }}>{s.value}</Typography>
+              <Typography sx={{ fontSize: 9, color: "rgba(0,0,0,0.5)", fontWeight: 600, mt: 0.1 }}>{s.label}</Typography>
             </Box>
           ))}
         </Box>
@@ -933,7 +886,7 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
           onClick={() => setSelectedFixture(liveFixtures[0])}
           sx={{
             mx: 2, mb: 2, px: 2, py: 1.2, borderRadius: 2.5, cursor: "pointer",
-            background: "linear-gradient(90deg, #7f0000, #d32f2f)",
+            background: "linear-gradient(90deg, #006630, #009440)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}
         >
@@ -964,7 +917,7 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
       )}
 
       {/* Tabs de fase */}
-      <Box sx={{ borderBottom: "1px solid rgba(255,255,255,0.06)", mb: 2 }}>
+      <Box sx={{ borderBottom: "1px solid rgba(0,0,0,0.08)", mb: 2 }}>
         <Box sx={{ display: "flex", overflowX: "auto", "&::-webkit-scrollbar": { display: "none" } }}>
           {availablePhases.map((p) => {
             const active = activePhase === p.key;
@@ -975,14 +928,14 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
                 onClick={() => setActivePhase(p.key)}
                 sx={{
                   flex: "0 0 auto", px: 2.5, py: 1.2, cursor: "pointer", textAlign: "center",
-                  borderBottom: active ? "2px solid #ffc91f" : "2px solid transparent",
+                  borderBottom: active ? "2px solid #009440" : "2px solid transparent",
                   transition: "border-color 0.2s",
                 }}
               >
-                <Typography sx={{ fontSize: 13, fontWeight: active ? 800 : 500, color: active ? "#ffc91f" : "rgba(255,255,255,0.4)", whiteSpace: "nowrap" }}>
+                <Typography sx={{ fontSize: 13, fontWeight: active ? 800 : 500, color: active ? "#009440" : "rgba(0,0,0,0.45)", whiteSpace: "nowrap" }}>
                   {p.label}
                 </Typography>
-                <Typography sx={{ fontSize: 9, color: active ? "#ffc91f" : "rgba(255,255,255,0.2)", fontWeight: 600 }}>
+                <Typography sx={{ fontSize: 9, color: active ? "#009440" : "rgba(0,0,0,0.35)", fontWeight: 600 }}>
                   {count > 0 ? `${count} ${count === 1 ? "jogo" : "jogos"}` : "em breve"}
                 </Typography>
               </Box>
@@ -997,14 +950,14 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
           <Box sx={{ textAlign: "center", py: 8, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
             <Typography sx={{ fontSize: 48, lineHeight: 1 }}>🇧🇷</Typography>
             <Box>
-              <Typography sx={{ color: "#ffc91f", fontSize: 16, fontWeight: 900, letterSpacing: 0.5 }}>
+              <Typography sx={{ color: "#009440", fontSize: 16, fontWeight: 900, letterSpacing: 0.5 }}>
                 É HEXA, BRASIL!
               </Typography>
-              <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: 13, mt: 0.5 }}>
+              <Typography sx={{ color: "rgba(0,0,0,0.55)", fontSize: 13, mt: 0.5 }}>
                 Aguardando os jogos da {PHASE_LABEL[activePhase]}
               </Typography>
             </Box>
-            <Typography sx={{ color: "rgba(255,255,255,0.2)", fontSize: 12, maxWidth: 220 }}>
+            <Typography sx={{ color: "rgba(0,0,0,0.35)", fontSize: 12, maxWidth: 220 }}>
               Os classificados serão definidos conforme a Copa avança. Torça muito!
             </Typography>
           </Box>
@@ -1022,63 +975,9 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
       {/* Tabela de classificação — visível no tab Grupos */}
       {activePhase === "grupos" && (
         <Box sx={{ px: 2, mt: 1, mb: 2 }}>
-          <StandingsTable standings={displayStandings} grupoFixtures={fixturesByPhase["grupos"] ?? []} dark />
+          <StandingsTable standings={displayStandings} grupoFixtures={fixturesByPhase["grupos"] ?? []} />
         </Box>
       )}
-
-      {/* Picker de jogo ao vivo real */}
-      <Drawer
-        anchor="bottom"
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        sx={{ zIndex: 10000 }}
-        PaperProps={{ sx: { borderRadius: "20px 20px 0 0", maxHeight: "70vh", bgcolor: "#fff" } }}
-      >
-        <Box sx={{ px: 2, pt: 2, pb: 1, borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
-          <Box sx={{ width: 40, height: 4, bgcolor: "rgba(0,0,0,0.1)", borderRadius: 2, mx: "auto", mb: 2 }} />
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Box>
-              <Typography sx={{ fontSize: 15, fontWeight: 800, color: "#111" }}>Jogos ao vivo agora</Typography>
-              <Typography sx={{ fontSize: 11, color: "rgba(0,0,0,0.45)" }}>Escolha um jogo para testar</Typography>
-            </Box>
-            <IconButton onClick={() => setPickerOpen(false)} size="small" sx={{ bgcolor: "rgba(0,0,0,0.06)" }}>
-              <CloseIcon fontSize="small" sx={{ color: "rgba(0,0,0,0.6)" }} />
-            </IconButton>
-          </Box>
-        </Box>
-        <Box sx={{ overflowY: "auto", p: 2 }}>
-          {liveNowLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-              <CircularProgress size={28} sx={{ color: "#ff6400" }} />
-            </Box>
-          ) : liveNowGames.length === 0 ? (
-            <Box sx={{ textAlign: "center", py: 5 }}>
-              <Typography sx={{ color: "rgba(0,0,0,0.4)", fontSize: 13 }}>Nenhum jogo ao vivo no momento</Typography>
-            </Box>
-          ) : liveNowGames.map((game) => (
-            <Box
-              key={game.id}
-              onClick={() => selectLiveGame(game)}
-              sx={{
-                mb: 1.5, p: 1.5, borderRadius: 2, cursor: "pointer",
-                bgcolor: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.07)",
-                "&:active": { transform: "scale(0.98)" }, transition: "all 0.15s",
-              }}
-            >
-              <Typography sx={{ fontSize: 9, color: "#ff6400", fontWeight: 700, letterSpacing: 0.8, mb: 0.5 }}>
-                {game.league} · {game.elapsed}'
-              </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#111", flex: 1 }}>{game.home}</Typography>
-                <Typography sx={{ fontSize: 16, fontWeight: 900, color: "#d32f2f", px: 2 }}>
-                  {game.home_goals ?? 0} x {game.away_goals ?? 0}
-                </Typography>
-                <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#111", flex: 1, textAlign: "right" }}>{game.away}</Typography>
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      </Drawer>
 
       {/* Drawer de eventos */}
       <Drawer

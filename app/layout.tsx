@@ -45,14 +45,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Casa CazéTV",
+  title: "Caze App",
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo/logo-n1.png",
-    apple: "/logo/logo-apple.png",
+    icon: "/assets/figma/mascot-center.png",
+    apple: "/assets/figma/mascot-center.png",
   },
   appleWebApp: {
-    title: "Casa CazéTV",
+    title: "Caze App",
     statusBarStyle: "black-translucent",
     capable: true,
   },

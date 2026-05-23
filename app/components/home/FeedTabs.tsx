@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Box } from "@mui/material";
 import type { FeedTab } from "@/app/components/home/FeedTabs.types";
 import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
@@ -15,36 +16,38 @@ interface FeedTabsProps {
 }
 
 type TabEntry =
-  | { kind: "tab"; label: string; value: FeedTab }
-  | { kind: "soon"; label: string };
+  | { kind: "tab";          label: string; value: FeedTab }
+  | { kind: "nav";          label: string; href: string }
+  | { kind: "featured-tab"; label: string; value: FeedTab };
 
 const TAB_ENTRIES: TabEntry[] = [
-  { kind: "tab", label: "Home", value: "all" },
-  { kind: "tab", label: "Evento", value: "games" },
-  { kind: "tab", label: "Bolão", value: "bolao" },
-  { kind: "tab", label: "Figurinhas", value: "stickers" },
-  { kind: "soon", label: "Fotos" },
-  { kind: "soon", label: "Mapa" },
+  { kind: "tab",          label: "Feed",            value: "all" },
+  { kind: "tab",          label: "Evento",          value: "games" },
+  { kind: "featured-tab", label: "Jogos do Brasil", value: "brasil" },
+  { kind: "nav",          label: "Finder Photo",    href: "/pages/user/foto" },
+  { kind: "nav",          label: "Mapa",            href: "/pages/user/mapa" },
 ];
 
 function activeTabSx() {
   return {
-    backgroundColor: COLORS.yellow,
-    color: COLORS.black,
+    backgroundColor: COLORS.green,
+    color: "#FFFFFF",
     border: "none",
-    boxShadow: "0 2px 8px rgba(246, 196, 0, 0.35)",
+    boxShadow: "0 2px 8px rgba(0,148,64,0.30)",
   };
 }
 
 function inactiveTabSx() {
   return {
-    backgroundColor: "#f5efde",
-    color: COLORS.textSecondary,
-    border: "1px solid #e4d2b7",
+    backgroundColor: "#FFFFFF",
+    color: COLORS.muted,
+    border: "1px solid rgba(0,0,0,0.10)",
   };
 }
 
 export default function FeedTabs({ active, onChange }: FeedTabsProps) {
+  const router = useRouter();
+
   return (
     <Box
       role="tablist"
@@ -58,16 +61,20 @@ export default function FeedTabs({ active, onChange }: FeedTabsProps) {
         scrollSnapType: "x proximity",
         scrollbarWidth: "none",
         "&::-webkit-scrollbar": { display: "none" },
-        /** Respiro só após o último chip ao rolar até o fim */
         pr: `${LAYOUT.pagePaddingX}px`,
       }}
     >
       {TAB_ENTRIES.map((entry) => {
-        if (entry.kind === "soon") {
+        if (entry.kind === "featured-tab") {
+          const isActive = active === entry.value;
           return (
             <Box
-              key={entry.label}
-              component="span"
+              key={entry.value}
+              component="button"
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onChange(entry.value)}
               sx={{
                 flexShrink: 0,
                 scrollSnapAlign: "start",
@@ -75,14 +82,49 @@ export default function FeedTabs({ active, onChange }: FeedTabsProps) {
                 height: TAB_HEIGHT,
                 px: `${SPACING.md}px`,
                 borderRadius: CAZE_RADIUS.md,
-                ...inactiveTabSx(),
+                cursor: "pointer",
                 fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: TYPOGRAPHY.caption.fontSize,
+                lineHeight: TYPOGRAPHY.caption.lineHeight,
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                opacity: 0.5,
+                transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+                ...(isActive ? activeTabSx() : inactiveTabSx()),
+                "&:hover": { backgroundColor: isActive ? "#007a33" : "rgba(0,0,0,0.04)" },
+              }}
+            >
+              {entry.label}
+            </Box>
+          );
+        }
+
+        if (entry.kind === "nav") {
+          return (
+            <Box
+              key={entry.href}
+              component="button"
+              type="button"
+              onClick={() => router.push(entry.href)}
+              sx={{
+                flexShrink: 0,
+                scrollSnapAlign: "start",
+                minWidth: 72,
+                height: TAB_HEIGHT,
+                px: `${SPACING.md}px`,
+                borderRadius: CAZE_RADIUS.md,
+                cursor: "pointer",
+                fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
+                fontWeight: 600,
+                fontSize: TYPOGRAPHY.caption.fontSize,
+                lineHeight: TYPOGRAPHY.caption.lineHeight,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "color 0.2s ease, background-color 0.2s ease",
+                ...inactiveTabSx(),
+                "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
               }}
             >
               {entry.label}

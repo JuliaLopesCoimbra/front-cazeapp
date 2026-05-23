@@ -89,30 +89,27 @@ export default function CommentItem({
           <Paper
             elevation={0}
             sx={{
-              backgroundColor: "rgba(255,255,255,0.05)",
+              backgroundColor: "rgba(0,0,0,0.03)",
               p: 1.5,
               borderRadius: 2,
             }}
           >
             <Typography
-              fontWeight={600}
+              fontWeight={700}
               fontSize={13}
               onClick={() => handleUserClick(comment.user.id)}
               sx={{
-                color: "#fff",
+                color: "#0A0A0A",
                 mb: 0.5,
                 cursor: "pointer",
-                transition: "opacity 0.2s",
-                "&:hover": {
-                  opacity: 0.8,
-                },
+                "&:hover": { opacity: 0.7 },
               }}
             >
               {comment.user.name}
             </Typography>
             <Typography
               fontSize={14}
-              sx={{ color: "rgba(255,255,255,0.9)" }}
+              sx={{ color: "#4A4A4A" }}
             >
               {comment.content}
             </Typography>
@@ -120,9 +117,7 @@ export default function CommentItem({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5, ml: 1 }}>
             <Typography
               fontSize={11}
-              sx={{
-                color: "rgba(255,255,255,0.5)",
-              }}
+              sx={{ color: "#9E9E9E" }}
             >
               {formatDate(comment.created_at)}
             </Typography>
@@ -132,7 +127,7 @@ export default function CommentItem({
                 onClick={onLike}
                 disabled={!isAuthenticated}
                 sx={{
-                  color: comment.likes.user_liked ? "#ff3040" : "rgba(255,255,255,0.5)",
+                  color: comment.likes.user_liked ? "#E63946" : "#9E9E9E",
                   padding: "4px",
                 }}
               >
@@ -141,7 +136,7 @@ export default function CommentItem({
               {comment.likes.count > 0 && (
                 <Typography
                   fontSize={11}
-                  sx={{ color: "rgba(255,255,255,0.5)", mr: 1 }}
+                  sx={{ color: "#9E9E9E", mr: 1 }}
                 >
                   {comment.likes.count}
                 </Typography>
@@ -150,10 +145,7 @@ export default function CommentItem({
                 size="small"
                 onClick={onToggleReplies}
                 disabled={!isAuthenticated}
-                sx={{
-                  color: "rgba(255,255,255,0.5)",
-                  padding: "4px",
-                }}
+                sx={{ color: "#9E9E9E", padding: "4px" }}
               >
                 <ReplyIcon fontSize="small" />
               </IconButton>
@@ -162,20 +154,13 @@ export default function CommentItem({
                   <IconButton
                     size="small"
                     onClick={onToggleReplies}
-                    sx={{
-                      color: "rgba(255,255,255,0.5)",
-                      padding: "4px",
-                    }}
+                    sx={{ color: "#9E9E9E", padding: "4px" }}
                   >
-                    {isExpanded ? (
-                      <ExpandLessIcon fontSize="small" />
-                    ) : (
-                      <ExpandMoreIcon fontSize="small" />
-                    )}
+                    {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                   </IconButton>
                   <Typography
                     fontSize={11}
-                    sx={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}
+                    sx={{ color: "#9E9E9E", cursor: "pointer" }}
                     onClick={onToggleReplies}
                   >
                     {comment.replies_count} {comment.replies_count === 1 ? "resposta" : "respostas"}
@@ -186,11 +171,7 @@ export default function CommentItem({
                 <IconButton
                   size="small"
                   onClick={onDelete}
-                  sx={{
-                    color: "rgba(255,255,255,0.5)",
-                    padding: "4px",
-                    ml: 0.5,
-                  }}
+                  sx={{ color: "#9E9E9E", padding: "4px", ml: 0.5 }}
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>
@@ -214,10 +195,10 @@ export default function CommentItem({
           )}
 
           {isExpanded && (
-            <Box sx={{ mt: 1, ml: 4, borderLeft: "2px solid rgba(255,255,255,0.1)", pl: 2 }}>
+            <Box sx={{ mt: 1, ml: 4, borderLeft: "2px solid rgba(0,0,0,0.08)", pl: 2 }}>
               {loadingReplies ? (
                 <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-                  <CircularProgress size={20} sx={{ color: "#ffc91f" }} />
+                  <CircularProgress size={20} sx={{ color: "#009440" }} />
                 </Box>
               ) : (
                 <>
