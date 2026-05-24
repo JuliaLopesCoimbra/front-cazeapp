@@ -612,15 +612,8 @@ const LoginForm: React.FC = () => {
         >
           <Button
             variant="outlined"
+            disabled
             startIcon={<Google />}
-            onClick={async () => {
-              try {
-                const url = await initGoogleLogin();
-                window.location.href = url;
-              } catch {
-                showToast("Erro ao iniciar login com Google", "error");
-              }
-            }}
             sx={{
               flex: 1,
               color: "#fff",
@@ -647,15 +640,8 @@ const LoginForm: React.FC = () => {
 
           <Button
             variant="outlined"
+            disabled
             startIcon={<Facebook />}
-            onClick={async () => {
-              try {
-                const url = await initFacebookLogin();
-                window.location.href = url;
-              } catch {
-                showToast("Erro ao iniciar login com Facebook", "error");
-              }
-            }}
             sx={{
               flex: 1,
               color: "#fff",
@@ -692,25 +678,17 @@ const LoginForm: React.FC = () => {
           }}
         >
           Não tem uma conta?{" "}
-          <a
-            href="/pages/auth/register"
+          <span
             style={{
               textDecoration: "none",
-              color: loginColors.yellow,
+              color: "rgba(255,203,0,0.4)",
               fontWeight: 600,
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = loginColors.yellowHover;
-              e.currentTarget.style.textDecoration = "underline";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = loginColors.yellow;
-              e.currentTarget.style.textDecoration = "none";
+              cursor: "default",
+              pointerEvents: "none",
             }}
           >
-            Cadastre-se aqui 
-          </a>
+            Cadastre-se aqui
+          </span>
         </Typography>
       </Box>
         </Box>

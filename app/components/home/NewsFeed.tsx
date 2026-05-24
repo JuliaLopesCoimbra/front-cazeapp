@@ -616,8 +616,9 @@ export default function NewsFeed({ eventId, event }: Props) {
 }
 
 function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
-  const cardBg = isTorcida ? "#123b6b" : "rgba(0,0,0,0.04)";
-  const skeletonBg = isTorcida ? "#2f5f96" : "rgba(0,0,0,0.08)";
+  const cardBg = "rgba(0,0,0,0.04)";
+  const skeletonBg = "rgba(0,0,0,0.08)";
+  void isTorcida;
   return (
     <Card
       sx={{
@@ -649,8 +650,9 @@ function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
 }
 
 function NewsItemSkeleton({ isTorcida }: { isTorcida: boolean }) {
-  const cardBg = isTorcida ? "#123b6b" : "rgba(0,0,0,0.04)";
-  const skeletonBg = isTorcida ? "#2f5f96" : "rgba(0,0,0,0.08)";
+  const cardBg = "rgba(0,0,0,0.04)";
+  const skeletonBg = "rgba(0,0,0,0.08)";
+  void isTorcida;
   return (
     <Card
       sx={{
