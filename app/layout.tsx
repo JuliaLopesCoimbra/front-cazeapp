@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: "/assets/figma/mascot-center.png",
-    apple: "/assets/figma/mascot-center.png",
+    apple: "/logo/logo-apple.png",
   },
   appleWebApp: {
     title: "Caze App",
