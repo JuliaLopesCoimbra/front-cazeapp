@@ -90,7 +90,7 @@ export default function EventDetail({ event }: EventDetailProps) {
               Data
             </Typography>
             <Typography sx={{ color: "#0A0A0A", fontSize: "0.9rem", fontWeight: 600, fontFamily: '"Montserrat"' }}>
-              {event.starts_at ? formatEventDate(event.starts_at) : "13 de junho de 2026"}
+              13 de junho de 2026
             </Typography>
           </Box>
         </Box>
@@ -103,7 +103,7 @@ export default function EventDetail({ event }: EventDetailProps) {
               Horário
             </Typography>
             <Typography sx={{ color: "#0A0A0A", fontSize: "0.9rem", fontWeight: 600, fontFamily: '"Montserrat"' }}>
-              {event.starts_at ? `${formatEventTime(event.starts_at)}${event.ends_at ? ` — ${formatEventTime(event.ends_at)}` : ""}` : "19h00 — 23h00"}
+              19h00 — 23h00
             </Typography>
           </Box>
         </Box>

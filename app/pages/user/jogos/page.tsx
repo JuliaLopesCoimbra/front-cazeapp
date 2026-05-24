@@ -69,8 +69,8 @@ interface Team {
 const GROUPS_TEAMS: Record<GroupKey, [Team, Team, Team, Team]> = {
   A: [{ name: "EUA", code: "us" }, { name: "Inglaterra", code: "gb-eng" }, { name: "Irã", code: "ir" }, { name: "País de Gales", code: "gb-wls" }],
   B: [{ name: "México", code: "mx" }, { name: "Polônia", code: "pl" }, { name: "Arábia Saudita", code: "sa" }, { name: "Camarões", code: "cm" }],
-  C: [{ name: "Canadá", code: "ca" }, { name: "Bélgica", code: "be" }, { name: "Croácia", code: "hr" }, { name: "Marrocos", code: "ma" }],
-  D: [{ name: "Brasil", code: "br" }, { name: "Alemanha", code: "de" }, { name: "Japão", code: "jp" }, { name: "Costa Rica", code: "cr" }],
+  C: [{ name: "Brasil", code: "br" }, { name: "Marrocos", code: "ma" }, { name: "Haiti", code: "ht" }, { name: "Escócia", code: "gb-sct" }],
+  D: [{ name: "Canadá", code: "ca" }, { name: "Bélgica", code: "be" }, { name: "Croácia", code: "hr" }, { name: "Marrocos", code: "ma" }],
   E: [{ name: "França", code: "fr" }, { name: "Dinamarca", code: "dk" }, { name: "Tunísia", code: "tn" }, { name: "Austrália", code: "au" }],
   F: [{ name: "Espanha", code: "es" }, { name: "Portugal", code: "pt" }, { name: "Uruguai", code: "uy" }, { name: "Gana", code: "gh" }],
   G: [{ name: "Holanda", code: "nl" }, { name: "Senegal", code: "sn" }, { name: "Equador", code: "ec" }, { name: "Suíça", code: "ch" }],

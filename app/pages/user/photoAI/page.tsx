@@ -367,7 +367,7 @@ export default function PhotoAIPage({ eventId, accentColor = "#ffc91f", isTorcid
         return;
       }
 
-      const response = await searchFace(file, "caze-rostos", eventId);
+      const response = await searchFace(file, "caze-rostos");
       console.log("Resposta completa da API:", response);
       console.log("Matches:", response.matches);
 

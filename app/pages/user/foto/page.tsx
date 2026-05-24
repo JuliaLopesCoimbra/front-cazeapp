@@ -250,7 +250,7 @@ export default function FotoPage() {
       return;
     }
     try {
-      const resp = await searchFace(file, "caze-rostos", eventId ?? undefined);
+      const resp = await searchFace(file, "caze-rostos");
       const photos: PhotoResult[] =
         resp.images?.map((u) => ({ url: u })) ??
         resp.matches
