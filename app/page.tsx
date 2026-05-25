@@ -360,11 +360,11 @@ const LoginForm: React.FC = () => {
           className={shouldAnimate ? "slide-up-delay-1" : ""}
           variant="h4"
           sx={{
-            fontFamily: 'var(--font-syne), Syne, sans-serif',
-            fontWeight: 900,
-            fontSize: { xs: "24px", md: "28px" },
+            fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: "28px", md: "34px" },
             textAlign: "left",
-            letterSpacing: "-0.02em",
+            letterSpacing: "0.04em",
             marginBottom: { xs: 1, md: 1.25 },
           }}
         >
@@ -454,21 +454,21 @@ const LoginForm: React.FC = () => {
             mb: 1,
             backgroundColor: loginColors.yellow,
             color: loginColors.black,
-            fontFamily: 'var(--font-syne), Syne, sans-serif',
+            fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
             fontWeight: 700,
             borderRadius: CAZE_RADIUS.sm,
             textTransform: "none",
             fontSize: { xs: "15px", md: "16px" },
             padding: { xs: "12px", md: "14px" },
-            boxShadow: "0 4px 16px rgba(255, 203, 0, 0.35)",
+            boxShadow: "0 4px 16px rgba(255, 209, 0, 0.35)",
             transition: "all 0.2s ease",
             "&:hover": {
               backgroundColor: loginColors.yellowHover,
               transform: "translateY(-2px)",
-              boxShadow: "0 6px 20px rgba(255, 203, 0, 0.45)",
+              boxShadow: "0 6px 20px rgba(255, 209, 0, 0.45)",
             },
             "&.Mui-disabled": {
-              backgroundColor: "rgba(255, 203, 0, 0.35)",
+              backgroundColor: "rgba(255, 209, 0, 0.35)",
               color: "rgba(0,0,0,0.5)",
             },
           }}

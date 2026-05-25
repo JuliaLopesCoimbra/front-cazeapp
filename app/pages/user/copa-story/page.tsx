@@ -20,7 +20,7 @@ export default function CopaStoryPreviewPage() {
           newsId={1}
           authorName="@casacazetv"
           caption="Valendo um total de ZERO reais e..."
-          body="Valendo um total de ZERO reais e zero centavos na disputa do bolão da Copa! 🇧🇷⚽"
+          body="Valendo um total de ZERO reais e zero centavos na disputa do bolão da Copa!"
           createdAtLabel="há 2 horas"
           likesCount={1284}
           commentsCount={42}

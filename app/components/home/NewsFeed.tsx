@@ -423,12 +423,12 @@ export default function NewsFeed({ eventId, event }: Props) {
                           width: 28,
                           height: 28,
                           bgcolor: "rgba(255,255,255,0.2)",
-                          border: "2px solid #009440",
+                          border: "2px solid #008542",
                         }}
                       />
                       <Typography
                         sx={{
-                          color: "#0A0A0A",
+                          color: "#FFFFFF",
                           fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
                           fontWeight: 800,
                           fontSize: 12,
@@ -444,7 +444,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                       </Typography>
                       <Typography
                         sx={{
-                          color: "rgba(0,0,0,0.68)",
+                          color: "rgba(255,255,255,0.55)",
                           fontSize: 10,
                           fontFamily: 'var(--font-inter), Inter, sans-serif',
                           flexShrink: 0,
@@ -453,7 +453,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                       >
                         {formatDate(item.created_at)}
                       </Typography>
-                      <MoreHorizIcon sx={{ color: "rgba(0,0,0,0.55)", fontSize: 18 }} />
+                      <MoreHorizIcon sx={{ color: "rgba(255,255,255,0.40)", fontSize: 18 }} />
                     </Box>
                   </PostGlassCard>
 
@@ -537,7 +537,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                               width: 28,
                               height: 28,
                               bgcolor: "rgba(255,255,255,0.2)",
-                              border: "2px solid #009440",
+                              border: "2px solid #008542",
                               flexShrink: 0,
                             }}
                           />
@@ -616,8 +616,8 @@ export default function NewsFeed({ eventId, event }: Props) {
 }
 
 function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
-  const cardBg = "rgba(0,0,0,0.04)";
-  const skeletonBg = "rgba(0,0,0,0.08)";
+  const cardBg = "rgba(255,255,255,0.04)";
+  const skeletonBg = "rgba(255,255,255,0.08)";
   void isTorcida;
   return (
     <Card
@@ -650,8 +650,8 @@ function FeaturedNewsSkeleton({ isTorcida }: { isTorcida: boolean }) {
 }
 
 function NewsItemSkeleton({ isTorcida }: { isTorcida: boolean }) {
-  const cardBg = "rgba(0,0,0,0.04)";
-  const skeletonBg = "rgba(0,0,0,0.08)";
+  const cardBg = "rgba(255,255,255,0.04)";
+  const skeletonBg = "rgba(255,255,255,0.08)";
   void isTorcida;
   return (
     <Card

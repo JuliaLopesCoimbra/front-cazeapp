@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Box, Skeleton, Typography } from "@mui/material";
 import HomeScreenHeader from "@/app/components/home/HomeScreenHeader";
-import { LAYOUT, SPACING } from "@/app/constants/designTokens";
+import { COLORS, LAYOUT, SPACING } from "@/app/constants/designTokens";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
@@ -282,7 +282,7 @@ const HomeContent: React.FC = () => {
   // Skeleton enquanto carrega evento + perfil
   if (!currentEvent || !profileLoaded) {
     return (
-      <Box sx={{ position: "relative", minHeight: "100vh", pb: "100px", bgcolor: "#FFFFFF" }}>
+      <Box sx={{ position: "relative", minHeight: "100vh", pb: "100px", bgcolor: COLORS.bg }}>
         <Sidebar />
         <Box
           sx={{
@@ -296,10 +296,10 @@ const HomeContent: React.FC = () => {
             variant="rectangular"
             width="100%"
             height={128}
-            sx={{ bgcolor: "rgba(0,0,0,0.06)" }}
+            sx={{ bgcolor: "rgba(255,255,255,0.06)" }}
           />
           <Box sx={{ p: 2 }}>
-            <Skeleton variant="rectangular" width="100%" height={98} sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: 0 }} />
+            <Skeleton variant="rectangular" width="100%" height={98} sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: 0 }} />
             <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
               {[1, 2, 3, 4].map((i) => (
                 <Skeleton
@@ -307,7 +307,7 @@ const HomeContent: React.FC = () => {
                   variant="rectangular"
                   width={93}
                   height={29}
-                  sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px" }}
+                  sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px" }}
                 />
               ))}
             </Box>
@@ -315,13 +315,13 @@ const HomeContent: React.FC = () => {
               variant="rectangular"
               width="100%"
               height={200}
-              sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px", mt: 2 }}
+              sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px", mt: 2 }}
             />
             <Skeleton
               variant="rectangular"
               width="100%"
               height={150}
-              sx={{ bgcolor: "rgba(0,0,0,0.08)", borderRadius: "15px", mt: 2 }}
+              sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: "15px", mt: 2 }}
             />
           </Box>
         </Box>
@@ -331,7 +331,7 @@ const HomeContent: React.FC = () => {
 
   return (
     <>
-      <Box sx={{ position: "relative", minHeight: "100vh", bgcolor: "#FFFFFF" }}>
+      <Box sx={{ position: "relative", minHeight: "100vh", bgcolor: COLORS.bg }}>
         <Sidebar />
 
         <Box
@@ -356,44 +356,27 @@ const HomeContent: React.FC = () => {
 
           <Box
             sx={{
-              pl: `${LAYOUT.pagePaddingX}px`,
-              pr: 0,
-              maxWidth: LAYOUT.feedMaxWidth,
-              mx: "auto",
+              px: 0,
               width: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "stretch",
-              gap: `${SPACING.lg}px`,
+              gap: 0,
               pt: `${SPACING.lg}px`,
-              pb: `${SPACING.sm}px`,
+              pb: 0,
               mb: `${SPACING.md}px`,
             }}
           >
-            <Box
-              sx={{
-                mr: `-${LAYOUT.pagePaddingX}px`,
-                width: `calc(100% + ${LAYOUT.pagePaddingX}px)`,
-              }}
+            <FeedTabs active={activeTab} onChange={handleTabChange} />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              style={{ transformOrigin: "left", width: "100%" }}
             >
-              <FeedTabs active={activeTab} onChange={handleTabChange} />
-            </Box>
-            <Box
-              sx={{
-                ml: `-${LAYOUT.pagePaddingX}px`,
-                width: `calc(100% + ${LAYOUT.pagePaddingX}px)`,
-              }}
-            >
-              <motion.div
-                initial={{ scaleX: 0 }}
-                whileInView={{ scaleX: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                style={{ transformOrigin: "left", width: "100%" }}
-              >
-                <RainbowDivider />
-              </motion.div>
-            </Box>
+              <RainbowDivider />
+            </motion.div>
           </Box>
 
           {/* Conteúdo da aba */}

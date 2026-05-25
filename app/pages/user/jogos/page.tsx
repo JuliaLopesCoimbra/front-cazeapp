@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Box, Typography, Tab, Tabs } from "@mui/material";
 import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
@@ -9,6 +9,7 @@ import TopBar from "@/app/components/layout/TopBar";
 import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import { LAYOUT } from "@/app/constants/designTokens";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import LiveScoreBanner from "@/app/components/jogos/LiveScoreBanner";
 import { useBrazilLive } from "@/app/hooks/useFixtures";
 import { getSavedBets, type SavedBet } from "@/app/lib/betStore";
@@ -16,12 +17,12 @@ import { getSavedBets, type SavedBet } from "@/app/lib/betStore";
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
 const GLASS_CARD = {
-  backgroundColor: "rgba(255,255,255,0.6)",
-  backdropFilter: "blur(8px)",
-  WebkitBackdropFilter: "blur(8px)",
-  borderRadius: "12px",
-  border: "1px solid rgba(0,0,0,0.08)",
-  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+  backgroundColor: "rgba(21,28,46,0.92)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+  borderRadius: CAZE_RADIUS.md,
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
 } as const;
 
 // ── Phases ────────────────────────────────────────────────────────────────────
@@ -189,14 +190,11 @@ function GroupMatchCard({ match }: GroupMatchCardProps) {
     <Link href={`/pages/user/bolao/${match.id}`} style={{ textDecoration: "none" }}>
       <Box
         sx={{
-          borderRadius: "12px",
-          backgroundColor: "#FFFFFF",
-          border: "1px solid rgba(0,0,0,0.07)",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+          ...GLASS_CARD,
           cursor: "pointer",
           mb: 1.5,
           transition: "transform 0.15s, box-shadow 0.15s",
-          "&:hover": { transform: "translateY(-1px)", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" },
+          "&:hover": { transform: "translateY(-1px)", boxShadow: "0 12px 30px rgba(27,61,232,0.18)" },
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", p: 2, gap: 1.5 }}>
@@ -210,31 +208,31 @@ function GroupMatchCard({ match }: GroupMatchCardProps) {
               style={{ borderRadius: 3, objectFit: "cover" }}
               alt={match.home.name}
             />
-            <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.8rem" }} noWrap>
+            <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.8rem" }} noWrap>
               {match.home.name}
             </Typography>
           </Box>
 
           {/* Center */}
           <Box sx={{ textAlign: "center", flexShrink: 0 }}>
-            <Typography sx={{ color: "#6B6B6B", fontSize: "0.65rem" }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.72)", fontSize: "0.65rem" }}>
               {dateStr} · {timeStr}
             </Typography>
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.6rem", mt: 0.5 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.6rem", mt: 0.5 }}>
               {match.venue} · {match.city}
             </Typography>
             <Box
               sx={{
                 mt: 0.5,
-                backgroundColor: "rgba(0,148,64,0.07)",
-                border: "1px solid rgba(0,148,64,0.15)",
-                borderRadius: "6px",
+                backgroundColor: "rgba(0,133,66,0.12)",
+                border: "1px solid rgba(0,133,66,0.25)",
+                borderRadius: CAZE_RADIUS.sm,
                 px: 1,
                 py: 0.25,
                 display: "inline-block",
               }}
             >
-              <Typography sx={{ color: "#009440", fontSize: "0.58rem", fontWeight: 700 }}>
+              <Typography sx={{ color: "#008542", fontSize: "0.58rem", fontWeight: 700 }}>
                 Rodada {match.matchday}
               </Typography>
             </Box>
@@ -250,7 +248,7 @@ function GroupMatchCard({ match }: GroupMatchCardProps) {
               style={{ borderRadius: 3, objectFit: "cover" }}
               alt={match.away.name}
             />
-            <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.8rem", textAlign: "right" }} noWrap>
+            <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.8rem", textAlign: "right" }} noWrap>
               {match.away.name}
             </Typography>
           </Box>
@@ -273,10 +271,10 @@ function KnockoutMatchCard({ match }: KnockoutMatchCardProps) {
     <Box sx={{ ...GLASS_CARD, p: 2, mb: 1.5 }}>
       {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.5, gap: 1 }}>
-        <Typography sx={{ color: "#6B6B6B", fontSize: "0.65rem", fontWeight: 700, flexShrink: 0 }}>
+        <Typography sx={{ color: "rgba(255,255,255,0.72)", fontSize: "0.65rem", fontWeight: 700, flexShrink: 0 }}>
           {dateStr} · {timeStr}
         </Typography>
-        <Typography sx={{ color: "#9E9E9E", fontSize: "0.62rem", textAlign: "right" }}>
+        <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.62rem", textAlign: "right" }}>
           {match.venue} · {match.city}
         </Typography>
       </Box>
@@ -284,17 +282,17 @@ function KnockoutMatchCard({ match }: KnockoutMatchCardProps) {
       {/* Teams */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Box sx={{ flex: 1 }}>
-          <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.875rem" }}>A Definir</Typography>
-          <Typography sx={{ color: "#9E9E9E", fontSize: "0.68rem", fontStyle: "italic" }}>
+          <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.875rem" }}>A Definir</Typography>
+          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.68rem", fontStyle: "italic" }}>
             {match.homeLabel}
           </Typography>
         </Box>
-        <Typography sx={{ color: "#9E9E9E", fontWeight: 700, fontSize: "0.875rem", flexShrink: 0 }}>
+        <Typography sx={{ color: "rgba(255,255,255,0.45)", fontWeight: 700, fontSize: "0.875rem", flexShrink: 0 }}>
           ×
         </Typography>
         <Box sx={{ flex: 1, textAlign: "right" }}>
-          <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.875rem" }}>A Definir</Typography>
-          <Typography sx={{ color: "#9E9E9E", fontSize: "0.68rem", fontStyle: "italic" }}>
+          <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.875rem" }}>A Definir</Typography>
+          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.68rem", fontStyle: "italic" }}>
             {match.awayLabel}
           </Typography>
         </Box>
@@ -303,7 +301,7 @@ function KnockoutMatchCard({ match }: KnockoutMatchCardProps) {
   );
 }
 
-// ── Minhas Apostas ────────────────────────────────────────────────────────────
+// ── Meus Palpites ─────────────────────────────────────────────────────────────
 
 function BetCard({ bet }: { bet: SavedBet }) {
   return (
@@ -316,7 +314,7 @@ function BetCard({ bet }: { bet: SavedBet }) {
           p: 1.5,
           cursor: "pointer",
           transition: "transform 0.15s, box-shadow 0.15s",
-          "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" },
+          "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(27,61,232,0.2)" },
         }}
       >
         {/* Times */}
@@ -324,7 +322,7 @@ function BetCard({ bet }: { bet: SavedBet }) {
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5, flex: 1 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`https://flagcdn.com/w40/${bet.home_code}.png`} width={28} height={19} style={{ borderRadius: 3, objectFit: "cover" }} alt={bet.home_team} />
-            <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.6rem", textAlign: "center" }} noWrap>
+            <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.6rem", textAlign: "center" }} noWrap>
               {bet.home_team}
             </Typography>
           </Box>
@@ -338,7 +336,7 @@ function BetCard({ bet }: { bet: SavedBet }) {
             }}>
               {bet.home_score}×{bet.away_score}
             </Typography>
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.55rem", mt: 0.25 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.55rem", mt: 0.25 }}>
               seu palpite
             </Typography>
           </Box>
@@ -346,7 +344,7 @@ function BetCard({ bet }: { bet: SavedBet }) {
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5, flex: 1 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`https://flagcdn.com/w40/${bet.away_code}.png`} width={28} height={19} style={{ borderRadius: 3, objectFit: "cover" }} alt={bet.away_team} />
-            <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.6rem", textAlign: "center" }} noWrap>
+            <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.6rem", textAlign: "center" }} noWrap>
               {bet.away_team}
             </Typography>
           </Box>
@@ -355,12 +353,12 @@ function BetCard({ bet }: { bet: SavedBet }) {
         {/* Badge pendente */}
         <Box sx={{
           display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5,
-          backgroundColor: "rgba(0,148,64,0.07)", borderRadius: "6px",
-          border: "1px solid rgba(0,148,64,0.18)", py: 0.4,
+          backgroundColor: "rgba(0,133,66,0.12)", borderRadius: CAZE_RADIUS.sm,
+          border: "1px solid rgba(0,133,66,0.25)", py: 0.4,
         }}>
-          <Box sx={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: "#009440" }} />
-          <Typography sx={{ color: "#009440", fontSize: "0.58rem", fontWeight: 700, fontFamily: '"Montserrat"' }}>
-            Aposta confirmada
+          <Box sx={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: "#008542" }} />
+          <Typography sx={{ color: "#008542", fontSize: "0.58rem", fontWeight: 700, fontFamily: '"Montserrat"' }}>
+            Palpite confirmado
           </Typography>
         </Box>
       </Box>
@@ -373,12 +371,10 @@ function BetCard({ bet }: { bet: SavedBet }) {
 export default function JogosPage() {
   const [activePhase, setActivePhase] = useState<PhaseKey>("grupos");
   const [selectedGroup, setSelectedGroup] = useState<GroupKey>("A");
-  const [savedBets, setSavedBets] = useState<SavedBet[]>([]);
+  const [savedBets] = useState<SavedBet[]>(() => getSavedBets());
 
   const { data: liveFixtures } = useBrazilLive();
   const liveGame = liveFixtures?.[0] ?? null;
-
-  useEffect(() => { setSavedBets(getSavedBets()); }, []);
 
   const groupMatches = GROUP_MATCHES.filter((m) => m.group === selectedGroup);
   const knockoutMatches = KNOCKOUT[activePhase] ?? [];
@@ -396,10 +392,10 @@ export default function JogosPage() {
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
             minHeight: "100vh",
             pb: `${LAYOUT.bottomNavClearance}px`,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#0A1128",
           }}
         >
-          <TopBar title="Quer apostar?" light />
+          <TopBar title="Jogos" />
 
           <Box
             sx={{
@@ -409,21 +405,41 @@ export default function JogosPage() {
               mx: "auto",
             }}
           >
+            <Box
+              sx={{
+                ...GLASS_CARD,
+                p: 2,
+                mb: 2,
+                background:
+                  "linear-gradient(135deg, rgba(0,85,184,0.26), rgba(21,28,46,0.94) 54%, rgba(0,133,66,0.18))",
+              }}
+            >
+              <Typography sx={{ color: "#F5C900", fontSize: "0.7rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                Copa do Mundo 2026
+              </Typography>
+              <Typography sx={{ color: "#FFFFFF", fontFamily: '"Montserrat"', fontSize: "1.35rem", fontWeight: 900, lineHeight: 1.1, mt: 0.5 }}>
+                Jogos e palpites
+              </Typography>
+              <Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.82rem", mt: 0.75 }}>
+                Escolha uma partida, veja a agenda e mande seu bolão.
+              </Typography>
+            </Box>
+
             {liveGame && <LiveScoreBanner fixture={liveGame} />}
 
-            {/* Minhas Apostas */}
+            {/* Meus Palpites */}
             {savedBets.length > 0 && (
               <Box sx={{ mb: 2.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.25 }}>
-                  <EmojiEventsOutlinedIcon sx={{ fontSize: "1rem", color: "#009440" }} />
-                  <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.875rem", fontFamily: '"Montserrat"' }}>
-                    Minhas apostas
+                  <EmojiEventsOutlinedIcon sx={{ fontSize: "1rem", color: "#008542" }} />
+                  <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.875rem", fontFamily: '"Montserrat"' }}>
+                    Meus palpites
                   </Typography>
                   <Box sx={{
-                    ml: "auto", backgroundColor: "#009440", borderRadius: "100px",
+                    ml: "auto", backgroundColor: "#008542", borderRadius: "100px",
                     px: 1, py: 0.25,
                   }}>
-                    <Typography sx={{ color: "#fff", fontSize: "0.65rem", fontWeight: 700, fontFamily: '"Montserrat"' }}>
+                    <Typography sx={{ color: "#FFFFFF", fontSize: "0.65rem", fontWeight: 700, fontFamily: '"Montserrat"' }}>
                       {savedBets.length}
                     </Typography>
                   </Box>
@@ -447,17 +463,27 @@ export default function JogosPage() {
               scrollButtons={false}
               sx={{
                 mb: 2,
-                "& .MuiTabs-indicator": { backgroundColor: "#009440" },
+                minHeight: 36,
+                "& .MuiTabs-indicator": { display: "none" },
+                "& .MuiTabs-flexContainer": { gap: 0.75 },
                 "& .MuiTab-root": {
-                  color: "#6B6B6B",
+                  color: "rgba(255,255,255,0.45)",
                   fontFamily: "var(--font-syne), Syne, sans-serif",
                   fontWeight: 700,
                   fontSize: "0.75rem",
                   textTransform: "none",
                   minWidth: "auto",
                   px: 1.5,
+                  minHeight: 34,
+                  backgroundColor: "rgba(21,28,46,0.82)",
+                  borderRadius: CAZE_RADIUS.sm,
+                  border: "1px solid rgba(255,255,255,0.08)",
                 },
-                "& .Mui-selected": { color: "#009440" },
+                "& .Mui-selected": {
+                  color: "#FFFFFF",
+                  backgroundColor: "rgba(255,255,255,0.14)",
+                  border: "1px solid rgba(255,255,255,0.20)",
+                },
               }}
             >
               {PHASES.map((phase) => (
@@ -487,9 +513,9 @@ export default function JogosPage() {
                         flexShrink: 0,
                         width: 36,
                         height: 36,
-                        borderRadius: "10px",
-                        backgroundColor: selectedGroup === g ? "#009440" : "rgba(255,255,255,0.6)",
-                        border: selectedGroup === g ? "1px solid #009440" : "1px solid rgba(0,0,0,0.08)",
+                        borderRadius: CAZE_RADIUS.sm,
+                        backgroundColor: selectedGroup === g ? "rgba(255,255,255,0.16)" : "rgba(21,28,46,0.82)",
+                        border: selectedGroup === g ? "1px solid rgba(255,255,255,0.24)" : "1px solid rgba(255,255,255,0.08)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -499,7 +525,7 @@ export default function JogosPage() {
                     >
                       <Typography
                         sx={{
-                          color: selectedGroup === g ? "#FFF" : "#0A0A0A",
+                          color: selectedGroup === g ? "#FFFFFF" : "rgba(255,255,255,0.72)",
                           fontWeight: 700,
                           fontSize: "0.8rem",
                         }}
@@ -513,7 +539,7 @@ export default function JogosPage() {
                 {/* Group label */}
                 <Typography
                   sx={{
-                    color: "#0A0A0A",
+                    color: "#FFFFFF",
                     fontWeight: 700,
                     fontSize: "0.875rem",
                     mb: 1.5,
@@ -533,7 +559,7 @@ export default function JogosPage() {
             {activePhase !== "grupos" && (
               <>
                 {knockoutMatches.length === 0 ? (
-                  <Typography sx={{ color: "#6B6B6B", textAlign: "center", py: 4 }}>
+                  <Typography sx={{ color: "rgba(255,255,255,0.45)", textAlign: "center", py: 4 }}>
                     Confrontos a confirmar após a fase de grupos.
                   </Typography>
                 ) : (

@@ -10,6 +10,7 @@ import TopBar from "@/app/components/layout/TopBar";
 import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import { LAYOUT } from "@/app/constants/designTokens";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import { PredictionInput } from "@/app/components/bolao/PredictionInput";
 import { useBolaoFixtures } from "@/app/hooks/useBolao";
 import { saveBet } from "@/app/lib/betStore";
@@ -101,20 +102,20 @@ const MOCK_FIXTURES = buildMockFixtures();
 // ── Sub-componentes ───────────────────────────────────────────────────────────
 
 const GLASS_CARD = {
-  backgroundColor: "rgba(255,255,255,0.7)",
-  backdropFilter: "blur(10px)",
-  WebkitBackdropFilter: "blur(10px)",
-  borderRadius: "16px",
-  border: "1px solid rgba(0,0,0,0.08)",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+  backgroundColor: "rgba(21,28,46,0.92)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+  borderRadius: CAZE_RADIUS.md,
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
 } as const;
 
 function TeamFlag({ name, code }: { name: string; code: string }) {
   if (!code) {
     return (
       <Box sx={{
-        width: 72, height: 50, borderRadius: "8px",
-        backgroundColor: "rgba(0,0,0,0.05)",
+        width: 72, height: 50, borderRadius: CAZE_RADIUS.sm,
+        backgroundColor: "rgba(255,255,255,0.06)",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         <Typography sx={{ color: "#9E9E9E", fontSize: "0.7rem" }}>?</Typography>
@@ -128,7 +129,7 @@ function TeamFlag({ name, code }: { name: string; code: string }) {
       alt={name}
       width={72}
       height={50}
-      style={{ borderRadius: "8px", objectFit: "cover", border: "1px solid rgba(0,0,0,0.1)" }}
+      style={{ borderRadius: 8, objectFit: "cover", border: "1px solid rgba(255,255,255,0.12)" }}
       onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0"; }}
     />
   );
@@ -149,13 +150,21 @@ function MatchHero({ fixture }: { fixture: BolaoFixture }) {
   const awayCode = getTeamCode(fixture.away_team);
 
   return (
-    <Box sx={{ ...GLASS_CARD, p: "20px 20px", mb: 2 }}>
+    <Box
+      sx={{
+        ...GLASS_CARD,
+        p: "20px 20px",
+        mb: 2,
+        background:
+          "linear-gradient(135deg, rgba(0,85,184,0.24), rgba(21,28,46,0.96) 52%, rgba(245,201,0,0.14))",
+      }}
+    >
       {/* data */}
       <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
         <Box sx={{
           backgroundColor: isClosed ? "rgba(230,57,70,0.08)" : "rgba(0,148,64,0.08)",
           border: `1px solid ${isClosed ? "rgba(230,57,70,0.3)" : "rgba(0,148,64,0.3)"}`,
-          borderRadius: "100px",
+          borderRadius: CAZE_RADIUS.pill,
           px: 1.5, py: 0.5,
           display: "inline-flex", alignItems: "center", gap: 0.75,
         }}>
@@ -179,7 +188,7 @@ function MatchHero({ fixture }: { fixture: BolaoFixture }) {
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
           <TeamFlag name={fixture.home_team} code={homeCode} />
           <Typography sx={{
-            color: "#0A0A0A", fontWeight: 700, fontSize: "0.85rem", textAlign: "center",
+            color: "#FFFFFF", fontWeight: 700, fontSize: "0.85rem", textAlign: "center",
             fontFamily: '"Montserrat"', lineHeight: 1.2, maxWidth: 90,
           }}>
             {fixture.home_team}
@@ -188,7 +197,7 @@ function MatchHero({ fixture }: { fixture: BolaoFixture }) {
 
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 48 }}>
           <Typography sx={{
-            color: "#009440", fontFamily: '"Montserrat"', fontWeight: 900,
+            color: "#F5C900", fontFamily: '"Montserrat"', fontWeight: 900,
             fontSize: "1.75rem", lineHeight: 1,
           }}>
             VS
@@ -198,7 +207,7 @@ function MatchHero({ fixture }: { fixture: BolaoFixture }) {
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
           <TeamFlag name={fixture.away_team} code={awayCode} />
           <Typography sx={{
-            color: "#0A0A0A", fontWeight: 700, fontSize: "0.85rem", textAlign: "center",
+            color: "#FFFFFF", fontWeight: 700, fontSize: "0.85rem", textAlign: "center",
             fontFamily: '"Montserrat"', lineHeight: 1.2, maxWidth: 90,
           }}>
             {fixture.away_team}
@@ -213,11 +222,11 @@ function MatchHero({ fixture }: { fixture: BolaoFixture }) {
 function PageSkeleton() {
   return (
     <Box sx={{ pt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-      <Skeleton variant="rectangular" height={160} sx={{ borderRadius: "16px", backgroundColor: "rgba(0,0,0,0.06)" }} />
+      <Skeleton variant="rectangular" height={160} sx={{ borderRadius: CAZE_RADIUS.md, backgroundColor: "rgba(255,255,255,0.06)" }} />
       <Box sx={{ display: "flex", gap: 1 }}>
-        {[1, 2, 3].map((i) => <Skeleton key={i} variant="rectangular" height={60} sx={{ flex: 1, borderRadius: "12px", backgroundColor: "rgba(0,0,0,0.06)" }} />)}
+        {[1, 2, 3].map((i) => <Skeleton key={i} variant="rectangular" height={60} sx={{ flex: 1, borderRadius: CAZE_RADIUS.md, backgroundColor: "rgba(255,255,255,0.06)" }} />)}
       </Box>
-      <Skeleton variant="rectangular" height={260} sx={{ borderRadius: "16px", backgroundColor: "rgba(0,0,0,0.06)" }} />
+      <Skeleton variant="rectangular" height={260} sx={{ borderRadius: CAZE_RADIUS.md, backgroundColor: "rgba(255,255,255,0.06)" }} />
     </Box>
   );
 }
@@ -247,11 +256,11 @@ export default function BolaoFixturePage({ params }: Props) {
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
             minHeight: "100vh",
             pb: `${LAYOUT.bottomNavClearance}px`,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#0A1128",
           }}
         >
-          <TopBar title="Apostar" showBack light />
-          <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 1.5, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
+          <TopBar title="Palpite" showBack />
+          <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
             {children}
           </Box>
         </Box>

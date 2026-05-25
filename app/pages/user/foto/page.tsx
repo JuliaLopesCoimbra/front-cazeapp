@@ -293,7 +293,7 @@ export default function FotoPage() {
 
   return (
     <>
-      <Box sx={{ position: "relative", minHeight: "100vh", bgcolor: "#FFFFFF" }}>
+      <Box sx={{ position: "relative", minHeight: "100vh", bgcolor: "#0A1128" }}>
         <Sidebar />
 
         <Box
@@ -311,7 +311,7 @@ export default function FotoPage() {
           {/* ── INTRO ── */}
           {stage === "intro" && (
             <>
-              <TopBar title="Finder Photo" light showBack />
+              <TopBar title="Finder Photo" showBack />
               <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", px: `${LAYOUT.pagePaddingX}px`, gap: `${SPACING.section}px` }}>
 
                 {/* Ícone */}
@@ -440,7 +440,7 @@ export default function FotoPage() {
 
                 {results.length === 0 ? (
                   <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pt: 8, gap: 2 }}>
-                    <CameraAltOutlinedIcon sx={{ fontSize: 52, color: "rgba(0,0,0,0.12)" }} />
+                    <CameraAltOutlinedIcon sx={{ fontSize: 52, color: "rgba(255,255,255,0.18)" }} />
                     <Typography sx={{ color: COLORS.muted, fontSize: "0.875rem", textAlign: "center", maxWidth: 260, lineHeight: 1.6 }}>
                       Nenhuma foto encontrada. Tente novamente com melhor iluminação ou ângulo diferente.
                     </Typography>
@@ -451,7 +451,7 @@ export default function FotoPage() {
                       <Box
                         key={i}
                         onClick={() => { setSelected(photo); setActiveBorder(BORDER_OPTIONS[0]); }}
-                        sx={{ borderRadius: 2, overflow: "hidden", cursor: "pointer", bgcolor: COLORS.surface, border: "2px solid transparent", background: "linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, #009440, #FFCB00) border-box", boxShadow: "0 1px 6px rgba(0,0,0,0.07)", "&:active": { opacity: 0.85 }, transition: "opacity 0.15s" }}
+                        sx={{ borderRadius: 2, overflow: "hidden", cursor: "pointer", bgcolor: COLORS.surface, border: "2px solid transparent", background: "linear-gradient(#151c2e, #151c2e) padding-box, linear-gradient(135deg, #009440, #FFCB00) border-box", boxShadow: "0 1px 6px rgba(0,0,0,0.35)", "&:active": { opacity: 0.85 }, transition: "opacity 0.15s" }}
                       >
                         <img
                           src={photo.url}

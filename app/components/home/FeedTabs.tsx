@@ -3,12 +3,13 @@
 import { useRouter } from "next/navigation";
 import { Box } from "@mui/material";
 import type { FeedTab } from "@/app/components/home/FeedTabs.types";
-import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
-import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/app/constants/designTokens";
+import { TYPOGRAPHY } from "@/app/constants/designTokens";
 
 export type { FeedTab } from "@/app/components/home/FeedTabs.types";
 
-const TAB_HEIGHT = 32;
+const TAB_HEIGHT = 46;
+const ACTIVE_COLOR = "#F5C900";
+const HOVER_COLOR = "#0055B8";
 
 interface FeedTabsProps {
   active: FeedTab;
@@ -21,27 +22,50 @@ type TabEntry =
   | { kind: "featured-tab"; label: string; value: FeedTab };
 
 const TAB_ENTRIES: TabEntry[] = [
-  { kind: "tab",          label: "Feed",            value: "all" },
-  { kind: "tab",          label: "Evento",          value: "games" },
-  { kind: "featured-tab", label: "Jogos do Brasil", value: "brasil" },
-  { kind: "nav",          label: "Finder Photo",    href: "/pages/user/foto" },
-  { kind: "nav",          label: "Mapa",            href: "/pages/user/mapa" },
+  { kind: "tab",          label: "Feed",   value: "all"    },
+  { kind: "tab",          label: "Evento", value: "games"  },
+  { kind: "featured-tab", label: "Jogos",  value: "brasil" },
+  { kind: "nav",          label: "Fotos",  href: "/pages/user/foto" },
+  { kind: "nav",          label: "Mapa",   href: "/pages/user/mapa" },
 ];
 
-function activeTabSx() {
+function tabButtonSx(isActive: boolean) {
   return {
-    backgroundColor: COLORS.green,
-    color: "#FFFFFF",
-    border: "none",
-    boxShadow: "0 2px 8px rgba(0,148,64,0.30)",
-  };
-}
-
-function inactiveTabSx() {
-  return {
-    backgroundColor: "#FFFFFF",
-    color: COLORS.muted,
-    border: "1px solid rgba(0,0,0,0.10)",
+    position: "relative",
+    flex: "1 1 0",
+    minWidth: 0,
+    height: TAB_HEIGHT,
+    px: 0.5,
+    border: 0,
+    borderRadius: 0,
+    backgroundColor: "transparent",
+    color: isActive ? ACTIVE_COLOR : "rgba(255,255,255,0.44)",
+    cursor: "pointer",
+    fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
+    fontWeight: isActive ? 800 : 700,
+    fontSize: 12,
+    lineHeight: TYPOGRAPHY.caption.lineHeight,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    whiteSpace: "nowrap",
+    textShadow: isActive ? "0 0 5px rgba(245,201,0,0.28)" : "none",
+    transition: "color 0.18s ease, text-shadow 0.18s ease",
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      left: "16%",
+      right: "16%",
+      bottom: 0,
+      height: 3,
+      borderRadius: 999,
+      backgroundColor: isActive ? ACTIVE_COLOR : "transparent",
+      boxShadow: isActive ? "0 0 6px rgba(245,201,0,0.42)" : "none",
+      transition: "background-color 0.18s ease, box-shadow 0.18s ease",
+    },
+    "&:hover": {
+      color: isActive ? ACTIVE_COLOR : HOVER_COLOR,
+    },
   };
 }
 
@@ -53,15 +77,11 @@ export default function FeedTabs({ active, onChange }: FeedTabsProps) {
       role="tablist"
       aria-label="Categorias do feed"
       sx={{
+        width: "100%",
         display: "flex",
-        gap: `${SPACING.sm}px`,
-        overflowX: "auto",
-        overflowY: "hidden",
-        WebkitOverflowScrolling: "touch",
-        scrollSnapType: "x proximity",
-        scrollbarWidth: "none",
-        "&::-webkit-scrollbar": { display: "none" },
-        pr: `${LAYOUT.pagePaddingX}px`,
+        alignItems: "center",
+        minHeight: TAB_HEIGHT,
+        backgroundColor: "rgba(10,17,40,0.96)",
       }}
     >
       {TAB_ENTRIES.map((entry) => {
@@ -75,25 +95,7 @@ export default function FeedTabs({ active, onChange }: FeedTabsProps) {
               role="tab"
               aria-selected={isActive}
               onClick={() => onChange(entry.value)}
-              sx={{
-                flexShrink: 0,
-                scrollSnapAlign: "start",
-                minWidth: 72,
-                height: TAB_HEIGHT,
-                px: `${SPACING.md}px`,
-                borderRadius: CAZE_RADIUS.md,
-                cursor: "pointer",
-                fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                fontWeight: 700,
-                fontSize: TYPOGRAPHY.caption.fontSize,
-                lineHeight: TYPOGRAPHY.caption.lineHeight,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "background-color 0.2s ease, box-shadow 0.2s ease",
-                ...(isActive ? activeTabSx() : inactiveTabSx()),
-                "&:hover": { backgroundColor: isActive ? "#007a33" : "rgba(0,0,0,0.04)" },
-              }}
+              sx={tabButtonSx(isActive)}
             >
               {entry.label}
             </Box>
@@ -107,25 +109,7 @@ export default function FeedTabs({ active, onChange }: FeedTabsProps) {
               component="button"
               type="button"
               onClick={() => router.push(entry.href)}
-              sx={{
-                flexShrink: 0,
-                scrollSnapAlign: "start",
-                minWidth: 72,
-                height: TAB_HEIGHT,
-                px: `${SPACING.md}px`,
-                borderRadius: CAZE_RADIUS.md,
-                cursor: "pointer",
-                fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-                fontWeight: 600,
-                fontSize: TYPOGRAPHY.caption.fontSize,
-                lineHeight: TYPOGRAPHY.caption.lineHeight,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "color 0.2s ease, background-color 0.2s ease",
-                ...inactiveTabSx(),
-                "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
-              }}
+              sx={tabButtonSx(false)}
             >
               {entry.label}
             </Box>
@@ -141,25 +125,7 @@ export default function FeedTabs({ active, onChange }: FeedTabsProps) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(entry.value)}
-            sx={{
-              position: "relative",
-              flexShrink: 0,
-              scrollSnapAlign: "start",
-              minWidth: 72,
-              height: TAB_HEIGHT,
-              px: `${SPACING.md}px`,
-              borderRadius: CAZE_RADIUS.md,
-              cursor: "pointer",
-              fontFamily: "var(--font-montserrat), Montserrat, sans-serif",
-              fontWeight: isActive ? 700 : 600,
-              fontSize: TYPOGRAPHY.caption.fontSize,
-              lineHeight: TYPOGRAPHY.caption.lineHeight,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "color 0.2s ease, background-color 0.2s ease",
-              ...(isActive ? activeTabSx() : inactiveTabSx()),
-            }}
+            sx={tabButtonSx(isActive)}
           >
             {entry.label}
           </Box>

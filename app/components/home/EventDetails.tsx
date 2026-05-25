@@ -37,7 +37,7 @@ export default function EventDetails({ event }: Props) {
     const cached = getCache(cacheKey);
     
     if (cached && cached.scrollPosition > 0) {
-      console.log('✅ [EventDetails] Cache encontrado! Scroll:', cached.scrollPosition);
+      console.log('[EventDetails] Cache encontrado. Scroll:', cached.scrollPosition);
       const targetPosition = cached.scrollPosition;
       
       if ('scrollRestoration' in history) {
@@ -59,12 +59,12 @@ export default function EventDetails({ event }: Props) {
         const diff = Math.abs(currentScroll - targetPosition);
         
         if (diff < 10) {
-          console.log(`✅ [EventDetails] SUCESSO! Scroll restaurado em ${attempts} tentativas: ${currentScroll}px`);
+          console.log(`[EventDetails] Scroll restaurado em ${attempts} tentativas: ${currentScroll}px`);
         } else if (attempts < maxAttempts) {
           console.log(`⏳ [EventDetails] Tentativa ${attempts}: atual=${currentScroll}, target=${targetPosition}, diff=${diff}`);
           requestAnimationFrame(attemptRestore);
         } else {
-          console.log(`⚠️ [EventDetails] Máximo de tentativas. Posição final: ${currentScroll}px`);
+          console.log(`[EventDetails] Máximo de tentativas. Posição final: ${currentScroll}px`);
         }
       };
       
@@ -79,14 +79,14 @@ export default function EventDetails({ event }: Props) {
         }, delay);
       });
     } else {
-      console.log('❌ [EventDetails] Sem cache ou scroll = 0');
+      console.log('[EventDetails] Sem cache ou scroll = 0');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event.id]);
   
   // Salva scroll ao rolar/sair
   useEffect(() => {
-    console.log('📌 [EventDetails] Iniciando listeners de scroll para:', cacheKey);
+    console.log('[EventDetails] Iniciando listeners de scroll para:', cacheKey);
     let throttleTimeout: NodeJS.Timeout | null = null;
     const THROTTLE_MS = 400; // Otimizado para performance
     
@@ -95,7 +95,7 @@ export default function EventDetails({ event }: Props) {
       const docScroll = document.documentElement.scrollTop;
       const bodyScroll = document.body.scrollTop;
       
-      console.log(`📊 [EventDetails] SCROLL DETECTADO:`, {
+      console.log(`[EventDetails] SCROLL DETECTADO:`, {
         windowScrollY: window.scrollY,
         windowPageYOffset: window.pageYOffset,
         docScroll,
@@ -110,39 +110,39 @@ export default function EventDetails({ event }: Props) {
       
       throttleTimeout = setTimeout(() => {
         setCache(cacheKey, [], currentScroll);
-        console.log(`💾 [EventDetails] Cache atualizado (scroll): ${currentScroll}px`);
+        console.log(`[EventDetails] Cache atualizado (scroll): ${currentScroll}px`);
       }, THROTTLE_MS);
     };
     
     const handleScroll = () => {
-      console.log('🔔 [EventDetails] Evento de scroll disparado!');
+      console.log('[EventDetails] Evento de scroll disparado.');
       updateScrollPosition();
     };
     
     const handlePageHide = () => {
       const finalScroll = lastScrollPositionRef.current;
       setCache(cacheKey, [], finalScroll);
-      console.log(`💾 [EventDetails] Cache salvo (pagehide): ${finalScroll}px`);
+      console.log(`[EventDetails] Cache salvo (pagehide): ${finalScroll}px`);
     };
     
     const handleBeforeUnload = () => {
       const finalScroll = lastScrollPositionRef.current;
       setCache(cacheKey, [], finalScroll);
-      console.log(`💾 [EventDetails] Cache salvo (beforeunload): ${finalScroll}px`);
+      console.log(`[EventDetails] Cache salvo (beforeunload): ${finalScroll}px`);
     };
     
     const handleVisibilityChange = () => {
       if (document.hidden) {
         const finalScroll = lastScrollPositionRef.current;
         setCache(cacheKey, [], finalScroll);
-        console.log(`💾 [EventDetails] Cache salvo (visibilitychange): ${finalScroll}px`);
+        console.log(`[EventDetails] Cache salvo (visibilitychange): ${finalScroll}px`);
       }
     };
     
     const handleBlur = () => {
       const finalScroll = lastScrollPositionRef.current;
       setCache(cacheKey, [], finalScroll);
-      console.log(`💾 [EventDetails] Cache salvo (blur): ${finalScroll}px`);
+      console.log(`[EventDetails] Cache salvo (blur): ${finalScroll}px`);
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -162,7 +162,7 @@ export default function EventDetails({ event }: Props) {
       
       const finalScroll = lastScrollPositionRef.current;
       setCache(cacheKey, [], finalScroll);
-      console.log(`💾 [EventDetails] Cache salvo (cleanup final): ${finalScroll}px`);
+      console.log(`[EventDetails] Cache salvo (cleanup final): ${finalScroll}px`);
     };
   }, [cacheKey, setCache]);
   // ======================================================

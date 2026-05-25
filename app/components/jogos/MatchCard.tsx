@@ -29,7 +29,7 @@ function TeamLogo({ name, logo, darkText = false }: { name: string; logo: string
         style={{
           borderRadius: 3,
           objectFit: "cover",
-          border: darkText ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.1)",
+          border: "1px solid rgba(255,255,255,0.1)",
         }}
         onError={(e) => { (e.target as HTMLImageElement).src = logo; }}
       />
@@ -38,7 +38,7 @@ function TeamLogo({ name, logo, darkText = false }: { name: string; logo: string
           fontFamily: 'var(--font-inter), Inter, sans-serif',
           fontWeight: 500,
           fontSize: "0.7rem",
-          color: darkText ? "#282828" : "#FFFFFF",
+          color: "#FFFFFF",
           textAlign: "center",
           maxWidth: 64,
           lineHeight: 1.2,
@@ -76,7 +76,7 @@ function ScoreDisplay({ fixture, darkText = false }: { fixture: BrazilFixture; d
           fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
           fontWeight: 700,
           fontSize: "1.75rem",
-          color: live ? "#E63946" : (darkText ? "#009440" : "#F5C900"),
+          color: live ? "#E8175D" : "#FFD100",
           lineHeight: 1,
           fontVariantNumeric: "tabular-nums",
         }}
@@ -87,7 +87,7 @@ function ScoreDisplay({ fixture, darkText = false }: { fixture: BrazilFixture; d
         <Typography
           sx={{
             fontSize: "0.65rem",
-            color: "#E63946",
+            color: "#E8175D",
             fontWeight: 700,
             fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
             fontVariantNumeric: "tabular-nums",
@@ -117,30 +117,30 @@ export default function MatchCard({ fixture, compact = false, href, fieldBg = fa
         overflow: "hidden",
         backgroundColor: fieldBg
           ? (live ? "rgba(14,40,20,0.95)" : "#111a14")
-          : (live ? "rgba(230,57,70,0.06)" : "rgba(255,255,255,0.55)"),
+          : (live ? "rgba(232,23,93,0.06)" : "#151c2e"),
         backdropFilter: fieldBg ? "none" : "blur(8px)",
         WebkitBackdropFilter: fieldBg ? "none" : "blur(8px)",
         border: live
-          ? "1.5px solid #E63946"
+          ? "1.5px solid #E8175D"
           : fieldBg
-          ? "1px solid rgba(0,148,64,0.25)"
-          : "1px solid rgba(0,0,0,0.09)",
+          ? "1px solid rgba(0,133,66,0.25)"
+          : "1px solid rgba(255,255,255,0.08)",
         borderRadius: "12px",
         padding: compact ? "12px" : "16px",
         cursor: "pointer",
         transition: "all 0.2s ease",
         "&:hover": {
-          borderColor: live ? "#E63946" : "#009440",
+          borderColor: live ? "#E8175D" : "#008542",
           backgroundColor: fieldBg
             ? (live ? "rgba(14,40,20,0.95)" : "#111a14")
-            : (live ? "rgba(230,57,70,0.09)" : "rgba(255,255,255,0.75)"),
+            : (live ? "rgba(232,23,93,0.09)" : "#1A1A2E"),
           transform: "translateY(-1px)",
-          boxShadow: !fieldBg && !live ? "0 4px 12px rgba(0,148,64,0.12)" : undefined,
+          boxShadow: !fieldBg && !live ? "0 4px 12px rgba(27,61,232,0.15)" : undefined,
         },
         boxShadow: live
-          ? "0 0 12px rgba(230,57,70,0.2)"
+          ? "0 0 12px rgba(232,23,93,0.25)"
           : !fieldBg
-          ? "0 1px 4px rgba(0,0,0,0.06)"
+          ? "0 1px 4px rgba(0,0,0,0.25)"
           : "none",
       }}
     >
@@ -181,7 +181,7 @@ export default function MatchCard({ fixture, compact = false, href, fieldBg = fa
       <Box sx={{ position: "relative", zIndex: 1 }}>
         {/* Header: round + badge */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-          <Typography sx={{ fontSize: "0.7rem", color: darkText ? "#6B6B6B" : "rgba(255,255,255,0.55)", fontFamily: 'var(--font-inter), Inter' }}>
+          <Typography sx={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.45)", fontFamily: 'var(--font-inter), Inter' }}>
             {fixture.league.round}
           </Typography>
           {live ? (
@@ -191,7 +191,7 @@ export default function MatchCard({ fixture, compact = false, href, fieldBg = fa
               label="Encerrado"
               size="small"
               sx={{
-                backgroundColor: darkText ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
+                backgroundColor: "rgba(255,255,255,0.06)",
                 color: "#9E9E9E",
                 fontSize: "0.6rem",
                 height: 18,
@@ -200,7 +200,7 @@ export default function MatchCard({ fixture, compact = false, href, fieldBg = fa
               }}
             />
           ) : (
-            <Typography sx={{ fontSize: "0.7rem", color: darkText ? "#6B6B6B" : "rgba(255,255,255,0.55)" }}>
+            <Typography sx={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.72)" }}>
               {format(matchDate, "dd/MM · HH'h'mm", { locale: ptBR })}
             </Typography>
           )}
@@ -218,7 +218,7 @@ export default function MatchCard({ fixture, compact = false, href, fieldBg = fa
           <Typography
             sx={{
               fontSize: "0.65rem",
-              color: darkText ? "#9E9E9E" : "rgba(255,255,255,0.45)",
+              color: "rgba(255,255,255,0.45)",
               textAlign: "center",
               mt: 1.5,
               fontFamily: 'var(--font-inter), Inter',

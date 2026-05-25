@@ -15,12 +15,10 @@ interface EventDetailProps {
 }
 
 const GLASS_CARD = {
-  backgroundColor: "rgba(255,255,255,0.7)",
-  backdropFilter: "blur(10px)",
-  WebkitBackdropFilter: "blur(10px)",
+  backgroundColor: "#151c2e",
   borderRadius: "16px",
-  border: "1px solid rgba(0,0,0,0.08)",
-  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.32)",
 } as const;
 
 function formatEventDate(iso: string) {
@@ -41,7 +39,7 @@ function formatEventTime(iso: string) {
 
 export default function EventDetail({ event }: EventDetailProps) {
   return (
-    <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, pb: 4, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
+    <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, pb: 4, maxWidth: LAYOUT.feedMaxWidth, mx: "auto", backgroundColor: "#0A1128", minHeight: "100%" }}>
 
       {/* Banner */}
       {event.banner_image && (
@@ -84,12 +82,12 @@ export default function EventDetail({ event }: EventDetailProps) {
 
         {/* Data */}
         <Box sx={{ ...GLASS_CARD, p: "14px 16px", display: "flex", alignItems: "flex-start", gap: 1.5 }}>
-          <CalendarTodayOutlinedIcon sx={{ color: "#009440", fontSize: "1.25rem", mt: 0.25, flexShrink: 0 }} />
+          <CalendarTodayOutlinedIcon sx={{ color: "#008542", fontSize: "1.25rem", mt: 0.25, flexShrink: 0 }} />
           <Box>
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 0.25 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 0.25 }}>
               Data
             </Typography>
-            <Typography sx={{ color: "#0A0A0A", fontSize: "0.9rem", fontWeight: 600, fontFamily: '"Montserrat"' }}>
+            <Typography sx={{ color: "#FFFFFF", fontSize: "0.9rem", fontWeight: 600, fontFamily: '"Montserrat"' }}>
               13 de junho de 2026
             </Typography>
           </Box>
@@ -97,12 +95,12 @@ export default function EventDetail({ event }: EventDetailProps) {
 
         {/* Horário */}
         <Box sx={{ ...GLASS_CARD, p: "14px 16px", display: "flex", alignItems: "flex-start", gap: 1.5 }}>
-          <AccessTimeOutlinedIcon sx={{ color: "#009440", fontSize: "1.25rem", mt: 0.25, flexShrink: 0 }} />
+          <AccessTimeOutlinedIcon sx={{ color: "#008542", fontSize: "1.25rem", mt: 0.25, flexShrink: 0 }} />
           <Box>
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 0.25 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 0.25 }}>
               Horário
             </Typography>
-            <Typography sx={{ color: "#0A0A0A", fontSize: "0.9rem", fontWeight: 600, fontFamily: '"Montserrat"' }}>
+            <Typography sx={{ color: "#FFFFFF", fontSize: "0.9rem", fontWeight: 600, fontFamily: '"Montserrat"' }}>
               19h00 — 23h00
             </Typography>
           </Box>
@@ -111,12 +109,12 @@ export default function EventDetail({ event }: EventDetailProps) {
         {/* Localização */}
         {event.location && (
           <Box sx={{ ...GLASS_CARD, p: "14px 16px", display: "flex", alignItems: "flex-start", gap: 1.5 }}>
-            <LocationOnOutlinedIcon sx={{ color: "#009440", fontSize: "1.25rem", mt: 0.25, flexShrink: 0 }} />
+            <LocationOnOutlinedIcon sx={{ color: "#008542", fontSize: "1.25rem", mt: 0.25, flexShrink: 0 }} />
             <Box>
-              <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 0.25 }}>
+              <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 0.25 }}>
                 Local
               </Typography>
-              <Typography sx={{ color: "#0A0A0A", fontSize: "0.9rem", fontWeight: 600, fontFamily: '"Montserrat"', lineHeight: 1.4 }}>
+              <Typography sx={{ color: "#FFFFFF", fontSize: "0.9rem", fontWeight: 600, fontFamily: '"Montserrat"', lineHeight: 1.4 }}>
                 {event.location}
               </Typography>
             </Box>
@@ -137,16 +135,16 @@ export default function EventDetail({ event }: EventDetailProps) {
               mt: 1,
               py: 1.75,
               borderRadius: "14px",
-              backgroundColor: "#009440",
+              backgroundColor: "#008542",
               color: "#FFFFFF",
               fontFamily: '"Montserrat"',
               fontWeight: 700,
               fontSize: "0.95rem",
               textTransform: "none",
-              boxShadow: "0 4px 16px rgba(0,148,64,0.3)",
+              boxShadow: "0 4px 16px rgba(0,133,66,0.3)",
               "&:hover": {
-                backgroundColor: "#007a33",
-                boxShadow: "0 6px 20px rgba(0,148,64,0.4)",
+                backgroundColor: "#006b2c",
+                boxShadow: "0 6px 20px rgba(0,133,66,0.4)",
               },
             }}
           >

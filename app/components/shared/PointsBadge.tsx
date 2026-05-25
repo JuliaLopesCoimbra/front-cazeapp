@@ -3,6 +3,7 @@
 import { Box, Typography, Skeleton } from "@mui/material";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import type { BolaoMyPoints } from "@/app/types/bolao";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 
 interface PointsBadgeProps {
   points?: BolaoMyPoints;
@@ -17,7 +18,7 @@ export function PointsBadge({ points, isLoading, compact = false }: PointsBadgeP
         variant="rectangular"
         width={compact ? 80 : "100%"}
         height={compact ? 36 : 72}
-        sx={{ borderRadius: "12px", backgroundColor: "rgba(0,0,0,0.07)" }}
+        sx={{ borderRadius: compact ? CAZE_RADIUS.pill : CAZE_RADIUS.md, backgroundColor: "rgba(255,255,255,0.06)" }}
       />
     );
   }
@@ -30,7 +31,7 @@ export function PointsBadge({ points, isLoading, compact = false }: PointsBadgeP
           alignItems: "center",
           gap: 0.5,
           backgroundColor: "rgba(245,201,0,0.12)",
-          borderRadius: "20px",
+          borderRadius: CAZE_RADIUS.pill,
           px: 1.5,
           py: 0.5,
           border: "1px solid rgba(245,201,0,0.3)",
@@ -55,24 +56,24 @@ export function PointsBadge({ points, isLoading, compact = false }: PointsBadgeP
   return (
     <Box
       sx={{
-        backgroundColor: "rgba(255,255,255,0.6)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
-        borderRadius: "16px",
+        backgroundColor: "rgba(21,28,46,0.92)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        borderRadius: CAZE_RADIUS.md,
         p: 2,
-        border: "1px solid rgba(0,148,64,0.2)",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+        border: "1px solid rgba(255,255,255,0.10)",
+        boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
         display: "flex",
         alignItems: "center",
         gap: 2,
       }}
     >
-      <EmojiEventsIcon sx={{ color: "#009440", fontSize: "2rem" }} />
+      <EmojiEventsIcon sx={{ color: "#F5C900", fontSize: "2rem" }} />
 
       <Box>
         <Typography
           sx={{
-            color: "#009440",
+            color: "#F5C900",
             fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
             fontWeight: 700,
             fontSize: "1.75rem",
@@ -82,14 +83,14 @@ export function PointsBadge({ points, isLoading, compact = false }: PointsBadgeP
         >
           {points?.total_points ?? 0}
         </Typography>
-        <Typography sx={{ color: "#6B6B6B", fontSize: "0.75rem" }}>pontos</Typography>
+        <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.75rem" }}>pontos</Typography>
       </Box>
 
       {points?.rank != null && (
         <Box sx={{ ml: "auto", textAlign: "right" }}>
           <Typography
             sx={{
-              color: "#0A0A0A",
+              color: "#FFFFFF",
               fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
               fontWeight: 700,
               fontSize: "1.25rem",
@@ -99,7 +100,7 @@ export function PointsBadge({ points, isLoading, compact = false }: PointsBadgeP
           >
             #{points.rank}
           </Typography>
-          <Typography sx={{ color: "#6B6B6B", fontSize: "0.75rem" }}>ranking</Typography>
+          <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.75rem" }}>ranking</Typography>
         </Box>
       )}
     </Box>

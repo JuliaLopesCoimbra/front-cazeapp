@@ -1,20 +1,25 @@
 "use client";
 
 import { Box, Typography, Chip } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import TrackChangesIcon from "@mui/icons-material/TrackChanges";
+import type { SvgIconComponent } from "@mui/icons-material";
 import type { BolaoFixture, UserPredictionSummary } from "@/app/types/bolao";
 
 type StatusConfig = {
   label: string;
+  Icon: SvgIconComponent;
   chipBg: string;
   chipText: string;
 };
 
 const STATUS_CONFIG: Record<UserPredictionSummary["status"], StatusConfig> = {
-  exact:     { label: "Placar exato 🎯",    chipBg: "#F5C900", chipText: "#000000" },
-  outcome:   { label: "Resultado certo ✅", chipBg: "#0055B8", chipText: "#FFFFFF" },
-  wrong:     { label: "Errou 😅",           chipBg: "#333333", chipText: "#9E9E9E" },
-  pending:   { label: "Aguardando",         chipBg: "#1A1A1A", chipText: "#9E9E9E" },
-  cancelled: { label: "Cancelada",          chipBg: "#1A1A1A", chipText: "#9E9E9E" },
+  exact:     { label: "Placar exato",     Icon: TrackChangesIcon, chipBg: "#F5C900", chipText: "#000000" },
+  outcome:   { label: "Resultado certo",  Icon: CheckCircleIcon,  chipBg: "#0055B8", chipText: "#FFFFFF" },
+  wrong:     { label: "Errou",            Icon: ErrorOutlineIcon, chipBg: "#333333", chipText: "#9E9E9E" },
+  pending:   { label: "Aguardando",       Icon: ErrorOutlineIcon, chipBg: "#1A1A1A", chipText: "#9E9E9E" },
+  cancelled: { label: "Cancelada",        Icon: ErrorOutlineIcon, chipBg: "#1A1A1A", chipText: "#9E9E9E" },
 };
 
 interface PredictionCardProps {
@@ -53,6 +58,7 @@ export function PredictionCard({ fixture }: PredictionCardProps) {
           {fixture.home_team} × {fixture.away_team}
         </Typography>
         <Chip
+          icon={<config.Icon sx={{ color: `${config.chipText} !important`, fontSize: "0.9rem" }} />}
           label={config.label}
           size="small"
           sx={{
@@ -66,7 +72,7 @@ export function PredictionCard({ fixture }: PredictionCardProps) {
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Typography sx={{ color: "#9E9E9E", fontSize: "0.75rem" }}>Aposta:</Typography>
+        <Typography sx={{ color: "#9E9E9E", fontSize: "0.75rem" }}>Palpite:</Typography>
         <Typography
           sx={{
             color: "#F5C900",

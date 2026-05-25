@@ -52,12 +52,12 @@ const MOCK_CONVERSATIONS: Conversation[] = [
 ];
 
 const GLASS_CARD = {
-  backgroundColor: "rgba(255,255,255,0.6)",
+  backgroundColor: "rgba(21,28,46,0.92)",
   backdropFilter: "blur(8px)",
   WebkitBackdropFilter: "blur(8px)",
   borderRadius: "12px",
-  border: "1px solid rgba(0,0,0,0.08)",
-  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
 } as const;
 
 export default function MensagensPage() {
@@ -76,18 +76,18 @@ export default function MensagensPage() {
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
             minHeight: "100vh",
             pb: `${LAYOUT.bottomNavClearance}px`,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#0A1128",
           }}
         >
-          <TopBar title="Mensagens" showBack light />
+          <TopBar title="Mensagens" showBack />
 
           <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
             {MOCK_CONVERSATIONS.length === 0 ? (
               <Box sx={{ textAlign: "center", py: 8 }}>
-                <Typography sx={{ color: "#9E9E9E", fontSize: "0.875rem" }}>
+                <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.875rem" }}>
                   Nenhuma conversa ainda.
                 </Typography>
-                <Typography sx={{ color: "#C0C0C0", fontSize: "0.75rem", mt: 0.5 }}>
+                <Typography sx={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", mt: 0.5 }}>
                   Entre em contato com alguém na listagem de figurinhas.
                 </Typography>
               </Box>
@@ -103,20 +103,20 @@ export default function MensagensPage() {
                       p: 1.5,
                       cursor: "pointer",
                       transition: "box-shadow 0.15s, transform 0.15s",
-                      "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,0.1)", transform: "translateY(-1px)" },
+                      "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,0.35)", transform: "translateY(-1px)" },
                     }}
                   >
                     <Box sx={{ position: "relative", flexShrink: 0 }}>
                       <Avatar
                         src={`https://i.pravatar.cc/80?img=${conv.avatarIndex}`}
-                        sx={{ width: 46, height: 46, border: "2px solid rgba(0,148,64,0.2)" }}
+                        sx={{ width: 46, height: 46, border: "2px solid rgba(0,133,66,0.35)" }}
                       />
                       {conv.unread > 0 && (
                         <Box sx={{
                           position: "absolute", top: -2, right: -2,
                           width: 16, height: 16, borderRadius: "50%",
-                          backgroundColor: "#009440",
-                          border: "2px solid #FFFFFF",
+                          backgroundColor: "#008542",
+                          border: "2px solid #151c2e",
                           display: "flex", alignItems: "center", justifyContent: "center",
                         }}>
                           <Typography sx={{ fontSize: "0.5rem", fontWeight: 900, color: "#FFF", lineHeight: 1 }}>
@@ -129,24 +129,24 @@ export default function MensagensPage() {
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.25 }}>
                         <Typography sx={{
-                          color: "#0A0A0A",
+                          color: "#FFFFFF",
                           fontWeight: conv.unread > 0 ? 700 : 600,
                           fontSize: "0.875rem",
                           fontFamily: '"Montserrat"',
                         }}>
                           {conv.name}
                         </Typography>
-                        <Typography sx={{ color: "#9E9E9E", fontSize: "0.6rem", flexShrink: 0 }}>
+                        <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.6rem", flexShrink: 0 }}>
                           {formatDistanceToNow(new Date(conv.lastAt), { addSuffix: false, locale: ptBR })}
                         </Typography>
                       </Box>
 
-                      <Typography sx={{ color: "#009440", fontSize: "0.7rem", fontWeight: 600, mb: 0.2 }}>
+                      <Typography sx={{ color: "#008542", fontSize: "0.7rem", fontWeight: 600, mb: 0.2 }}>
                         {conv.player}
                       </Typography>
 
                       <Typography sx={{
-                        color: conv.unread > 0 ? "#0A0A0A" : "#9E9E9E",
+                        color: conv.unread > 0 ? "#FFFFFF" : "rgba(255,255,255,0.45)",
                         fontSize: "0.75rem",
                         fontWeight: conv.unread > 0 ? 500 : 400,
                         overflow: "hidden",
@@ -157,7 +157,7 @@ export default function MensagensPage() {
                       </Typography>
                     </Box>
 
-                    <ChevronRightIcon sx={{ color: "#C0C0C0", fontSize: "1.1rem", flexShrink: 0 }} />
+                    <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.35)", fontSize: "1.1rem", flexShrink: 0 }} />
                   </Box>
                 ))}
               </Box>

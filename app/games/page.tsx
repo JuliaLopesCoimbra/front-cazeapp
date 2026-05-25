@@ -13,10 +13,17 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import FlagIcon from "@mui/icons-material/Flag";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LockClockIcon from "@mui/icons-material/LockClock";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import ShieldIcon from "@mui/icons-material/Shield";
 import SensorsIcon from "@mui/icons-material/Sensors";
+import SportsMmaIcon from "@mui/icons-material/SportsMma";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import SquareIcon from "@mui/icons-material/Square";
+import WhatshotIcon from "@mui/icons-material/Whatshot";
 import axiosInstance from "@/app/services/auth/axiosConfig";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -53,7 +60,6 @@ interface LiveEvent {
   type: "goal" | "card" | "period" | "now";
   title: string;
   detail: string;
-  icon: string;
 }
 
 // ─── Flag image ───────────────────────────────────────────────────────────────
@@ -217,42 +223,36 @@ const liveEvents: LiveEvent[] = [
     type: "now",
     title: "Jogo em andamento",
     detail: "BRA 1 x 0 MAR",
-    icon: "🔴",
   },
   {
     min: "46'",
     type: "period",
     title: "2º Tempo iniciado",
     detail: "Equipes voltam ao campo",
-    icon: "⚽",
   },
   {
     min: "45+2'",
     type: "period",
     title: "Fim do 1º Tempo",
     detail: "Intervalo — BRA 1 x 0 MAR",
-    icon: "🔔",
   },
   {
     min: "23'",
     type: "goal",
-    title: "GOOOOL! BRASIL! 🇧🇷",
+    title: "GOOOOL! BRASIL!",
     detail: "Endrick recebe na área, domina e chuta no canto — 1 x 0!",
-    icon: "⚽",
   },
   {
     min: "5'",
     type: "card",
     title: "Cartão Amarelo",
     detail: "Aguerd (Marrocos) — falta em Vinicius Jr.",
-    icon: "🟡",
   },
   {
     min: "1'",
     type: "period",
     title: "Início do Jogo",
     detail: "SoFi Stadium, Los Angeles — Copa do Mundo 2026",
-    icon: "🏁",
   },
 ];
 
@@ -283,16 +283,29 @@ async function fetchBrazilStats(): Promise<BrazilStats | null> {
   }
 }
 
+function LiveEventIcon({ type }: { type: LiveEvent["type"] }) {
+  const color =
+    type === "now" ? "#d32f2f" :
+    type === "goal" ? "#009739" :
+    type === "card" ? "#f9a825" :
+    "#777";
+  if (type === "now") return <SensorsIcon sx={{ color, fontSize: 16 }} />;
+  if (type === "goal") return <SportsSoccerIcon sx={{ color, fontSize: 16 }} />;
+  if (type === "card") return <SquareIcon sx={{ color, fontSize: 14 }} />;
+  return <FlagIcon sx={{ color, fontSize: 16 }} />;
+}
+
 // ─── Estado de fase bloqueada ─────────────────────────────────────────────────
 
 function PhaseLockedState({ phase }: { phase: string }) {
-  const messages: Record<string, { title: string; sub: string; emoji: string }> = {
-    oitavas: { emoji: "⚔️", title: "Oitavas de Final", sub: "O Brasil precisa avançar da fase de grupos para jogar aqui. Torça muito!" },
-    quartas: { emoji: "⚽", title: "Quartas de Final", sub: "Os 8 melhores times do mundo se enfrentam. O Brasil quer estar aqui." },
-    semi:    { emoji: "🔥", title: "Semifinal",        sub: "Só os 4 melhores chegam até aqui. A final está logo ali." },
+  const messages: Record<string, { title: string; sub: string; Icon: typeof SportsSoccerIcon }> = {
+    oitavas: { Icon: ShieldIcon,       title: "Oitavas de Final", sub: "O Brasil precisa avançar da fase de grupos para jogar aqui. Torça muito!" },
+    quartas: { Icon: SportsSoccerIcon, title: "Quartas de Final", sub: "Os 8 melhores times do mundo se enfrentam. O Brasil quer estar aqui." },
+    semi:    { Icon: WhatshotIcon,     title: "Semifinal",        sub: "Só os 4 melhores chegam até aqui. A final está logo ali." },
   };
   const info = messages[phase];
   if (!info) return null;
+  const LockedIcon = info.Icon;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 8, px: 3, textAlign: "center" }}>
@@ -300,9 +313,9 @@ function PhaseLockedState({ phase }: { phase: string }) {
         width: 90, height: 90, borderRadius: "50%",
         background: "linear-gradient(135deg, #e8f5e9, #c8e6c9)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        mb: 2.5, fontSize: 40, boxShadow: "0 4px 20px rgba(0,151,57,0.15)",
+        mb: 2.5, boxShadow: "0 4px 20px rgba(0,151,57,0.15)",
       }}>
-        {info.emoji}
+        <LockedIcon sx={{ color: "#009739", fontSize: 40 }} />
       </Box>
       <Chip
         icon={<LockClockIcon sx={{ fontSize: "14px !important" }} />}
@@ -402,7 +415,6 @@ function LiveFeed() {
             <Box sx={{
               width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: ev.type === "goal" ? 18 : 14,
               bgcolor:
                 ev.type === "now"    ? "#ffebee" :
                 ev.type === "goal"   ? "#e8f5e9" :
@@ -417,7 +429,7 @@ function LiveFeed() {
                 animation: "blink 1.2s ease-in-out infinite",
               }),
             }}>
-              {ev.icon}
+              <LiveEventIcon type={ev.type} />
             </Box>
 
             {/* Texto */}
@@ -589,10 +601,10 @@ function BracketDrawer({ game, isLive, onClose }: { game: Game; isLive: boolean;
           </Box>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             {[
-              { label: "Oitavas de Final", date: "Jul 2026",    icon: "⚔️" },
-              { label: "Quartas de Final", date: "Jul 2026",    icon: "🥊" },
-              { label: "Semifinal",        date: "Jul 2026",    icon: "🔥" },
-              { label: "Final",            date: "19 Jul 2026", icon: "🏆" },
+              { label: "Oitavas de Final", date: "Jul 2026",    Icon: ShieldIcon },
+              { label: "Quartas de Final", date: "Jul 2026",    Icon: SportsMmaIcon },
+              { label: "Semifinal",        date: "Jul 2026",    Icon: WhatshotIcon },
+              { label: "Final",            date: "19 Jul 2026", Icon: EmojiEventsIcon },
             ].map((fase, i) => (
               <Box
                 key={fase.label}
@@ -603,7 +615,7 @@ function BracketDrawer({ game, isLive, onClose }: { game: Game; isLive: boolean;
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <Typography sx={{ fontSize: 22 }}>{fase.icon}</Typography>
+                  <fase.Icon sx={{ color: i === 3 ? "#f9a825" : "#777", fontSize: 22 }} />
                   <Box>
                     <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#333" }}>{fase.label}</Typography>
                     <Typography sx={{ fontSize: 11, color: "#aaa" }}>{fase.date}</Typography>
@@ -619,7 +631,7 @@ function BracketDrawer({ game, isLive, onClose }: { game: Game; isLive: boolean;
         <Box sx={{ p: 2, background: "linear-gradient(135deg, #FEDF00, #ffc107)", borderRadius: 3, display: "flex", alignItems: "center", gap: 2 }}>
           <Flag code="br" size={40} />
           <Box>
-            <Typography sx={{ fontSize: 15, fontWeight: 900, color: "#002776" }}>Bora Brasil! 🙌</Typography>
+            <Typography sx={{ fontSize: 15, fontWeight: 900, color: "#002776" }}>Bora Brasil!</Typography>
             <Typography sx={{ fontSize: 11, color: "#002776", opacity: 0.75 }}>Acompanhe cada jogo aqui</Typography>
           </Box>
         </Box>
@@ -832,7 +844,7 @@ export default function GamesPage() {
                   {/* Gol info no card ao vivo */}
                   {gameIsLive && (
                     <Box sx={{ mx: 2, mb: 1.5, p: 1, bgcolor: "#e8f5e9", borderRadius: 2, display: "flex", alignItems: "center", gap: 1 }}>
-                      <Typography sx={{ fontSize: 16 }}>⚽</Typography>
+                      <SportsSoccerIcon sx={{ color: "#2e7d32", fontSize: 16 }} />
                       <Typography sx={{ fontSize: 12, color: "#2e7d32", fontWeight: 700 }}>23' Endrick</Typography>
                       <Flag code="br" size={18} />
                     </Box>

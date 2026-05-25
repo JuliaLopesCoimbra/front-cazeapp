@@ -28,6 +28,7 @@ import TopBar from "@/app/components/layout/TopBar";
 import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import { LAYOUT } from "@/app/constants/designTokens";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import LogoutButton from "@/app/components/auth/LogoutButton";
 import { getProfile, updateProfilePhoto, updateProfile, ProfileResponse } from "@/app/services/profile/profileService";
 import { useToast } from "@/app/context/ToastContext";
@@ -77,12 +78,10 @@ function extractErrorMessage(error: unknown): string {
 // ── sub-components ────────────────────────────────────────────────────────────
 
 const GLASS_CARD = {
-  backgroundColor: "rgba(255,255,255,0.6)",
-  backdropFilter: "blur(8px)",
-  WebkitBackdropFilter: "blur(8px)",
-  borderRadius: "14px",
-  border: "1px solid rgba(0,0,0,0.08)",
-  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+  backgroundColor: "rgba(21,28,46,0.92)",
+  borderRadius: CAZE_RADIUS.md,
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
 };
 
 function InfoRow({
@@ -106,8 +105,8 @@ function InfoRow({
     <Box sx={{ display: "flex", alignItems: editMode ? "flex-start" : "center", gap: 1.5, px: 2, py: 1.75 }}>
       <Box
         sx={{
-          width: 36, height: 36, borderRadius: "10px",
-          backgroundColor: "rgba(0,148,64,0.08)",
+          width: 36, height: 36, borderRadius: CAZE_RADIUS.sm,
+          backgroundColor: "rgba(0,133,66,0.12)",
           display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           mt: editMode ? 0.25 : 0,
         }}
@@ -115,27 +114,27 @@ function InfoRow({
         {icon}
       </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{ color: "#9E9E9E", fontSize: "0.68rem", fontWeight: 600, mb: 0.2 }}>{label}</Typography>
+        <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.68rem", fontWeight: 600, mb: 0.2 }}>{label}</Typography>
         {editMode ? editContent : (
-          <Typography sx={{ color: "#0A0A0A", fontWeight: 500, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <Typography sx={{ color: "#FFFFFF", fontWeight: 500, fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {value}
           </Typography>
         )}
       </Box>
       {!editMode && onEdit && (
-        <IconButton size="small" onClick={onEdit} sx={{ color: "#9E9E9E", flexShrink: 0, "&:hover": { color: "#009440" } }}>
+        <IconButton size="small" onClick={onEdit} sx={{ color: "rgba(255,255,255,0.45)", flexShrink: 0, "&:hover": { color: "#008542" } }}>
           <EditOutlinedIcon sx={{ fontSize: 16 }} />
         </IconButton>
       )}
       {!editMode && verified && (
-        <VerifiedIcon sx={{ fontSize: 18, color: "#009440", flexShrink: 0 }} />
+        <VerifiedIcon sx={{ fontSize: 18, color: "#008542", flexShrink: 0 }} />
       )}
     </Box>
   );
 }
 
 function InfoDivider() {
-  return <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.05)", mx: 2 }} />;
+  return <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)", mx: 2 }} />;
 }
 
 // ── página ────────────────────────────────────────────────────────────────────
@@ -217,7 +216,7 @@ export default function ProfilePage() {
         size="small" onClick={onSave} disabled={saving}
         startIcon={saving ? <CircularProgress size={12} sx={{ color: "#fff" }} /> : <SaveOutlinedIcon sx={{ fontSize: 15 }} />}
         sx={{
-          flex: 1, backgroundColor: "#009440", color: "#fff", borderRadius: "8px",
+          flex: 1, backgroundColor: "#009440", color: "#fff", borderRadius: CAZE_RADIUS.sm,
           textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
           "&:hover": { backgroundColor: "#007a33" },
         }}
@@ -228,9 +227,9 @@ export default function ProfilePage() {
         size="small" onClick={onCancel} disabled={saving}
         startIcon={<CancelOutlinedIcon sx={{ fontSize: 15 }} />}
         sx={{
-          flex: 1, border: "1px solid rgba(0,0,0,0.15)", color: "#6B6B6B", borderRadius: "8px",
+          flex: 1, border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.72)", borderRadius: CAZE_RADIUS.sm,
           textTransform: "none", fontWeight: 600, fontSize: "0.8rem",
-          "&:hover": { borderColor: "#009440", color: "#009440" },
+          "&:hover": { borderColor: "#008542", color: "#008542", backgroundColor: "rgba(255,255,255,0.06)" },
         }}
       >
         Cancelar
@@ -240,24 +239,27 @@ export default function ProfilePage() {
 
   const inputSx = {
     "& .MuiOutlinedInput-root": {
-      borderRadius: "10px",
-      backgroundColor: "rgba(0,0,0,0.03)",
-      "& fieldset": { borderColor: "rgba(0,0,0,0.15)" },
-      "&:hover fieldset": { borderColor: "#009440" },
-      "&.Mui-focused fieldset": { borderColor: "#009440" },
+      borderRadius: CAZE_RADIUS.sm,
+      backgroundColor: "rgba(255,255,255,0.06)",
+      "& fieldset": { borderColor: "rgba(255,255,255,0.12)" },
+      "&:hover fieldset": { borderColor: "#008542" },
+      "&.Mui-focused fieldset": { borderColor: "#008542" },
     },
-    "& .MuiInputBase-input": { color: "#0A0A0A", fontSize: "0.9rem" },
-    "& input[type='date']::-webkit-calendar-picker-indicator": { opacity: 0.5 },
+    "& .MuiInputBase-input": { color: "#FFFFFF", fontSize: "0.9rem" },
+    "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.72)" },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#008542" },
+    "& input[type='date']::-webkit-calendar-picker-indicator": { opacity: 0.5, filter: "invert(1)" },
   };
 
   const selectSx = {
-    borderRadius: "10px",
-    backgroundColor: "rgba(0,0,0,0.03)",
-    color: "#0A0A0A",
+    borderRadius: CAZE_RADIUS.sm,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    color: "#FFFFFF",
     fontSize: "0.9rem",
-    "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(0,0,0,0.15)" },
-    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#009440" },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#009440" },
+    "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.12)" },
+    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#008542" },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#008542" },
+    "& .MuiSvgIcon-root": { color: "rgba(255,255,255,0.72)" },
   };
 
   return (
@@ -273,12 +275,31 @@ export default function ProfilePage() {
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
             minHeight: "100vh",
             pb: `${LAYOUT.bottomNavClearance}px`,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#0A1128",
           }}
         >
-          <TopBar title="Meu Perfil" light />
+          <TopBar title="Meu Perfil" />
 
           <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
+            <Box
+              sx={{
+                ...GLASS_CARD,
+                p: 2,
+                mb: 2,
+                background:
+                  "linear-gradient(135deg, rgba(0,85,184,0.22), rgba(21,28,46,0.96) 52%, rgba(245,201,0,0.14))",
+              }}
+            >
+              <Typography sx={{ color: "#F5C900", fontSize: "0.7rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                Sua conta
+              </Typography>
+              <Typography sx={{ color: "#FFFFFF", fontFamily: '"Montserrat"', fontSize: "1.35rem", fontWeight: 900, lineHeight: 1.1, mt: 0.5 }}>
+                Perfil Casa CazéTV
+              </Typography>
+              <Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.82rem", mt: 0.75 }}>
+                Mantenha seus dados atualizados para participar das ativações.
+              </Typography>
+            </Box>
 
             {/* ── Avatar hero ─────────────────────────────────── */}
             <Box
@@ -292,8 +313,8 @@ export default function ProfilePage() {
               <Box
                 sx={{
                   height: 72,
-                  background: "linear-gradient(135deg, rgba(0,148,64,0.12) 0%, rgba(0,148,64,0.04) 100%)",
-                  borderBottom: "1px solid rgba(0,148,64,0.1)",
+                  background: "linear-gradient(135deg, rgba(0,133,66,0.24) 0%, rgba(0,85,184,0.20) 100%)",
+                  borderBottom: "1px solid rgba(255,255,255,0.08)",
                 }}
               />
 
@@ -301,13 +322,13 @@ export default function ProfilePage() {
                 {/* Avatar */}
                 <Box sx={{ position: "relative", mb: 1.5 }}>
                   {loading ? (
-                    <Skeleton variant="circular" width={88} height={88} sx={{ bgcolor: "rgba(0,0,0,0.07)" }} />
+                    <Skeleton variant="circular" width={88} height={88} sx={{ bgcolor: "rgba(255,255,255,0.08)" }} />
                   ) : (
                     <Box
                       sx={{
                         width: 88, height: 88, borderRadius: "50%",
-                        border: "3px solid #009440",
-                        boxShadow: "0 4px 16px rgba(0,148,64,0.2)",
+                        border: "3px solid rgba(255,255,255,0.12)",
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
                         cursor: "pointer",
                         position: "relative",
                         overflow: "hidden",
@@ -317,7 +338,7 @@ export default function ProfilePage() {
                     >
                       <Avatar
                         src={profile?.profile_photo ?? "/assets/figma/logo-top.png"}
-                        sx={{ width: "100%", height: "100%", fontSize: "2rem", bgcolor: "rgba(0,148,64,0.1)", color: "#009440" }}
+                        sx={{ width: "100%", height: "100%", fontSize: "2rem", bgcolor: "rgba(0,133,66,0.15)", color: "#008542" }}
                       >
                         {(profile?.name ?? "U")[0].toUpperCase()}
                       </Avatar>
@@ -342,20 +363,20 @@ export default function ProfilePage() {
 
                 {loading ? (
                   <>
-                    <Skeleton width={140} height={22} sx={{ bgcolor: "rgba(0,0,0,0.07)", borderRadius: 1 }} />
-                    <Skeleton width={180} height={16} sx={{ bgcolor: "rgba(0,0,0,0.05)", borderRadius: 1, mt: 0.5 }} />
+                    <Skeleton width={140} height={22} sx={{ bgcolor: "rgba(255,255,255,0.08)", borderRadius: 1 }} />
+                    <Skeleton width={180} height={16} sx={{ bgcolor: "rgba(255,255,255,0.06)", borderRadius: 1, mt: 0.5 }} />
                   </>
                 ) : (
                   <>
-                    <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "1.1rem", textAlign: "center" }}>
+                    <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "1.1rem", textAlign: "center" }}>
                       {profile?.name ?? "Usuário"}
                     </Typography>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.25 }}>
-                      <Typography sx={{ color: "#9E9E9E", fontSize: "0.78rem" }}>
+                      <Typography sx={{ color: "rgba(255,255,255,0.72)", fontSize: "0.78rem" }}>
                         {profile?.email}
                       </Typography>
                       {profile?.is_email_verified && (
-                        <VerifiedIcon sx={{ fontSize: 14, color: "#009440" }} />
+                        <VerifiedIcon sx={{ fontSize: 14, color: "#008542" }} />
                       )}
                     </Box>
                   </>
@@ -366,14 +387,14 @@ export default function ProfilePage() {
             {/* ── Info card ────────────────────────────────────── */}
             <Box sx={{ ...GLASS_CARD, mb: 2, overflow: "hidden" }}>
               <InfoRow
-                icon={<EmailOutlinedIcon sx={{ fontSize: 18, color: "#009440" }} />}
+                icon={<EmailOutlinedIcon sx={{ fontSize: 18, color: "#008542" }} />}
                 label="Email"
                 value={profile?.email ?? "—"}
                 verified={profile?.is_email_verified}
               />
               <InfoDivider />
               <InfoRow
-                icon={<CakeOutlinedIcon sx={{ fontSize: 18, color: "#009440" }} />}
+                icon={<CakeOutlinedIcon sx={{ fontSize: 18, color: "#008542" }} />}
                 label="Data de nascimento"
                 value={formatDate(profile?.birth_date ?? null)}
                 onEdit={() => setEditingBirthDate(true)}
@@ -397,7 +418,7 @@ export default function ProfilePage() {
               />
               <InfoDivider />
               <InfoRow
-                icon={<WcOutlinedIcon sx={{ fontSize: 18, color: "#009440" }} />}
+                icon={<WcOutlinedIcon sx={{ fontSize: 18, color: "#008542" }} />}
                 label="Sexo"
                 value={formatGender(profile?.gender ?? null)}
                 onEdit={() => setEditingGender(true)}
@@ -412,11 +433,15 @@ export default function ProfilePage() {
                         MenuProps={{
                           PaperProps: {
                             sx: {
-                              borderRadius: "12px", mt: 0.5,
+                              borderRadius: CAZE_RADIUS.md, mt: 0.5,
+                              backgroundColor: "#151c2e",
+                              border: "1px solid rgba(255,255,255,0.08)",
                               "& .MuiMenuItem-root": {
                                 fontSize: "0.9rem",
-                                "&:hover": { backgroundColor: "rgba(0,148,64,0.06)" },
-                                "&.Mui-selected": { backgroundColor: "rgba(0,148,64,0.1)", color: "#009440" },
+                                color: "#FFFFFF",
+                                "&:hover": { backgroundColor: "rgba(255,255,255,0.06)" },
+                                "&.Mui-selected": { backgroundColor: "rgba(0,133,66,0.18)", color: "#008542" },
+                                "&.Mui-selected:hover": { backgroundColor: "rgba(0,133,66,0.24)" },
                               },
                             },
                           },
@@ -438,7 +463,7 @@ export default function ProfilePage() {
               />
               <InfoDivider />
               <InfoRow
-                icon={<CalendarTodayOutlinedIcon sx={{ fontSize: 18, color: "#9E9E9E" }} />}
+                icon={<CalendarTodayOutlinedIcon sx={{ fontSize: 18, color: "rgba(255,255,255,0.45)" }} />}
                 label="Membro desde"
                 value={formatDate(profile?.created_at ?? null)}
               />

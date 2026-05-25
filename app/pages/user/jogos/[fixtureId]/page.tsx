@@ -118,7 +118,7 @@ export default function FixtureDetailPage() {
                 fullWidth
                 onClick={() => router.push(`/pages/user/bolao/${fixtureId}`)}
               >
-                {live ? "Ver sua aposta" : "Apostar nesse jogo"}
+                {live ? "Ver seu palpite" : "Dar palpite nesse jogo"}
               </CazeButton>
             )}
           </Box>

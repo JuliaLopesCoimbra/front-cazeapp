@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
-import HeaderMatchStrip from "@/app/components/home/HeaderMatchStrip";
 import BrazilGradientAvatar from "@/app/components/shared/BrazilGradientAvatar";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import type { ProfileResponse } from "@/app/services/profile/profileService";
@@ -14,9 +13,10 @@ import { useMobileMenu } from "@/app/context/MobileMenuContext";
 import MenuIcon from "@mui/icons-material/Menu";
 
 const HEADER_AVATAR_SRC = "/assets/figma/avatar-header.png";
+const HEADER_CENTER_LOGO_SRC = "/assets/casa-cazetv/caz%C3%A9%20-%20tm1.png";
 const MASCOT_WIDTH = 76;
 const MASCOT_HEIGHT = 42;
-const MASCOT_ZONE = 28;
+const MASCOT_ZONE = 20;
 const AVATAR_SIZE = 32;
 
 interface HomeScreenHeaderProps {
@@ -48,7 +48,7 @@ export default function HomeScreenHeader({
         top: 0,
         zIndex: 1100,
         isolation: "isolate",
-        pt: `${SPACING.xl}px`,
+        pt: `${SPACING.sm}px`,
         backgroundColor: COLORS.surface,
       }}
     >
@@ -60,8 +60,8 @@ export default function HomeScreenHeader({
           gridTemplateColumns: "1fr auto 1fr",
           alignItems: "center",
           px: `${LAYOUT.pagePaddingX}px`,
-          minHeight: 52,
-          mb: `${SPACING.sm}px`,
+          minHeight: 46,
+          mb: `${SPACING.xs}px`,
         }}
       >
         {/* Coluna esquerda — Avatar + "Olá, nome" */}
@@ -105,16 +105,28 @@ export default function HomeScreenHeader({
           </Typography>
         </Box>
 
-        {/* Coluna central — placar absolutamente centrado na página */}
+        {/* Coluna central — logo Casa CazéTV */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "center",
-            transform: "scale(0.9)",
-            transformOrigin: "center",
+            alignItems: "center",
+            lineHeight: 0,
+            transform: "translateY(-4px)",
           }}
         >
-          <HeaderMatchStrip embedded />
+          <Image
+            src={HEADER_CENTER_LOGO_SRC}
+            alt="Casa CazéTV"
+            width={76}
+            height={76}
+            priority
+            unoptimized
+            style={{
+              display: "block",
+              objectFit: "contain",
+            }}
+          />
         </Box>
 
         {/* Coluna direita — hambúrguer (mobile) / logo (desktop) */}

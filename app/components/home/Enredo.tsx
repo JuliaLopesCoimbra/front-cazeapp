@@ -9,6 +9,7 @@ import {
   Button,
   Skeleton,
 } from "@mui/material";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
 
 import { useFeedCache } from "@/app/context/FeedCacheContext";
 
@@ -676,7 +677,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl, event }) => {
                   opacity: 0.7,
                 }}
               >
-                🎵
+                <MusicNoteIcon sx={{ fontSize: "inherit", color: accentColor }} />
               </Box>
               <Typography
                 variant="h6"
@@ -841,7 +842,10 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl, event }) => {
                         fontSize: { xs: "1.1rem", md: "1.3rem" },
                       }}
                     >
-                      🎵 Letra da Música
+                      <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+                        <MusicNoteIcon sx={{ fontSize: 22 }} />
+                        Letra da Música
+                      </Box>
                     </Typography>
 
                     {/* Letra */}
@@ -894,7 +898,7 @@ const Enredo: React.FC<Props> = ({ eventId, spotifyPlaylistUrl, event }) => {
           textAlign: "center",
         }}
       >
-        🎵 Letras de Música
+        Letras de Música
       </Typography> */}
 
       {/* {musics.length === 0 ? (

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anton, Bebas_Neue, Montserrat, Inter } from "next/font/google";
+import { Montserrat, Poppins, Roboto } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { ToastProvider } from './context/ToastContext';
@@ -16,32 +16,25 @@ import LiquidGlassFilters from './components/shared/LiquidGlassFilters';
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
-// Super headlines — hero, match day, live now, onboarding (sempre CAPS LOCK)
-const anton = Anton({
-  variable: "--font-anton",
-  subsets: ["latin"],
-  weight: "400",
-});
-
-// Sports data — placares, cronômetros, AO VIVO, estatísticas, rankings
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas",
-  subsets: ["latin"],
-  weight: "400",
-});
-
-// UI de impacto — botões, cards, nav, CTAs, tabs, títulos menores
+// Brand kit: títulos, nav, badges e CTAs.
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["400", "600", "700", "900"],
 });
 
-// Interface geral — comentários, feed, texto corrido, perfil, settings
-const inter = Inter({
-  variable: "--font-inter",
+// Brand kit: subtítulos, labels e textos auxiliares.
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "600"],
+});
+
+// Brand kit: texto corrido, inputs e conteúdo longo.
+const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -69,8 +62,8 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
       <body
-        className={`${anton.variable} ${bebasNeue.variable} ${montserrat.variable} ${inter.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }}
+        className={`${montserrat.variable} ${poppins.variable} ${roboto.variable} antialiased`}
+        style={{ fontFamily: 'var(--font-roboto), Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' }}
       >
         <LiquidGlassFilters />
         <EmotionCacheProvider>

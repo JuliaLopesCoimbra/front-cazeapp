@@ -1,15 +1,29 @@
 "use client";
 
 import { Box, Typography, Chip } from "@mui/material";
+import CheckroomIcon from "@mui/icons-material/Checkroom";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
+import RedeemIcon from "@mui/icons-material/Redeem";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import type { SvgIconComponent } from "@mui/icons-material";
 import Image from "next/image";
 import CazeButton from "@/app/components/shared/CazeButton";
 import type { BolaoPrize } from "@/app/types/bolao";
 
 const PRIZE_TYPE_LABEL: Record<BolaoPrize["prize_type"], string> = {
-  shirt:   "Camisa 👕",
-  ticket:  "Ingresso 🎟️",
-  merch:   "Produto 🛍️",
-  digital: "Digital 📱",
+  shirt:   "Camisa",
+  ticket:  "Ingresso",
+  merch:   "Produto",
+  digital: "Digital",
+};
+
+const PRIZE_TYPE_ICON: Record<BolaoPrize["prize_type"], SvgIconComponent> = {
+  shirt: CheckroomIcon,
+  ticket: ConfirmationNumberIcon,
+  merch: ShoppingBagIcon,
+  digital: PhoneIphoneIcon,
 };
 
 interface PrizeCardProps {
@@ -23,6 +37,7 @@ export function PrizeCard({ prize, userPoints, onRedeem, isRedeeming }: PrizeCar
   const canAfford = userPoints >= prize.points_required;
   const outOfStock = prize.remaining_qty === 0;
   const disabled = !canAfford || outOfStock || isRedeeming || !prize.is_active;
+  const PrizeTypeIcon = PRIZE_TYPE_ICON[prize.prize_type];
 
   return (
     <Box
@@ -64,12 +79,13 @@ export function PrizeCard({ prize, userPoints, onRedeem, isRedeeming }: PrizeCar
               height: "100%",
             }}
           >
-            <Typography sx={{ fontSize: "2.5rem" }}>🏆</Typography>
+            <EmojiEventsIcon sx={{ color: "#F5C900", fontSize: "2.5rem" }} />
           </Box>
         )}
 
         <Box sx={{ position: "absolute", top: 8, right: 8 }}>
           <Chip
+            icon={<PrizeTypeIcon sx={{ color: "#F5C900 !important", fontSize: "0.85rem" }} />}
             label={PRIZE_TYPE_LABEL[prize.prize_type]}
             size="small"
             sx={{
@@ -138,7 +154,12 @@ export function PrizeCard({ prize, userPoints, onRedeem, isRedeeming }: PrizeCar
               ? "Esgotado"
               : !canAfford
               ? "Pts insuficientes"
-              : "Resgatar 🎁"}
+              : (
+                <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}>
+                  <RedeemIcon sx={{ fontSize: "1rem" }} />
+                  Resgatar
+                </Box>
+              )}
           </CazeButton>
         </Box>
       </Box>

@@ -96,17 +96,16 @@ export default function BottomNav({
     return () => window.removeEventListener("scroll", onScroll);
   }, [scrollY]);
 
-  const dockHeight = useTransform(compact, [0, 1], [58, 40]);
-  const dockMaxWidth = useTransform(compact, [0, 1], [400, 268]);
-  const dockMinWidth = useTransform(compact, [0, 1], [280, 220]);
-  const dockWidthPercent = useTransform(compact, [0, 1], [86, 68]);
+  const dockHeight = useTransform(compact, [0, 1], [50, 34]);
+  const dockMaxWidth = useTransform(compact, [0, 1], [328, 252]);
+  const dockMinWidth = useTransform(compact, [0, 1], [264, 216]);
+  const dockWidthPercent = useTransform(compact, [0, 1], [74, 64]);
   const bottomOffset = useTransform(compact, [0, 1], [24, 10]);
   const dockScale = useTransform(compact, [0, 1], [1, 0.94]);
-  const itemGap = useTransform(compact, [0, 1], [22, 6]);
-  const dockPaddingX = useTransform(compact, [0, 1], [22, 10]);
-  const activeSlot = useTransform(compact, [0, 1], [44, 30]);
+  const dockPaddingX = useTransform(compact, [0, 1], [8, 5]);
+  const activeSlot = useTransform(compact, [0, 1], [38, 27]);
   const iconScale = useTransform(compact, [0, 1], [1, 0.82]);
-  const activeRadius = useTransform(compact, [0, 1], [12, 9]);
+  const activeRadius = 999;
 
   const bottom = useTransform(
     bottomOffset,
@@ -155,11 +154,11 @@ export default function BottomNav({
         noPadding
         sx={{
           width: "100%",
-          backgroundColor: "rgba(255, 255, 255, 0.90)",
-          backdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.2)`,
-          WebkitBackdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(1.2)`,
-          border: "1px solid rgba(0,0,0,0.09)",
-          boxShadow: "0 -2px 12px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.08)",
+          backgroundColor: `rgba(${NAV_DOCK_GLASS.fillRgb}, ${NAV_DOCK_GLASS.fillAlpha})`,
+          backdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(${NAV_DOCK_GLASS.saturate})`,
+          WebkitBackdropFilter: `blur(${NAV_DOCK_GLASS.blurPx}px) saturate(${NAV_DOCK_GLASS.saturate})`,
+          border: NAV_DOCK_GLASS.border,
+          boxShadow: NAV_DOCK_GLASS.shadow,
         }}
       >
         <motion.div
@@ -167,8 +166,7 @@ export default function BottomNav({
             height: dockHeight,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            gap: itemGap,
+            justifyContent: "space-between",
             paddingLeft: dockPaddingX,
             paddingRight: dockPaddingX,
           }}
@@ -190,7 +188,7 @@ export default function BottomNav({
               sx={{
                 flexShrink: 0,
                 "& .MuiBadge-badge": {
-                  backgroundColor: "#E52554",
+                  backgroundColor: "#E8175D",
                   color: "#fff",
                   fontSize: badgeCount > 1 ? "9px" : undefined,
                   minWidth: badgeCount > 1 ? 14 : 8,
@@ -199,7 +197,7 @@ export default function BottomNav({
                   borderRadius: "50%",
                   top: 5,
                   right: 5,
-                  border: "1.5px solid #e4d2b7",
+                  border: "1.5px solid #0A1128",
                 },
               }}
             >
@@ -222,8 +220,11 @@ export default function BottomNav({
                   height: activeSlot,
                   borderRadius: activeRadius,
                   background: isActive
-                    ? COLORS.yellow
+                    ? "#0055B8"
                     : "transparent",
+                  boxShadow: isActive
+                    ? "0 0 14px rgba(0, 85, 184, 0.45)"
+                    : "none",
                 }}
               >
                 <motion.span
@@ -235,8 +236,8 @@ export default function BottomNav({
                 >
                   <Icon
                     sx={{
-                      fontSize: 24,
-                      color: isActive ? COLORS.black : COLORS.muted,
+                      fontSize: 22,
+                      color: isActive ? "#FFFFFF" : COLORS.muted,
                     }}
                   />
                 </motion.span>

@@ -14,21 +14,21 @@ export const LOGIN_BG_SIZE = {
 export const LOGIN_BG_VIDEO = "/assets/casa-cazetv/login_bg.mp4";
 
 export const loginColors = {
-  yellow: "#FFCB00",
-  yellowHover: "#F7B521",
-  green: "#009440",
-  greenHover: "#007a35",
-  blue: "#0055B8",
+  yellow: "#FFD100",
+  yellowHover: "#E8C000",
+  green: "#008542",
+  greenHover: "#006d35",
+  blue: "#1B3DE8",
   black: "#000000",
   white: "#FFFFFF",
   muted: "rgba(255, 255, 255, 0.85)",
   mutedDim: "rgba(255, 255, 255, 0.7)",
-  glassBorder: "rgba(255, 255, 255, 0.12)",
-  fieldBg: "rgba(255, 255, 255, 0.06)",
-  fieldBgFocus: "rgba(255, 255, 255, 0.1)",
+  glassBorder: "rgba(255, 209, 0, 0.15)",
+  fieldBg: "rgba(26, 26, 46, 0.6)",
+  fieldBgFocus: "rgba(26, 26, 46, 0.85)",
   fieldBorder: "rgba(255, 255, 255, 0.28)",
   fieldBorderHover: "rgba(255, 255, 255, 0.45)",
-  error: "#E52554",
+  error: "#E8175D",
 } as const;
 
 export const loginPageSx = {

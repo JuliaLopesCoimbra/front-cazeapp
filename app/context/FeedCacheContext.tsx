@@ -45,7 +45,7 @@ export function FeedCacheProvider({ children }: { children: ReactNode }) {
         cacheRef.current = parsed;
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar cache:', error);
+      console.error('Erro ao carregar cache:', error);
     }
   }, []);
 
@@ -66,7 +66,7 @@ export function FeedCacheProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (error) {
-        console.error('❌ Erro ao ler cache:', error);
+        console.error('Erro ao ler cache:', error);
       }
     }
     
@@ -90,7 +90,7 @@ export function FeedCacheProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheRef.current));
     } catch (error) {
-      console.error('❌ Erro ao salvar cache:', error);
+      console.error('Erro ao salvar cache:', error);
       // Se localStorage estiver cheio, limpa caches antigos
       try {
         const now = Date.now();
@@ -103,7 +103,7 @@ export function FeedCacheProvider({ children }: { children: ReactNode }) {
         cacheRef.current = filtered;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
       } catch (e) {
-        console.error('❌ Erro crítico ao salvar cache:', e);
+        console.error('Erro crítico ao salvar cache:', e);
       }
     }
   };
