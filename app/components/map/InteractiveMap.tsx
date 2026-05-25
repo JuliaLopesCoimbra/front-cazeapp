@@ -311,7 +311,7 @@ export default function InteractiveMap({ onAreaSelect }: InteractiveMapProps) {
           maxScale={5}
           initialScale={1}
           centerOnInit={false}
-          wheel={{ step: 0.15, smoothStep: 0.003 }}
+          wheel={{ step: 0.15 }}
           pinch={{ step: 6 }}
           doubleClick={{ mode: "zoomIn", step: 0.8 }}
           panning={{ excluded: [] }}

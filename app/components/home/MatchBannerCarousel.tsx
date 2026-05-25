@@ -75,7 +75,6 @@ const FLAG_CODES: Record<string, string> = {
   Colombia:        "co",
   Ecuador:         "ec",
   Australia:       "au",
-  Senegal:         "sn",
   Ghana:           "gh",
   Cameroon:        "cm",
   "South Korea":   "kr",
