@@ -54,12 +54,15 @@ export default function TopBar({
       <Box
         component="header"
         sx={{
-          backgroundColor: light ? "#FFFFFF" : "#282828",
+          backgroundColor: light ? "#FFFFFF" : "#0A1128",
           height: "56px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          boxShadow: light ? "0 1px 0 rgba(0,0,0,0.08)" : "none",
+          boxShadow: light
+            ? "0 1px 0 rgba(0,0,0,0.08)"
+            : "0 1px 0 rgba(255,255,255,0.06)",
+          borderBottom: light ? "none" : "1px solid rgba(255,255,255,0.08)",
         }}
       >
         {/* Lado esquerdo: logo Casa CazéTV ou botão voltar */}

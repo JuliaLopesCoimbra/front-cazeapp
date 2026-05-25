@@ -53,24 +53,31 @@ export default function LogoutButton({
   if (variant === "sidebar") {
     return (
       <Button
-        fullWidth
         variant="outlined"
         startIcon={<LogoutIcon />}
         onClick={handleLogout}
         sx={{
-          mx: 1.25,
-          mb: 1,
+          width: "calc(100% - 32px)",
+          mx: 2,
+          mb: 0,
           color: "#FFCB00",
-          borderColor: "rgba(255, 203, 0, 0.45)",
-          borderRadius: "12px",
+          borderColor: "rgba(255, 203, 0, 0.40)",
+          borderRadius: "999px",
           textTransform: "none",
-          fontFamily: 'var(--font-syne), Syne, sans-serif',
+          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           fontWeight: 600,
-          fontSize: "0.875rem",
-          py: 1.25,
+          fontSize: "0.78rem",
+          minHeight: 38,
+          py: 0.75,
+          bgcolor: "rgba(0,85,184,0.10)",
+          boxShadow: "inset 0 0 0 1px rgba(0,85,184,0.16)",
+          "& .MuiButton-startIcon": {
+            mr: 0.75,
+            "& svg": { fontSize: 16 },
+          },
           "&:hover": {
-            borderColor: "#FFCB00",
-            backgroundColor: "rgba(255, 203, 0, 0.08)",
+            borderColor: "rgba(255, 203, 0, 0.72)",
+            backgroundColor: "rgba(0,85,184,0.22)",
           },
         }}
       >

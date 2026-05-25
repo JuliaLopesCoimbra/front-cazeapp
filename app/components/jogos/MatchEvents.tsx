@@ -66,7 +66,7 @@ export default function MatchEvents({ events, homeTeamName, isLoading = false }:
           top: 0,
           bottom: 0,
           width: "1px",
-          backgroundColor: "rgba(245,201,0,0.15)",
+          backgroundColor: "rgba(255,209,0,0.15)",
           transform: "translateX(-50%)",
         }}
       />
@@ -90,7 +90,7 @@ export default function MatchEvents({ events, homeTeamName, isLoading = false }:
             <Box
               sx={{
                 maxWidth: "42%",
-                backgroundColor: "rgba(255,255,255,0.04)",
+                backgroundColor: "rgba(255,255,255,0.06)",
                 borderRadius: "8px",
                 px: "10px",
                 py: "6px",
@@ -123,7 +123,7 @@ export default function MatchEvents({ events, homeTeamName, isLoading = false }:
                 height: 8,
                 borderRadius: "50%",
                 backgroundColor: color,
-                border: "2px solid #000",
+                border: "2px solid #0A1128",
                 zIndex: 1,
               }}
             />

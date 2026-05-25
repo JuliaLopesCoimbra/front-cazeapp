@@ -1,11 +1,10 @@
 "use client";
 
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BrazilDivider from "@/app/components/layout/BrazilDivider";
-import HeaderMatchStrip from "@/app/components/home/HeaderMatchStrip";
 import BrazilGradientAvatar from "@/app/components/shared/BrazilGradientAvatar";
 import { EventResponse } from "@/app/services/events/eventAppService";
 import type { ProfileResponse } from "@/app/services/profile/profileService";
@@ -14,9 +13,10 @@ import { useMobileMenu } from "@/app/context/MobileMenuContext";
 import MenuIcon from "@mui/icons-material/Menu";
 
 const HEADER_AVATAR_SRC = "/assets/figma/avatar-header.png";
+const HEADER_CENTER_LOGO_SRC = "/assets/casa-cazetv/caz%C3%A9%20-%20tm1.png";
 const MASCOT_WIDTH = 76;
 const MASCOT_HEIGHT = 42;
-const MASCOT_ZONE = 28;
+const MASCOT_ZONE = 16;
 const AVATAR_SIZE = 32;
 
 interface HomeScreenHeaderProps {
@@ -30,12 +30,10 @@ export default function HomeScreenHeader({
   events: _events,
   currentEvent: _currentEvent,
   onSelectEvent: _onSelectEvent,
-  profile,
+  profile: _profile,
 }: HomeScreenHeaderProps) {
   const router = useRouter();
   const { setMenuOpen } = useMobileMenu();
-  const displayName = profile?.name?.trim() || profile?.email || "Visitante";
-  const firstName = displayName.split(" ")[0];
 
   return (
     <Box
@@ -48,7 +46,7 @@ export default function HomeScreenHeader({
         top: 0,
         zIndex: 1100,
         isolation: "isolate",
-        pt: `${SPACING.xl}px`,
+        pt: `${SPACING.xs}px`,
         backgroundColor: COLORS.surface,
       }}
     >
@@ -60,8 +58,8 @@ export default function HomeScreenHeader({
           gridTemplateColumns: "1fr auto 1fr",
           alignItems: "center",
           px: `${LAYOUT.pagePaddingX}px`,
-          minHeight: 52,
-          mb: `${SPACING.sm}px`,
+          minHeight: 40,
+          mb: 0,
         }}
       >
         {/* Coluna esquerda — Avatar + "Olá, nome" */}
@@ -77,7 +75,7 @@ export default function HomeScreenHeader({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 0.75,
+            gap: 0,
             cursor: "pointer",
             width: "fit-content",
             background: "none",
@@ -88,33 +86,32 @@ export default function HomeScreenHeader({
           <BrazilGradientAvatar
             size={AVATAR_SIZE}
             src={HEADER_AVATAR_SRC}
-            alt={firstName}
+            alt="Perfil"
           />
-          <Typography
-            sx={{
-              fontFamily: "var(--font-inter), Inter, sans-serif",
-              fontSize: 11,
-              fontWeight: 500,
-              color: COLORS.muted,
-              lineHeight: 1,
-              whiteSpace: "nowrap",
-              pointerEvents: "none",
-            }}
-          >
-            Olá, {firstName}
-          </Typography>
         </Box>
 
-        {/* Coluna central — placar absolutamente centrado na página */}
+        {/* Coluna central — logo Casa CazéTV */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "center",
-            transform: "scale(0.9)",
-            transformOrigin: "center",
+            alignItems: "center",
+            lineHeight: 0,
+            transform: "translateY(-4px)",
           }}
         >
-          <HeaderMatchStrip embedded />
+          <Image
+            src={HEADER_CENTER_LOGO_SRC}
+            alt="Casa CazéTV"
+            width={76}
+            height={76}
+            priority
+            unoptimized
+            style={{
+              display: "block",
+              objectFit: "contain",
+            }}
+          />
         </Box>
 
         {/* Coluna direita — hambúrguer (mobile) / logo (desktop) */}

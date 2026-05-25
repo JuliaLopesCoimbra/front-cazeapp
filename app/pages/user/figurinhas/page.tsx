@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Box, Typography, Tabs, Tab, Avatar, Chip,
+  Box, Typography, Tabs, Tab, Avatar,
   Drawer, ToggleButton, ToggleButtonGroup,
   IconButton, Badge,
 } from "@mui/material";
@@ -20,6 +20,7 @@ import TopBar from "@/app/components/layout/TopBar";
 import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import { LAYOUT } from "@/app/constants/designTokens";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import CazeButton from "@/app/components/shared/CazeButton";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -97,6 +98,13 @@ const MOCK: StickerPost[] = [
   { id: "7", type: "sell", user: { name: "Rafael S.",      avatar_url: "https://i.pravatar.cc/40?img=7"  }, player_name: "Rodrygo",      team: "Brasil",     created_at: new Date(Date.now() - 1000*60*60*6).toISOString() },
 ];
 
+const GLASS_CARD = {
+  bgcolor: "rgba(21,28,46,0.92)",
+  borderRadius: CAZE_RADIUS.md,
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
+} as const;
+
 function timeAgo(iso: string) {
   return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: ptBR });
 }
@@ -115,19 +123,16 @@ function PostCard({
   const isNeed = post.type === "need";
   return (
     <Box sx={{
-      bgcolor: "#FFFFFF",
-      borderRadius: "15px",
+      ...GLASS_CARD,
       p: 2,
-      border: "1px solid rgba(0,0,0,0.07)",
-      boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
       display: "flex", gap: 1.5, alignItems: "flex-start",
     }}>
       <Avatar
         src={post.user.avatar_url ?? undefined}
         sx={{
           width: 36, height: 36, flexShrink: 0,
-          bgcolor: isNeed ? "rgba(230,57,70,0.10)" : "rgba(0,148,64,0.10)",
-          color: isNeed ? "#E63946" : "#009440",
+          bgcolor: isNeed ? "rgba(232,23,93,0.15)" : "rgba(0,133,66,0.15)",
+          color: isNeed ? "#E8175D" : "#008542",
           fontSize: "0.85rem", fontWeight: 700,
         }}
       >
@@ -136,26 +141,26 @@ function PostCard({
 
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
-          <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.875rem", fontFamily: "var(--font-inter), Inter, sans-serif" }}>
+          <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.875rem", fontFamily: "var(--font-inter), Inter, sans-serif" }}>
             {post.user.name}
           </Typography>
-          <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem" }}>{timeAgo(post.created_at)}</Typography>
+          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem" }}>{timeAgo(post.created_at)}</Typography>
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.5, flexWrap: "wrap" }}>
           <Box component="span" sx={{
             display: "inline-flex", alignItems: "center",
-            bgcolor: isNeed ? "rgba(230,57,70,0.08)" : "rgba(0,148,64,0.08)",
-            color: isNeed ? "#E63946" : "#009440",
-            borderRadius: "100px", px: 1, py: 0.2,
+            bgcolor: isNeed ? "rgba(232,23,93,0.12)" : "rgba(0,133,66,0.12)",
+            color: isNeed ? "#E8175D" : "#008542",
+            borderRadius: CAZE_RADIUS.pill, px: 1, py: 0.2,
             fontSize: "0.65rem", fontWeight: 700, lineHeight: 1.6,
           }}>
             {isNeed ? "Preciso" : "Tenho"}
           </Box>
-          <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.875rem" }}>
+          <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.875rem" }}>
             {post.player_name}
           </Typography>
-          <Typography sx={{ color: "#9E9E9E", fontSize: "0.75rem" }}>· {post.team}</Typography>
+          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.75rem" }}>· {post.team}</Typography>
         </Box>
 
         {onContact && (
@@ -165,7 +170,7 @@ function PostCard({
             sx={{
               display: "inline-flex", alignItems: "center",
               bgcolor: "#009440", color: "#fff",
-              border: "none", borderRadius: "100px",
+              border: "none", borderRadius: CAZE_RADIUS.pill,
               px: 2, py: 0.65,
               fontSize: "0.75rem", fontWeight: 700,
               fontFamily: "var(--font-inter), Inter, sans-serif",
@@ -185,7 +190,7 @@ function PostCard({
               display: "inline-flex", alignItems: "center",
               bgcolor: "transparent", color: "#E63946",
               border: "1px solid rgba(230,57,70,0.30)",
-              borderRadius: "100px",
+              borderRadius: CAZE_RADIUS.pill,
               px: 2, py: 0.55,
               fontSize: "0.75rem", fontWeight: 700,
               fontFamily: "var(--font-inter), Inter, sans-serif",
@@ -310,29 +315,29 @@ function AnnounceDrawer({
       onClose={handleClose}
       PaperProps={{
         sx: {
-          backgroundColor: "#FFFFFF",
-          borderRadius: "20px 20px 0 0",
+          backgroundColor: "#151c2e",
+          borderRadius: `${CAZE_RADIUS.md} ${CAZE_RADIUS.md} 0 0`,
           maxHeight: "82vh",
           display: "flex",
           flexDirection: "column",
-          boxShadow: "0 -4px 24px rgba(0,0,0,0.12)",
+          boxShadow: "0 -4px 24px rgba(0,0,0,0.6)",
         },
       }}
     >
       {/* drag handle */}
       <Box sx={{ pt: 2, pb: 0.5, display: "flex", justifyContent: "center", flexShrink: 0 }}>
-        <Box sx={{ width: 40, height: 4, backgroundColor: "rgba(0,0,0,0.12)", borderRadius: "2px" }} />
+        <Box sx={{ width: 40, height: 4, backgroundColor: "rgba(255,255,255,0.12)", borderRadius: "2px" }} />
       </Box>
 
       {/* header fixo */}
       <Box sx={{ px: 3, pt: 1.5, pb: 2, flexShrink: 0 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           {catalogStep !== "category" && (
-            <IconButton onClick={handleBack} size="small" sx={{ color: "#6B6B6B", p: 0.5 }}>
+            <IconButton onClick={handleBack} size="small" sx={{ color: "rgba(255,255,255,0.72)", p: 0.5 }}>
               <ArrowBackIosNewIcon sx={{ fontSize: "0.85rem" }} />
             </IconButton>
           )}
-          <Typography sx={{ color: "#0A0A0A", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.95rem", flex: 1 }}>
+          <Typography sx={{ color: "#FFFFFF", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.95rem", flex: 1 }}>
             {catalogStep === "category" ? "Anunciar figurinha" : breadcrumb}
           </Typography>
         </Box>
@@ -343,60 +348,59 @@ function AnnounceDrawer({
           onChange={(_, v) => v && setPostType(v)}
           fullWidth
           size="small"
-          sx={{ mb: 0 }}
+          sx={{ mb: 0, backgroundColor: "#1A1A2E", borderRadius: CAZE_RADIUS.sm }}
         >
           <ToggleButton value="need" sx={{
-            borderColor: "rgba(0,0,0,0.12)", color: "#9E9E9E", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
-            "&.Mui-selected": { backgroundColor: "rgba(230,57,70,0.08)", color: "#E63946", borderColor: "#E63946" },
+            borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
+            "&.Mui-selected": { backgroundColor: "rgba(232,23,93,0.12)", color: "#E8175D", borderColor: "#E8175D" },
           }}>
             Precisando
           </ToggleButton>
           <ToggleButton value="sell" sx={{
-            borderColor: "rgba(0,0,0,0.12)", color: "#9E9E9E", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
-            "&.Mui-selected": { backgroundColor: "rgba(0,148,64,0.08)", color: "#009440", borderColor: "#009440" },
+            borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
+            "&.Mui-selected": { backgroundColor: "rgba(0,133,66,0.12)", color: "#008542", borderColor: "#008542" },
           }}>
             Tenho para Vender
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
-      <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.07)", flexShrink: 0 }} />
+      <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)", flexShrink: 0 }} />
 
       {/* conteúdo rolável */}
       <Box sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
 
         {catalogStep === "category" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 0.5 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 0.5 }}>
               Categoria
             </Typography>
-            {CATEGORIES.map(({ key, label, Icon, color }) => (
+            {CATEGORIES.map(({ key, label, Icon }) => (
               <Box
                 key={key}
                 onClick={() => handleCategoryClick(key)}
                 sx={{
                   display: "flex", alignItems: "center", gap: 2,
-                  backgroundColor: "rgba(255,255,255,0.6)",
-                  backdropFilter: "blur(8px)",
-                  border: "1px solid rgba(0,0,0,0.08)",
-                  borderRadius: "12px",
+                  backgroundColor: "#1A1A2E",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: CAZE_RADIUS.md,
                   p: "14px 16px",
                   cursor: "pointer",
                   transition: "all 0.15s",
-                  "&:hover": { borderColor: "#009440", backgroundColor: "rgba(0,148,64,0.04)" },
+                  "&:hover": { borderColor: "#008542", backgroundColor: "rgba(0,133,66,0.08)" },
                 }}
               >
                 <Box sx={{
-                  width: 36, height: 36, borderRadius: "10px",
-                  backgroundColor: "rgba(0,148,64,0.08)",
+                  width: 36, height: 36, borderRadius: CAZE_RADIUS.sm,
+                  backgroundColor: "rgba(0,133,66,0.12)",
                   display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
-                  <Icon sx={{ color: color === "#F5C900" ? "#009440" : color, fontSize: "1.2rem" }} />
+                  <Icon sx={{ color: "#008542", fontSize: "1.2rem" }} />
                 </Box>
-                <Typography sx={{ color: "#0A0A0A", fontWeight: 600, fontSize: "0.875rem", flex: 1 }}>
+                <Typography sx={{ color: "#FFFFFF", fontWeight: 600, fontSize: "0.875rem", flex: 1 }}>
                   {label}
                 </Typography>
-                <ChevronRightIcon sx={{ color: "#C0C0C0", fontSize: "1.1rem" }} />
+                <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1.1rem" }} />
               </Box>
             ))}
           </Box>
@@ -404,7 +408,7 @@ function AnnounceDrawer({
 
         {catalogStep === "team" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
               Escolha a seleção
             </Typography>
             {CATALOG.selecao.map((team, idx) => (
@@ -414,24 +418,24 @@ function AnnounceDrawer({
                   sx={{
                     display: "flex", alignItems: "center", gap: 2,
                     py: 1.5, px: 0.5,
-                    cursor: "pointer", borderRadius: "10px",
-                    "&:hover": { backgroundColor: "rgba(0,148,64,0.04)" },
+                    cursor: "pointer", borderRadius: CAZE_RADIUS.sm,
+                    "&:hover": { backgroundColor: "rgba(0,133,66,0.08)" },
                     transition: "background-color 0.1s",
                   }}
                 >
                   <TeamFlag name={team.name} />
-                  <Typography sx={{ color: "#0A0A0A", fontSize: "0.875rem", fontWeight: 500, flex: 1 }}>
+                  <Typography sx={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500, flex: 1 }}>
                     {team.name}
                   </Typography>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <Typography sx={{ color: "#9E9E9E", fontSize: "0.7rem" }}>
+                    <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.7rem" }}>
                       {team.players.length} fig.
                     </Typography>
-                    <ChevronRightIcon sx={{ color: "#C0C0C0", fontSize: "1rem" }} />
+                    <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1rem" }} />
                   </Box>
                 </Box>
                 {idx < CATALOG.selecao.length - 1 && (
-                  <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.05)" }} />
+                  <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />
                 )}
               </Box>
             ))}
@@ -440,7 +444,7 @@ function AnnounceDrawer({
 
         {catalogStep === "player" && (
           <Box>
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
               Escolha a figurinha
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
@@ -453,19 +457,19 @@ function AnnounceDrawer({
                       sx={{
                         display: "flex", alignItems: "center", gap: 2,
                         py: 1.5, px: 0.5,
-                        cursor: "pointer", borderRadius: "10px",
-                        backgroundColor: isSelected ? "rgba(0,148,64,0.06)" : "transparent",
-                        "&:hover": { backgroundColor: isSelected ? "rgba(0,148,64,0.08)" : "rgba(0,0,0,0.03)" },
+                        cursor: "pointer", borderRadius: CAZE_RADIUS.sm,
+                        backgroundColor: isSelected ? "rgba(0,133,66,0.12)" : "transparent",
+                        "&:hover": { backgroundColor: isSelected ? "rgba(0,133,66,0.16)" : "rgba(255,255,255,0.04)" },
                         transition: "background-color 0.1s",
                       }}
                     >
-                      <Typography sx={{ color: isSelected ? "#009440" : "#0A0A0A", fontSize: "0.875rem", fontWeight: isSelected ? 700 : 400, flex: 1 }}>
+                      <Typography sx={{ color: isSelected ? "#008542" : "#FFFFFF", fontSize: "0.875rem", fontWeight: isSelected ? 700 : 400, flex: 1 }}>
                         {player}
                       </Typography>
-                      {isSelected && <CheckCircleIcon sx={{ color: "#009440", fontSize: "1.1rem" }} />}
+                      {isSelected && <CheckCircleIcon sx={{ color: "#008542", fontSize: "1.1rem" }} />}
                     </Box>
                     {idx < players.length - 1 && (
-                      <Box sx={{ height: "1px", backgroundColor: "rgba(0,0,0,0.05)" }} />
+                      <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />
                     )}
                   </Box>
                 );
@@ -476,20 +480,20 @@ function AnnounceDrawer({
       </Box>
 
       {selectedPlayer && (
-        <Box sx={{ px: 3, pt: 1.5, pb: 3, borderTop: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
+        <Box sx={{ px: 3, pt: 1.5, pb: 3, borderTop: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 }}>
           <Box sx={{
-            backgroundColor: "rgba(0,148,64,0.06)",
-            border: "1px solid rgba(0,148,64,0.2)",
-            borderRadius: "10px",
+            backgroundColor: "rgba(0,133,66,0.10)",
+            border: "1px solid rgba(0,133,66,0.30)",
+            borderRadius: CAZE_RADIUS.sm,
             px: 2, py: 1,
             mb: 2,
             display: "flex", alignItems: "center", gap: 1,
           }}>
-            <CheckCircleIcon sx={{ color: "#009440", fontSize: "1rem" }} />
-            <Typography sx={{ color: "#009440", fontSize: "0.8rem", fontWeight: 600 }}>
+            <CheckCircleIcon sx={{ color: "#008542", fontSize: "1rem" }} />
+            <Typography sx={{ color: "#008542", fontSize: "0.8rem", fontWeight: 600 }}>
               {selectedPlayer}
               {selectedTeam && selectedCategory === "selecao" && (
-                <Typography component="span" sx={{ color: "#9E9E9E", fontWeight: 400 }}>
+                <Typography component="span" sx={{ color: "rgba(255,255,255,0.45)", fontWeight: 400 }}>
                   {" "}· {selectedTeam}
                 </Typography>
               )}
@@ -556,24 +560,23 @@ export default function FigurinhasPage() {
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
             minHeight: "100vh",
             pb: `${LAYOUT.bottomNavClearance}px`,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#0A1128",
           }}
         >
           <TopBar
-            light
             title="Figurinhas"
             rightSlot={
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <IconButton
                   onClick={() => setDrawerOpen(true)}
-                  sx={{ color: "#0A0A0A", "&:hover": { color: "#009440" } }}
+                  sx={{ color: "#FFFFFF", backgroundColor: "rgba(255,255,255,0.08)", "&:hover": { color: "#F5C900", backgroundColor: "rgba(255,255,255,0.12)" } }}
                   aria-label="Novo anúncio"
                 >
                   <AddIcon sx={{ fontSize: "1.3rem" }} />
                 </IconButton>
                 <IconButton
                   onClick={() => router.push("/pages/user/figurinhas/mensagens")}
-                  sx={{ color: "#0A0A0A", "&:hover": { color: "#009440" } }}
+                  sx={{ color: "#FFFFFF", backgroundColor: "rgba(255,255,255,0.08)", "&:hover": { color: "#F5C900", backgroundColor: "rgba(255,255,255,0.12)" } }}
                   aria-label="Histórico de mensagens"
                 >
                   <Badge badgeContent={1} sx={{ "& .MuiBadge-badge": { backgroundColor: "#F5C900", color: "#000", fontSize: "0.55rem", minWidth: 14, height: 14, p: 0 } }}>
@@ -585,14 +588,51 @@ export default function FigurinhasPage() {
           />
 
           <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
+            <Box
+              sx={{
+                ...GLASS_CARD,
+                p: 2,
+                mb: 2,
+                background:
+                  "linear-gradient(135deg, rgba(245,201,0,0.18), rgba(21,28,46,0.96) 48%, rgba(232,23,93,0.18))",
+              }}
+            >
+              <Typography sx={{ color: "#F5C900", fontSize: "0.7rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                Álbum da Copa
+              </Typography>
+              <Typography sx={{ color: "#FFFFFF", fontFamily: '"Montserrat"', fontSize: "1.35rem", fontWeight: 900, lineHeight: 1.1, mt: 0.5 }}>
+                Troca de figurinhas
+              </Typography>
+              <Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.82rem", mt: 0.75 }}>
+                Anuncie repetidas, encontre as que faltam e feche troca no chat.
+              </Typography>
+            </Box>
+
             <Tabs
               value={tab}
               onChange={(_, v) => setTab(v as TabValue)}
               sx={{
                 mb: 2,
-                "& .MuiTabs-indicator": { backgroundColor: "#009440" },
-                "& .MuiTab-root": { color: "#6B6B6B", fontFamily: '"Montserrat"', fontWeight: 700, fontSize: "0.75rem", textTransform: "none", minWidth: "auto", px: 1.5 },
-                "& .Mui-selected": { color: "#009440" },
+                "& .MuiTabs-indicator": { display: "none" },
+                "& .MuiTabs-flexContainer": { gap: 0.75 },
+                "& .MuiTab-root": {
+                  color: "rgba(255,255,255,0.45)",
+                  backgroundColor: "rgba(21,28,46,0.82)",
+                  borderRadius: CAZE_RADIUS.sm,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  fontFamily: '"Montserrat"',
+                  fontWeight: 700,
+                  fontSize: "0.75rem",
+                  textTransform: "none",
+                  minWidth: "auto",
+                  px: 1.5,
+                  minHeight: "29px",
+                },
+                "& .Mui-selected": {
+                  color: "#FFFFFF",
+                  backgroundColor: "rgba(255,255,255,0.14)",
+                  border: "1px solid rgba(255,255,255,0.20)",
+                },
               }}
             >
               <Tab value="need"   label={`Precisando (${needCount})`} />
@@ -601,7 +641,7 @@ export default function FigurinhasPage() {
             </Tabs>
 
             {displayed.length === 0 ? (
-              <Typography sx={{ color: "#6B6B6B", textAlign: "center", py: 6 }}>
+              <Typography sx={{ color: "rgba(255,255,255,0.45)", textAlign: "center", py: 6 }}>
                 {tab === "need"   && "Ninguém precisando ainda. Seja o primeiro!"}
                 {tab === "sell"   && "Ninguém vendendo ainda. Compartilhe!"}
                 {tab === "myads"  && "Você ainda não fez nenhum anúncio."}

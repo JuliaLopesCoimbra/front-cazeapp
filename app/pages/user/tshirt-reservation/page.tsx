@@ -16,6 +16,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import CheckroomIcon from "@mui/icons-material/Checkroom";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useToast } from "@/app/context/ToastContext";
@@ -143,8 +144,9 @@ function QrSuccessBlock({ reservation }: { reservation: TshirtReservationMine })
               Apresente ao promotor no estande N1 para retirar sua camiseta.
             </Typography>
             <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, mt: 1.2, bgcolor: "#fff3e0", borderRadius: 2, px: 1.4, py: 0.5 }}>
+              <LockOutlinedIcon sx={{ fontSize: 14, color: "#e65100" }} />
               <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#e65100" }}>
-                🔒 Não compartilhe este QR code com ninguém
+                Não compartilhe este QR code com ninguém
               </Typography>
             </Box>
           </Box>

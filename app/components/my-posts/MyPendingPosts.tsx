@@ -111,7 +111,7 @@ export default function MyPendingPosts({ hideTitle = false }: MyPendingPostsProp
     const cached = getCache(cacheKey);
     
     if (cached && cached.data.length > 0) {
-      // ✅ Dados encontrados no cache!
+      // Dados encontrados no cache.
       setPosts(cached.data);
       setOffset(cached.data.length);
       setHasMore(cached.data.length >= LIMIT);
@@ -154,7 +154,7 @@ export default function MyPendingPosts({ hideTitle = false }: MyPendingPostsProp
         }, delay);
       });
     } else {
-      // ❌ Sem cache - carrega da API
+      // Sem cache - carrega da API.
       loadPosts(true);
       setInitialized(true);
     }

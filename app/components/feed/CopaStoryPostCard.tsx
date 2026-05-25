@@ -228,7 +228,10 @@ export default function CopaStoryPostCard({
         sx={{
           borderRadius: CAZE_RADIUS.md,
           overflow: "hidden",
-          bgcolor: "transparent",
+          bgcolor: "#151c2e",
+          border: "1px solid rgba(27, 61, 232, 0.25)",
+          boxShadow: "0 2px 16px rgba(0, 0, 0, 0.35), 0 0 24px rgba(27, 61, 232, 0.10)",
+          borderTop: "2px solid #1B3DE8",
         }}
       >
         {/* Cabeçalho transparente — fica acima da mídia; divisão arco-íris abaixo */}
@@ -265,7 +268,7 @@ export default function CopaStoryPostCard({
                   width: 32,
                   height: 32,
                   flexShrink: 0,
-                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  border: "2px solid #FFD100",
                 }}
               />
               <Typography
@@ -548,7 +551,7 @@ export default function CopaStoryPostCard({
                           alignItems: "center",
                           mt: 0.75,
                           pt: 0.75,
-                          borderTop: "1px solid rgba(0,0,0,0.08)",
+                          borderTop: "1px solid rgba(255,255,255,0.08)",
                         }}
                       >
                         <Avatar
@@ -575,9 +578,9 @@ export default function CopaStoryPostCard({
                               color: COLORS.text,
                               fontSize: 12,
                               minHeight: 32,
-                              backgroundColor: "rgba(0,0,0,0.04)",
+                              backgroundColor: "rgba(255,255,255,0.06)",
                               borderRadius: "8px",
-                              "& fieldset": { borderColor: "rgba(0,0,0,0.12)" },
+                              "& fieldset": { borderColor: "rgba(255,255,255,0.12)" },
                               "&.Mui-focused fieldset": { borderColor: "rgba(0,148,64,0.55)" },
                             },
                           }}

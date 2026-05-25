@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { verifyEmail } from "@/app/services/auth/authService";
 import { useToast } from "@/app/context/ToastContext";
 import { Box, Typography, Button } from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { getEventBackgroundSxByKey } from "@/app/utils/eventBranding";
 
 type Status = "loading" | "success" | "error";
@@ -164,8 +165,9 @@ function VerifyEmailContent() {
         {/* ERROR */}
         {status === "error" && (
           <>
-            <Typography variant="h6" fontWeight={600} mb={2}>
-              Erro na verificação ❌
+            <Typography variant="h6" fontWeight={600} mb={2} sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+              <ErrorOutlineIcon sx={{ fontSize: 20 }} />
+              Erro na verificação
             </Typography>
 
             <Typography variant="body2" sx={{ opacity: 0.85 }} mb={4}>

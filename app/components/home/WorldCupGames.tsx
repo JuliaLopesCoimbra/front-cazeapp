@@ -4,9 +4,15 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { Box, Typography, Chip, Skeleton, Drawer, IconButton } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
+import SquareIcon from "@mui/icons-material/Square";
+import TvIcon from "@mui/icons-material/Tv";
 import CloseIcon from "@mui/icons-material/Close";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import {
   getBrazilFixtures,
   getBrazilLive,
@@ -82,8 +88,8 @@ function FlagImage({ name, size = 48 }: { name: string; size?: number }) {
   const h = Math.round(size * 0.67);
   if (!code) {
     return (
-      <Box sx={{ width: size, height: h, bgcolor: "rgba(0,0,0,0.06)", borderRadius: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <SportsSoccerIcon sx={{ fontSize: size * 0.35, color: "rgba(0,0,0,0.25)" }} />
+      <Box sx={{ width: size, height: h, bgcolor: "rgba(255,255,255,0.06)", borderRadius: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <SportsSoccerIcon sx={{ fontSize: size * 0.35, color: "rgba(255,255,255,0.25)" }} />
       </Box>
     );
   }
@@ -116,38 +122,38 @@ function formatDate(iso: string) {
   return { date: `${dd}/${mm}`, time: `${hh}:${min}` };
 }
 
-function eventIcon(ev: FixtureEvent) {
+function EventTypeIcon({ ev }: { ev: FixtureEvent }) {
   const type = (ev.type as string)?.toLowerCase() ?? "";
   const detail = ev.detail?.toLowerCase() ?? "";
-  if (type === "gol" || type === "goal") return "⚽";
+  const sx = { color: eventColor(ev), fontSize: 16, flexShrink: 0, mt: 0.15 };
+  if (type === "gol" || type === "goal") return <SportsSoccerIcon sx={sx} />;
   if (type === "cartão" || type === "card") {
-    if (detail.includes("vermelho") || detail.includes("red")) return "🔴";
-    return "🟡";
+    return <SquareIcon sx={sx} />;
   }
-  if (detail.includes("falta") || detail.includes("foul")) return "🦵";
-  if (type === "substituição" || type === "subst") return "🔄";
-  if (type === "var") return "📺";
-  return "📋";
+  if (detail.includes("falta") || detail.includes("foul")) return <ReportProblemOutlinedIcon sx={sx} />;
+  if (type === "substituição" || type === "subst") return <CompareArrowsIcon sx={sx} />;
+  if (type === "var") return <TvIcon sx={sx} />;
+  return <DescriptionOutlinedIcon sx={sx} />;
 }
 
 function eventLabel(ev: FixtureEvent) {
   const type = (ev.type as string)?.toLowerCase() ?? "";
   const detail = ev.detail?.toLowerCase() ?? "";
-  if (type === "gol" || type === "goal") return `⚽ GOOOOL! ${ev.team.name.toUpperCase()}!`;
-  if ((type === "cartão" || type === "card") && (detail.includes("vermelho") || detail.includes("red"))) return "🔴 Cartão Vermelho";
-  if (type === "cartão" || type === "card") return "🟡 Cartão Amarelo";
-  if (detail.includes("falta") || detail.includes("foul")) return "🦵 Falta";
-  if (type === "substituição" || type === "subst") return "🔄 Substituição";
+  if (type === "gol" || type === "goal") return `GOOOOL! ${ev.team.name.toUpperCase()}!`;
+  if ((type === "cartão" || type === "card") && (detail.includes("vermelho") || detail.includes("red"))) return "Cartão vermelho";
+  if (type === "cartão" || type === "card") return "Cartão amarelo";
+  if (detail.includes("falta") || detail.includes("foul")) return "Falta";
+  if (type === "substituição" || type === "subst") return "Substituição";
   return ev.detail;
 }
 
 function eventColor(ev: FixtureEvent) {
   const type = (ev.type as string)?.toLowerCase() ?? "";
   const detail = ev.detail?.toLowerCase() ?? "";
-  if (type === "gol" || type === "goal") return "#1b5e20";
-  if ((type === "cartão" || type === "card") && (detail.includes("vermelho") || detail.includes("red"))) return "#009440";
-  if (type === "cartão" || type === "card") return "#009440";
-  return "#111";
+  if (type === "gol" || type === "goal") return "#31E46A";
+  if ((type === "cartão" || type === "card") && (detail.includes("vermelho") || detail.includes("red"))) return "#E8175D";
+  if (type === "cartão" || type === "card") return "#FFD100";
+  return "rgba(255,255,255,0.72)";
 }
 
 // ─── StatusChip ───────────────────────────────────────────────────────────────
@@ -159,7 +165,7 @@ function StatusChip({ fixture }: { fixture: BrazilFixture }) {
         label={fixture.fixture.status.elapsed ? `${fixture.fixture.status.elapsed}'` : "AO VIVO"}
         size="small"
         sx={{
-          bgcolor: "#009440", color: "#fff", fontWeight: 800, fontSize: 10, height: 20,
+          bgcolor: "#008542", color: "#fff", fontWeight: 800, fontSize: 10, height: 20,
           animation: "blink 1.4s ease-in-out infinite",
           "@keyframes blink": { "0%": { opacity: 1 }, "50%": { opacity: 0.65 }, "100%": { opacity: 1 } },
         }}
@@ -171,7 +177,7 @@ function StatusChip({ fixture }: { fixture: BrazilFixture }) {
       <Chip
         label="Encerrado"
         size="small"
-        sx={{ bgcolor: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.5)", fontWeight: 600, fontSize: 10, height: 20 }}
+        sx={{ bgcolor: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)", fontWeight: 600, fontSize: 10, height: 20 }}
       />
     );
   }
@@ -180,7 +186,7 @@ function StatusChip({ fixture }: { fixture: BrazilFixture }) {
     <Chip
       label={`${date} · ${time}`}
       size="small"
-      sx={{ bgcolor: "rgba(0,148,64,0.1)", color: "#009440", fontWeight: 700, fontSize: 10, height: 20 }}
+      sx={{ bgcolor: "rgba(0,133,66,0.12)", color: "#008542", fontWeight: 700, fontSize: 10, height: 20 }}
     />
   );
 }
@@ -195,16 +201,16 @@ function ScoreDisplay({ fixture }: { fixture: BrazilFixture }) {
   if (live || done) {
     return (
       <Box sx={{ textAlign: "center" }}>
-        <Typography sx={{ fontSize: 30, fontWeight: 900, color: live ? "#009440" : "#111", letterSpacing: 3 }}>
+        <Typography sx={{ fontSize: 30, fontWeight: 900, color: live ? "#008542" : "#FFD100", letterSpacing: 3 }}>
           {home ?? 0} x {away ?? 0}
         </Typography>
         {live && (
-          <Typography sx={{ fontSize: 9, color: "#009440", fontWeight: 800 }}>
+          <Typography sx={{ fontSize: 9, color: "#008542", fontWeight: 800 }}>
             {fixture.fixture.status.elapsed ? `${fixture.fixture.status.elapsed}'` : "AO VIVO"}
           </Typography>
         )}
         {done && (
-          <Typography sx={{ fontSize: 9, color: "rgba(0,0,0,0.45)" }}>Encerrado</Typography>
+          <Typography sx={{ fontSize: 9, color: "rgba(255,255,255,0.45)" }}>Encerrado</Typography>
         )}
       </Box>
     );
@@ -213,10 +219,10 @@ function ScoreDisplay({ fixture }: { fixture: BrazilFixture }) {
   const { time } = formatDate(fixture.fixture.date);
   return (
     <Box sx={{ textAlign: "center" }}>
-      <Box sx={{ bgcolor: "rgba(0,148,64,0.1)", borderRadius: 2, px: 1.5, py: 0.8, mb: 0.5 }}>
-        <Typography sx={{ fontSize: 14, fontWeight: 900, color: "#009440", letterSpacing: 2 }}>VS</Typography>
+      <Box sx={{ bgcolor: "rgba(0,133,66,0.12)", borderRadius: 2, px: 1.5, py: 0.8, mb: 0.5 }}>
+        <Typography sx={{ fontSize: 14, fontWeight: 900, color: "#008542", letterSpacing: 2 }}>VS</Typography>
       </Box>
-      <Typography sx={{ fontSize: 10, color: "rgba(0,0,0,0.45)", fontWeight: 600 }}>{time}</Typography>
+      <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.45)", fontWeight: 600 }}>{time}</Typography>
     </Box>
   );
 }
@@ -241,10 +247,10 @@ function GameCard({
     <Box
       onClick={onClick}
       sx={{
-        mb: 2, borderRadius: 3, overflow: "hidden", cursor: "pointer",
-        border: "1px solid rgba(0,0,0,0.1)",
-        boxShadow: "0 1px 6px rgba(0,0,0,0.08)",
-        bgcolor: "#FFFFFF",
+        mb: 2, borderRadius: CAZE_RADIUS.md, overflow: "hidden", cursor: "pointer",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.32)",
+        bgcolor: "#151c2e",
+        border: "1px solid rgba(255,255,255,0.08)",
         "&:active": { transform: "scale(0.985)" },
         transition: "all 0.15s",
       }}
@@ -253,17 +259,17 @@ function GameCard({
       <Box
         sx={{
           px: 2, py: 0.8,
-          background: index === 0 ? "linear-gradient(90deg, #e8f5e9, #c8e6c9)" : "#f5f5f5",
+          background: index === 0 ? "rgba(0,133,66,0.12)" : "#1A1A2E",
           display: "flex", alignItems: "center", justifyContent: live ? "center" : "space-between",
         }}
       >
         {live ? (
-          <Typography sx={{ fontSize: 10, fontWeight: 800, color: "#009440", letterSpacing: 1 }}>
+          <Typography sx={{ fontSize: 10, fontWeight: 800, color: "#008542", letterSpacing: 1 }}>
             JOGO AO VIVO
           </Typography>
         ) : (
           <>
-            <Typography sx={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.7)", letterSpacing: 0.5 }}>
+            <Typography sx={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.72)", letterSpacing: 0.5 }}>
               {PHASE_LABEL[phase]}
             </Typography>
             <StatusChip fixture={fixture} />
@@ -275,30 +281,30 @@ function GameCard({
       <Box sx={{ px: 2, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0.8 }}>
           <FlagImage name={home.name} size={56} />
-          <Typography sx={{ fontSize: 12, fontWeight: 800, color: "#111", textAlign: "center" }}>{home.name}</Typography>
+          <Typography sx={{ fontSize: 12, fontWeight: 800, color: "#FFFFFF", textAlign: "center" }}>{home.name}</Typography>
         </Box>
         <Box sx={{ flex: "0 0 auto", px: 2 }}>
           <ScoreDisplay fixture={fixture} />
         </Box>
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0.8 }}>
           <FlagImage name={away.name} size={56} />
-          <Typography sx={{ fontSize: 12, fontWeight: 800, color: "#111", textAlign: "center" }}>{away.name}</Typography>
+          <Typography sx={{ fontSize: 12, fontWeight: 800, color: "#FFFFFF", textAlign: "center" }}>{away.name}</Typography>
         </Box>
       </Box>
 
       {/* Footer */}
-      <Box sx={{ px: 2, py: 0.8, borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Box sx={{ px: 2, py: 0.8, borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.4 }}>
-          <LocationOnIcon sx={{ fontSize: 11, color: "rgba(0,0,0,0.35)" }} />
-          <Typography sx={{ fontSize: 10, color: "rgba(0,0,0,0.35)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <LocationOnIcon sx={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }} />
+          <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.35)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {fixture.fixture.venue.name}, {fixture.fixture.venue.city}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
-          <Typography sx={{ fontSize: 10, color: live ? "#009440" : "#009440", fontWeight: 700 }}>
+          <Typography sx={{ fontSize: 10, color: "#008542", fontWeight: 700 }}>
             {live ? "Ver ao vivo" : "Ver detalhes"}
           </Typography>
-          <ChevronRightIcon sx={{ fontSize: 13, color: live ? "#009440" : "#009440" }} />
+          <ChevronRightIcon sx={{ fontSize: 13, color: "#008542" }} />
         </Box>
       </Box>
     </Box>
@@ -375,10 +381,10 @@ function StandingsTable({
     rowBorder: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
     rank: dark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
     name: dark ? "#fff" : "#111",
-    brazilName: dark ? "#009440" : "#8a6500",
+    brazilName: dark ? "#008542" : "#8a6500",
     val: dark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)",
     pts: dark ? "#fff" : "#111",
-    brazilPts: dark ? "#009440" : "#8a6500",
+    brazilPts: dark ? "#008542" : "#8a6500",
     dash: dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.25)",
   };
 
@@ -476,79 +482,77 @@ function EventsDrawer({
       {/* Handle + header */}
       <Box
         sx={{
-          px: 2, pt: 1.5, pb: 1, bgcolor: "#fff",
+          px: 2, pt: 1.5, pb: 1, bgcolor: "#151c2e",
           position: "sticky", top: 0, zIndex: 1,
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
         }}
       >
-        <Box sx={{ width: 40, height: 4, bgcolor: "rgba(0,0,0,0.1)", borderRadius: 2, mx: "auto", mb: 1.5 }} />
+        <Box sx={{ width: 40, height: 4, bgcolor: "rgba(255,255,255,0.12)", borderRadius: 2, mx: "auto", mb: 1.5 }} />
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography sx={{ fontSize: 15, fontWeight: 800, color: "#111" }}>
+              <Typography sx={{ fontSize: 15, fontWeight: 800, color: "#FFFFFF" }}>
                 {live ? "Ao vivo agora" : "Resumo da partida"}
               </Typography>
               {live && (
                 <Box sx={{
                   display: "flex", alignItems: "center", gap: 0.5,
-                  bgcolor: "rgba(0,148,64,0.1)", borderRadius: 1, px: 0.8, py: 0.2,
+                  bgcolor: "rgba(0,133,66,0.15)", borderRadius: 1, px: 0.8, py: 0.2,
                 }}>
                   <Box sx={{
-                    width: 6, height: 6, borderRadius: "50%", bgcolor: "#009440",
+                    width: 6, height: 6, borderRadius: "50%", bgcolor: "#008542",
                     animation: "blink 1.2s ease-in-out infinite",
                     "@keyframes blink": { "0%": { opacity: 1 }, "50%": { opacity: 0.2 }, "100%": { opacity: 1 } },
                   }} />
-                  <Typography sx={{ fontSize: 9, color: "#009440", fontWeight: 800 }}>AO VIVO</Typography>
+                  <Typography sx={{ fontSize: 9, color: "#008542", fontWeight: 800 }}>AO VIVO</Typography>
                 </Box>
               )}
             </Box>
-            <Typography sx={{ fontSize: 11, color: "rgba(0,0,0,0.45)" }}>
+            <Typography sx={{ fontSize: 11, color: "rgba(255,255,255,0.45)" }}>
               {fixture.league.round} · Copa do Mundo 2026
             </Typography>
           </Box>
-          <IconButton onClick={onClose} size="small" sx={{ bgcolor: "rgba(0,0,0,0.06)" }}>
-            <CloseIcon fontSize="small" sx={{ color: "rgba(0,0,0,0.6)" }} />
+          <IconButton onClick={onClose} size="small" sx={{ bgcolor: "rgba(255,255,255,0.08)" }}>
+            <CloseIcon fontSize="small" sx={{ color: "rgba(255,255,255,0.6)" }} />
           </IconButton>
         </Box>
       </Box>
 
-      <Box sx={{ overflowY: "auto", p: 2, bgcolor: "#fff", flex: 1 }}>
+      <Box sx={{ overflowY: "auto", p: 2, bgcolor: "#151c2e", flex: 1 }}>
         {/* Placar */}
         <Box
           sx={{
-            background: live
-              ? "linear-gradient(135deg, #fff5f5, #ffe8e8)"
-              : "linear-gradient(135deg, #f5f5f5, #eeeeee)",
-            borderRadius: 3, p: 2.5, mb: 3,
-            border: `1px solid ${live ? "rgba(0,148,64,0.2)" : "rgba(0,0,0,0.07)"}`,
+            background: live ? "rgba(232,23,93,0.08)" : "#1A1A2E",
+            borderRadius: CAZE_RADIUS.md, p: 2.5, mb: 3,
+            border: `1px solid ${live ? "rgba(232,23,93,0.2)" : "rgba(255,255,255,0.08)"}`,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
               <FlagImage name={home.name} size={68} />
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#111" }}>{home.name}</Typography>
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF" }}>{home.name}</Typography>
             </Box>
             <Box sx={{ textAlign: "center", px: 2 }}>
-              <Typography sx={{ fontSize: 40, fontWeight: 900, color: live ? "#009440" : "#111", letterSpacing: 4 }}>
+              <Typography sx={{ fontSize: 40, fontWeight: 900, color: live ? "#008542" : "#FFD100", letterSpacing: 4 }}>
                 {fixture.goals.home ?? 0} x {fixture.goals.away ?? 0}
               </Typography>
               {live && (
-                <Typography sx={{ fontSize: 11, color: "#009440", fontWeight: 800 }}>
+                <Typography sx={{ fontSize: 11, color: "#008542", fontWeight: 800 }}>
                   AO VIVO · {fixture.fixture.status.elapsed}'
                 </Typography>
               )}
               {isFinished(fixture) && (
-                <Typography sx={{ fontSize: 10, color: "rgba(0,0,0,0.4)" }}>Encerrado</Typography>
+                <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.45)" }}>Encerrado</Typography>
               )}
             </Box>
             <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
               <FlagImage name={away.name} size={68} />
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#111" }}>{away.name}</Typography>
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF" }}>{away.name}</Typography>
             </Box>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, mt: 1.5 }}>
-            <LocationOnIcon sx={{ fontSize: 11, color: "rgba(0,0,0,0.35)" }} />
-            <Typography sx={{ fontSize: 10, color: "rgba(0,0,0,0.4)" }}>
+            <LocationOnIcon sx={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }} />
+            <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
               {fixture.fixture.venue.name}, {fixture.fixture.venue.city}
             </Typography>
           </Box>
@@ -558,25 +562,25 @@ function EventsDrawer({
         {loading ? (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} variant="rectangular" height={42} sx={{ bgcolor: "rgba(0,0,0,0.05)", borderRadius: 1.5 }} />
+              <Skeleton key={i} variant="rectangular" height={42} sx={{ bgcolor: "rgba(255,255,255,0.06)", borderRadius: 1.5 }} />
             ))}
           </Box>
         ) : events.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 5 }}>
-            <SportsSoccerIcon sx={{ fontSize: 40, color: "rgba(0,0,0,0.1)", mb: 1 }} />
-            <Typography sx={{ color: "rgba(0,0,0,0.4)", fontSize: 13 }}>
+            <SportsSoccerIcon sx={{ fontSize: 40, color: "rgba(255,255,255,0.12)", mb: 1 }} />
+            <Typography sx={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
               {live ? "Aguardando eventos…" : "Sem eventos registrados"}
             </Typography>
           </Box>
         ) : (
           <Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <Box sx={{ width: 4, height: 16, bgcolor: "#009440", borderRadius: 1 }} />
-              <Typography sx={{ fontSize: 13, fontWeight: 800, color: "#111" }}>Eventos da partida</Typography>
+              <Box sx={{ width: 4, height: 16, bgcolor: "#008542", borderRadius: 1 }} />
+              <Typography sx={{ fontSize: 13, fontWeight: 800, color: "#FFFFFF" }}>Eventos da partida</Typography>
             </Box>
             <Box sx={{ position: "relative" }}>
               {/* Linha vertical */}
-              <Box sx={{ position: "absolute", left: 30, top: 0, bottom: 0, width: 2, bgcolor: "rgba(0,0,0,0.06)", zIndex: 0 }} />
+              <Box sx={{ position: "absolute", left: 30, top: 0, bottom: 0, width: 2, bgcolor: "rgba(255,255,255,0.08)", zIndex: 0 }} />
               {events.map((ev, i) => (
                 <Box key={i} sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, mb: 1.5, position: "relative", zIndex: 1 }}>
                   <Box sx={{ width: 40, flexShrink: 0, textAlign: "right" }}>
@@ -585,15 +589,18 @@ function EventsDrawer({
                     </Typography>
                   </Box>
                   <Box sx={{ flex: 1, pt: 0.3 }}>
-                    <Typography sx={{
-                      fontSize: 13,
-                      fontWeight: 800,
-                      color: eventColor(ev),
-                      lineHeight: 1.3,
-                    }}>
-                      {eventLabel(ev)}
-                    </Typography>
-                    <Typography sx={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.55)", mt: 0.3 }}>
+                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.75 }}>
+                      <EventTypeIcon ev={ev} />
+                      <Typography sx={{
+                        fontSize: 13,
+                        fontWeight: 800,
+                        color: eventColor(ev),
+                        lineHeight: 1.3,
+                      }}>
+                        {eventLabel(ev)}
+                      </Typography>
+                    </Box>
+                    <Typography sx={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.55)", mt: 0.3 }}>
                       {ev.player.name}
                       {ev.assist?.name ? ` · assist: ${ev.assist.name}` : ""}
                     </Typography>
@@ -609,14 +616,14 @@ function EventsDrawer({
 
         {/* ─── Tabela de classificação ──────────────────────────────── */}
         <Box sx={{ mb: 3 }}>
-          <StandingsTable standings={standings} grupoFixtures={fixturesByPhase["grupos"] ?? []} />
+          <StandingsTable standings={standings} grupoFixtures={fixturesByPhase["grupos"] ?? []} dark />
         </Box>
 
         {/* ─── Fase eliminatória ────────────────────────────────────── */}
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
             <Box sx={{ width: 4, height: 16, bgcolor: "#ff9800", borderRadius: 1 }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 800, color: "#111" }}>Fase eliminatória</Typography>
+            <Typography sx={{ fontSize: 13, fontWeight: 800, color: "#FFFFFF" }}>Fase eliminatória</Typography>
           </Box>
           {ELIM_PHASES.map((p) => {
             const count = fixturesByPhase[p.key]?.length ?? 0;
@@ -626,22 +633,22 @@ function EventsDrawer({
                 onClick={() => onPhaseSelect(p.key)}
                 sx={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
-                  px: 1.5, py: 1.2, mb: 0.5, borderRadius: 2, cursor: "pointer",
-                  bgcolor: "rgba(0,0,0,0.03)",
-                  border: "1px solid rgba(0,0,0,0.07)",
+                  px: 1.5, py: 1.2, mb: 0.5, borderRadius: CAZE_RADIUS.sm, cursor: "pointer",
+                  bgcolor: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
                   "&:active": { transform: "scale(0.98)" },
                   transition: "all 0.15s",
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#111" }}>{PHASE_LABEL[p.key]}</Typography>
+                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#FFFFFF" }}>{PHASE_LABEL[p.key]}</Typography>
                   {count === 0 ? (
-                    <Chip label="Em breve" size="small" sx={{ height: 18, fontSize: 9, bgcolor: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.45)" }} />
+                    <Chip label="Em breve" size="small" sx={{ height: 18, fontSize: 9, bgcolor: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)" }} />
                   ) : (
-                    <Chip label={`${count} ${count === 1 ? "jogo" : "jogos"}`} size="small" sx={{ height: 18, fontSize: 9, bgcolor: "rgba(0,148,64,0.1)", color: "#8a6500" }} />
+                    <Chip label={`${count} ${count === 1 ? "jogo" : "jogos"}`} size="small" sx={{ height: 18, fontSize: 9, bgcolor: "rgba(0,133,66,0.15)", color: "#FFD100" }} />
                   )}
                 </Box>
-                <ChevronRightIcon sx={{ fontSize: 16, color: "rgba(0,0,0,0.3)" }} />
+                <ChevronRightIcon sx={{ fontSize: 16, color: "rgba(255,255,255,0.3)" }} />
               </Box>
             );
           })}
@@ -783,9 +790,9 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
   if (loading) {
     return (
       <Box sx={{ px: 2, pb: 4 }}>
-        <Skeleton variant="rectangular" height={36} sx={{ bgcolor: "rgba(0,0,0,0.06)", borderRadius: 1, mb: 3, width: "60%" }} />
+        <Skeleton variant="rectangular" height={36} sx={{ bgcolor: "rgba(255,255,255,0.06)", borderRadius: 1, mb: 3, width: "60%" }} />
         {[1, 2, 3].map((i) => (
-          <Skeleton key={i} variant="rectangular" height={130} sx={{ bgcolor: "rgba(0,0,0,0.06)", borderRadius: 2, mb: 2 }} />
+          <Skeleton key={i} variant="rectangular" height={130} sx={{ bgcolor: "rgba(255,255,255,0.06)", borderRadius: CAZE_RADIUS.md, mb: 2 }} />
         ))}
       </Box>
     );
@@ -795,8 +802,8 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
   if (fixtures.length === 0) {
     return (
       <Box sx={{ px: 2, pb: 4, textAlign: "center", pt: 8 }}>
-        <SportsSoccerIcon sx={{ fontSize: 52, color: "rgba(0,0,0,0.1)", mb: 1.5 }} />
-        <Typography sx={{ color: "rgba(0,0,0,0.45)", fontSize: 14 }}>
+        <SportsSoccerIcon sx={{ fontSize: 52, color: "rgba(255,255,255,0.12)", mb: 1.5 }} />
+        <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: 14 }}>
           Jogos da Copa do Mundo 2026 em breve
         </Typography>
       </Box>
@@ -810,18 +817,18 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
       <Box sx={{ px: 2, mb: 2 }}>
         {/* Título */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-          <SportsSoccerIcon sx={{ color: "#009440", fontSize: 18 }} />
+          <SportsSoccerIcon sx={{ color: "#008542", fontSize: 18 }} />
           <Box>
-            <Typography sx={{ fontSize: 10, color: "#009440", fontWeight: 700, letterSpacing: 1.2 }}>
+            <Typography sx={{ fontSize: 10, color: "#008542", fontWeight: 700, letterSpacing: 1.2 }}>
               COPA DO MUNDO 2026
             </Typography>
-            <Typography sx={{ fontSize: 15, fontWeight: 900, color: "#111", lineHeight: 1.2 }}>
+            <Typography sx={{ fontSize: 15, fontWeight: 900, color: "#FFFFFF", lineHeight: 1.2 }}>
               Seleção Brasileira
             </Typography>
           </Box>
           <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1 }}>
             {displayStats && (
-              <Typography sx={{ fontSize: 10, color: "rgba(0,0,0,0.5)", fontWeight: 600 }}>
+              <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.45)", fontWeight: 600 }}>
                 Grupo {displayStats.grupo}
               </Typography>
             )}
@@ -832,12 +839,12 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
                 sx={{
                   display: "flex", alignItems: "center", gap: 0.5,
                   px: 1, py: 0.4, borderRadius: 1.5, cursor: mockLoading ? "default" : "pointer",
-                  bgcolor: "rgba(0,148,64,0.2)", border: "1px solid rgba(0,148,64,0.5)",
+                  bgcolor: "rgba(0,133,66,0.2)", border: "1px solid rgba(0,133,66,0.5)",
                   "&:active": { transform: "scale(0.93)" }, opacity: mockLoading ? 0.5 : 1,
                 }}
               >
-                <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#009440", animation: "blink 1.2s ease-in-out infinite", "@keyframes blink": { "0%": { opacity: 1 }, "50%": { opacity: 0.2 }, "100%": { opacity: 1 } } }} />
-                <Typography sx={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: "#009440" }}>AO VIVO</Typography>
+                <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#008542", animation: "blink 1.2s ease-in-out infinite", "@keyframes blink": { "0%": { opacity: 1 }, "50%": { opacity: 0.2 }, "100%": { opacity: 1 } } }} />
+                <Typography sx={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: "#008542" }}>AO VIVO</Typography>
               </Box>
             ) : isAdmin ? (
               <Box
@@ -845,12 +852,12 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
                 sx={{
                   display: "flex", alignItems: "center", gap: 0.5,
                   px: 1, py: 0.4, borderRadius: 1.5, cursor: mockLoading ? "default" : "pointer",
-                  bgcolor: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.1)",
+                  bgcolor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
                   "&:active": { transform: "scale(0.93)" }, opacity: mockLoading ? 0.5 : 1,
                 }}
               >
-                <Box sx={{ width: 5, height: 5, borderRadius: "50%", bgcolor: "rgba(0,0,0,0.25)", flexShrink: 0 }} />
-                <Typography sx={{ fontSize: 7, fontWeight: 700, letterSpacing: 0.3, color: "rgba(0,0,0,0.45)", whiteSpace: "nowrap" }}>SIMULAR AO VIVO</Typography>
+                <Box sx={{ width: 5, height: 5, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
+                <Typography sx={{ fontSize: 7, fontWeight: 700, letterSpacing: 0.3, color: "rgba(255,255,255,0.45)", whiteSpace: "nowrap" }}>SIMULAR AO VIVO</Typography>
               </Box>
             ) : null}
           </Box>
@@ -868,13 +875,13 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
               key={s.label}
               sx={{
                 flex: 1, textAlign: "center",
-                bgcolor: "rgba(0,0,0,0.04)",
-                borderRadius: 2, py: 0.9,
-                border: "1px solid rgba(0,0,0,0.07)",
+                bgcolor: "rgba(255,255,255,0.04)",
+                borderRadius: CAZE_RADIUS.sm, py: 0.9,
+                border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
-              <Typography sx={{ fontSize: 18, fontWeight: 900, color: "#009440" }}>{s.value}</Typography>
-              <Typography sx={{ fontSize: 9, color: "rgba(0,0,0,0.5)", fontWeight: 600, mt: 0.1 }}>{s.label}</Typography>
+              <Typography sx={{ fontSize: 18, fontWeight: 900, color: "#008542" }}>{s.value}</Typography>
+              <Typography sx={{ fontSize: 9, color: "rgba(255,255,255,0.45)", fontWeight: 600, mt: 0.1 }}>{s.label}</Typography>
             </Box>
           ))}
         </Box>
@@ -885,7 +892,7 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
         <Box
           onClick={() => setSelectedFixture(liveFixtures[0])}
           sx={{
-            mx: 2, mb: 2, px: 2, py: 1.2, borderRadius: 2.5, cursor: "pointer",
+            mx: 2, mb: 2, px: 2, py: 1.2, borderRadius: CAZE_RADIUS.md, cursor: "pointer",
             background: "linear-gradient(90deg, #006630, #009440)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}
@@ -917,7 +924,7 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
       )}
 
       {/* Tabs de fase */}
-      <Box sx={{ borderBottom: "1px solid rgba(0,0,0,0.08)", mb: 2 }}>
+      <Box sx={{ borderBottom: "1px solid rgba(255,255,255,0.08)", mb: 2 }}>
         <Box sx={{ display: "flex", overflowX: "auto", "&::-webkit-scrollbar": { display: "none" } }}>
           {availablePhases.map((p) => {
             const active = activePhase === p.key;
@@ -928,14 +935,14 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
                 onClick={() => setActivePhase(p.key)}
                 sx={{
                   flex: "0 0 auto", px: 2.5, py: 1.2, cursor: "pointer", textAlign: "center",
-                  borderBottom: active ? "2px solid #009440" : "2px solid transparent",
+                  borderBottom: active ? "2px solid #008542" : "2px solid transparent",
                   transition: "border-color 0.2s",
                 }}
               >
-                <Typography sx={{ fontSize: 13, fontWeight: active ? 800 : 500, color: active ? "#009440" : "rgba(0,0,0,0.45)", whiteSpace: "nowrap" }}>
+                <Typography sx={{ fontSize: 13, fontWeight: active ? 800 : 500, color: active ? "#008542" : "rgba(255,255,255,0.45)", whiteSpace: "nowrap" }}>
                   {p.label}
                 </Typography>
-                <Typography sx={{ fontSize: 9, color: active ? "#009440" : "rgba(0,0,0,0.35)", fontWeight: 600 }}>
+                <Typography sx={{ fontSize: 9, color: active ? "#008542" : "rgba(255,255,255,0.35)", fontWeight: 600 }}>
                   {count > 0 ? `${count} ${count === 1 ? "jogo" : "jogos"}` : "em breve"}
                 </Typography>
               </Box>
@@ -948,16 +955,16 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
       <Box sx={{ px: 2 }}>
         {displayFixtures.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 8, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <Typography sx={{ fontSize: 48, lineHeight: 1 }}>🇧🇷</Typography>
+            <SportsSoccerIcon sx={{ fontSize: 48, color: "#008542" }} />
             <Box>
-              <Typography sx={{ color: "#009440", fontSize: 16, fontWeight: 900, letterSpacing: 0.5 }}>
+              <Typography sx={{ color: "#008542", fontSize: 16, fontWeight: 900, letterSpacing: 0.5 }}>
                 É HEXA, BRASIL!
               </Typography>
-              <Typography sx={{ color: "rgba(0,0,0,0.55)", fontSize: 13, mt: 0.5 }}>
+              <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: 13, mt: 0.5 }}>
                 Aguardando os jogos da {PHASE_LABEL[activePhase]}
               </Typography>
             </Box>
-            <Typography sx={{ color: "rgba(0,0,0,0.35)", fontSize: 12, maxWidth: 220 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.35)", fontSize: 12, maxWidth: 220 }}>
               Os classificados serão definidos conforme a Copa avança. Torça muito!
             </Typography>
           </Box>
@@ -975,7 +982,7 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
       {/* Tabela de classificação — visível no tab Grupos */}
       {activePhase === "grupos" && (
         <Box sx={{ px: 2, mt: 1, mb: 2 }}>
-          <StandingsTable standings={displayStandings} grupoFixtures={fixturesByPhase["grupos"] ?? []} />
+          <StandingsTable standings={displayStandings} grupoFixtures={fixturesByPhase["grupos"] ?? []} dark />
         </Box>
       )}
 
@@ -987,12 +994,12 @@ export default function WorldCupGames({ eventId: _eventId }: Props) {
         sx={{ zIndex: 10000 }}
         PaperProps={{
           sx: {
-            borderRadius: "20px 20px 0 0",
+            borderRadius: `${CAZE_RADIUS.md} ${CAZE_RADIUS.md} 0 0`,
             maxHeight: "90vh",
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
-            bgcolor: "#fff",
+            bgcolor: "#151c2e",
           },
         }}
       >

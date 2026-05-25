@@ -87,21 +87,29 @@ export const TYPOGRAPHY = {
 
 /** Superfície vidro fosco — header e corpo da home */
 export const PAGE_GLASS_SURFACE = {
-  backgroundColor: "rgba(255, 255, 255, 0.08)",
-  backdropFilter: "blur(12px) saturate(1.15)",
-  WebkitBackdropFilter: "blur(12px) saturate(1.15)",
-  borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-  boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.65)",
+  backgroundColor: "rgba(27, 61, 232, 0.06)",
+  backdropFilter: "blur(12px) saturate(1.3)",
+  WebkitBackdropFilter: "blur(12px) saturate(1.3)",
+  borderBottom: "1px solid rgba(27, 61, 232, 0.15)",
+  boxShadow: "inset 0 1px 0 rgba(27, 61, 232, 0.10)",
+} as const;
+
+/** Azul canarinho — glows e sombras para elementos de destaque Copa */
+export const BLUE_COPA_GLOW = {
+  light: "0 0 14px rgba(27, 61, 232, 0.35)",
+  medium: "0 0 20px rgba(27, 61, 232, 0.50), 0 0 40px rgba(27, 61, 232, 0.15)",
+  border: "1px solid rgba(27, 61, 232, 0.30)",
+  borderStrong: "1px solid rgba(27, 61, 232, 0.60)",
 } as const;
 
 /** Vidro da BottomNav — reutilizar em header/comentários do post */
 export const NAV_DOCK_GLASS = {
   blurPx: 20,
-  fillAlpha: 0.32,
-  fillRgb: "255, 255, 255",
-  saturate: 1.1,
-  border: "1px solid rgba(0, 0, 0, 0.08)",
-  shadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  fillAlpha: 0.92,
+  fillRgb: "21, 28, 46",
+  saturate: 1.4,
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  shadow: "0 -2px 16px rgba(0, 0, 0, 0.35), 0 8px 32px rgba(0, 0, 0, 0.40)",
 } as const;
 
 /** `sx` do FrostedGlass alinhado à navbar */
@@ -123,27 +131,27 @@ export const LIQUID_GLASS_ALPHA = {
 } as const;
 
 export const COLORS = {
-  // Backgrounds
-  bg:          "#FFF6E8",
-  bgDark:      "#282828",
-  surface:     "#FFFFFF",
-  surfaceDark: "#363636",
+  // Backgrounds — dark theme
+  bg:          "#0A1128",
+  bgDark:      "#0A1128",
+  surface:     "#151c2e",
+  surfaceDark: "#151c2e",
 
   // Marca
-  green:    "#009440",
-  yellow:   "#F6C400",
-  red:      "#E52554",
-  blue:     "#173BFF",    // broadcast blue — headlines, banners, match day
+  green:    "#008542",
+  yellow:   "#FFD100",
+  red:      "#E8175D",
+  blue:     "#1B3DE8",    // broadcast blue — headlines, banners, match day
   blueCopa: "#0055B8",    // fundo de posts Copa (mantido separado)
   pink:     "#FF6FAE",    // stickers CTA, meme bubbles
   black:    "#000000",
 
-  // Texto — contexto claro (sobre #FFF6E8 / #FFFFFF)
-  muted:         "#6B6B6B",
-  text:          "#0A0A0A",
-  textSecondary: "rgba(0, 0, 0, 0.72)",
+  // Texto — dark theme (branco sobre fundo escuro)
+  muted:         "rgba(255, 255, 255, 0.45)",
+  text:          "#FFFFFF",
+  textSecondary: "rgba(255, 255, 255, 0.72)",
 
-  // Texto — contexto escuro (sobre imagens, overlays, fundos sólidos #282828+)
+  // Texto — aliases (mantidos para não quebrar componentes existentes)
   textOnDark:          "#FFFFFF",
   textSecondaryOnDark: "rgba(255, 255, 255, 0.70)",
   mutedOnDark:         "rgba(255, 255, 255, 0.45)",

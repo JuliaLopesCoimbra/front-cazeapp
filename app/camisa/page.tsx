@@ -6,6 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CheckroomIcon from "@mui/icons-material/Checkroom";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import {
   CamisetaSVG,
@@ -145,9 +146,18 @@ function ReservaDrawer({ open, onClose }: { open: boolean; onClose: () => void }
               "&:active": podeConfirmar ? { transform: "scale(0.98)" } : {},
             }}
           >
-            <Typography sx={{ fontSize: 16, fontWeight: 900, color: podeConfirmar ? "#fff" : "#aaa" }}>
-              {podeConfirmar ? "Confirmar Reserva ✓" : "Selecione modelo e tamanho"}
-            </Typography>
+            {podeConfirmar ? (
+              <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}>
+                <CheckCircleIcon sx={{ color: "#fff", fontSize: 18 }} />
+                <Typography sx={{ fontSize: 16, fontWeight: 900, color: "#fff" }}>
+                  Confirmar Reserva
+                </Typography>
+              </Box>
+            ) : (
+              <Typography sx={{ fontSize: 16, fontWeight: 900, color: "#aaa" }}>
+                Selecione modelo e tamanho
+              </Typography>
+            )}
           </Box>
         </Box>
       ) : (
@@ -245,9 +255,12 @@ export default function CamisetaPage() {
         <Typography sx={{ color: "#FEDF00", fontSize: 11, fontWeight: 700, letterSpacing: 1.5 }}>
           COPA DO MUNDO 2026
         </Typography>
-        <Typography sx={{ color: "#fff", fontSize: 22, fontWeight: 900, mt: 0.2 }}>
-          Camiseta Oficial 🇧🇷
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.2 }}>
+          <CheckroomIcon sx={{ color: "#FEDF00", fontSize: 24 }} />
+          <Typography sx={{ color: "#fff", fontSize: 22, fontWeight: 900 }}>
+            Camiseta Oficial
+          </Typography>
+        </Box>
         <Typography sx={{ color: "rgba(255,255,255,0.65)", fontSize: 12, mt: 0.3 }}>
           Guia de tamanhos e medidas
         </Typography>
@@ -385,9 +398,12 @@ export default function CamisetaPage() {
             "&:active": { transform: "scale(0.97)" },
           }}
         >
-          <Typography sx={{ fontSize: 16, fontWeight: 900, color: "#fff", letterSpacing: 0.5 }}>
-            👕  Reservar Camiseta
-          </Typography>
+          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+            <CheckroomIcon sx={{ color: "#fff", fontSize: 20 }} />
+            <Typography sx={{ fontSize: 16, fontWeight: 900, color: "#fff", letterSpacing: 0.5 }}>
+              Reservar Camiseta
+            </Typography>
+          </Box>
         </Box>
       </Box>
 

@@ -28,7 +28,7 @@ export function useScrollRestoration({
 
     const attemptRestore = () => {
       if (attemptCountRef.current >= maxAttempts) {
-        console.log("⚠️ Máximo de tentativas de restauração atingido");
+        console.log("Máximo de tentativas de restauração atingido");
         restoredRef.current = true;
         onRestored?.();
         return;
@@ -56,7 +56,7 @@ export function useScrollRestoration({
 
         // Verifica se conseguiu chegar perto do target (margem de 50px)
         if (Math.abs(newScroll - safeTarget) < 50) {
-          console.log(`✅ Scroll restaurado: ${newScroll}/${safeTarget}`);
+          console.log(`Scroll restaurado: ${newScroll}/${safeTarget}`);
           restoredRef.current = true;
           onRestored?.();
         } else {

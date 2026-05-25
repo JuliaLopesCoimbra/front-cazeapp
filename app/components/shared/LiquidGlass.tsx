@@ -77,8 +77,8 @@ interface LiquidGlassProps {
   containPaint?: boolean;
 }
 
-const GLOW_GREEN = "#009440";
-const GLOW_YELLOW = "#FFCB00";
+const GLOW_GREEN = "#008542";
+const GLOW_YELLOW = "#FFD100";
 const GLOW_GREEN_LIGHT = "#31E46A";
 
 /** Easing oficial Apple (WWDC). Usar em transitions de componentes glass. */
@@ -158,7 +158,7 @@ const PRESETS: Record<LiquidGlassPreset, Required<Pick<
     brightness: 1.05,
     displacement: false,
     glassAlpha: 0.12,
-    bgTint: "#009440",
+    bgTint: "#008542",
     innerHighlight: "soft",
     dropShadow: "none",
     specular: false,
@@ -395,7 +395,7 @@ export default function LiquidGlass({
       : {}),
     // Acessibilidade: fallback opaco quando o usuário pediu reduced-transparency.
     "@media (prefers-reduced-transparency: reduce)": {
-      backgroundColor: "rgba(54, 54, 54, 0.92)",
+      backgroundColor: "rgba(10, 17, 40, 0.96)",
       backdropFilter: "none",
       WebkitBackdropFilter: "none",
     },

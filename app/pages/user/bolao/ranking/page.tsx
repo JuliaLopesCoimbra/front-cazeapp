@@ -7,6 +7,7 @@ import TopBar from "@/app/components/layout/TopBar";
 import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
 import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import { LAYOUT } from "@/app/constants/designTokens";
+import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import { RankingTable } from "@/app/components/bolao/RankingTable";
 import { PointsBadge } from "@/app/components/shared/PointsBadge";
 import { useBolaoRanking, useBolaoMyPoints } from "@/app/hooks/useBolao";
@@ -184,12 +185,19 @@ function buildGameParticipants(game: MockGame): GameParticipant[] {
 // ── STATUS helpers ────────────────────────────────────────────────────────────
 
 const STATUS_LABEL: Record<string, string> = { exact: "Exato", outcome: "Resultado", wrong: "Errou" };
-const STATUS_COLOR: Record<string, string> = { exact: "#009440", outcome: "#0055B8", wrong: "#9E9E9E" };
+const STATUS_COLOR: Record<string, string> = { exact: "#008542", outcome: "#1B3DE8", wrong: "rgba(255,255,255,0.45)" };
 const STATUS_BG:    Record<string, string> = {
-  exact:   "rgba(0,148,64,0.1)",
-  outcome: "rgba(0,85,184,0.1)",
-  wrong:   "rgba(0,0,0,0.05)",
+  exact:   "rgba(0,133,66,0.14)",
+  outcome: "rgba(27,61,232,0.14)",
+  wrong:   "rgba(255,255,255,0.06)",
 };
+
+const GLASS_CARD = {
+  backgroundColor: "rgba(21,28,46,0.92)",
+  borderRadius: CAZE_RADIUS.md,
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
+} as const;
 
 // ── Por Jogo UI ───────────────────────────────────────────────────────────────
 
@@ -200,20 +208,20 @@ function GameParticipantRow({ p }: { p: GameParticipant }) {
         display: "flex",
         alignItems: "center",
         gap: 1.5,
-        backgroundColor: p.isMe ? "rgba(0,148,64,0.07)" : "rgba(255,255,255,0.55)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
-        borderRadius: "12px",
+        backgroundColor: p.isMe ? "rgba(0,133,66,0.12)" : "rgba(21,28,46,0.92)",
+        borderRadius: CAZE_RADIUS.md,
         px: 2,
         py: 1.25,
-        border: p.isMe ? "1px solid rgba(0,148,64,0.35)" : "1px solid rgba(0,0,0,0.07)",
+        border: p.isMe ? "1px solid rgba(0,133,66,0.4)" : "1px solid rgba(255,255,255,0.08)",
+        transition: "background-color 0.15s",
+        "&:hover": { backgroundColor: p.isMe ? "rgba(0,133,66,0.16)" : "rgba(255,255,255,0.04)" },
       }}
     >
       {/* rank */}
       <Typography
         sx={{
           minWidth: 24,
-          color: "#9E9E9E",
+          color: "rgba(255,255,255,0.45)",
           fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
           fontWeight: 700,
           fontSize: "0.8rem",
@@ -233,7 +241,7 @@ function GameParticipantRow({ p }: { p: GameParticipant }) {
       </Avatar>
 
       {/* nome */}
-      <Typography sx={{ flex: 1, color: p.isMe ? "#009440" : "#0A0A0A", fontWeight: p.isMe ? 700 : 500, fontSize: "0.875rem" }} noWrap>
+      <Typography sx={{ flex: 1, color: p.isMe ? "#008542" : "#FFFFFF", fontWeight: p.isMe ? 700 : 500, fontSize: "0.875rem" }} noWrap>
         {p.name}{p.isMe ? " (você)" : ""}
       </Typography>
 
@@ -309,17 +317,16 @@ function PerGameTab() {
               onClick={() => setSelectedId(g.id)}
               sx={{
                 flexShrink: 0,
-                backgroundColor: active ? "#009440" : "rgba(255,255,255,0.6)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-                borderRadius: "10px",
-                border: active ? "1px solid #009440" : "1px solid rgba(0,0,0,0.08)",
+                backgroundColor: active ? "rgba(255,255,255,0.14)" : "rgba(21,28,46,0.88)",
+                borderRadius: CAZE_RADIUS.sm,
+                border: active ? "1px solid rgba(255,255,255,0.22)" : "1px solid rgba(255,255,255,0.08)",
                 px: 1.5,
                 py: 1,
                 cursor: "pointer",
                 transition: "all 0.15s",
                 textAlign: "center",
                 minWidth: 96,
+                "&:hover": { backgroundColor: "rgba(255,255,255,0.04)" },
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, mb: 0.25 }}>
@@ -327,11 +334,11 @@ function PerGameTab() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={`https://flagcdn.com/w20/${GAME_CODES[g.home]}.png`} width={16} height={11} alt="" style={{ borderRadius: 1 }} />
                 )}
-                <Typography sx={{ color: active ? "#FFF" : "#0A0A0A", fontWeight: 700, fontSize: "0.68rem", lineHeight: 1.2 }}>
+                <Typography sx={{ color: active ? "#FFFFFF" : "rgba(255,255,255,0.72)", fontWeight: 700, fontSize: "0.68rem", lineHeight: 1.2 }}>
                   {g.home.split(" ")[0]}
                 </Typography>
               </Box>
-              <Typography sx={{ color: active ? "rgba(255,255,255,0.6)" : "#9E9E9E", fontSize: "0.58rem", lineHeight: 1.3 }}>
+              <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.58rem", lineHeight: 1.3 }}>
                 vs
               </Typography>
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, mt: 0.25 }}>
@@ -339,11 +346,11 @@ function PerGameTab() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={`https://flagcdn.com/w20/${GAME_CODES[g.away]}.png`} width={16} height={11} alt="" style={{ borderRadius: 1 }} />
                 )}
-                <Typography sx={{ color: active ? "rgba(255,255,255,0.7)" : "#6B6B6B", fontSize: "0.65rem" }}>
+                <Typography sx={{ color: active ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.45)", fontSize: "0.65rem" }}>
                   {g.away.split(" ")[0]}
                 </Typography>
               </Box>
-              <Typography sx={{ color: active ? "rgba(255,255,255,0.55)" : "#9E9E9E", fontSize: "0.55rem", mt: 0.5 }}>
+              <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.55rem", mt: 0.5 }}>
                 {g.date}
               </Typography>
             </Box>
@@ -354,11 +361,9 @@ function PerGameTab() {
       {/* card do resultado */}
       <Box
         sx={{
-          backgroundColor: "rgba(0,148,64,0.07)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          borderRadius: "14px",
-          border: "1px solid rgba(0,148,64,0.2)",
+          backgroundColor: "rgba(21,28,46,0.92)",
+          borderRadius: CAZE_RADIUS.md,
+          border: "1px solid rgba(0,133,66,0.25)",
           p: 2,
           mb: 2,
           display: "flex",
@@ -367,7 +372,7 @@ function PerGameTab() {
         }}
       >
         <Box sx={{ flex: 1 }}>
-          <Typography sx={{ color: "#6B6B6B", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>
             {game.round} · {game.date}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.5 }}>
@@ -375,22 +380,22 @@ function PerGameTab() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={`https://flagcdn.com/w20/${GAME_CODES[game.home]}.png`} width={20} height={14} alt="" style={{ borderRadius: 2 }} />
             )}
-            <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.9rem" }}>
+            <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.9rem" }}>
               {game.home}
             </Typography>
-            <Typography sx={{ color: "#9E9E9E", fontSize: "0.8rem" }}>×</Typography>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem" }}>×</Typography>
             {GAME_CODES[game.away] && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={`https://flagcdn.com/w20/${GAME_CODES[game.away]}.png`} width={20} height={14} alt="" style={{ borderRadius: 2 }} />
             )}
-            <Typography sx={{ color: "#0A0A0A", fontWeight: 700, fontSize: "0.9rem" }}>
+            <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.9rem" }}>
               {game.away}
             </Typography>
           </Box>
         </Box>
         <Typography
           sx={{
-            color: "#009440",
+            color: "#008542",
             fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
             fontWeight: 900,
             fontSize: "1.5rem",
@@ -403,11 +408,11 @@ function PerGameTab() {
 
       {/* cabeçalho da tabela */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, px: 2, mb: 1 }}>
-        <Typography sx={{ minWidth: 28, color: "#9E9E9E", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>#</Typography>
-        <Typography sx={{ flex: 1, color: "#9E9E9E", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>Participante</Typography>
-        <Typography sx={{ minWidth: 40, textAlign: "center", color: "#9E9E9E", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>Palpite</Typography>
-        <Typography sx={{ minWidth: 66, textAlign: "center", color: "#9E9E9E", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>Status</Typography>
-        <Typography sx={{ minWidth: 28, textAlign: "right", color: "#9E9E9E", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>Pts</Typography>
+        <Typography sx={{ minWidth: 28, color: "rgba(255,255,255,0.45)", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>#</Typography>
+        <Typography sx={{ flex: 1, color: "rgba(255,255,255,0.45)", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>Participante</Typography>
+        <Typography sx={{ minWidth: 40, textAlign: "center", color: "rgba(255,255,255,0.45)", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>Palpite</Typography>
+        <Typography sx={{ minWidth: 66, textAlign: "center", color: "rgba(255,255,255,0.45)", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>Status</Typography>
+        <Typography sx={{ minWidth: 28, textAlign: "right", color: "rgba(255,255,255,0.45)", fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>Pts</Typography>
       </Box>
 
       {/* linhas */}
@@ -442,14 +447,34 @@ export default function RankingPage() {
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
             minHeight: "100vh",
             pb: `${LAYOUT.bottomNavClearance}px`,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#0A1128",
           }}
         >
-          <TopBar title="Ranking" light />
+          <TopBar title="Ranking" />
 
           <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
+            <Box
+              sx={{
+                ...GLASS_CARD,
+                p: 2,
+                mb: 2,
+                background:
+                  "linear-gradient(135deg, rgba(245,201,0,0.18), rgba(21,28,46,0.96) 52%, rgba(0,85,184,0.22))",
+              }}
+            >
+              <Typography sx={{ color: "#F5C900", fontSize: "0.7rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                Bolão Casa CazéTV
+              </Typography>
+              <Typography sx={{ color: "#FFFFFF", fontFamily: '"Montserrat"', fontSize: "1.35rem", fontWeight: 900, lineHeight: 1.1, mt: 0.5 }}>
+                Quem tá mandando bem?
+              </Typography>
+              <Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.82rem", mt: 0.75 }}>
+                Acompanhe seus pontos, melhores palpites e posição geral.
+              </Typography>
+            </Box>
+
             {/* Posição geral */}
-            <Typography sx={{ color: "#6B6B6B", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 1 }}>
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 1 }}>
               Posição geral
             </Typography>
             <Box sx={{ mb: 2 }}>
@@ -457,8 +482,8 @@ export default function RankingPage() {
             </Box>
 
             {/* Bolões por jogo */}
-            <Typography sx={{ color: "#6B6B6B", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 1 }}>
-              Suas apostas
+            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", mb: 1 }}>
+              Seus palpites
             </Typography>
             <Box sx={{ display: "flex", gap: 1, mb: 3 }}>
               {MOCK_MY_HIGHLIGHTS.map((h) => (
@@ -466,11 +491,9 @@ export default function RankingPage() {
                   key={h.gameId}
                   sx={{
                     flex: 1,
-                    backgroundColor: h.status === "exact" ? "rgba(0,148,64,0.07)" : "rgba(0,85,184,0.06)",
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    borderRadius: "12px",
-                    border: h.status === "exact" ? "1px solid rgba(0,148,64,0.25)" : "1px solid rgba(0,85,184,0.2)",
+                    backgroundColor: "rgba(21,28,46,0.92)",
+                    borderRadius: CAZE_RADIUS.md,
+                    border: h.status === "exact" ? "1px solid rgba(0,133,66,0.3)" : "1px solid rgba(27,61,232,0.3)",
                     p: 1.5,
                   }}
                 >
@@ -479,21 +502,21 @@ export default function RankingPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={`https://flagcdn.com/w20/${GAME_CODES[h.home]}.png`} width={14} height={10} alt="" style={{ borderRadius: 1 }} />
                     )}
-                    <Typography sx={{ color: "#6B6B6B", fontSize: "0.62rem", fontWeight: 700 }} noWrap>
+                    <Typography sx={{ color: "rgba(255,255,255,0.72)", fontSize: "0.62rem", fontWeight: 700 }} noWrap>
                       {h.home}
                     </Typography>
-                    <Typography sx={{ color: "#9E9E9E", fontSize: "0.6rem" }}>×</Typography>
+                    <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.6rem" }}>×</Typography>
                     {GAME_CODES[h.away] && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={`https://flagcdn.com/w20/${GAME_CODES[h.away]}.png`} width={14} height={10} alt="" style={{ borderRadius: 1 }} />
                     )}
-                    <Typography sx={{ color: "#6B6B6B", fontSize: "0.62rem", fontWeight: 700 }} noWrap>
+                    <Typography sx={{ color: "rgba(255,255,255,0.72)", fontSize: "0.62rem", fontWeight: 700 }} noWrap>
                       {h.away}
                     </Typography>
                   </Box>
                   <Typography
                     sx={{
-                      color: h.status === "exact" ? "#009440" : "#0055B8",
+                      color: h.status === "exact" ? "#008542" : "#1B3DE8",
                       fontFamily: 'var(--font-space-mono), "Space Mono", monospace',
                       fontWeight: 900,
                       fontSize: "1.4rem",
@@ -502,7 +525,7 @@ export default function RankingPage() {
                   >
                     #{h.rank}
                   </Typography>
-                  <Typography sx={{ color: "#9E9E9E", fontSize: "0.62rem", mt: 0.25 }}>
+                  <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.62rem", mt: 0.25 }}>
                     {h.status === "exact" ? "Placar exato" : "Resultado certo"} · +{h.points}pts
                   </Typography>
                 </Box>
@@ -515,17 +538,26 @@ export default function RankingPage() {
               onChange={(_, v: TabValue) => setTab(v)}
               sx={{
                 mb: 2.5,
-                "& .MuiTabs-indicator": { backgroundColor: "#009440" },
+                "& .MuiTabs-indicator": { display: "none" },
+                "& .MuiTabs-flexContainer": { gap: 0.75 },
                 "& .MuiTab-root": {
-                  color: "#6B6B6B",
+                  color: "rgba(255,255,255,0.45)",
                   fontFamily: 'var(--font-syne), Syne, sans-serif',
                   fontWeight: 700,
                   fontSize: "0.8rem",
                   textTransform: "none",
                   minWidth: "auto",
                   px: 1.5,
+                  minHeight: 34,
+                  backgroundColor: "rgba(21,28,46,0.82)",
+                  borderRadius: CAZE_RADIUS.sm,
+                  border: "1px solid rgba(255,255,255,0.08)",
                 },
-                "& .Mui-selected": { color: "#009440" },
+                "& .Mui-selected": {
+                  color: "#FFFFFF",
+                  backgroundColor: "rgba(255,255,255,0.14)",
+                  border: "1px solid rgba(255,255,255,0.20)",
+                },
               }}
             >
               <Tab value="geral"   label="Geral" />

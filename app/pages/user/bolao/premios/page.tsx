@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Box, Typography, Skeleton, Snackbar, Alert } from "@mui/material";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import BottomNav from "@/app/components/layout/BottomNav";
 import TopBar from "@/app/components/layout/TopBar";
 import { PrizeCard } from "@/app/components/bolao/PrizeCard";
@@ -36,9 +37,9 @@ export default function PremiosPage() {
   function handleRedeem(prizeId: number) {
     redeemPrize(prizeId, {
       onSuccess: () =>
-        setSnack({ message: "Prêmio resgatado! Aguarde a confirmação 🎁", severity: "success" }),
+        setSnack({ message: "Prêmio resgatado! Aguarde a confirmação.", severity: "success" }),
       onError: () =>
-        setSnack({ message: "Não foi possível resgatar. Tenta de novo! 😅", severity: "error" }),
+        setSnack({ message: "Não foi possível resgatar. Tenta de novo.", severity: "error" }),
     });
   }
 
@@ -84,9 +85,12 @@ export default function PremiosPage() {
             ))}
           </Box>
         ) : activePrizes.length === 0 ? (
-          <Typography sx={{ color: "#9E9E9E", textAlign: "center", py: 6 }}>
-            Nenhum prêmio disponível no momento. Fique ligado! 🏆
-          </Typography>
+          <Box sx={{ textAlign: "center", py: 6 }}>
+            <EmojiEventsIcon sx={{ color: "#F5C900", fontSize: 40, mb: 1 }} />
+            <Typography sx={{ color: "#9E9E9E" }}>
+              Nenhum prêmio disponível no momento. Fique ligado!
+            </Typography>
+          </Box>
         ) : (
           <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
             {activePrizes.map((prize) => (

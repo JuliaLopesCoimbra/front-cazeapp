@@ -104,33 +104,45 @@ npm install @tanstack/react-query@5 @tanstack/react-query-devtools framer-motion
 
 ## 2. Design System — Fonte da Verdade
 
-> Valores extraídos diretamente do Figma (arquivo `VZ2fPhIG5zVt0XUlzaYyFm`).
-> Estes valores SUBSTITUEM qualquer referência anterior. O Figma é a fonte da verdade visual.
+> Paleta definida e validada pelo usuário durante o desenvolvimento (dark navy theme).
+> Estes valores estão em `app/constants/designTokens.ts` e são a única fonte de verdade.
+> **NÃO usar os valores antigos do Figma (#282828, #363636) — foram substituídos pela paleta abaixo.**
 
-### Paleta de Cores — Valores Exatos do Figma
+### Paleta de Cores — Valores Atuais
 
 ```css
 /* Backgrounds */
---color-bg-base:      #282828;   /* Fundo principal de todas as telas */
---color-bg-card:      #363636;   /* Surface de cards, tabs, bottom nav */
---color-bg-overlay:   rgba(217, 217, 217, 0.20); /* Overlay de headers de post */
---color-bg-black:     #000000;   /* Fundo de banners de patrocinador */
+--color-bg-base:           #0A1128;   /* Fundo principal de todas as telas (dark navy) */
+--color-bg-surface:        #151c2e;   /* Surface de cards, drawers, overlays */
+--color-bg-surface-2:      #1A1A2E;   /* Surface secundária */
+--color-bg-overlay:        rgba(217, 217, 217, 0.20); /* Overlay de headers de post */
+--color-bg-black:          #000000;   /* Fundo de banners de patrocinador */
 
 /* Primária — Verde Brasil */
---color-green:        #009440;   /* Bordas de cards, tab ativa, dividers, acentos */
---color-green-light:  #31E46A;   /* Usado no gradiente arco-íris */
+--color-green:             #008542;   /* Bordas de cards, dividers, acentos */
+--color-green-light:       #31E46A;   /* Usado no gradiente arco-íris */
 
 /* Secundária — Amarelo Brasil */
---color-yellow:       #FFCB00;   /* Ponto final do gradiente Brasil, destaques */
---color-yellow-alt:   #F7B521;   /* Usado no gradiente arco-íris */
+--color-yellow:            #FFD100;   /* Ponto final do gradiente Brasil, destaques, ativo nav */
+--color-yellow-alt:        #F7B521;   /* Usado no gradiente arco-íris */
 
-/* Accent — Copa */
---color-blue-copa:    #0055B8;   /* Fundo de posts Copa (ex: "Qual seleção vai levantar a taça?") */
---color-red-accent:   #E52554;   /* Início do gradiente arco-íris, alertas */
+/* Azul Canarinho — broadcast blue, destaque Copa */
+--color-blue:              #1B3DE8;   /* Azul canarinho — headlines, banners, tabs Copa */
+--color-blue-copa:         #0055B8;   /* Fundo de posts Copa */
+
+/* Accent */
+--color-red:               #E8175D;   /* Alertas, badges */
+--color-red-rainbow:       #E52554;   /* Início do gradiente arco-íris */
+--color-pink:              #FF6FAE;   /* Stickers CTA */
 
 /* Texto */
---color-text-primary: #FFFFFF;   /* Texto principal sobre fundos escuros */
---color-text-muted:   #9E9E9E;   /* Placeholder, texto desabilitado */
+--color-text-primary:      #FFFFFF;
+--color-text-secondary:    rgba(255, 255, 255, 0.72);
+--color-text-muted:        rgba(255, 255, 255, 0.45);
+
+/* Bordas */
+--color-border-subtle:     rgba(255, 255, 255, 0.08);
+--color-border-blue:       rgba(27, 61, 232, 0.25);
 
 /* Gradiente arco-íris (separador decorativo) */
 --gradient-rainbow: linear-gradient(
@@ -150,17 +162,20 @@ npm install @tanstack/react-query@5 @tanstack/react-query-devtools framer-motion
 theme: {
   extend: {
     colors: {
-      'caze-bg':         '#282828',
-      'caze-surface':    '#363636',
-      'caze-green':      '#009440',
+      'caze-bg':         '#0A1128',
+      'caze-surface':    '#151c2e',
+      'caze-surface-2':  '#1A1A2E',
+      'caze-green':      '#008542',
       'caze-green-light':'#31E46A',
-      'caze-yellow':     '#FFCB00',
+      'caze-yellow':     '#FFD100',
       'caze-yellow-alt': '#F7B521',
+      'caze-blue':       '#1B3DE8',
       'caze-blue-copa':  '#0055B8',
-      'caze-red':        '#E52554',
+      'caze-red':        '#E8175D',
+      'caze-pink':       '#FF6FAE',
       'caze-cyan':       '#29BAEB',
       'caze-purple':     '#432B9D',
-      'caze-muted':      '#9E9E9E',
+      'caze-muted':      'rgba(255,255,255,0.45)',
     },
     fontFamily: {
       headline: ['var(--font-anton)',      'Anton',      'sans-serif'], // Super headlines CAPS
@@ -194,19 +209,22 @@ export const cazeTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#009440',          // Verde Brasil — acentos, bordas, tabs ativas
+      main: '#008542',          // Verde Brasil — acentos, bordas, dividers
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#FFCB00',          // Amarelo Brasil — destaques, CTAs
+      main: '#FFD100',          // Amarelo Brasil — destaques, nav ativa, CTAs
       contrastText: '#000000',
     },
+    info: {
+      main: '#1B3DE8',          // Azul canarinho — tabs Copa, banners
+    },
     error: {
-      main: '#E52554',
+      main: '#E8175D',
     },
     background: {
-      default: '#282828',       // Fundo base de todas as telas
-      paper:   '#363636',       // Surface de cards e components elevados
+      default: '#0A1128',       // Fundo base dark navy
+      paper:   '#151c2e',       // Surface de cards e components elevados
     },
     text: {
       primary:   '#FFFFFF',
@@ -234,17 +252,17 @@ export const cazeTheme = createTheme({
     MuiBottomNavigation: {
       styleOverrides: {
         root: {
-          backgroundColor: '#363636',
+          backgroundColor: 'rgba(5,8,14,0.94)',
           height: '60px',
-          borderTop: '1px solid rgba(0, 148, 64, 0.3)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
         },
       },
     },
     MuiBottomNavigationAction: {
       styleOverrides: {
         root: {
-          color: '#9E9E9E',
-          '&.Mui-selected': { color: '#009440' },
+          color: 'rgba(255,255,255,0.45)',
+          '&.Mui-selected': { color: '#FFD100' },
           minWidth: 'unset',
         },
         label: {
@@ -257,9 +275,9 @@ export const cazeTheme = createTheme({
     MuiTab: {
       styleOverrides: {
         root: {
-          backgroundColor: '#363636',
+          backgroundColor: '#151c2e',
           borderRadius: '15px',
-          color: '#9E9E9E',
+          color: 'rgba(255,255,255,0.45)',
           fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           fontWeight: 700,
           fontSize: '12px',
@@ -267,7 +285,7 @@ export const cazeTheme = createTheme({
           padding: '0 16px',
           '&.Mui-selected': {
             color: '#FFFFFF',
-            border: '1px solid #009440',
+            border: '1px solid #008542',
           },
         },
       },
@@ -281,9 +299,9 @@ export const cazeTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: '#363636',
+          backgroundColor: '#151c2e',
           borderRadius: '15px',
-          border: '1px solid #009440',
+          border: '1px solid rgba(255,255,255,0.08)',
         },
       },
     },
@@ -374,14 +392,14 @@ Liquid Glass é o efeito de material translúcido introduzido pela Apple no WWDC
   backdrop-filter: blur(12px) saturate(1.6);
   -webkit-backdrop-filter: blur(12px) saturate(1.6);
   background: rgba(217, 217, 217, 0.20);
-  border: 2px solid #009440;
+  border: 2px solid #008542;
   border-radius: 15px;
 }
 
 /* --- Fallback para browsers sem suporte a backdrop-filter --- */
 @supports not (backdrop-filter: blur(1px)) {
   .glass, .glass-green, .glass-dark, .glass-caption {
-    background: rgba(40, 40, 40, 0.92);
+    background: rgba(10, 17, 40, 0.96);
   }
 }
 ```
@@ -621,7 +639,7 @@ function injectSponsors(posts: NewsPost[], sponsors: SponsorBanner[]): FeedItem[
 
 ```
 ┌─────────────────────────────────────┐
-│ TopBar (56px)                        │  bg: #282828
+│ TopBar (56px)                        │  bg: #0A1128
 │  [Logo Casa CazéTV]  [Mascote]       │  logo: canto esquerdo, mascote: centro
 ├─────────────────────────────────────┤
 │ BrazilDivider (4px)                  │  gradiente verde → amarelo
@@ -630,13 +648,13 @@ function injectSponsors(posts: NewsPost[], sponsors: SponsorBanner[]): FeedItem[
 ├─────────────────────────────────────┤
 │ BrazilDivider (4px)                  │
 ├─────────────────────────────────────┤
-│ FeedTabs (29px + 8px padding)        │  bg: #282828, pills: #363636
-│  [Tudo]  [Jogos]  [Bolão]  [Figur.]  │  ativa: border #009440
+│ FeedTabs (29px + 8px padding)        │  bg: #0A1128, pills: #151c2e
+│  [Tudo]  [Jogos]  [Bolão]  [Figur.]  │  ativa: border #008542 | tab Copa: bg #1B3DE8
 ├─────────────────────────────────────┤
 │ RainbowDivider (2px)                 │
 ├─────────────────────────────────────┤
 │ Feed de Posts (scroll infinito)      │  gap: 8px entre posts
-│  ├── PostCard (@casacazetv)          │  border: 1px #009440, radius: 15px
+│  ├── PostCard (@casacazetv)          │  border: 1px #008542, radius: 15px
 │  ├── PostCard                        │
 │  ├── PostCard                        │
 │  ├── PostCard                        │
@@ -644,7 +662,7 @@ function injectSponsors(posts: NewsPost[], sponsors: SponsorBanner[]): FeedItem[
 │  ├── SponsorCard                     │  a cada 5 posts
 │  └── ...                             │
 └─────────────────────────────────────┘
-│ BottomNav (60px)                     │  bg: #363636, ativo: #009440
+│ BottomNav (60px)                     │  bg: rgba(5,8,14,0.94), ativo: pill branca + ícone #FFD100
 ```
 
 **Regras visuais da `TopBar`:**
@@ -657,7 +675,7 @@ function injectSponsors(posts: NewsPost[], sponsors: SponsorBanner[]): FeedItem[
 - Container: `background: #282828`, `padding: 8px 14px`
 - Cada pill: `background: #363636`, `border-radius: 15px`, `height: 29px`, `min-width: 93px`
 - Tab ativa: `border: 1px solid #009440`, texto `#FFFFFF`
-- Tab inativa: sem borda, texto `#9E9E9E`
+- Tab inativa: sem borda, texto `rgba(255,255,255,0.45)`
 - Tabs: `Tudo`, `Jogos`, `Bolão`, `Figurinhas`
 - Scroll horizontal se não couber (sem overflow visible)
 
@@ -701,10 +719,10 @@ const navItems = [
 ];
 ```
 
-- Ícone inativo: `outlined`, cor `#9E9E9E`
-- Ícone ativo: `filled`, cor `#009440`
-- Label ativo: `#009440`, Montserrat 700 10px (font-ui)
-- Badge numérico em `Bolão` quando há apostas abertas (MUI Badge, cor `#E52554`)
+- Ícone inativo: `outlined`, cor `rgba(255,255,255,0.45)`
+- Ícone ativo: `filled`, cor `#FFFFFF` (dentro da pill branca ativa)
+- Pill ativa: `rgba(255,255,255,0.22)`, border-radius dinâmico
+- Badge numérico em `Bolão` quando há apostas abertas (MUI Badge, cor `#E8175D`)
 - Badge numérico em `Figurinhas` quando há pacotes não abertos
 
 ### 7.3 Telas ainda sem design visualizado no Figma

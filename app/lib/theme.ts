@@ -26,21 +26,15 @@ export const cazeTheme = createTheme({
     },
   },
   typography: {
-    // Inter — fonte base para texto geral
-    fontFamily: 'var(--font-inter), Inter, Arial, sans-serif',
-    // Anton — super headlines, hero (peso visual vem da fonte, não do fontWeight)
-    h1: { fontFamily: 'var(--font-anton), Anton, sans-serif', fontWeight: 400, fontSize: '1.75rem', lineHeight: 1.1 },
-    h2: { fontFamily: 'var(--font-anton), Anton, sans-serif', fontWeight: 400, fontSize: '1.375rem', lineHeight: 1.2 },
-    // Montserrat — títulos de seção e UI de destaque
-    h3: { fontFamily: 'var(--font-montserrat), Montserrat, sans-serif', fontWeight: 700, fontSize: '1.125rem', lineHeight: 1.4 },
-    // Anton — destaque máximo (ex: placar, convocação)
-    h4: { fontFamily: 'var(--font-anton), Anton, sans-serif', fontWeight: 400, fontSize: '2rem', lineHeight: 1.0 },
-    // Inter — corpo de texto
-    body1: { fontFamily: 'var(--font-inter), Inter, Arial, sans-serif', fontSize: '1rem', fontWeight: 400, lineHeight: 1.6 },
-    body2: { fontFamily: 'var(--font-inter), Inter, Arial, sans-serif', fontSize: '0.875rem', fontWeight: 400, lineHeight: 1.6 },
-    // Montserrat — botões e labels de ação
+    fontFamily: 'var(--font-roboto), Roboto, Arial, sans-serif',
+    h1: { fontFamily: 'var(--font-montserrat), Montserrat, Arial, sans-serif', fontWeight: 900, fontSize: '1.75rem', lineHeight: 1.2 },
+    h2: { fontFamily: 'var(--font-montserrat), Montserrat, Arial, sans-serif', fontWeight: 700, fontSize: '1.375rem', lineHeight: 1.3 },
+    h3: { fontFamily: 'var(--font-poppins), Poppins, Arial, sans-serif', fontWeight: 600, fontSize: '1.125rem', lineHeight: 1.4 },
+    h4: { fontFamily: 'var(--font-montserrat), Montserrat, Arial, sans-serif', fontWeight: 900, fontSize: '2rem', lineHeight: 1.0 },
+    body1: { fontFamily: 'var(--font-roboto), Roboto, Arial, sans-serif', fontSize: '1rem', fontWeight: 400, lineHeight: 1.6 },
+    body2: { fontFamily: 'var(--font-roboto), Roboto, Arial, sans-serif', fontSize: '0.875rem', fontWeight: 400, lineHeight: 1.6 },
     button: { fontFamily: 'var(--font-montserrat), Montserrat, sans-serif', fontWeight: 700, textTransform: 'none' },
-    caption: { fontFamily: 'var(--font-inter), Inter, Arial, sans-serif', fontSize: '0.75rem', fontWeight: 500, lineHeight: 1.5 },
+    caption: { fontFamily: 'var(--font-roboto), Roboto, Arial, sans-serif', fontSize: '0.75rem', fontWeight: 500, lineHeight: 1.5 },
   },
   shape: { borderRadius: 15 },
   components: {

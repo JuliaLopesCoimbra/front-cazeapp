@@ -13,6 +13,8 @@ import {
   Avatar,
   Chip,
 } from "@mui/material";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import { getLikedPosts } from "@/app/services/likes/likeService";
 import { NewsDetailsResponse } from "@/app/services/news/newsService";
 import { useAuth } from "@/app/context/AuthContext";
@@ -741,7 +743,7 @@ export default function LikedPostsPage() {
                       mb: 2,
                     }}
                   >
-                    ❤️
+                    <FavoriteIcon sx={{ fontSize: "4rem", color: isTorcida ? "#0F935D" : "#FFC91F" }} />
                   </Box>
                   <Typography
                     variant="h5"
@@ -826,7 +828,7 @@ export default function LikedPostsPage() {
                             variant="h4"
                             sx={{ color: "rgba(255,255,255,0.3)" }}
                           >
-                            📷
+                            <ImageOutlinedIcon sx={{ fontSize: 34 }} />
                           </Typography>
                         </Box>
                       )}

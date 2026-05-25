@@ -42,7 +42,7 @@ export default function NewsFeedWithCache({ eventId, event }: Props) {
     
     if (cached && cached.data.length > 0) {
       // Usa dados do cache
-      console.log("📦 Carregando feed do cache");
+      console.log("Carregando feed do cache");
       setNews(cached.data);
       setOffset(cached.data.length);
       setInitialized(true);
@@ -53,7 +53,7 @@ export default function NewsFeedWithCache({ eventId, event }: Props) {
       }, 100);
     } else {
       // Carrega normalmente se não há cache
-      console.log("🔄 Carregando feed da API");
+      console.log("Carregando feed da API");
       loadNews(true);
       setInitialized(true);
     }
@@ -64,7 +64,7 @@ export default function NewsFeedWithCache({ eventId, event }: Props) {
     return () => {
       // Quando o componente é desmontado (usuário navega para outra página)
       if (news.length > 0) {
-        console.log("💾 Salvando feed no cache");
+        console.log("Salvando feed no cache");
         setCache(cacheKey, news, window.scrollY);
       }
     };
@@ -116,7 +116,7 @@ export default function NewsFeedWithCache({ eventId, event }: Props) {
  * 3. Adicionar cleanup para salvar cache quando sair da página
  * 
  * RESULTADO:
- * ✅ Quando você voltar para o feed, ele mostra exatamente onde parou
- * ✅ Não precisa recarregar dados da API
- * ✅ Comportamento igual Instagram/TikTok
+ * Quando você voltar para o feed, ele mostra exatamente onde parou.
+ * Não precisa recarregar dados da API.
+ * Comportamento igual Instagram/TikTok.
  */
