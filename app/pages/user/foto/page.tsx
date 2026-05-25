@@ -38,10 +38,8 @@ interface BorderOption {
 const STORAGE_KEY = "selectedEventId";
 
 const BORDER_OPTIONS: BorderOption[] = [
-  { id: "brasil", frameType: "brasil", label: "Brasil"    },
-  { id: "ouro",   frameType: "ouro",   label: "Ouro"      },
-  { id: "copa",   frameType: "copa",   label: "Copa"      },
-  { id: "none",   frameType: "none",   label: "Sem borda" },
+  { id: "copa", frameType: "copa", label: "Moldura Cazé" },
+  { id: "none", frameType: "none", label: "Sem borda" },
 ];
 
 // ── canvas helper ─────────────────────────────────────────────────────────────
@@ -56,51 +54,41 @@ function loadImg(src: string): Promise<HTMLImageElement> {
 }
 
 async function buildBorderedBlob(imageBlob: Blob, frameType: string): Promise<Blob> {
-  if (frameType === "none") return imageBlob;
+  if (frameType !== "copa") return imageBlob;
 
   const objectUrl = URL.createObjectURL(imageBlob);
-  const [img, mascot] = await Promise.all([
-    loadImg(objectUrl),
-    loadImg("/assets/figma/mascot-center.png"),
-  ]);
+  const img = await loadImg(objectUrl);
   URL.revokeObjectURL(objectUrl);
 
-  const FRAME = 22;
+  const PH = 10;   // left + right sides
+  const PT = 10;   // top bar (thin)
+  const PB = 52;   // bottom bar (text label)
+
   const canvas = document.createElement("canvas");
-  canvas.width  = img.naturalWidth  + FRAME * 2;
-  canvas.height = img.naturalHeight + FRAME * 2;
+  canvas.width  = img.naturalWidth + PH * 2;
+  canvas.height = img.naturalHeight + PT + PB;
   const ctx = canvas.getContext("2d")!;
-  const W = canvas.width, H = canvas.height;
+  const W = canvas.width;
+  const H = canvas.height;
 
-  if (frameType === "brasil") {
-    ctx.fillStyle = "#009440"; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "#FFCB00"; ctx.fillRect(14, 14, W - 28, H - 28);
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(18, 18, W - 36, H - 36);
-  } else if (frameType === "ouro") {
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0,    "#7A4F00");
-    grad.addColorStop(0.3,  "#FFCB00");
-    grad.addColorStop(0.55, "#FFE066");
-    grad.addColorStop(0.8,  "#FFCB00");
-    grad.addColorStop(1,    "#7A4F00");
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(18, 18, W - 36, H - 36);
-  } else if (frameType === "copa") {
-    ctx.fillStyle = "#0055B8"; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "#FFCB00"; ctx.fillRect(14, 14, W - 28, H - 28);
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(18, 18, W - 36, H - 36);
-  }
+  // Background
+  ctx.fillStyle = "#012E16";
+  ctx.fillRect(0, 0, W, H);
 
-  ctx.drawImage(img, FRAME, FRAME);
+  // Photo
+  ctx.drawImage(img, PH, PT);
 
-  // Mascot watermark — large, centered at bottom of photo
-  const mascotW = Math.min(Math.round(img.naturalWidth * 0.38), 260);
-  const mascotH = Math.round(mascotW * mascot.naturalHeight / mascot.naturalWidth);
-  const mx = Math.round((W - mascotW) / 2);
-  const my = Math.round(FRAME + img.naturalHeight - mascotH - 18);
-  ctx.globalAlpha = 0.92;
-  ctx.drawImage(mascot, mx, my, mascotW, mascotH);
-  ctx.globalAlpha = 1;
+  // Gold divider above bottom bar
+  ctx.fillStyle = "#FFD100";
+  ctx.fillRect(PH, PT + img.naturalHeight, img.naturalWidth, 2);
+
+  // Bottom bar: "CASA CAZÉ TV" centered
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const sz = Math.max(14, Math.min(30, Math.round(img.naturalWidth * 0.032)));
+  ctx.font = `bold ${sz}px Arial, sans-serif`;
+  ctx.fillStyle = "#FFD100";
+  ctx.fillText("CASA CAZÉ TV", W / 2, PT + img.naturalHeight + PB / 2);
 
   return new Promise<Blob>((resolve, reject) =>
     canvas.toBlob(
@@ -119,31 +107,31 @@ interface FramePreviewProps {
   children: React.ReactNode;
 }
 
-const FRAME_SHADOWS: Record<string, { sm: string; lg: string }> = {
-  brasil: {
-    sm: "0 0 0 2px #fff, 0 0 0 5px #FFCB00, 0 0 0 9px #009440",
-    lg: "0 0 0 3px #fff, 0 0 0 7px #FFCB00, 0 0 0 13px #009440",
-  },
-  ouro: {
-    sm: "0 0 0 2px #fff, 0 0 0 7px #FFCB00",
-    lg: "0 0 0 3px #fff, 0 0 0 11px #FFCB00",
-  },
-  copa: {
-    sm: "0 0 0 2px #fff, 0 0 0 5px #FFCB00, 0 0 0 9px #0055B8",
-    lg: "0 0 0 3px #fff, 0 0 0 7px #FFCB00, 0 0 0 13px #0055B8",
-  },
-};
-
 function FramePreview({ frameType, large = false, maxWidth, children }: FramePreviewProps) {
-  const shadow = FRAME_SHADOWS[frameType]?.[large ? "lg" : "sm"];
-  const m = large ? "15px" : "11px";
   const wrapSx = { display: "inline-block", ...(maxWidth ? { maxWidth, width: "100%" } : {}) };
 
-  if (!shadow) return <Box sx={wrapSx}>{children}</Box>;
+  if (frameType !== "copa") return <Box sx={wrapSx}>{children}</Box>;
+
+  const topH = large ? 10 : 4;
+  const botH = large ? 42 : 13;
+  const PH   = large ? "10px" : "5px";
 
   return (
-    <Box sx={{ ...wrapSx, m }}>
-      <Box sx={{ lineHeight: 0, boxShadow: shadow }}>{children}</Box>
+    <Box sx={{ ...wrapSx, position: "relative", bgcolor: "#012E16" }}>
+      {/* Top bar (decorative) */}
+      <Box sx={{ height: topH }} />
+
+      {/* Photo */}
+      <Box sx={{ mx: PH, lineHeight: 0 }}>{children}</Box>
+
+      {/* Bottom bar: "CASA CAZÉ TV" */}
+      <Box sx={{ height: botH, display: "flex", alignItems: "center", justifyContent: "center", borderTop: "1.5px solid #FFD100" }}>
+        {large && (
+          <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 900, fontSize: "0.55rem", color: "#FFD100", lineHeight: 1 }}>
+            CASA CAZÉ TV
+          </Typography>
+        )}
+      </Box>
     </Box>
   );
 }
@@ -311,7 +299,7 @@ export default function FotoPage() {
           {/* ── INTRO ── */}
           {stage === "intro" && (
             <>
-              <TopBar title="Finder Photo" showBack />
+              <TopBar title="Finder Photo" light showBack />
               <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", px: `${LAYOUT.pagePaddingX}px`, gap: `${SPACING.section}px` }}>
 
                 {/* Ícone */}
@@ -511,15 +499,7 @@ export default function FotoPage() {
                   onClick={() => setActiveBorder(opt)}
                   sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.75, cursor: "pointer" }}
                 >
-                  <Box
-                    sx={{
-                      outline: isActive ? `2px solid ${COLORS.green}` : "2px solid transparent",
-                      outlineOffset: "2px",
-                      borderRadius: 1.5,
-                      transition: "outline-color 0.15s",
-                      display: "inline-block",
-                    }}
-                  >
+                  <Box sx={{ display: "inline-block" }}>
                     <FramePreview frameType={opt.frameType}>
                       {selected && (
                         <img

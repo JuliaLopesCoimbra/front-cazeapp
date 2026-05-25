@@ -63,6 +63,11 @@ function formatDate(dateString: string): string {
   });
 }
 
+function authorDisplay(name?: string | null, fallback = "@casacazetv"): string {
+  if (!name) return fallback;
+  return name.toLowerCase() === "admin" ? "Cazé" : name;
+}
+
 export default function NewsFeed({ eventId, event }: Props) {
   const { authVersion } = useAuth();
   const router = useRouter();
@@ -377,7 +382,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                 {isWorldCup ? (
                   <CopaStoryPostCard
                     newsId={item.id}
-                    authorName={item.author?.name || "@casacazetv"}
+                    authorName={authorDisplay(item.author?.name)}
                     authorPhoto={item.author?.profile_photo}
                     caption={item.title}
                     body={item.content}
@@ -418,7 +423,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                     >
                       <Avatar
                         src={item.author?.profile_photo || undefined}
-                        alt={item.author?.name || "Autor"}
+                        alt={authorDisplay(item.author?.name, "Autor")}
                         sx={{
                           width: 28,
                           height: 28,
@@ -440,7 +445,7 @@ export default function NewsFeed({ eventId, event }: Props) {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {item.author?.name || "@casacazetv"}
+                        {authorDisplay(item.author?.name)}
                       </Typography>
                       <Typography
                         sx={{
