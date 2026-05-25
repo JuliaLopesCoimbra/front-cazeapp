@@ -1,0 +1,10 @@
+Coloque aqui os logos das marcas da roleta:
+
+  coca-cola.png        — logo Coca-Cola (fundo transparente, vermelho)
+  mercado-livre.png    — logo Mercado Livre (fundo transparente)
+  visa.png             — logo VISA (fundo transparente, azul)
+
+Para o segmento "Tente de novo", coloque o logo da Cazé em:
+  public/assets/casa-cazetv/cazetv-logo-white.svg
+
+Enquanto as imagens não estiverem na pasta, a roleta mostra o nome da marca como texto (fallback automático).

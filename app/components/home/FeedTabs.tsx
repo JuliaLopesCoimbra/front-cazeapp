@@ -24,7 +24,8 @@ type TabEntry =
 const TAB_ENTRIES: TabEntry[] = [
   { kind: "tab",          label: "Feed",   value: "all"    },
   { kind: "tab",          label: "Evento", value: "games"  },
-  { kind: "featured-tab", label: "Jogos",  value: "brasil" },
+  { kind: "featured-tab", label: "Jogos",    value: "brasil"  },
+  { kind: "tab",          label: "Brindes", value: "brindes" },
   { kind: "nav",          label: "Fotos",  href: "/pages/user/foto" },
   { kind: "nav",          label: "Mapa",   href: "/pages/user/mapa" },
 ];

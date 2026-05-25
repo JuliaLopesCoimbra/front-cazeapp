@@ -18,6 +18,7 @@ import NewsFeed from "@/app/components/home/NewsFeed";
 import { useAuth } from "@/app/context/AuthContext";
 import EventDetail from "@/app/components/home/EventDetail";
 import WorldCupGames from "@/app/components/home/WorldCupGames";
+import BrindesTab from "@/app/components/home/BrindesTab";
 import EventIndisponivel from "@/app/components/event/EventIndisponivel";
 import {
   getProfile,
@@ -28,7 +29,7 @@ const STORAGE_KEY = "selectedEventId";
 const SCROLL_KEY = "homeScrollY";
 const TAB_KEY = "homeActiveTab";
 
-const VALID_TABS: FeedTab[] = ["all", "games", "brasil"];
+const VALID_TABS: FeedTab[] = ["all", "games", "brasil", "brindes"];
 
 function isFeedTab(value: string): value is FeedTab {
   return (VALID_TABS as string[]).includes(value);
@@ -393,6 +394,8 @@ const HomeContent: React.FC = () => {
           {activeTab === "brasil" && currentEvent && (
             <WorldCupGames eventId={currentEvent.id} />
           )}
+
+          {activeTab === "brindes" && <BrindesTab />}
 
         </Box>
       </Box>

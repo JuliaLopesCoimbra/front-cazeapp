@@ -1,1 +1,1 @@
-export type FeedTab = "all" | "games" | "brasil";
+export type FeedTab = "all" | "games" | "brasil" | "brindes";
