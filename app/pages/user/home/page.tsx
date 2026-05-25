@@ -10,7 +10,8 @@ import BrazilDivider from "@/app/components/layout/BrazilDivider";
 import RainbowDivider from "@/app/components/layout/RainbowDivider";
 import FeedTabs, { type FeedTab } from "@/app/components/home/FeedTabs";
 import { motion } from "framer-motion";
-import SponsorCarousel, { getMockSponsors } from "@/app/components/feed/SponsorCarousel";
+import SponsorLogosBar from "@/app/components/home/SponsorLogosBar";
+import MatchBannerCarousel from "@/app/components/home/MatchBannerCarousel";
 import BottomNav from "@/app/components/layout/BottomNav";
 import { EventResponse, getEvents } from "@/app/services/events/eventAppService";
 import NewsFeed from "@/app/components/home/NewsFeed";
@@ -351,7 +352,8 @@ const HomeContent: React.FC = () => {
             profile={profile}
           />
 
-          <SponsorCarousel banners={getMockSponsors()} edgeToEdge />
+          <SponsorLogosBar />
+          <MatchBannerCarousel />
           <BrazilDivider />
 
           <Box
