@@ -323,34 +323,49 @@ function AnnounceDrawer({ open, onClose, onConfirm }: {
       <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)", flexShrink: 0 }} />
 
       <Box sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+
+        {/* Banner sistema teste */}
+        <Box sx={{ mb: 2, px: 1.5, py: 1, backgroundColor: "rgba(255,209,0,0.08)", border: "1px solid rgba(255,209,0,0.22)", borderRadius: CAZE_RADIUS.sm, display: "flex", alignItems: "flex-start", gap: 1 }}>
+          <Typography sx={{ fontSize: "0.65rem", color: "rgba(255,209,0,0.5)", fontWeight: 700, lineHeight: 1, mt: "2px", flexShrink: 0 }}>TESTE</Typography>
+          <Typography sx={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.4 }}>
+            Sistema em versão teste. Apenas figurinhas da <strong style={{ color: "rgba(255,255,255,0.7)" }}>Seleção Brasil</strong> estão disponíveis: Paquetá, Neymar e Vini Jr.
+          </Typography>
+        </Box>
+
         {catalogStep === "category" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-            {CATEGORIES.map(({ key, label, Icon }) => (
-              <Box key={key} onClick={() => handleCategoryClick(key)}
-                sx={{ display: "flex", alignItems: "center", gap: 2, backgroundColor: "#1A1A2E", border: "1px solid rgba(255,255,255,0.08)", borderRadius: CAZE_RADIUS.md, p: "14px 16px", cursor: "pointer", "&:hover": { borderColor: "#009440" }, transition: "border-color 0.15s" }}
-              >
-                <Box sx={{ width: 36, height: 36, borderRadius: CAZE_RADIUS.sm, backgroundColor: "rgba(0,133,66,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Icon sx={{ color: "#009440", fontSize: "1.2rem" }} />
+            {CATEGORIES.map(({ key, label, Icon }) => {
+              const disabled = key !== "selecao";
+              return (
+                <Box key={key} onClick={disabled ? undefined : () => handleCategoryClick(key)}
+                  sx={{ display: "flex", alignItems: "center", gap: 2, backgroundColor: "#1A1A2E", border: "1px solid rgba(255,255,255,0.08)", borderRadius: CAZE_RADIUS.md, p: "14px 16px", cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.38 : 1, "&:hover": disabled ? {} : { borderColor: "#009440" }, transition: "border-color 0.15s" }}
+                >
+                  <Box sx={{ width: 36, height: 36, borderRadius: CAZE_RADIUS.sm, backgroundColor: "rgba(0,133,66,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Icon sx={{ color: "#009440", fontSize: "1.2rem" }} />
+                  </Box>
+                  <Typography sx={{ color: "#FFFFFF", fontWeight: 600, fontSize: "0.875rem", flex: 1 }}>{label}</Typography>
+                  <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1.1rem" }} />
                 </Box>
-                <Typography sx={{ color: "#FFFFFF", fontWeight: 600, fontSize: "0.875rem", flex: 1 }}>{label}</Typography>
-                <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1.1rem" }} />
-              </Box>
-            ))}
+              );
+            })}
           </Box>
         )}
 
         {catalogStep === "team" && (
           <Box sx={{ display: "flex", flexDirection: "column" }}>
-            {CATALOG.selecao.map((team, idx) => (
-              <Box key={team.name}>
-                <Box onClick={() => handleTeamClick(team.name)} sx={{ display: "flex", alignItems: "center", gap: 2, py: 1.5, px: 0.5, cursor: "pointer", borderRadius: CAZE_RADIUS.sm, "&:hover": { backgroundColor: "rgba(0,133,66,0.08)" }, transition: "background-color 0.1s" }}>
-                  {COUNTRY_CODES[team.name] && <img src={`https://flagcdn.com/w40/${COUNTRY_CODES[team.name]}.png`} alt={team.name} width={24} height={16} style={{ borderRadius: 2, objectFit: "cover" }} />}
-                  <Typography sx={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500, flex: 1 }}>{team.name}</Typography>
-                  <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1rem" }} />
+            {CATALOG.selecao.map((team, idx) => {
+              const disabled = team.name !== "Brasil";
+              return (
+                <Box key={team.name}>
+                  <Box onClick={disabled ? undefined : () => handleTeamClick(team.name)} sx={{ display: "flex", alignItems: "center", gap: 2, py: 1.5, px: 0.5, cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.38 : 1, borderRadius: CAZE_RADIUS.sm, "&:hover": disabled ? {} : { backgroundColor: "rgba(0,133,66,0.08)" }, transition: "background-color 0.1s" }}>
+                    {COUNTRY_CODES[team.name] && <img src={`https://flagcdn.com/w40/${COUNTRY_CODES[team.name]}.png`} alt={team.name} width={24} height={16} style={{ borderRadius: 2, objectFit: "cover" }} />}
+                    <Typography sx={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500, flex: 1 }}>{team.name}</Typography>
+                    <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1rem" }} />
+                  </Box>
+                  {idx < CATALOG.selecao.length - 1 && <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />}
                 </Box>
-                {idx < CATALOG.selecao.length - 1 && <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />}
-              </Box>
-            ))}
+              );
+            })}
           </Box>
         )}
 
