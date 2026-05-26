@@ -63,9 +63,18 @@ export default function FigurinhasChatPage() {
     name: "Usuário", avatarIndex: 1, player: "figurinha", team: "", type: "need" as const,
   };
 
-  const [messages, setMessages]   = useState<Message[]>([]);
+  const storageKey = `figurinha_chat_${postId}`;
+
+  const [messages, setMessages]   = useState<Message[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem(storageKey) ?? "[]");
+    } catch { return []; }
+  });
   const [inputText, setInputText] = useState("");
-  const [phase, setPhase]         = useState<"quick" | "typing" | "open">("quick");
+  const [phase, setPhase]         = useState<"quick" | "typing" | "open">(() =>
+    messages.length > 0 ? "open" : "quick"
+  );
   const messagesEndRef            = useRef<HTMLDivElement>(null);
 
   const quickReplies = [
@@ -81,6 +90,12 @@ export default function FigurinhasChatPage() {
     `Perfeito! Só me fala o que você precisa e a gente combina.`,
     `Pode ser qualquer horário! Me chama quando quiser.`,
   ];
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      try { localStorage.setItem(storageKey, JSON.stringify(messages)); } catch {}
+    }
+  }, [messages, storageKey]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
