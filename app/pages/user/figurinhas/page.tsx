@@ -39,6 +39,7 @@ interface TradeOffer {
   team: string;
   rarity: Rarity;
   number: number;
+  image_url?: string;
 }
 
 interface StickerPost {
@@ -69,11 +70,11 @@ const RARITY_CONFIG: Record<Rarity, { label: string; color: string; bg: string; 
 };
 
 const MOCK_OFFERS: TradeOffer[] = [
-  { id: "1", user: { name: "Gabriel M.",   avatar_url: "https://i.pravatar.cc/80?img=3"  }, player_name: "Vinicius Jr.", team: "Brasil",    rarity: "legendary", number: 42  },
-  { id: "2", user: { name: "Maria Silva",  avatar_url: "https://i.pravatar.cc/80?img=5"  }, player_name: "Mbappé",       team: "França",    rarity: "epic",      number: 87  },
-  { id: "3", user: { name: "Lucas F.",     avatar_url: "https://i.pravatar.cc/80?img=11" }, player_name: "Bellingham",   team: "Inglaterra",rarity: "rare",      number: 123 },
-  { id: "4", user: { name: "Ana Beatriz",  avatar_url: "https://i.pravatar.cc/80?img=9"  }, player_name: "Endrick",      team: "Brasil",    rarity: "rare",      number: 38  },
-  { id: "5", user: { name: "Pedro Alves",  avatar_url: "https://i.pravatar.cc/80?img=15" }, player_name: "Messi",        team: "Argentina", rarity: "legendary", number: 10  },
+  { id: "1", user: { name: "Gabriel M.",   avatar_url: "https://i.pravatar.cc/80?img=3"  }, player_name: "Vinicius Jr.",       team: "Brasil",   rarity: "legendary", number: 42,  image_url: "/figurinhas/vinicius.jpeg"  },
+  { id: "2", user: { name: "Maria Silva",  avatar_url: "https://i.pravatar.cc/80?img=5"  }, player_name: "Messi",              team: "Argentina",rarity: "legendary", number: 10,  image_url: "/figurinhas/messi.jpeg"     },
+  { id: "3", user: { name: "Lucas F.",     avatar_url: "https://i.pravatar.cc/80?img=11" }, player_name: "Cristiano Ronaldo",  team: "Portugal", rarity: "epic",      number: 7,   image_url: "/figurinhas/cristiano.jpeg" },
+  { id: "4", user: { name: "Ana Beatriz",  avatar_url: "https://i.pravatar.cc/80?img=9"  }, player_name: "Neymar",             team: "Brasil",   rarity: "epic",      number: 10,  image_url: "/figurinhas/neymar.jpeg"    },
+  { id: "5", user: { name: "Pedro Alves",  avatar_url: "https://i.pravatar.cc/80?img=15" }, player_name: "Lucas Paquetá",      team: "Brasil",   rarity: "rare",      number: 23,  image_url: "/figurinhas/paqueta.jpeg"   },
 ];
 
 const CATALOG: Record<CategoryKey, Array<{ name: string; players: string[] }>> = {
@@ -191,11 +192,10 @@ function TradeCard({ offer, exiting, exitDir }: { offer: TradeOffer; exiting: bo
   return (
     <Box sx={{
       width: "100%",
-      maxWidth: 340,
       borderRadius: "20px",
       overflow: "hidden",
-      boxShadow: `0 8px 48px ${cfg.glow}30, 0 2px 16px rgba(0,0,0,0.5)`,
-      border: `1.5px solid ${cfg.color}30`,
+      boxShadow: `0 8px 64px ${cfg.glow}40, 0 2px 20px rgba(0,0,0,0.6)`,
+      border: `1.5px solid ${cfg.color}40`,
       transform: exiting
         ? exitDir === "left"
           ? "translateX(-120%) rotate(-12deg)"
@@ -207,53 +207,88 @@ function TradeCard({ offer, exiting, exitDir }: { offer: TradeOffer; exiting: bo
       {/* Sticker visual */}
       <Box sx={{
         background: cfg.bg,
-        px: 3, pt: 3, pb: 2,
+        px: 4, pt: 5, pb: 4,
         display: "flex", flexDirection: "column", alignItems: "center",
         position: "relative",
-        minHeight: 200,
+        minHeight: 380,
+        justifyContent: "center",
       }}>
         {/* Rarity badge */}
         <Box sx={{
-          position: "absolute", top: 14, right: 14,
+          position: "absolute", top: 18, right: 18,
           bgcolor: `${cfg.color}20`,
           border: `1px solid ${cfg.color}60`,
           borderRadius: "100px",
-          px: 1.25, py: 0.3,
+          px: 1.5, py: 0.4,
         }}>
-          <Typography sx={{ fontSize: "0.6rem", fontWeight: 800, color: cfg.color, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          <Typography sx={{ fontSize: "0.7rem", fontWeight: 800, color: cfg.color, letterSpacing: "0.08em", textTransform: "uppercase" }}>
             {cfg.label}
           </Typography>
         </Box>
 
         {/* Number */}
-        <Typography sx={{ position: "absolute", top: 14, left: 16, fontSize: "0.65rem", color: "rgba(255,255,255,0.3)", fontWeight: 700 }}>
+        <Typography sx={{ position: "absolute", top: 18, left: 20, fontSize: "0.75rem", color: "rgba(255,255,255,0.3)", fontWeight: 700 }}>
           #{offer.number}
         </Typography>
 
-        {/* Flag */}
-        {flag ? (
+        {/* Player photo */}
+        {offer.image_url ? (
+          <Box sx={{ position: "relative", mb: 2.5, mt: 1 }}>
+            <Box
+              component="img"
+              src={offer.image_url}
+              alt={offer.player_name}
+              sx={{
+                width: 180,
+                height: 180,
+                objectFit: "cover",
+                objectPosition: "top center",
+                borderRadius: "50%",
+                border: `3px solid ${cfg.color}60`,
+                boxShadow: `0 0 40px ${cfg.glow}50, 0 8px 24px rgba(0,0,0,0.6)`,
+              }}
+            />
+            {/* Flag badge over photo */}
+            {flag && (
+              <Box
+                component="img"
+                src={flag}
+                alt={offer.team}
+                sx={{
+                  position: "absolute",
+                  bottom: 4, right: 4,
+                  width: 36, height: 24,
+                  objectFit: "cover",
+                  borderRadius: "4px",
+                  border: "2px solid rgba(0,0,0,0.4)",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.5)",
+                }}
+              />
+            )}
+          </Box>
+        ) : flag ? (
           <Box
             component="img"
             src={flag}
             alt={offer.team}
-            sx={{ width: 72, height: 48, objectFit: "cover", borderRadius: "8px", mb: 2, boxShadow: "0 4px 12px rgba(0,0,0,0.4)", mt: 1 }}
+            sx={{ width: 110, height: 74, objectFit: "cover", borderRadius: "10px", mb: 3, boxShadow: "0 6px 20px rgba(0,0,0,0.5)" }}
           />
         ) : (
-          <Box sx={{ width: 72, height: 48, bgcolor: "rgba(255,255,255,0.08)", borderRadius: "8px", mb: 2, mt: 1 }} />
+          <Box sx={{ width: 110, height: 74, bgcolor: "rgba(255,255,255,0.08)", borderRadius: "10px", mb: 3 }} />
         )}
 
         <Typography sx={{
           fontFamily: '"Montserrat",sans-serif',
           fontWeight: 900,
-          fontSize: "1.5rem",
+          fontSize: "2rem",
           color: "#fff",
           textAlign: "center",
           lineHeight: 1.1,
-          textShadow: `0 0 20px ${cfg.glow}80`,
+          textShadow: `0 0 30px ${cfg.glow}90`,
         }}>
           {offer.player_name}
         </Typography>
-        <Typography sx={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", mt: 0.5 }}>
+        <Typography sx={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.5)", mt: 1 }}>
           {offer.team}
         </Typography>
       </Box>
@@ -261,18 +296,18 @@ function TradeCard({ offer, exiting, exitDir }: { offer: TradeOffer; exiting: bo
       {/* Offering user */}
       <Box sx={{
         bgcolor: "#0d1526",
-        px: 3, py: 2,
-        display: "flex", alignItems: "center", gap: 1.5,
+        px: 4, py: 2.5,
+        display: "flex", alignItems: "center", gap: 2,
         borderTop: `1px solid ${cfg.color}20`,
       }}>
-        <Avatar src={offer.user.avatar_url ?? undefined} sx={{ width: 40, height: 40, border: `2px solid ${cfg.color}40` }}>
+        <Avatar src={offer.user.avatar_url ?? undefined} sx={{ width: 48, height: 48, border: `2px solid ${cfg.color}50` }}>
           {!offer.user.avatar_url && offer.user.name[0]}
         </Avatar>
         <Box>
-          <Typography sx={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.2 }}>
+          <Typography sx={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.2 }}>
             está oferecendo
           </Typography>
-          <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 700, fontSize: "0.9rem", color: "#fff" }}>
+          <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 700, fontSize: "1rem", color: "#fff" }}>
             {offer.user.name}
           </Typography>
         </Box>
@@ -484,10 +519,8 @@ export default function FigurinhasPage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            px: 2,
-            pt: 3,
-            maxWidth: LAYOUT.feedMaxWidth,
-            mx: "auto",
+            px: 1.5,
+            pt: 2,
           }}>
             {/* counter */}
             <Typography sx={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.35)", mb: 2, letterSpacing: "0.06em" }}>
