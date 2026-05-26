@@ -63,18 +63,18 @@ const PLAYER_IMAGES: Record<string, string> = {
   "Vinicius Jr.": "/figurinhas/vinicius.jpeg",
 };
 
-const MOCK_INTERESTED: Record<string, Array<{ name: string; avatar: string }>> = {
+const MOCK_INTERESTED: Record<string, Array<{ name: string; avatar: string; postId: string }>> = {
   "Vinicius Jr.": [
-    { name: "Carla M.", avatar: "https://i.pravatar.cc/80?img=47" },
-    { name: "João P.",  avatar: "https://i.pravatar.cc/80?img=67" },
+    { name: "Carla M.", avatar: "https://i.pravatar.cc/80?img=47", postId: "c1" },
+    { name: "João P.",  avatar: "https://i.pravatar.cc/80?img=67", postId: "c2" },
   ],
   "Neymar": [
-    { name: "Felipe S.", avatar: "https://i.pravatar.cc/80?img=53" },
+    { name: "Felipe S.", avatar: "https://i.pravatar.cc/80?img=53", postId: "6" },
   ],
   "Paquetá": [
-    { name: "Carla M.", avatar: "https://i.pravatar.cc/80?img=47" },
-    { name: "Bruno K.", avatar: "https://i.pravatar.cc/80?img=71" },
-    { name: "Isa C.",   avatar: "https://i.pravatar.cc/80?img=45" },
+    { name: "Carla M.", avatar: "https://i.pravatar.cc/80?img=47", postId: "c1" },
+    { name: "Bruno K.", avatar: "https://i.pravatar.cc/80?img=71", postId: "c3" },
+    { name: "Isa C.",   avatar: "https://i.pravatar.cc/80?img=45", postId: "c4" },
   ],
 };
 
@@ -396,6 +396,7 @@ function AnnounceDrawer({ open, onClose, onConfirm }: {
 // ── MeusAnunciosView ───────────────────────────────────────────────────────────
 
 function MeusAnunciosView({ onAdd }: { onAdd: () => void }) {
+  const router = useRouter();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
@@ -448,7 +449,10 @@ function MeusAnunciosView({ onAdd }: { onAdd: () => void }) {
               </Typography>
 
               {interested.length > 0 ? (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  onClick={() => router.push(`/pages/user/figurinhas/chat/${interested[0].postId}`)}
+                  sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", "&:active": { opacity: 0.7 } }}
+                >
                   {/* Avatar stack */}
                   <Box sx={{ display: "flex" }}>
                     {interested.slice(0, 3).map((u, i) => (

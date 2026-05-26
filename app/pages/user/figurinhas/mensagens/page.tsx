@@ -25,43 +25,11 @@ interface Match {
 interface Conversation {
   postId: string;
   name: string;
-  avatarIndex: number;
+  avatar_url: string | null;
   player: string;
   lastMessage: string;
   lastAt: string;
-  unread: number;
 }
-
-
-const MOCK_CONVERSATIONS: Conversation[] = [
-  {
-    postId: "1",
-    name: "Gabriel M.",
-    avatarIndex: 3,
-    player: "Vinicius Jr.",
-    lastMessage: "Pode ser! Me manda a lista das suas repetidas que a gente vê.",
-    lastAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-    unread: 1,
-  },
-  {
-    postId: "3",
-    name: "Lucas F.",
-    avatarIndex: 11,
-    player: "Cristiano Ronaldo",
-    lastMessage: "Perfeito! Só me fala o que você precisa e a gente combina.",
-    lastAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    unread: 0,
-  },
-  {
-    postId: "4",
-    name: "Ana Beatriz",
-    avatarIndex: 9,
-    player: "Neymar",
-    lastMessage: "Pode ser qualquer horário! Me chama quando quiser.",
-    lastAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    unread: 0,
-  },
-];
 
 const GLASS_CARD = {
   backgroundColor: "rgba(21,28,46,0.92)",
@@ -75,13 +43,35 @@ const GLASS_CARD = {
 export default function MensagensPage() {
   const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
 
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem("figurinha_matches") ?? "[]");
-      setMatches(saved);
+      const savedMatches: Match[] = JSON.parse(localStorage.getItem("figurinha_matches") ?? "[]");
+      setMatches(savedMatches);
+
+      const convs: Conversation[] = savedMatches
+        .map((m) => {
+          try {
+            const msgs: Array<{ text: string; time: string; sender: string }> =
+              JSON.parse(localStorage.getItem(`figurinha_chat_${m.postId}`) ?? "[]");
+            if (msgs.length === 0) return null;
+            const last = msgs[msgs.length - 1];
+            return {
+              postId: m.postId,
+              name: m.name,
+              avatar_url: m.avatar_url,
+              player: m.player,
+              lastMessage: last.text,
+              lastAt: new Date().toISOString(),
+            } as Conversation;
+          } catch { return null; }
+        })
+        .filter((c): c is Conversation => c !== null);
+      setConversations(convs);
     } catch {
       setMatches([]);
+      setConversations([]);
     }
   }, []);
 
@@ -206,7 +196,7 @@ export default function MensagensPage() {
             </Box>
 
             <Box sx={{ px: `${LAYOUT.pagePaddingX}px` }}>
-              {MOCK_CONVERSATIONS.length === 0 ? (
+              {conversations.length === 0 ? (
                 <Box sx={{ textAlign: "center", py: 8 }}>
                   <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.875rem" }}>
                     Nenhuma conversa ainda.
@@ -214,7 +204,7 @@ export default function MensagensPage() {
                 </Box>
               ) : (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                  {MOCK_CONVERSATIONS.map((conv) => (
+                  {conversations.map((conv) => (
                     <Box
                       key={conv.postId}
                       onClick={() => router.push(`/pages/user/figurinhas/chat/${conv.postId}`)}
@@ -227,34 +217,14 @@ export default function MensagensPage() {
                         "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,0.35)", transform: "translateY(-1px)" },
                       }}
                     >
-                      <Box sx={{ position: "relative", flexShrink: 0 }}>
-                        <Avatar
-                          src={`https://i.pravatar.cc/80?img=${conv.avatarIndex}`}
-                          sx={{ width: 46, height: 46, border: "2px solid rgba(0,133,66,0.35)" }}
-                        />
-                        {conv.unread > 0 && (
-                          <Box sx={{
-                            position: "absolute", top: -2, right: -2,
-                            width: 16, height: 16, borderRadius: "50%",
-                            backgroundColor: "#008542",
-                            border: "2px solid #151c2e",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                          }}>
-                            <Typography sx={{ fontSize: "0.5rem", fontWeight: 900, color: "#FFF", lineHeight: 1 }}>
-                              {conv.unread}
-                            </Typography>
-                          </Box>
-                        )}
-                      </Box>
+                      <Avatar
+                        src={conv.avatar_url ?? undefined}
+                        sx={{ width: 46, height: 46, border: "2px solid rgba(0,133,66,0.35)", flexShrink: 0 }}
+                      />
 
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.25 }}>
-                          <Typography sx={{
-                            color: "#FFFFFF",
-                            fontWeight: conv.unread > 0 ? 700 : 600,
-                            fontSize: "0.875rem",
-                            fontFamily: '"Montserrat"',
-                          }}>
+                          <Typography sx={{ color: "#FFFFFF", fontWeight: 600, fontSize: "0.875rem", fontFamily: '"Montserrat"' }}>
                             {conv.name}
                           </Typography>
                           <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.6rem", flexShrink: 0 }}>
@@ -267,9 +237,8 @@ export default function MensagensPage() {
                         </Typography>
 
                         <Typography sx={{
-                          color: conv.unread > 0 ? "#FFFFFF" : "rgba(255,255,255,0.45)",
+                          color: "rgba(255,255,255,0.45)",
                           fontSize: "0.75rem",
-                          fontWeight: conv.unread > 0 ? 500 : 400,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",

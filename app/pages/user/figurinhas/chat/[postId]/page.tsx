@@ -18,6 +18,7 @@ const MOCK_POSTS: Record<string, {
   "3": { name: "Lucas F.",    avatarIndex: 11, player: "Cristiano Ronaldo", team: "Portugal" },
   "4": { name: "Ana Beatriz", avatarIndex: 9,  player: "Neymar",            team: "Brasil"   },
   "5": { name: "Pedro Alves", avatarIndex: 15, player: "Lucas Paquetá",     team: "Brasil"   },
+  "6": { name: "Felipe S.",   avatarIndex: 53, player: "Neymar",            team: "Brasil"   },
 };
 
 interface Message {
