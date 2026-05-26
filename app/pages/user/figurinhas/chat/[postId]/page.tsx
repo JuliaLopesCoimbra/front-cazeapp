@@ -12,15 +12,12 @@ const MOCK_POSTS: Record<string, {
   avatarIndex: number;
   player: string;
   team: string;
-  type: "need" | "sell";
 }> = {
-  "1": { name: "Gabriel M.",     avatarIndex: 3,  player: "Vinicius Jr.",  team: "Brasil",     type: "need" },
-  "2": { name: "Maria Silva",    avatarIndex: 25, player: "Endrick",       team: "Brasil",     type: "need" },
-  "3": { name: "Lucas Ferreira", avatarIndex: 8,  player: "Mbappé",        team: "França",     type: "need" },
-  "4": { name: "Ana Beatriz",    avatarIndex: 44, player: "Bellingham",    team: "Inglaterra", type: "need" },
-  "5": { name: "Pedro Alves",    avatarIndex: 12, player: "Neymar Jr.",    team: "Brasil",     type: "sell" },
-  "6": { name: "Fernanda C.",    avatarIndex: 47, player: "Messi",         team: "Argentina",  type: "sell" },
-  "7": { name: "Rafael S.",      avatarIndex: 17, player: "Rodrygo",       team: "Brasil",     type: "sell" },
+  "1": { name: "Gabriel M.",  avatarIndex: 3,  player: "Vinicius Jr.",      team: "Brasil"   },
+  "2": { name: "Maria Silva", avatarIndex: 5,  player: "Messi",             team: "Argentina"},
+  "3": { name: "Lucas F.",    avatarIndex: 11, player: "Cristiano Ronaldo", team: "Portugal" },
+  "4": { name: "Ana Beatriz", avatarIndex: 9,  player: "Neymar",            team: "Brasil"   },
+  "5": { name: "Pedro Alves", avatarIndex: 15, player: "Lucas Paquetá",     team: "Brasil"   },
 };
 
 interface Message {
@@ -71,21 +68,19 @@ export default function FigurinhasChatPage() {
   const [phase, setPhase]         = useState<"quick" | "typing" | "open">("quick");
   const messagesEndRef            = useRef<HTMLDivElement>(null);
 
-  const quickReplies = post.type === "need"
-    ? [
-        `Oi! Tenho a figurinha do ${post.player} disponível`,
-        `Ainda precisa do ${post.player}?`,
-        "Podemos fazer uma troca?",
-        "Qual o preço que você topa?",
-      ]
-    : [
-        `Oi! Quero comprar a figurinha do ${post.player}`,
-        `Ainda tem o ${post.player} disponível?`,
-        "Quanto você quer pela figurinha?",
-        "Podemos trocar por outra?",
-      ];
+  const quickReplies = [
+    `Oi ${post.name.split(" ")[0]}! Topei a troca do ${post.player}!`,
+    `Qual figurinha você quer em troca?`,
+    `Tenho repetidas que podem te interessar!`,
+    `Quando podemos fazer a troca?`,
+  ];
 
-  const botReply = "Tenho disponível, por onde posso te enviar?";
+  const botReplies = [
+    `Oi! Que bom! Tenho interesse em algumas repetidas. Quais você tem disponível?`,
+    `Pode ser! Me manda a lista das suas repetidas que a gente vê.`,
+    `Perfeito! Só me fala o que você precisa e a gente combina.`,
+    `Pode ser qualquer horário! Me chama quando quiser.`,
+  ];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -95,8 +90,10 @@ export default function FigurinhasChatPage() {
     const msg: Message = { id: Date.now().toString(), sender: "me", text, time: nowTime() };
     setMessages([msg]);
     setPhase("typing");
+    const replyIndex = quickReplies.indexOf(text);
+    const replyText = botReplies[replyIndex] ?? botReplies[0];
     setTimeout(() => {
-      const reply: Message = { id: (Date.now() + 1).toString(), sender: "them", text: botReply, time: nowTime() };
+      const reply: Message = { id: (Date.now() + 1).toString(), sender: "them", text: replyText, time: nowTime() };
       setMessages((prev) => [...prev, reply]);
       setPhase("open");
     }, 1600);
@@ -137,21 +134,18 @@ export default function FigurinhasChatPage() {
             {post.name}
           </Typography>
           <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", lineHeight: 1.2 }}>
-            {post.type === "need" ? `Precisa de ${post.player}` : `Vendendo ${post.player}`} · {post.team}
+            {post.player} · {post.team}
           </Typography>
         </Box>
 
-        {/* chip de tipo */}
+        {/* chip de match */}
         <Box sx={{
-          backgroundColor: post.type === "need" ? "rgba(232,23,93,0.12)" : "rgba(0,133,66,0.12)",
-          border: `1px solid ${post.type === "need" ? "rgba(232,23,93,0.3)" : "rgba(0,133,66,0.3)"}`,
+          backgroundColor: "rgba(255,209,0,0.12)",
+          border: "1px solid rgba(255,209,0,0.35)",
           borderRadius: CAZE_RADIUS.pill, px: 1.25, py: 0.4,
         }}>
-          <Typography sx={{
-            color: post.type === "need" ? "#E8175D" : "#008542",
-            fontSize: "0.6rem", fontWeight: 700,
-          }}>
-            {post.type === "need" ? "Precisando" : "Vendendo"}
+          <Typography sx={{ color: "#FFD100", fontSize: "0.6rem", fontWeight: 700 }}>
+            Match!
           </Typography>
         </Box>
       </Box>

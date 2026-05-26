@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import {
@@ -131,8 +131,8 @@ function MatchOverlay({
       {/* Avatares lado a lado */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 0, mb: 4 }}>
         <Avatar
-          src="https://i.pravatar.cc/80?img=25"
-          sx={{ width: 80, height: 80, border: "3px solid #FFD100", zIndex: 1 }}
+          src="/assets/figma/logo-top.png"
+          sx={{ width: 80, height: 80, border: "3px solid #FFD100", zIndex: 1, bgcolor: "#000" }}
         />
         <Box sx={{ width: 32, height: 32, borderRadius: "50%", bgcolor: "#009440", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2, mx: -1.5, border: "2px solid #060d1a" }}>
           <FavoriteIcon sx={{ fontSize: 16, color: "#fff" }} />
@@ -185,131 +185,238 @@ function MatchOverlay({
 
 // ── TradeCard ──────────────────────────────────────────────────────────────────
 
-function TradeCard({ offer, exiting, exitDir }: { offer: TradeOffer; exiting: boolean; exitDir: "left" | "right" | null }) {
+const DRAG_THRESHOLD = 90;
+
+function TradeCard({
+  offer, exiting, exitDir, onPass, onWant,
+}: {
+  offer: TradeOffer;
+  exiting: boolean;
+  exitDir: "left" | "right" | null;
+  onPass: () => void;
+  onWant: () => void;
+}) {
   const cfg = RARITY_CONFIG[offer.rarity];
   const flag = flagUrl(offer.team);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const startX = useRef(0);
+
+  function onPointerDown(e: React.PointerEvent) {
+    if (exiting) return;
+    startX.current = e.clientX;
+    setDragging(true);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e: React.PointerEvent) {
+    if (!dragging || exiting) return;
+    setDragX(e.clientX - startX.current);
+  }
+
+  function onPointerUp() {
+    if (!dragging) return;
+    setDragging(false);
+    if (dragX > DRAG_THRESHOLD) {
+      onPass();           // arrastar direita = não
+    } else if (dragX < -DRAG_THRESHOLD) {
+      onWant();           // arrastar esquerda = quero
+    } else {
+      setDragX(0);        // snap back
+    }
+  }
+
+  const rotation = dragX * 0.05;
+  const progress = Math.min(Math.abs(dragX) / DRAG_THRESHOLD, 1);
+  const showNao   = dragX >  24;
+  const showQuero = dragX < -24;
+
+  const transform = exiting
+    ? exitDir === "left"
+      ? "translateX(-130%) rotate(-12deg)"
+      : "translateX(130%) rotate(12deg)"
+    : `translateX(${dragX}px) rotate(${rotation}deg)`;
 
   return (
-    <Box sx={{
-      width: "100%",
-      borderRadius: "20px",
-      overflow: "hidden",
-      boxShadow: `0 8px 64px ${cfg.glow}40, 0 2px 20px rgba(0,0,0,0.6)`,
-      border: `1.5px solid ${cfg.color}40`,
-      transform: exiting
-        ? exitDir === "left"
-          ? "translateX(-120%) rotate(-12deg)"
-          : "translateX(120%) rotate(12deg)"
-        : "translateX(0) rotate(0deg)",
-      opacity: exiting ? 0 : 1,
-      transition: "transform 0.35s ease-in, opacity 0.35s ease-in",
-    }}>
-      {/* Sticker visual */}
-      <Box sx={{
-        background: cfg.bg,
-        px: 4, pt: 5, pb: 4,
-        display: "flex", flexDirection: "column", alignItems: "center",
+    <Box
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={() => { setDragging(false); setDragX(0); }}
+      sx={{
+        width: "100%",
+        height: "100%",
         position: "relative",
-        minHeight: 380,
-        justifyContent: "center",
+        overflow: "hidden",
+        borderRadius: "20px",
+        boxShadow: `0 8px 64px ${cfg.glow}30`,
+        transform,
+        opacity: exiting ? 0 : 1,
+        transition: dragging ? "none" : "transform 0.35s ease-out, opacity 0.35s ease-in",
+        cursor: dragging ? "grabbing" : "grab",
+        userSelect: "none",
+        touchAction: "none",
+      }}
+    >
+      {/* Indicator — NÃO (direita) */}
+      <Box sx={{
+        position: "absolute", inset: 0, zIndex: 10,
+        display: "flex", alignItems: "center", justifyContent: "flex-start",
+        pl: 3, pointerEvents: "none",
+        opacity: showNao ? progress : 0,
+        transition: dragging ? "none" : "opacity 0.2s",
       }}>
-        {/* Rarity badge */}
-        <Box sx={{
-          position: "absolute", top: 18, right: 18,
-          bgcolor: `${cfg.color}20`,
-          border: `1px solid ${cfg.color}60`,
-          borderRadius: "100px",
-          px: 1.5, py: 0.4,
+        <Typography sx={{
+          fontFamily: '"Montserrat",sans-serif', fontWeight: 900, fontSize: "2.5rem",
+          color: "#EF4444", border: "4px solid #EF4444",
+          px: 2, py: 0.5, borderRadius: "10px",
+          transform: "rotate(-15deg)",
+          textShadow: "0 2px 8px rgba(0,0,0,0.5)",
         }}>
-          <Typography sx={{ fontSize: "0.7rem", fontWeight: 800, color: cfg.color, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            {cfg.label}
-          </Typography>
-        </Box>
+          NÃO
+        </Typography>
+      </Box>
 
-        {/* Number */}
-        <Typography sx={{ position: "absolute", top: 18, left: 20, fontSize: "0.75rem", color: "rgba(255,255,255,0.3)", fontWeight: 700 }}>
+      {/* Indicator — QUERO (esquerda) */}
+      <Box sx={{
+        position: "absolute", inset: 0, zIndex: 10,
+        display: "flex", alignItems: "center", justifyContent: "flex-end",
+        pr: 3, pointerEvents: "none",
+        opacity: showQuero ? progress : 0,
+        transition: dragging ? "none" : "opacity 0.2s",
+      }}>
+        <Typography sx={{
+          fontFamily: '"Montserrat",sans-serif', fontWeight: 900, fontSize: "2.5rem",
+          color: "#009440", border: "4px solid #009440",
+          px: 2, py: 0.5, borderRadius: "10px",
+          transform: "rotate(15deg)",
+          textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+        }}>
+          QUERO!
+        </Typography>
+      </Box>
+      {/* Background photo */}
+      {offer.image_url ? (
+        <Box
+          component="img"
+          src={offer.image_url}
+          alt={offer.player_name}
+          sx={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            objectFit: "cover", objectPosition: "top center",
+          }}
+        />
+      ) : (
+        <Box sx={{ position: "absolute", inset: 0, background: cfg.bg }} />
+      )}
+
+      {/* Gradient overlay */}
+      <Box sx={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.65) 65%, rgba(0,0,0,0.96) 100%)",
+      }} />
+
+      {/* Top row: number + flag */}
+      <Box sx={{ position: "absolute", top: 20, left: 20, right: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography sx={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", fontWeight: 700 }}>
           #{offer.number}
         </Typography>
-
-        {/* Player photo */}
-        {offer.image_url ? (
-          <Box sx={{ position: "relative", mb: 2.5, mt: 1 }}>
-            <Box
-              component="img"
-              src={offer.image_url}
-              alt={offer.player_name}
-              sx={{
-                width: 180,
-                height: 180,
-                objectFit: "cover",
-                objectPosition: "top center",
-                borderRadius: "50%",
-                border: `3px solid ${cfg.color}60`,
-                boxShadow: `0 0 40px ${cfg.glow}50, 0 8px 24px rgba(0,0,0,0.6)`,
-              }}
-            />
-            {/* Flag badge over photo */}
-            {flag && (
-              <Box
-                component="img"
-                src={flag}
-                alt={offer.team}
-                sx={{
-                  position: "absolute",
-                  bottom: 4, right: 4,
-                  width: 36, height: 24,
-                  objectFit: "cover",
-                  borderRadius: "4px",
-                  border: "2px solid rgba(0,0,0,0.4)",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.5)",
-                }}
-              />
-            )}
-          </Box>
-        ) : flag ? (
+        {flag && (
           <Box
             component="img"
             src={flag}
             alt={offer.team}
-            sx={{ width: 110, height: 74, objectFit: "cover", borderRadius: "10px", mb: 3, boxShadow: "0 6px 20px rgba(0,0,0,0.5)" }}
+            sx={{ width: 40, height: 27, objectFit: "cover", borderRadius: "5px", boxShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
           />
-        ) : (
-          <Box sx={{ width: 110, height: 74, bgcolor: "rgba(255,255,255,0.08)", borderRadius: "10px", mb: 3 }} />
         )}
+      </Box>
 
+      {/* Bottom info */}
+      <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, px: 3, pb: 2 }}>
+        {/* Player name + team */}
         <Typography sx={{
           fontFamily: '"Montserrat",sans-serif',
           fontWeight: 900,
-          fontSize: "2rem",
+          fontSize: "2.2rem",
           color: "#fff",
-          textAlign: "center",
-          lineHeight: 1.1,
-          textShadow: `0 0 30px ${cfg.glow}90`,
+          lineHeight: 1.05,
+          textShadow: "0 2px 12px rgba(0,0,0,0.8)",
         }}>
           {offer.player_name}
         </Typography>
-        <Typography sx={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.5)", mt: 1 }}>
+        <Typography sx={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.6)", mt: 0.5, mb: 2.5 }}>
           {offer.team}
         </Typography>
-      </Box>
 
-      {/* Offering user */}
-      <Box sx={{
-        bgcolor: "#0d1526",
-        px: 4, py: 2.5,
-        display: "flex", alignItems: "center", gap: 2,
-        borderTop: `1px solid ${cfg.color}20`,
-      }}>
-        <Avatar src={offer.user.avatar_url ?? undefined} sx={{ width: 48, height: 48, border: `2px solid ${cfg.color}50` }}>
-          {!offer.user.avatar_url && offer.user.name[0]}
-        </Avatar>
-        <Box>
-          <Typography sx={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.2 }}>
-            está oferecendo
-          </Typography>
-          <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 700, fontSize: "1rem", color: "#fff" }}>
-            {offer.user.name}
-          </Typography>
+        {/* Offering user */}
+        <Box sx={{
+          display: "flex", alignItems: "center", gap: 1.5,
+          bgcolor: "rgba(0,0,0,0.35)",
+          backdropFilter: "blur(10px)",
+          borderRadius: "14px",
+          px: 2, py: 1.25,
+          mb: 2.5,
+          border: "1px solid rgba(255,255,255,0.1)",
+        }}>
+          <Avatar src={offer.user.avatar_url ?? undefined} sx={{ width: 40, height: 40, border: `2px solid ${cfg.color}50` }}>
+            {!offer.user.avatar_url && offer.user.name[0]}
+          </Avatar>
+          <Box>
+            <Typography sx={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.2 }}>
+              está oferecendo
+            </Typography>
+            <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 700, fontSize: "0.95rem", color: "#fff" }}>
+              {offer.user.name}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Action buttons */}
+        <Box sx={{ display: "flex", gap: 2, justifyContent: "center", pb: 1 }}>
+          <Box
+            component="button"
+            onClick={onPass}
+            disabled={exiting}
+            sx={{
+              flex: 1, height: 52,
+              borderRadius: "14px",
+              bgcolor: "rgba(239,68,68,0.15)",
+              border: "1.5px solid rgba(239,68,68,0.5)",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
+              cursor: "pointer",
+              transition: "background-color 0.15s",
+              "&:hover": { bgcolor: "rgba(239,68,68,0.28)" },
+              "&:active": { transform: "scale(0.97)" },
+            }}
+          >
+            <CloseIcon sx={{ color: "#EF4444", fontSize: 22 }} />
+            <Typography sx={{ color: "#EF4444", fontFamily: '"Montserrat",sans-serif', fontWeight: 700, fontSize: "0.85rem" }}>
+              Não
+            </Typography>
+          </Box>
+
+          <Box
+            component="button"
+            onClick={onWant}
+            disabled={exiting}
+            sx={{
+              flex: 1, height: 52,
+              borderRadius: "14px",
+              bgcolor: "rgba(0,148,64,0.18)",
+              border: "1.5px solid rgba(0,148,64,0.6)",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
+              cursor: "pointer",
+              transition: "background-color 0.15s",
+              "&:hover": { bgcolor: "rgba(0,148,64,0.32)" },
+              "&:active": { transform: "scale(0.97)" },
+            }}
+          >
+            <FavoriteIcon sx={{ color: "#009440", fontSize: 22 }} />
+            <Typography sx={{ color: "#009440", fontFamily: '"Montserrat",sans-serif', fontWeight: 700, fontSize: "0.85rem" }}>
+              Quero!
+            </Typography>
+          </Box>
         </Box>
       </Box>
     </Box>
@@ -461,7 +568,10 @@ export default function FigurinhasPage() {
     setExiting(true);
     setTimeout(() => {
       if (dir === "right") setMatchOffer(current);
-      setOffers((prev) => prev.slice(1));
+      setOffers((prev) => {
+        const next = prev.slice(1);
+        return next.length === 0 ? MOCK_OFFERS : next;
+      });
       setExiting(false);
       setExitDir(null);
     }, 350);
@@ -490,8 +600,9 @@ export default function FigurinhasPage() {
             position: "relative",
             zIndex: 1,
             ml: { xs: 0, md: `${SIDEBAR_WIDTH_PX}px` },
-            minHeight: "100vh",
-            pb: `${LAYOUT.bottomNavClearance}px`,
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
             backgroundColor: "#0A1128",
           }}
         >
@@ -515,95 +626,17 @@ export default function FigurinhasPage() {
             }
           />
 
-          <Box sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            px: 1.5,
-            pt: 2,
-          }}>
-            {/* counter */}
-            <Typography sx={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.35)", mb: 2, letterSpacing: "0.06em" }}>
-              {offers.length > 0 ? `${offers.length} oferta${offers.length > 1 ? "s" : ""} disponível${offers.length > 1 ? "s" : ""}` : ""}
-            </Typography>
-
-            {current ? (
-              <>
-                {/* Card */}
-                <TradeCard offer={current} exiting={exiting} exitDir={exitDir} />
-
-                {/* Action buttons */}
-                <Box sx={{ display: "flex", gap: 4, mt: 4, alignItems: "center" }}>
-                  {/* Não */}
-                  <Box
-                    component="button"
-                    onClick={handlePass}
-                    disabled={exiting}
-                    sx={{
-                      width: 64, height: 64,
-                      borderRadius: "50%",
-                      bgcolor: "rgba(239,68,68,0.12)",
-                      border: "2px solid rgba(239,68,68,0.4)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "transform 0.1s, background-color 0.15s",
-                      "&:hover": { bgcolor: "rgba(239,68,68,0.22)", transform: "scale(1.08)" },
-                      "&:active": { transform: "scale(0.95)" },
-                    }}
-                  >
-                    <CloseIcon sx={{ color: "#EF4444", fontSize: 28 }} />
-                  </Box>
-
-                  {/* Quero */}
-                  <Box
-                    component="button"
-                    onClick={handleWant}
-                    disabled={exiting}
-                    sx={{
-                      width: 72, height: 72,
-                      borderRadius: "50%",
-                      bgcolor: "rgba(0,148,64,0.15)",
-                      border: "2px solid rgba(0,148,64,0.5)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "transform 0.1s, background-color 0.15s",
-                      "&:hover": { bgcolor: "rgba(0,148,64,0.28)", transform: "scale(1.08)" },
-                      "&:active": { transform: "scale(0.95)" },
-                    }}
-                  >
-                    <FavoriteIcon sx={{ color: "#009440", fontSize: 32 }} />
-                  </Box>
-                </Box>
-
-                {/* Labels */}
-                <Box sx={{ display: "flex", gap: 5.5, mt: 1 }}>
-                  <Typography sx={{ fontSize: "0.65rem", color: "rgba(239,68,68,0.7)", fontWeight: 700, width: 64, textAlign: "center" }}>Não</Typography>
-                  <Typography sx={{ fontSize: "0.65rem", color: "rgba(0,148,64,0.7)", fontWeight: 700, width: 72, textAlign: "center" }}>Quero!</Typography>
-                </Box>
-              </>
-            ) : (
-              /* Empty state */
-              <Box sx={{ textAlign: "center", pt: 8 }}>
-                <Typography sx={{ fontSize: "3rem", mb: 2 }}>📭</Typography>
-                <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 800, fontSize: "1.1rem", color: "#fff", mb: 1 }}>
-                  Você viu tudo por hoje!
-                </Typography>
-                <Typography sx={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.45)", mb: 3 }}>
-                  Volte mais tarde ou anuncie suas repetidas.
-                </Typography>
-                <Box
-                  component="button"
-                  onClick={() => setDrawerOpen(true)}
-                  sx={{
-                    px: 3, py: 1.2,
-                    bgcolor: "#FFD100", border: 0, borderRadius: "12px",
-                    fontFamily: '"Montserrat",sans-serif', fontWeight: 800, fontSize: "0.9rem", color: "#000",
-                    cursor: "pointer",
-                  }}
-                >
-                  Anunciar figurinha
-                </Box>
-              </Box>
+          {/* Card area — fills between TopBar and BottomNav */}
+          <Box sx={{ flex: 1, px: 1.5, py: 1.5, pb: `${LAYOUT.bottomNavClearance + 8}px` }}>
+            {current && (
+              <TradeCard
+                key={current.id}
+                offer={current}
+                exiting={exiting}
+                exitDir={exitDir}
+                onPass={handlePass}
+                onWant={handleWant}
+              />
             )}
           </Box>
         </Box>
