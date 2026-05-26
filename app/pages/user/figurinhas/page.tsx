@@ -2,19 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import {
-  Box, Typography, Tabs, Tab, Avatar,
-  Drawer, ToggleButton, ToggleButtonGroup,
-  IconButton, Badge,
+  Box, Typography, Avatar, IconButton, Badge, Drawer,
+  ToggleButton, ToggleButtonGroup,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddIcon from "@mui/icons-material/Add";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PublicIcon from "@mui/icons-material/Public";
 import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BottomNav from "@/app/components/layout/BottomNav";
 import TopBar from "@/app/components/layout/TopBar";
 import PageAmbientBackground from "@/app/components/layout/PageAmbientBackground";
@@ -22,15 +24,22 @@ import Sidebar, { SIDEBAR_WIDTH_PX } from "@/app/components/layout/Sidebar";
 import { LAYOUT } from "@/app/constants/designTokens";
 import { CAZE_RADIUS } from "@/app/constants/cazeRadius";
 import CazeButton from "@/app/components/shared/CazeButton";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
-// ── tipos ─────────────────────────────────────────────────────────────────────
+// ── tipos ──────────────────────────────────────────────────────────────────────
 
+type Rarity = "common" | "rare" | "epic" | "legendary";
 type PostType = "need" | "sell";
-type TabValue = "need" | "sell" | "myads";
-type CategoryKey = "selecao" | "tacas" | "escudos";
 type CatalogStep = "category" | "team" | "player";
+type CategoryKey = "selecao" | "tacas" | "escudos";
+
+interface TradeOffer {
+  id: string;
+  user: { name: string; avatar_url: string | null };
+  player_name: string;
+  team: string;
+  rarity: Rarity;
+  number: number;
+}
 
 interface StickerPost {
   id: string;
@@ -41,7 +50,7 @@ interface StickerPost {
   created_at: string;
 }
 
-// ── catálogo de figurinhas ────────────────────────────────────────────────────
+// ── dados ──────────────────────────────────────────────────────────────────────
 
 const COUNTRY_CODES: Record<string, string> = {
   "Brasil": "br", "Argentina": "ar", "França": "fr", "Alemanha": "de",
@@ -50,189 +59,231 @@ const COUNTRY_CODES: Record<string, string> = {
   "Japão": "jp", "Coreia do Sul": "kr", "Austrália": "au", "Suíça": "ch",
   "Estados Unidos": "us", "México": "mx", "Canadá": "ca", "Uruguai": "uy",
   "Colômbia": "co", "Equador": "ec", "Sérvia": "rs", "Polônia": "pl",
-  "Dinamarca": "dk", "Turquia": "tr", "Ucrânia": "ua", "Áustria": "at",
 };
+
+const RARITY_CONFIG: Record<Rarity, { label: string; color: string; bg: string; glow: string }> = {
+  common:    { label: "Comum",    color: "#94A3B8", bg: "linear-gradient(160deg,#1e293b,#0f172a)",       glow: "#94A3B8" },
+  rare:      { label: "Rara",     color: "#60A5FA", bg: "linear-gradient(160deg,#1e3a8a,#0f172a)",       glow: "#3B82F6" },
+  epic:      { label: "Épica",    color: "#C084FC", bg: "linear-gradient(160deg,#581c87,#1e1b4b)",       glow: "#A855F7" },
+  legendary: { label: "Lendária", color: "#FCD34D", bg: "linear-gradient(160deg,#92400e,#1c1917)",       glow: "#F59E0B" },
+};
+
+const MOCK_OFFERS: TradeOffer[] = [
+  { id: "1", user: { name: "Gabriel M.",   avatar_url: "https://i.pravatar.cc/80?img=3"  }, player_name: "Vinicius Jr.", team: "Brasil",    rarity: "legendary", number: 42  },
+  { id: "2", user: { name: "Maria Silva",  avatar_url: "https://i.pravatar.cc/80?img=5"  }, player_name: "Mbappé",       team: "França",    rarity: "epic",      number: 87  },
+  { id: "3", user: { name: "Lucas F.",     avatar_url: "https://i.pravatar.cc/80?img=11" }, player_name: "Bellingham",   team: "Inglaterra",rarity: "rare",      number: 123 },
+  { id: "4", user: { name: "Ana Beatriz",  avatar_url: "https://i.pravatar.cc/80?img=9"  }, player_name: "Endrick",      team: "Brasil",    rarity: "rare",      number: 38  },
+  { id: "5", user: { name: "Pedro Alves",  avatar_url: "https://i.pravatar.cc/80?img=15" }, player_name: "Messi",        team: "Argentina", rarity: "legendary", number: 10  },
+];
 
 const CATALOG: Record<CategoryKey, Array<{ name: string; players: string[] }>> = {
   selecao: [
-    { name: "Brasil",       players: ["Alisson", "Éderson", "Weverton", "Danilo", "Militão", "Marquinhos", "Bremer", "Wendell", "Casemiro", "Lucas Paquetá", "Bruno Guimarães", "Gerson", "Raphinha", "Vinicius Jr.", "Rodrygo", "Gabriel Martinelli", "Endrick", "Pedro", "Richarlison"] },
-    { name: "Argentina",    players: ["E. Martínez", "N. Molina", "Romero", "Otamendi", "Acuña", "De Paul", "Enzo Fernández", "Mac Allister", "Messi", "Lautaro Martínez", "J. Álvarez", "Di María"] },
-    { name: "França",       players: ["Maignan", "Pavard", "Upamecano", "Saliba", "T. Hernandez", "Tchouameni", "Camavinga", "Griezmann", "Mbappé", "Dembélé", "Giroud", "Rabiot"] },
-    { name: "Alemanha",     players: ["Neuer", "Kimmich", "Rüdiger", "Schlotterbeck", "Raum", "Kroos", "Gündogan", "Müller", "Gnabry", "Havertz", "Wirtz", "Sané"] },
-    { name: "Espanha",      players: ["Unai Simón", "Carvajal", "Le Normand", "Laporte", "Cucurella", "Pedri", "Rodri", "Fabián Ruiz", "Yamal", "Morata", "Ferran Torres", "Olmo"] },
-    { name: "Portugal",     players: ["Diogo Costa", "J. Cancelo", "Rúben Dias", "Pepe", "N. Mendes", "Vitinha", "Bruno Fernandes", "Bernardo Silva", "Cristiano Ronaldo", "Rafael Leão", "G. Ramos"] },
-    { name: "Inglaterra",   players: ["Pickford", "Alexander-Arnold", "Stones", "Maguire", "Shaw", "Bellingham", "Rice", "Saka", "Rashford", "Kane", "Sterling", "Grealish"] },
-    { name: "Holanda",      players: ["Flekken", "Dumfries", "De Vrij", "Van Dijk", "Blind", "De Jong", "De Roon", "Gakpo", "Bergwijn", "Depay", "Xavi Simons"] },
-    { name: "México",       players: ["Ochoa", "Sánchez", "Moreno", "Montes", "Gallardo", "E. Álvarez", "Herrera", "H. Lozano", "Martín", "Jiménez", "Vega"] },
-    { name: "Estados Unidos", players: ["Turner", "Dest", "Richards", "Long", "Robinson", "McKennie", "Musah", "Reyna", "Weah", "Pulisic", "Ferreira"] },
-    { name: "Uruguai",      players: ["Rochet", "Nández", "Giménez", "Godín", "Olivera", "Valverde", "Bentancur", "Vecino", "De Arrascaeta", "Suárez", "Núñez", "Pellistri"] },
-    { name: "Colômbia",     players: ["Vargas", "Muñoz", "Dávinson", "Cuesta", "Mojica", "Lerma", "Uribe", "J. Díaz", "J. Rodríguez", "Borré", "Córdoba"] },
-    { name: "Senegal",      players: ["E. Mendy", "Sabaly", "Koulibaly", "Niakhate", "Jakobs", "Gana Gueye", "P. Gueye", "Diatta", "Mané", "Dia", "Diedhiou"] },
-    { name: "Marrocos",     players: ["Bounou", "Hakimi", "El Yamiq", "Aguerd", "Mazraoui", "Amrabat", "Ounahi", "Ziyech", "En-Nesyri", "Boufal", "Sabiri"] },
-    { name: "Japão",        players: ["Gonda", "Tomiyasu", "Itakura", "Yoshida", "Nagatomo", "Endo", "Tanaka", "Kamada", "Doan", "Minamino", "Asano"] },
-    { name: "Coreia do Sul", players: ["Kim Seung-gyu", "Kim Moon-hwan", "Kim Min-jae", "Kwon Kyung-won", "Kim Jin-su", "Hwang In-beom", "Son Heung-min", "Lee Jae-sung", "Hwang Hee-chan", "Cho Gue-sung"] },
+    { name: "Brasil",    players: ["Alisson","Militão","Marquinhos","Casemiro","Lucas Paquetá","Raphinha","Vinicius Jr.","Rodrygo","Endrick","Pedro","Richarlison"] },
+    { name: "Argentina", players: ["E. Martínez","Romero","Otamendi","De Paul","Enzo Fernández","Mac Allister","Messi","Lautaro Martínez","J. Álvarez","Di María"] },
+    { name: "França",    players: ["Maignan","Upamecano","Saliba","Camavinga","Griezmann","Mbappé","Dembélé","Tchouameni","Rabiot"] },
+    { name: "Alemanha",  players: ["Neuer","Kimmich","Rüdiger","Kroos","Gündogan","Müller","Havertz","Wirtz","Sané"] },
+    { name: "Espanha",   players: ["Unai Simón","Carvajal","Le Normand","Pedri","Rodri","Fabián Ruiz","Yamal","Morata","Olmo"] },
+    { name: "Portugal",  players: ["Diogo Costa","Rúben Dias","Vitinha","Bruno Fernandes","Bernardo Silva","Cristiano Ronaldo","Rafael Leão"] },
+    { name: "Inglaterra",players: ["Pickford","Alexander-Arnold","Stones","Bellingham","Rice","Saka","Kane","Rashford"] },
   ],
-  tacas: [
-    { name: "Troféus", players: ["Taça Jules Rimet", "Taça FIFA", "Troféu Copa 2026", "Troféu de Artilheiro", "Troféu Melhor Jogador", "Troféu Melhor Goleiro", "Troféu Fair Play"] },
-  ],
-  escudos: [
-    { name: "Escudos", players: ["Escudo Brasil", "Escudo Argentina", "Escudo França", "Escudo Alemanha", "Escudo Espanha", "Escudo Portugal", "Escudo Inglaterra", "Escudo Holanda", "Escudo México", "Escudo Estados Unidos", "Escudo Uruguai", "Escudo Colômbia", "Escudo Senegal", "Escudo Marrocos", "Escudo Japão", "Escudo FIFA Copa 2026"] },
-  ],
+  tacas:   [{ name: "Troféus",  players: ["Taça Jules Rimet","Taça FIFA","Troféu Copa 2026","Troféu Artilheiro","Troféu Melhor Jogador"] }],
+  escudos: [{ name: "Escudos",  players: ["Escudo Brasil","Escudo Argentina","Escudo França","Escudo Alemanha","Escudo Espanha","Escudo Portugal","Escudo FIFA Copa 2026"] }],
 };
 
 const CATEGORIES = [
-  { key: "selecao" as CategoryKey, label: "Seleção",  Icon: PublicIcon,               color: "#F5C900" },
-  { key: "tacas"   as CategoryKey, label: "Taças",    Icon: EmojiEventsOutlinedIcon,  color: "#F5C900" },
-  { key: "escudos" as CategoryKey, label: "Escudos",  Icon: ShieldOutlinedIcon,       color: "#F5C900" },
+  { key: "selecao" as CategoryKey, label: "Seleção",  Icon: PublicIcon              },
+  { key: "tacas"   as CategoryKey, label: "Taças",    Icon: EmojiEventsOutlinedIcon },
+  { key: "escudos" as CategoryKey, label: "Escudos",  Icon: ShieldOutlinedIcon      },
 ];
 
-// ── mock de posts ─────────────────────────────────────────────────────────────
+// ── helpers ────────────────────────────────────────────────────────────────────
 
-const MOCK: StickerPost[] = [
-  { id: "1", type: "need", user: { name: "Gabriel M.",     avatar_url: "https://i.pravatar.cc/40?img=3"  }, player_name: "Vinicius Jr.", team: "Brasil",     created_at: new Date(Date.now() - 1000*60*30).toISOString() },
-  { id: "2", type: "need", user: { name: "Maria Silva",    avatar_url: "https://i.pravatar.cc/40?img=5"  }, player_name: "Endrick",      team: "Brasil",     created_at: new Date(Date.now() - 1000*60*60*2).toISOString() },
-  { id: "3", type: "need", user: { name: "Lucas Ferreira", avatar_url: "https://i.pravatar.cc/40?img=11" }, player_name: "Mbappé",       team: "França",     created_at: new Date(Date.now() - 1000*60*60*5).toISOString() },
-  { id: "4", type: "need", user: { name: "Ana Beatriz",    avatar_url: "https://i.pravatar.cc/40?img=9"  }, player_name: "Bellingham",   team: "Inglaterra", created_at: new Date(Date.now() - 1000*60*60*8).toISOString() },
-  { id: "5", type: "sell", user: { name: "Pedro Alves",    avatar_url: "https://i.pravatar.cc/40?img=15" }, player_name: "Neymar Jr.",   team: "Brasil",     created_at: new Date(Date.now() - 1000*60*45).toISOString() },
-  { id: "6", type: "sell", user: { name: "Fernanda C.",    avatar_url: "https://i.pravatar.cc/40?img=20" }, player_name: "Messi",        team: "Argentina",  created_at: new Date(Date.now() - 1000*60*60*3).toISOString() },
-  { id: "7", type: "sell", user: { name: "Rafael S.",      avatar_url: "https://i.pravatar.cc/40?img=7"  }, player_name: "Rodrygo",      team: "Brasil",     created_at: new Date(Date.now() - 1000*60*60*6).toISOString() },
-];
-
-const GLASS_CARD = {
-  bgcolor: "rgba(21,28,46,0.92)",
-  borderRadius: CAZE_RADIUS.md,
-  border: "1px solid rgba(255,255,255,0.10)",
-  boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
-} as const;
-
-function timeAgo(iso: string) {
-  return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: ptBR });
+function flagUrl(team: string) {
+  const code = COUNTRY_CODES[team];
+  return code ? `https://flagcdn.com/w80/${code}.png` : null;
 }
 
-// ── componente PostCard ───────────────────────────────────────────────────────
+// ── MatchOverlay ───────────────────────────────────────────────────────────────
 
-function PostCard({
-  post,
-  onContact,
-  onRemove,
+function MatchOverlay({
+  offer,
+  onChat,
+  onContinue,
 }: {
-  post: StickerPost;
-  onContact?: (id: string) => void;
-  onRemove?: (id: string) => void;
+  offer: TradeOffer;
+  onChat: () => void;
+  onContinue: () => void;
 }) {
-  const isNeed = post.type === "need";
+  const content = (
+    <Box sx={{
+      position: "fixed",
+      inset: 0,
+      zIndex: 9999,
+      background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,148,64,0.25) 0%, transparent 70%), linear-gradient(160deg,#060d1a,#0a1128)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      px: 3,
+      textAlign: "center",
+    }}>
+      {/* Avatares lado a lado */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0, mb: 4 }}>
+        <Avatar
+          src="https://i.pravatar.cc/80?img=25"
+          sx={{ width: 80, height: 80, border: "3px solid #FFD100", zIndex: 1 }}
+        />
+        <Box sx={{ width: 32, height: 32, borderRadius: "50%", bgcolor: "#009440", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2, mx: -1.5, border: "2px solid #060d1a" }}>
+          <FavoriteIcon sx={{ fontSize: 16, color: "#fff" }} />
+        </Box>
+        <Avatar
+          src={offer.user.avatar_url ?? undefined}
+          sx={{ width: 80, height: 80, border: "3px solid #009440", zIndex: 1 }}
+        />
+      </Box>
+
+      <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 900, fontSize: "2rem", color: "#FFD100", lineHeight: 1.1, mb: 1 }}>
+        É um Match!
+      </Typography>
+      <Typography sx={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.65)", mb: 4 }}>
+        Você e <strong style={{ color: "#fff" }}>{offer.user.name}</strong> querem trocar a figurinha do <strong style={{ color: "#fff" }}>{offer.player_name}</strong>!
+      </Typography>
+
+      <Box sx={{ width: "100%", maxWidth: 300, display: "flex", flexDirection: "column", gap: 1.5 }}>
+        <Box
+          component="button"
+          onClick={onChat}
+          sx={{
+            py: 1.5, bgcolor: "#009440", border: 0, borderRadius: "12px",
+            fontFamily: '"Montserrat",sans-serif', fontWeight: 800, fontSize: "1rem", color: "#fff",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
+            "&:hover": { bgcolor: "#007a35" }, transition: "background-color 0.15s",
+          }}
+        >
+          <ForumOutlinedIcon sx={{ fontSize: 20 }} />
+          Abrir Chat
+        </Box>
+        <Box
+          component="button"
+          onClick={onContinue}
+          sx={{
+            py: 1.25, bgcolor: "transparent", border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: "12px",
+            fontFamily: '"Montserrat",sans-serif', fontWeight: 600, fontSize: "0.9rem", color: "rgba(255,255,255,0.6)",
+            cursor: "pointer", "&:hover": { borderColor: "#FFD100", color: "#FFD100" },
+            transition: "border-color 0.15s, color 0.15s",
+          }}
+        >
+          Continuar vendo ofertas
+        </Box>
+      </Box>
+    </Box>
+  );
+
+  return typeof document !== "undefined" ? createPortal(content, document.body) : null;
+}
+
+// ── TradeCard ──────────────────────────────────────────────────────────────────
+
+function TradeCard({ offer, exiting, exitDir }: { offer: TradeOffer; exiting: boolean; exitDir: "left" | "right" | null }) {
+  const cfg = RARITY_CONFIG[offer.rarity];
+  const flag = flagUrl(offer.team);
+
   return (
     <Box sx={{
-      ...GLASS_CARD,
-      p: 2,
-      display: "flex", gap: 1.5, alignItems: "flex-start",
+      width: "100%",
+      maxWidth: 340,
+      borderRadius: "20px",
+      overflow: "hidden",
+      boxShadow: `0 8px 48px ${cfg.glow}30, 0 2px 16px rgba(0,0,0,0.5)`,
+      border: `1.5px solid ${cfg.color}30`,
+      transform: exiting
+        ? exitDir === "left"
+          ? "translateX(-120%) rotate(-12deg)"
+          : "translateX(120%) rotate(12deg)"
+        : "translateX(0) rotate(0deg)",
+      opacity: exiting ? 0 : 1,
+      transition: "transform 0.35s ease-in, opacity 0.35s ease-in",
     }}>
-      <Avatar
-        src={post.user.avatar_url ?? undefined}
-        sx={{
-          width: 36, height: 36, flexShrink: 0,
-          bgcolor: isNeed ? "rgba(232,23,93,0.15)" : "rgba(0,133,66,0.15)",
-          color: isNeed ? "#E8175D" : "#008542",
-          fontSize: "0.85rem", fontWeight: 700,
-        }}
-      >
-        {!post.user.avatar_url && post.user.name[0]}
-      </Avatar>
-
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
-          <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.875rem", fontFamily: "var(--font-inter), Inter, sans-serif" }}>
-            {post.user.name}
+      {/* Sticker visual */}
+      <Box sx={{
+        background: cfg.bg,
+        px: 3, pt: 3, pb: 2,
+        display: "flex", flexDirection: "column", alignItems: "center",
+        position: "relative",
+        minHeight: 200,
+      }}>
+        {/* Rarity badge */}
+        <Box sx={{
+          position: "absolute", top: 14, right: 14,
+          bgcolor: `${cfg.color}20`,
+          border: `1px solid ${cfg.color}60`,
+          borderRadius: "100px",
+          px: 1.25, py: 0.3,
+        }}>
+          <Typography sx={{ fontSize: "0.6rem", fontWeight: 800, color: cfg.color, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            {cfg.label}
           </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem" }}>{timeAgo(post.created_at)}</Typography>
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.5, flexWrap: "wrap" }}>
-          <Box component="span" sx={{
-            display: "inline-flex", alignItems: "center",
-            bgcolor: isNeed ? "rgba(232,23,93,0.12)" : "rgba(0,133,66,0.12)",
-            color: isNeed ? "#E8175D" : "#008542",
-            borderRadius: CAZE_RADIUS.pill, px: 1, py: 0.2,
-            fontSize: "0.65rem", fontWeight: 700, lineHeight: 1.6,
-          }}>
-            {isNeed ? "Preciso" : "Tenho"}
-          </Box>
-          <Typography sx={{ color: "#FFFFFF", fontWeight: 700, fontSize: "0.875rem" }}>
-            {post.player_name}
-          </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.75rem" }}>· {post.team}</Typography>
-        </Box>
+        {/* Number */}
+        <Typography sx={{ position: "absolute", top: 14, left: 16, fontSize: "0.65rem", color: "rgba(255,255,255,0.3)", fontWeight: 700 }}>
+          #{offer.number}
+        </Typography>
 
-        {onContact && (
+        {/* Flag */}
+        {flag ? (
           <Box
-            component="button"
-            onClick={() => onContact(post.id)}
-            sx={{
-              display: "inline-flex", alignItems: "center",
-              bgcolor: "#009440", color: "#fff",
-              border: "none", borderRadius: CAZE_RADIUS.pill,
-              px: 2, py: 0.65,
-              fontSize: "0.75rem", fontWeight: 700,
-              fontFamily: "var(--font-inter), Inter, sans-serif",
-              cursor: "pointer", lineHeight: 1.6,
-              boxShadow: "0 2px 8px rgba(0,148,64,0.25)",
-              "&:active": { opacity: 0.85 },
-            }}
-          >
-            Entrar em contato
-          </Box>
+            component="img"
+            src={flag}
+            alt={offer.team}
+            sx={{ width: 72, height: 48, objectFit: "cover", borderRadius: "8px", mb: 2, boxShadow: "0 4px 12px rgba(0,0,0,0.4)", mt: 1 }}
+          />
+        ) : (
+          <Box sx={{ width: 72, height: 48, bgcolor: "rgba(255,255,255,0.08)", borderRadius: "8px", mb: 2, mt: 1 }} />
         )}
-        {onRemove && (
-          <Box
-            component="button"
-            onClick={() => onRemove(post.id)}
-            sx={{
-              display: "inline-flex", alignItems: "center",
-              bgcolor: "transparent", color: "#E63946",
-              border: "1px solid rgba(230,57,70,0.30)",
-              borderRadius: CAZE_RADIUS.pill,
-              px: 2, py: 0.55,
-              fontSize: "0.75rem", fontWeight: 700,
-              fontFamily: "var(--font-inter), Inter, sans-serif",
-              cursor: "pointer", lineHeight: 1.6,
-              "&:active": { opacity: 0.85 },
-            }}
-          >
-            Remover anúncio
-          </Box>
-        )}
+
+        <Typography sx={{
+          fontFamily: '"Montserrat",sans-serif',
+          fontWeight: 900,
+          fontSize: "1.5rem",
+          color: "#fff",
+          textAlign: "center",
+          lineHeight: 1.1,
+          textShadow: `0 0 20px ${cfg.glow}80`,
+        }}>
+          {offer.player_name}
+        </Typography>
+        <Typography sx={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", mt: 0.5 }}>
+          {offer.team}
+        </Typography>
+      </Box>
+
+      {/* Offering user */}
+      <Box sx={{
+        bgcolor: "#0d1526",
+        px: 3, py: 2,
+        display: "flex", alignItems: "center", gap: 1.5,
+        borderTop: `1px solid ${cfg.color}20`,
+      }}>
+        <Avatar src={offer.user.avatar_url ?? undefined} sx={{ width: 40, height: 40, border: `2px solid ${cfg.color}40` }}>
+          {!offer.user.avatar_url && offer.user.name[0]}
+        </Avatar>
+        <Box>
+          <Typography sx={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.2 }}>
+            está oferecendo
+          </Typography>
+          <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 700, fontSize: "0.9rem", color: "#fff" }}>
+            {offer.user.name}
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
 }
 
-// ── AnnounceDrawer ────────────────────────────────────────────────────────────
+// ── AnnounceDrawer ─────────────────────────────────────────────────────────────
 
-function TeamFlag({ name }: { name: string }) {
-  const code = COUNTRY_CODES[name];
-  if (!code) return null;
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={`https://flagcdn.com/w40/${code}.png`}
-      alt={name}
-      width={24}
-      height={16}
-      style={{ borderRadius: 2, objectFit: "cover", border: "1px solid rgba(255,255,255,0.1)" }}
-      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-    />
-  );
-}
-
-function AnnounceDrawer({
-  open,
-  onClose,
-  onSubmit,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (post: Omit<StickerPost, "id" | "created_at" | "user">) => void;
-}) {
+function AnnounceDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [postType,         setPostType]         = useState<PostType>("need");
   const [catalogStep,      setCatalogStep]      = useState<CatalogStep>("category");
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(null);
@@ -240,96 +291,40 @@ function AnnounceDrawer({
   const [selectedPlayer,   setSelectedPlayer]   = useState<string | null>(null);
 
   function reset() {
-    setCatalogStep("category");
-    setSelectedCategory(null);
-    setSelectedTeam(null);
-    setSelectedPlayer(null);
+    setCatalogStep("category"); setSelectedCategory(null); setSelectedTeam(null); setSelectedPlayer(null);
   }
 
-  function handleClose() {
-    reset();
-    onClose();
-  }
+  function handleClose() { reset(); onClose(); }
 
   function handleCategoryClick(cat: CategoryKey) {
-    setSelectedCategory(cat);
-    setSelectedPlayer(null);
-    setSelectedTeam(null);
-    if (cat === "selecao") {
-      setCatalogStep("team");
-    } else {
-      // taças e escudos têm apenas um grupo direto
-      setSelectedTeam(CATALOG[cat][0].name);
-      setCatalogStep("player");
-    }
+    setSelectedCategory(cat); setSelectedPlayer(null); setSelectedTeam(null);
+    if (cat === "selecao") { setCatalogStep("team"); }
+    else { setSelectedTeam(CATALOG[cat][0].name); setCatalogStep("player"); }
   }
 
-  function handleTeamClick(team: string) {
-    setSelectedTeam(team);
-    setSelectedPlayer(null);
-    setCatalogStep("player");
-  }
-
-  function handlePlayerClick(player: string) {
-    setSelectedPlayer(player === selectedPlayer ? null : player);
-  }
+  function handleTeamClick(team: string) { setSelectedTeam(team); setSelectedPlayer(null); setCatalogStep("player"); }
+  function handlePlayerClick(player: string) { setSelectedPlayer(player === selectedPlayer ? null : player); }
 
   function handleBack() {
-    if (catalogStep === "player" && selectedCategory === "selecao") {
-      setCatalogStep("team");
-      setSelectedPlayer(null);
-    } else {
-      setCatalogStep("category");
-      setSelectedCategory(null);
-      setSelectedTeam(null);
-      setSelectedPlayer(null);
-    }
-  }
-
-  function handleConfirm() {
-    if (!selectedPlayer) return;
-    onSubmit({
-      type: postType,
-      player_name: selectedPlayer,
-      team: selectedTeam ?? "—",
-    });
-    reset();
-    onClose();
+    if (catalogStep === "player" && selectedCategory === "selecao") { setCatalogStep("team"); setSelectedPlayer(null); }
+    else { setCatalogStep("category"); setSelectedCategory(null); setSelectedTeam(null); setSelectedPlayer(null); }
   }
 
   const players = selectedCategory && selectedTeam
     ? CATALOG[selectedCategory].find((t) => t.name === selectedTeam)?.players ?? []
     : [];
 
-  // breadcrumb text
   const breadcrumb = catalogStep === "team"
     ? CATEGORIES.find((c) => c.key === selectedCategory)?.label ?? ""
-    : catalogStep === "player"
-    ? [CATEGORIES.find((c) => c.key === selectedCategory)?.label, selectedTeam].filter(Boolean).join(" › ")
-    : "";
+    : [CATEGORIES.find((c) => c.key === selectedCategory)?.label, selectedTeam].filter(Boolean).join(" › ");
 
   return (
-    <Drawer
-      anchor="bottom"
-      open={open}
-      onClose={handleClose}
-      PaperProps={{
-        sx: {
-          backgroundColor: "#151c2e",
-          borderRadius: `${CAZE_RADIUS.md} ${CAZE_RADIUS.md} 0 0`,
-          maxHeight: "82vh",
-          display: "flex",
-          flexDirection: "column",
-          boxShadow: "0 -4px 24px rgba(0,0,0,0.6)",
-        },
-      }}
+    <Drawer anchor="bottom" open={open} onClose={handleClose}
+      PaperProps={{ sx: { backgroundColor: "#151c2e", borderRadius: `${CAZE_RADIUS.md} ${CAZE_RADIUS.md} 0 0`, maxHeight: "82vh", display: "flex", flexDirection: "column" } }}
     >
-      {/* drag handle */}
       <Box sx={{ pt: 2, pb: 0.5, display: "flex", justifyContent: "center", flexShrink: 0 }}>
         <Box sx={{ width: 40, height: 4, backgroundColor: "rgba(255,255,255,0.12)", borderRadius: "2px" }} />
       </Box>
-
-      {/* header fixo */}
       <Box sx={{ px: 3, pt: 1.5, pb: 2, flexShrink: 0 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           {catalogStep !== "category" && (
@@ -341,211 +336,113 @@ function AnnounceDrawer({
             {catalogStep === "category" ? "Anunciar figurinha" : breadcrumb}
           </Typography>
         </Box>
-
-        <ToggleButtonGroup
-          value={postType}
-          exclusive
-          onChange={(_, v) => v && setPostType(v)}
-          fullWidth
-          size="small"
-          sx={{ mb: 0, backgroundColor: "#1A1A2E", borderRadius: CAZE_RADIUS.sm }}
+        <ToggleButtonGroup value={postType} exclusive onChange={(_, v) => v && setPostType(v)} fullWidth size="small"
+          sx={{ backgroundColor: "#1A1A2E", borderRadius: CAZE_RADIUS.sm }}
         >
-          <ToggleButton value="need" sx={{
-            borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
-            "&.Mui-selected": { backgroundColor: "rgba(232,23,93,0.12)", color: "#E8175D", borderColor: "#E8175D" },
-          }}>
+          <ToggleButton value="need" sx={{ borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", textTransform: "none", fontWeight: 700, fontSize: "0.8rem", "&.Mui-selected": { backgroundColor: "rgba(232,23,93,0.12)", color: "#E8175D", borderColor: "#E8175D" } }}>
             Precisando
           </ToggleButton>
-          <ToggleButton value="sell" sx={{
-            borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", textTransform: "none", fontWeight: 700, fontSize: "0.8rem",
-            "&.Mui-selected": { backgroundColor: "rgba(0,133,66,0.12)", color: "#008542", borderColor: "#008542" },
-          }}>
-            Tenho para Vender
+          <ToggleButton value="sell" sx={{ borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", textTransform: "none", fontWeight: 700, fontSize: "0.8rem", "&.Mui-selected": { backgroundColor: "rgba(0,133,66,0.12)", color: "#008542", borderColor: "#008542" } }}>
+            Tenho para trocar
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
-
       <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)", flexShrink: 0 }} />
-
-      {/* conteúdo rolável */}
       <Box sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
-
         {catalogStep === "category" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 0.5 }}>
-              Categoria
-            </Typography>
             {CATEGORIES.map(({ key, label, Icon }) => (
-              <Box
-                key={key}
-                onClick={() => handleCategoryClick(key)}
-                sx={{
-                  display: "flex", alignItems: "center", gap: 2,
-                  backgroundColor: "#1A1A2E",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: CAZE_RADIUS.md,
-                  p: "14px 16px",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                  "&:hover": { borderColor: "#008542", backgroundColor: "rgba(0,133,66,0.08)" },
-                }}
+              <Box key={key} onClick={() => handleCategoryClick(key)}
+                sx={{ display: "flex", alignItems: "center", gap: 2, backgroundColor: "#1A1A2E", border: "1px solid rgba(255,255,255,0.08)", borderRadius: CAZE_RADIUS.md, p: "14px 16px", cursor: "pointer", "&:hover": { borderColor: "#009440" }, transition: "border-color 0.15s" }}
               >
-                <Box sx={{
-                  width: 36, height: 36, borderRadius: CAZE_RADIUS.sm,
-                  backgroundColor: "rgba(0,133,66,0.12)",
-                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                }}>
-                  <Icon sx={{ color: "#008542", fontSize: "1.2rem" }} />
+                <Box sx={{ width: 36, height: 36, borderRadius: CAZE_RADIUS.sm, backgroundColor: "rgba(0,133,66,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Icon sx={{ color: "#009440", fontSize: "1.2rem" }} />
                 </Box>
-                <Typography sx={{ color: "#FFFFFF", fontWeight: 600, fontSize: "0.875rem", flex: 1 }}>
-                  {label}
-                </Typography>
+                <Typography sx={{ color: "#FFFFFF", fontWeight: 600, fontSize: "0.875rem", flex: 1 }}>{label}</Typography>
                 <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1.1rem" }} />
               </Box>
             ))}
           </Box>
         )}
-
         {catalogStep === "team" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
-              Escolha a seleção
-            </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
             {CATALOG.selecao.map((team, idx) => (
               <Box key={team.name}>
-                <Box
-                  onClick={() => handleTeamClick(team.name)}
-                  sx={{
-                    display: "flex", alignItems: "center", gap: 2,
-                    py: 1.5, px: 0.5,
-                    cursor: "pointer", borderRadius: CAZE_RADIUS.sm,
-                    "&:hover": { backgroundColor: "rgba(0,133,66,0.08)" },
-                    transition: "background-color 0.1s",
-                  }}
-                >
-                  <TeamFlag name={team.name} />
-                  <Typography sx={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500, flex: 1 }}>
-                    {team.name}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.7rem" }}>
-                      {team.players.length} fig.
-                    </Typography>
-                    <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1rem" }} />
-                  </Box>
+                <Box onClick={() => handleTeamClick(team.name)} sx={{ display: "flex", alignItems: "center", gap: 2, py: 1.5, px: 0.5, cursor: "pointer", borderRadius: CAZE_RADIUS.sm, "&:hover": { backgroundColor: "rgba(0,133,66,0.08)" }, transition: "background-color 0.1s" }}>
+                  {COUNTRY_CODES[team.name] && <img src={`https://flagcdn.com/w40/${COUNTRY_CODES[team.name]}.png`} alt={team.name} width={24} height={16} style={{ borderRadius: 2, objectFit: "cover" }} />}
+                  <Typography sx={{ color: "#FFFFFF", fontSize: "0.875rem", fontWeight: 500, flex: 1 }}>{team.name}</Typography>
+                  <ChevronRightIcon sx={{ color: "rgba(255,255,255,0.45)", fontSize: "1rem" }} />
                 </Box>
-                {idx < CATALOG.selecao.length - 1 && (
-                  <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />
-                )}
+                {idx < CATALOG.selecao.length - 1 && <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />}
               </Box>
             ))}
           </Box>
         )}
-
         {catalogStep === "player" && (
-          <Box>
-            <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", mb: 1.5 }}>
-              Escolha a figurinha
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {players.map((player, idx) => {
-                const isSelected = player === selectedPlayer;
-                return (
-                  <Box key={player}>
-                    <Box
-                      onClick={() => handlePlayerClick(player)}
-                      sx={{
-                        display: "flex", alignItems: "center", gap: 2,
-                        py: 1.5, px: 0.5,
-                        cursor: "pointer", borderRadius: CAZE_RADIUS.sm,
-                        backgroundColor: isSelected ? "rgba(0,133,66,0.12)" : "transparent",
-                        "&:hover": { backgroundColor: isSelected ? "rgba(0,133,66,0.16)" : "rgba(255,255,255,0.04)" },
-                        transition: "background-color 0.1s",
-                      }}
-                    >
-                      <Typography sx={{ color: isSelected ? "#008542" : "#FFFFFF", fontSize: "0.875rem", fontWeight: isSelected ? 700 : 400, flex: 1 }}>
-                        {player}
-                      </Typography>
-                      {isSelected && <CheckCircleIcon sx={{ color: "#008542", fontSize: "1.1rem" }} />}
-                    </Box>
-                    {idx < players.length - 1 && (
-                      <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />
-                    )}
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            {players.map((player, idx) => {
+              const isSelected = player === selectedPlayer;
+              return (
+                <Box key={player}>
+                  <Box onClick={() => handlePlayerClick(player)} sx={{ display: "flex", alignItems: "center", gap: 2, py: 1.5, px: 0.5, cursor: "pointer", borderRadius: CAZE_RADIUS.sm, backgroundColor: isSelected ? "rgba(0,133,66,0.12)" : "transparent", "&:hover": { backgroundColor: isSelected ? "rgba(0,133,66,0.16)" : "rgba(255,255,255,0.04)" } }}>
+                    <Typography sx={{ color: isSelected ? "#009440" : "#FFFFFF", fontSize: "0.875rem", fontWeight: isSelected ? 700 : 400, flex: 1 }}>{player}</Typography>
+                    {isSelected && <CheckCircleIcon sx={{ color: "#009440", fontSize: "1.1rem" }} />}
                   </Box>
-                );
-              })}
-            </Box>
+                  {idx < players.length - 1 && <Box sx={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />}
+                </Box>
+              );
+            })}
           </Box>
         )}
       </Box>
-
       {selectedPlayer && (
         <Box sx={{ px: 3, pt: 1.5, pb: 3, borderTop: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 }}>
-          <Box sx={{
-            backgroundColor: "rgba(0,133,66,0.10)",
-            border: "1px solid rgba(0,133,66,0.30)",
-            borderRadius: CAZE_RADIUS.sm,
-            px: 2, py: 1,
-            mb: 2,
-            display: "flex", alignItems: "center", gap: 1,
-          }}>
-            <CheckCircleIcon sx={{ color: "#008542", fontSize: "1rem" }} />
-            <Typography sx={{ color: "#008542", fontSize: "0.8rem", fontWeight: 600 }}>
-              {selectedPlayer}
-              {selectedTeam && selectedCategory === "selecao" && (
-                <Typography component="span" sx={{ color: "rgba(255,255,255,0.45)", fontWeight: 400 }}>
-                  {" "}· {selectedTeam}
-                </Typography>
-              )}
-            </Typography>
+          <Box sx={{ backgroundColor: "rgba(0,133,66,0.10)", border: "1px solid rgba(0,133,66,0.30)", borderRadius: CAZE_RADIUS.sm, px: 2, py: 1, mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+            <CheckCircleIcon sx={{ color: "#009440", fontSize: "1rem" }} />
+            <Typography sx={{ color: "#009440", fontSize: "0.8rem", fontWeight: 600 }}>{selectedPlayer}</Typography>
           </Box>
-          <CazeButton fullWidth onClick={handleConfirm}>
-            Confirmar anúncio
-          </CazeButton>
+          <CazeButton fullWidth onClick={() => { reset(); onClose(); }}>Confirmar anúncio</CazeButton>
         </Box>
       )}
     </Drawer>
   );
 }
 
-// ── página principal ──────────────────────────────────────────────────────────
+// ── página principal ───────────────────────────────────────────────────────────
 
 export default function FigurinhasPage() {
   const router = useRouter();
-  const [tab, setTab]               = useState<TabValue>("need");
-  const [posts, setPosts]           = useState<StickerPost[]>(MOCK);
+  const [offers, setOffers]         = useState<TradeOffer[]>(MOCK_OFFERS);
+  const [exiting, setExiting]       = useState(false);
+  const [exitDir, setExitDir]       = useState<"left" | "right" | null>(null);
+  const [matchOffer, setMatchOffer] = useState<TradeOffer | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const communityPosts = posts.filter((p) => p.user.name !== "Você");
-  const myPosts        = posts.filter((p) => p.user.name === "Você");
+  const current = offers[0] ?? null;
 
-  const displayed =
-    tab === "myads" ? myPosts :
-    tab === "need"  ? communityPosts.filter((p) => p.type === "need") :
-                      communityPosts.filter((p) => p.type === "sell");
-
-  const needCount  = communityPosts.filter((p) => p.type === "need").length;
-  const sellCount  = communityPosts.filter((p) => p.type === "sell").length;
-  const myAdsCount = myPosts.length;
-
-  function handleContact(postId: string) {
-    router.push(`/pages/user/figurinhas/chat/${postId}`);
+  function dismiss(dir: "left" | "right") {
+    if (!current || exiting) return;
+    setExitDir(dir);
+    setExiting(true);
+    setTimeout(() => {
+      if (dir === "right") setMatchOffer(current);
+      setOffers((prev) => prev.slice(1));
+      setExiting(false);
+      setExitDir(null);
+    }, 350);
   }
 
-  function handleRemove(postId: string) {
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
+  function handlePass() { dismiss("left"); }
+  function handleWant() { dismiss("right"); }
+
+  function handleOpenChat() {
+    if (matchOffer) {
+      setMatchOffer(null);
+      router.push(`/pages/user/figurinhas/chat/${matchOffer.id}`);
+    }
   }
 
-  function handleAnnounce(data: Omit<StickerPost, "id" | "created_at" | "user">) {
-    const newPost: StickerPost = {
-      ...data,
-      id: String(Date.now()),
-      user: { name: "Você", avatar_url: null },
-      created_at: new Date().toISOString(),
-    };
-    setPosts((prev) => [newPost, ...prev]);
-    setTab("myads");
-  }
+  function handleContinue() { setMatchOffer(null); }
 
   return (
     <>
@@ -567,17 +464,13 @@ export default function FigurinhasPage() {
             title="Figurinhas"
             rightSlot={
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <IconButton
-                  onClick={() => setDrawerOpen(true)}
-                  sx={{ color: "#FFFFFF", backgroundColor: "rgba(255,255,255,0.08)", "&:hover": { color: "#F5C900", backgroundColor: "rgba(255,255,255,0.12)" } }}
-                  aria-label="Novo anúncio"
+                <IconButton onClick={() => setDrawerOpen(true)}
+                  sx={{ color: "#FFFFFF", backgroundColor: "rgba(255,255,255,0.08)", "&:hover": { color: "#F5C900" } }}
                 >
                   <AddIcon sx={{ fontSize: "1.3rem" }} />
                 </IconButton>
-                <IconButton
-                  onClick={() => router.push("/pages/user/figurinhas/mensagens")}
-                  sx={{ color: "#FFFFFF", backgroundColor: "rgba(255,255,255,0.08)", "&:hover": { color: "#F5C900", backgroundColor: "rgba(255,255,255,0.12)" } }}
-                  aria-label="Histórico de mensagens"
+                <IconButton onClick={() => router.push("/pages/user/figurinhas/mensagens")}
+                  sx={{ color: "#FFFFFF", backgroundColor: "rgba(255,255,255,0.08)", "&:hover": { color: "#F5C900" } }}
                 >
                   <Badge badgeContent={1} sx={{ "& .MuiBadge-badge": { backgroundColor: "#F5C900", color: "#000", fontSize: "0.55rem", minWidth: 14, height: 14, p: 0 } }}>
                     <ForumOutlinedIcon sx={{ fontSize: "1.3rem" }} />
@@ -587,88 +480,109 @@ export default function FigurinhasPage() {
             }
           />
 
-          <Box sx={{ px: `${LAYOUT.pagePaddingX}px`, pt: 2, maxWidth: LAYOUT.feedMaxWidth, mx: "auto" }}>
-            <Box
-              sx={{
-                ...GLASS_CARD,
-                p: 2,
-                mb: 2,
-                background:
-                  "linear-gradient(135deg, rgba(245,201,0,0.18), rgba(21,28,46,0.96) 48%, rgba(232,23,93,0.18))",
-              }}
-            >
-              <Typography sx={{ color: "#F5C900", fontSize: "0.7rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em" }}>
-                Álbum da Copa
-              </Typography>
-              <Typography sx={{ color: "#FFFFFF", fontFamily: '"Montserrat"', fontSize: "1.35rem", fontWeight: 900, lineHeight: 1.1, mt: 0.5 }}>
-                Troca de figurinhas
-              </Typography>
-              <Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.82rem", mt: 0.75 }}>
-                Anuncie repetidas, encontre as que faltam e feche troca no chat.
-              </Typography>
-            </Box>
+          <Box sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            px: 2,
+            pt: 3,
+            maxWidth: LAYOUT.feedMaxWidth,
+            mx: "auto",
+          }}>
+            {/* counter */}
+            <Typography sx={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.35)", mb: 2, letterSpacing: "0.06em" }}>
+              {offers.length > 0 ? `${offers.length} oferta${offers.length > 1 ? "s" : ""} disponível${offers.length > 1 ? "s" : ""}` : ""}
+            </Typography>
 
-            <Tabs
-              value={tab}
-              onChange={(_, v) => setTab(v as TabValue)}
-              sx={{
-                mb: 2,
-                "& .MuiTabs-indicator": { display: "none" },
-                "& .MuiTabs-flexContainer": { gap: 0.75 },
-                "& .MuiTab-root": {
-                  color: "rgba(255,255,255,0.45)",
-                  backgroundColor: "rgba(21,28,46,0.82)",
-                  borderRadius: CAZE_RADIUS.sm,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  fontFamily: '"Montserrat"',
-                  fontWeight: 700,
-                  fontSize: "0.75rem",
-                  textTransform: "none",
-                  minWidth: "auto",
-                  px: 1.5,
-                  minHeight: "29px",
-                },
-                "& .Mui-selected": {
-                  color: "#FFFFFF",
-                  backgroundColor: "rgba(255,255,255,0.14)",
-                  border: "1px solid rgba(255,255,255,0.20)",
-                },
-              }}
-            >
-              <Tab value="need"   label={`Precisando (${needCount})`} />
-              <Tab value="sell"   label={`Vendendo (${sellCount})`} />
-              <Tab value="myads"  label={`Meus anúncios${myAdsCount > 0 ? ` (${myAdsCount})` : ""}`} />
-            </Tabs>
+            {current ? (
+              <>
+                {/* Card */}
+                <TradeCard offer={current} exiting={exiting} exitDir={exitDir} />
 
-            {displayed.length === 0 ? (
-              <Typography sx={{ color: "rgba(255,255,255,0.45)", textAlign: "center", py: 6 }}>
-                {tab === "need"   && "Ninguém precisando ainda. Seja o primeiro!"}
-                {tab === "sell"   && "Ninguém vendendo ainda. Compartilhe!"}
-                {tab === "myads"  && "Você ainda não fez nenhum anúncio."}
-              </Typography>
+                {/* Action buttons */}
+                <Box sx={{ display: "flex", gap: 4, mt: 4, alignItems: "center" }}>
+                  {/* Não */}
+                  <Box
+                    component="button"
+                    onClick={handlePass}
+                    disabled={exiting}
+                    sx={{
+                      width: 64, height: 64,
+                      borderRadius: "50%",
+                      bgcolor: "rgba(239,68,68,0.12)",
+                      border: "2px solid rgba(239,68,68,0.4)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "transform 0.1s, background-color 0.15s",
+                      "&:hover": { bgcolor: "rgba(239,68,68,0.22)", transform: "scale(1.08)" },
+                      "&:active": { transform: "scale(0.95)" },
+                    }}
+                  >
+                    <CloseIcon sx={{ color: "#EF4444", fontSize: 28 }} />
+                  </Box>
+
+                  {/* Quero */}
+                  <Box
+                    component="button"
+                    onClick={handleWant}
+                    disabled={exiting}
+                    sx={{
+                      width: 72, height: 72,
+                      borderRadius: "50%",
+                      bgcolor: "rgba(0,148,64,0.15)",
+                      border: "2px solid rgba(0,148,64,0.5)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "transform 0.1s, background-color 0.15s",
+                      "&:hover": { bgcolor: "rgba(0,148,64,0.28)", transform: "scale(1.08)" },
+                      "&:active": { transform: "scale(0.95)" },
+                    }}
+                  >
+                    <FavoriteIcon sx={{ color: "#009440", fontSize: 32 }} />
+                  </Box>
+                </Box>
+
+                {/* Labels */}
+                <Box sx={{ display: "flex", gap: 5.5, mt: 1 }}>
+                  <Typography sx={{ fontSize: "0.65rem", color: "rgba(239,68,68,0.7)", fontWeight: 700, width: 64, textAlign: "center" }}>Não</Typography>
+                  <Typography sx={{ fontSize: "0.65rem", color: "rgba(0,148,64,0.7)", fontWeight: 700, width: 72, textAlign: "center" }}>Quero!</Typography>
+                </Box>
+              </>
             ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                {displayed.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    onContact={tab !== "myads" ? handleContact : undefined}
-                    onRemove={tab === "myads" ? handleRemove : undefined}
-                  />
-                ))}
+              /* Empty state */
+              <Box sx={{ textAlign: "center", pt: 8 }}>
+                <Typography sx={{ fontSize: "3rem", mb: 2 }}>📭</Typography>
+                <Typography sx={{ fontFamily: '"Montserrat",sans-serif', fontWeight: 800, fontSize: "1.1rem", color: "#fff", mb: 1 }}>
+                  Você viu tudo por hoje!
+                </Typography>
+                <Typography sx={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.45)", mb: 3 }}>
+                  Volte mais tarde ou anuncie suas repetidas.
+                </Typography>
+                <Box
+                  component="button"
+                  onClick={() => setDrawerOpen(true)}
+                  sx={{
+                    px: 3, py: 1.2,
+                    bgcolor: "#FFD100", border: 0, borderRadius: "12px",
+                    fontFamily: '"Montserrat",sans-serif', fontWeight: 800, fontSize: "0.9rem", color: "#000",
+                    cursor: "pointer",
+                  }}
+                >
+                  Anunciar figurinha
+                </Box>
               </Box>
             )}
           </Box>
         </Box>
       </Box>
 
-      <AnnounceDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        onSubmit={handleAnnounce}
-      />
+      {matchOffer && (
+        <MatchOverlay offer={matchOffer} onChat={handleOpenChat} onContinue={handleContinue} />
+      )}
 
-      {!drawerOpen && <BottomNav />}
+      <AnnounceDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      {!drawerOpen && !matchOffer && <BottomNav />}
     </>
   );
 }
