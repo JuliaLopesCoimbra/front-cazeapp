@@ -562,12 +562,33 @@ export default function FigurinhasPage() {
 
   const current = offers[0] ?? null;
 
+  function saveMatch(offer: TradeOffer) {
+    const match = {
+      postId: offer.id,
+      name: offer.user.name,
+      avatar_url: offer.user.avatar_url,
+      player: offer.player_name,
+      image_url: offer.image_url ?? "",
+      isNew: true,
+      matchedAt: new Date().toISOString(),
+    };
+    try {
+      const existing = JSON.parse(localStorage.getItem("figurinha_matches") ?? "[]");
+      if (!existing.find((m: { postId: string }) => m.postId === match.postId)) {
+        localStorage.setItem("figurinha_matches", JSON.stringify([match, ...existing]));
+      }
+    } catch {}
+  }
+
   function dismiss(dir: "left" | "right") {
     if (!current || exiting) return;
     setExitDir(dir);
     setExiting(true);
     setTimeout(() => {
-      if (dir === "right") setMatchOffer(current);
+      if (dir === "right") {
+        saveMatch(current);
+        setMatchOffer(current);
+      }
       setOffers((prev) => {
         const next = prev.slice(1);
         return next.length === 0 ? MOCK_OFFERS : next;

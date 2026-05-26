@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Box, Typography, Avatar } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TopBar from "@/app/components/layout/TopBar";
@@ -14,10 +15,11 @@ import { ptBR } from "date-fns/locale";
 interface Match {
   postId: string;
   name: string;
-  avatarIndex: number;
+  avatar_url: string | null;
   player: string;
   image_url: string;
   isNew: boolean;
+  matchedAt?: string;
 }
 
 interface Conversation {
@@ -30,13 +32,6 @@ interface Conversation {
   unread: number;
 }
 
-const MOCK_MATCHES: Match[] = [
-  { postId: "1", name: "Gabriel M.",  avatarIndex: 3,  player: "Vinicius Jr.",      image_url: "/figurinhas/vinicius.jpeg",  isNew: true  },
-  { postId: "2", name: "Maria Silva", avatarIndex: 5,  player: "Messi",             image_url: "/figurinhas/messi.jpeg",     isNew: true  },
-  { postId: "3", name: "Lucas F.",    avatarIndex: 11, player: "Cristiano Ronaldo", image_url: "/figurinhas/cristiano.jpeg", isNew: false },
-  { postId: "4", name: "Ana Beatriz", avatarIndex: 9,  player: "Neymar",            image_url: "/figurinhas/neymar.jpeg",    isNew: false },
-  { postId: "5", name: "Pedro Alves", avatarIndex: 15, player: "Lucas Paquetá",     image_url: "/figurinhas/paqueta.jpeg",   isNew: false },
-];
 
 const MOCK_CONVERSATIONS: Conversation[] = [
   {
@@ -79,6 +74,16 @@ const GLASS_CARD = {
 
 export default function MensagensPage() {
   const router = useRouter();
+  const [matches, setMatches] = useState<Match[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("figurinha_matches") ?? "[]");
+      setMatches(saved);
+    } catch {
+      setMatches([]);
+    }
+  }, []);
 
   return (
     <>
@@ -123,21 +128,22 @@ export default function MensagensPage() {
               "&::-webkit-scrollbar": { display: "none" },
               scrollbarWidth: "none",
             }}>
-              {MOCK_MATCHES.map((match) => (
+              {matches.length === 0 ? (
+                <Typography sx={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", pl: 0.5 }}>
+                  Nenhum match ainda. Arraste pra esquerda nas figurinhas!
+                </Typography>
+              ) : matches.map((match) => (
                 <Box
                   key={match.postId}
                   onClick={() => router.push(`/pages/user/figurinhas/chat/${match.postId}`)}
                   sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.75, cursor: "pointer", flexShrink: 0, width: 68 }}
                 >
                   <Box sx={{ position: "relative" }}>
-                    {/* Player photo ring */}
                     <Box sx={{
                       width: 64, height: 64,
                       borderRadius: "50%",
                       p: "2.5px",
-                      background: match.isNew
-                        ? "linear-gradient(135deg, #FFD100, #009440)"
-                        : "rgba(255,255,255,0.15)",
+                      background: "linear-gradient(135deg, #FFD100, #009440)",
                     }}>
                       <Box
                         component="img"
@@ -153,28 +159,22 @@ export default function MensagensPage() {
                         }}
                       />
                     </Box>
-
-                    {/* "Novo" badge */}
-                    {match.isNew && (
-                      <Box sx={{
-                        position: "absolute", bottom: 0, right: 0,
-                        bgcolor: "#FFD100",
-                        borderRadius: "100px",
-                        px: 0.6, py: 0.1,
-                        border: "2px solid #0A1128",
-                      }}>
-                        <Typography sx={{ fontSize: "0.45rem", fontWeight: 900, color: "#000", lineHeight: 1.4 }}>
-                          NOVO
-                        </Typography>
-                      </Box>
-                    )}
+                    <Box sx={{
+                      position: "absolute", bottom: 0, right: 0,
+                      bgcolor: "#FFD100",
+                      borderRadius: "100px",
+                      px: 0.6, py: 0.1,
+                      border: "2px solid #0A1128",
+                    }}>
+                      <Typography sx={{ fontSize: "0.45rem", fontWeight: 900, color: "#000", lineHeight: 1.4 }}>
+                        NOVO
+                      </Typography>
+                    </Box>
                   </Box>
-
-                  {/* User name */}
                   <Typography sx={{
                     color: "rgba(255,255,255,0.75)",
                     fontSize: "0.62rem",
-                    fontWeight: match.isNew ? 700 : 400,
+                    fontWeight: 700,
                     textAlign: "center",
                     lineHeight: 1.2,
                     width: "100%",
