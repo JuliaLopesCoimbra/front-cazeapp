@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import Image from "next/image";
 
 const BG_COLOR  = "#e7e1d1";
 const TEXT_COLOR = "#7a4e28"; // warm brown — matches the original image tone
@@ -64,95 +63,6 @@ export default function LoginVideoBackground() {
         ))}
       </Box>
 
-      {/* ── CazéTV logo — top right ────────────────────────────────────── */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: { xs: 28, sm: 40 },
-          right: { xs: 20, sm: 32 },
-          zIndex: 3,
-          pointerEvents: "none",
-          lineHeight: 0,
-        }}
-      >
-        <Image
-          src="/assets/casa-cazetv/logo-circle.png"
-          alt="Casa CazéTV"
-          width={54}
-          height={54}
-          priority
-          style={{ borderRadius: "50%", display: "block" }}
-        />
-      </Box>
-
-      {/* ── "BATE NO PEITO" badge — bottom center ─────────────────────── */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: { xs: 56, sm: 72 },
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 2,
-          pointerEvents: "none",
-          width:  { xs: 92, sm: 104 },
-          height: { xs: 92, sm: 104 },
-          borderRadius: "50%",
-          backgroundColor: "#0A1128",
-          border: "2.5px solid rgba(255,255,255,0.14)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.28)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 0,
-        }}
-      >
-        <Typography sx={{
-          fontFamily: "var(--font-anton), Anton, sans-serif",
-          fontSize: { xs: "9px", sm: "10px" },
-          color: "#FFD100",
-          letterSpacing: "0.18em",
-          lineHeight: 1.2,
-        }}>
-          ★ ★ ★
-        </Typography>
-        <Typography sx={{
-          fontFamily: "var(--font-anton), Anton, sans-serif",
-          fontSize: { xs: "17px", sm: "19px" },
-          color: "#FFFFFF",
-          letterSpacing: "0.05em",
-          lineHeight: 1.05,
-        }}>
-          BATE
-        </Typography>
-        <Typography sx={{
-          fontFamily: "var(--font-anton), Anton, sans-serif",
-          fontSize: { xs: "11px", sm: "12px" },
-          color: "rgba(255,255,255,0.72)",
-          letterSpacing: "0.12em",
-          lineHeight: 1.05,
-        }}>
-          NO
-        </Typography>
-        <Typography sx={{
-          fontFamily: "var(--font-anton), Anton, sans-serif",
-          fontSize: { xs: "17px", sm: "19px" },
-          color: "#FFFFFF",
-          letterSpacing: "0.05em",
-          lineHeight: 1.05,
-        }}>
-          PEITO
-        </Typography>
-        <Typography sx={{
-          fontFamily: "var(--font-anton), Anton, sans-serif",
-          fontSize: { xs: "9px", sm: "10px" },
-          color: "#FFD100",
-          letterSpacing: "0.18em",
-          lineHeight: 1.2,
-        }}>
-          ★ ★ ★
-        </Typography>
-      </Box>
 
       {/* ── Persona 1 (SVG) — right side, faces inward ────────────────── */}
       <Box
@@ -162,17 +72,17 @@ export default function LoginVideoBackground() {
         decoding="async"
         sx={{
           ...PERSONA_SX,
-          width: { xs: "155px", sm: "230px", md: "265px" },
+          width: { xs: "220px", sm: "240px", md: "275px" },
           top:   { xs: "auto", sm: "50%", md: "50%" },
-          bottom:{ xs: "80px", sm: "auto" },
-          right: { xs: "-28px", sm: "-42px", md: "-50px" },
+          bottom:{ xs: "60px", sm: "auto" },
+          right: { xs: "-18px", sm: "-42px", md: "-50px" },
           left:  "auto",
           transform: {
             xs: "scaleX(-1)",
             sm: "translateY(-50%) scaleX(-1)",
             md: "translateY(-50%) scaleX(-1)",
           },
-          opacity: { xs: 0.82, sm: 0.92, md: 1 },
+          opacity: { xs: 0.88, sm: 0.92, md: 1 },
         }}
       />
 
@@ -206,12 +116,12 @@ export default function LoginVideoBackground() {
         decoding="async"
         sx={{
           ...PERSONA_SX,
-          width:  { xs: "164px", sm: "230px", md: "268px" },
-          bottom: { xs: "-18px", sm: "-26px", md: "-30px" },
+          width:  { xs: "240px", sm: "250px", md: "278px" },
+          bottom: { xs: "-8px", sm: "-26px", md: "-30px" },
           top:    "auto",
-          left:   { xs: "-14px", sm: "auto" },
+          left:   { xs: "-8px", sm: "auto" },
           right:  { xs: "auto", sm: "10%",   md: "13%" },
-          opacity:{ xs: 0.85, sm: 0.92, md: 1 },
+          opacity:{ xs: 0.9, sm: 0.92, md: 1 },
         }}
       />
 

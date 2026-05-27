@@ -35,13 +35,14 @@ export const loginPageSx = {
   root: {
     position: "relative",
     zIndex: 1,
-    minHeight: "100vh",
+    minHeight: "100dvh",
     width: "100%",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: { xs: "flex-start", sm: "center" },
     padding: { xs: "16px", md: "40px" },
-    overflow: "hidden",
+    paddingTop: { xs: "190px", sm: "40px", md: "40px" },
+    overflowX: "hidden",
   },
   stack: {
     width: "100%",
